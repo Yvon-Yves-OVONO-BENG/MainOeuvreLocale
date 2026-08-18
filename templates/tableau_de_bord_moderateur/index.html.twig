@@ -1,0 +1,605 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Modérateur{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'tableau_de_bord_moderateur/_vip_ui.html.twig' %}
+
+  {# Valeurs par défaut : aucun changement n'est requis côté contrôleur. #}
+  {% set kpi = kpi ?? {} %}
+  {% set reports = reports ?? [] %}
+  {% set lastDecisions = lastDecisions ?? [] %}
+  {% set hasLogs = hasLogs ?? false %}
+  {% set sanctions = sanctions ?? [] %}
+
+  {% set analytics = analytics ?? {} %}
+  {% set signups7d = analytics.signups7d ?? {'labels': [], 'values': []} %}
+  {% set gender7d = analytics.gender7d ?? {'F': 0, 'M': 0, 'PM': 0} %}
+  {% set roles7d = analytics.roles7d ?? {'ROLE_TALENT': 0, 'ROLE_PARTICULIER': 0, 'ROLE_COMPANY': 0} %}
+  {% set lastUsers = analytics.lastUsers ?? [] %}
+  {% set unread = kpi.unreadMessages ?? 0 %}
+
+  <main class="mod-page" data-moderator-dashboard>
+    <div class="mod-shell">
+
+      {# =========================================================
+         EN-TÊTE : uniquement les actions utiles au modérateur
+         ========================================================= #}
+      <header class="mod-header mt-4">
+        <div class="mod-header__identity mt-4">
+          <div>
+            <h1>{% trans %}Tableau de bord modérateur{% endtrans %}</h1>
+            <p>{% trans %}Vérifiez les profils, contrôlez les contenus et sécurisez la plateforme.{% endtrans %}</p>
+          </div>
+        </div>
+
+        <div class="mod-header__actions" aria-label="{{ 'Actions principales'|trans }}">
+
+          <a
+            class="mod-button mod-button--danger-soft"
+            href="{{ path('moderateur_reports_index') }}"
+            data-loading-label="{{ 'Ouverture…'|trans }}"
+          >
+            <span class="mod-button__icon" aria-hidden="true">🚨</span>
+            <span>{% trans %}Signalements{% endtrans %}</span>
+          </a>
+
+          <a
+            class="mod-button mod-button--primary"
+            href="{{ path('moderateur_verifications_index') }}"
+            data-loading-label="{{ 'Ouverture…'|trans }}"
+          >
+            <span class="mod-button__icon" aria-hidden="true">✓</span>
+            <span>{% trans %}Profils à vérifier{% endtrans %}</span>
+          </a>
+        </div>
+      </header>
+
+      {# =========================================================
+         FILES DE TRAVAIL PRIORITAIRES
+         ========================================================= #}
+      <section class="mod-section mod-section--priority" aria-labelledby="moderation-priorities-title">
+        <div class="mod-section__heading">
+          <div>
+            <span class="mod-eyebrow">{% trans %}Priorités opérationnelles{% endtrans %}</span>
+            <h2 id="moderation-priorities-title">{% trans %}Files de modération{% endtrans %}</h2>
+            <p>{% trans %}Accédez directement aux éléments qui nécessitent une vérification ou une décision.{% endtrans %}</p>
+          </div>
+
+          <div class="mod-statuses" aria-label="{{ 'État de la session'|trans }}">
+            <span class="mod-status mod-status--info">
+              <span class="mod-status__dot"></span>
+              {% trans %}Session{% endtrans %} : {{ kpi.shift ?? ('Live'|trans) }}
+            </span>
+            <span class="mod-status">
+              {% trans %}Priorité{% endtrans %} : {{ kpi.priority ?? ('Normale'|trans) }}
+            </span>
+            <span class="mod-status mod-status--success">SLA : {{ kpi.sla ?? 'OK' }}</span>
+          </div>
+        </div>
+
+        <div class="mod-work-grid">
+          <a
+            class="mod-work-card mod-work-card--profile"
+            href="{{ path('moderateur_verifications_index') }}"
+            data-loading-label="{{ 'Chargement…'|trans }}"
+          >
+            <div class="mod-work-card__top">
+              <span class="mod-work-card__icon" aria-hidden="true">✓</span>
+              <span class="mod-work-card__count">{{ kpi.profilesToVerify ?? 0 }}</span>
+            </div>
+            <div class="mod-work-card__content">
+              <h3>{% trans %}Vérifier et activer les profils{% endtrans %}</h3>
+              <p>{% trans %}Contrôlez les informations, les pièces et la conformité avant activation.{% endtrans %}</p>
+            </div>
+            <span class="mod-work-card__action">{% trans %}Ouvrir la file{% endtrans %}<span aria-hidden="true">→</span></span>
+          </a>
+
+          <a
+            class="mod-work-card mod-work-card--job"
+            href="{{ path('admin_jobs_moderation') }}"
+            data-turbo="false"
+            data-loading-label="{{ 'Chargement…'|trans }}"
+          >
+            <div class="mod-work-card__top">
+              <span class="mod-work-card__icon" aria-hidden="true">💼</span>
+              <span class="mod-work-card__count">{{ kpi.suspectJobs ?? 0 }}</span>
+            </div>
+            <div class="mod-work-card__content">
+              <h3>{% trans %}Modérer les offres{% endtrans %}</h3>
+              <p>{% trans %}Examinez les offres en attente, douteuses ou signalées avant publication.{% endtrans %}</p>
+            </div>
+            <span class="mod-work-card__action">{% trans %}Examiner les offres{% endtrans %}<span aria-hidden="true">→</span></span>
+          </a>
+
+          <a
+            class="mod-work-card mod-work-card--announcement"
+            href="{{ path('admin_annonces_moderation') }}"
+            data-turbo="false"
+            data-loading-label="{{ 'Chargement…'|trans }}"
+          >
+            <div class="mod-work-card__top">
+              <span class="mod-work-card__icon" aria-hidden="true">📣</span>
+              <span class="mod-work-card__count">{{ kpi.suspectContent ?? 0 }}</span>
+            </div>
+            <div class="mod-work-card__content">
+              <h3>{% trans %}Modérer les annonces{% endtrans %}</h3>
+              <p>{% trans %}Validez, refusez ou placez en révision les annonces non conformes.{% endtrans %}</p>
+            </div>
+            <span class="mod-work-card__action">{% trans %}Examiner les annonces{% endtrans %}<span aria-hidden="true">→</span></span>
+          </a>
+
+          <a
+            class="mod-work-card mod-work-card--report"
+            href="{{ path('moderateur_reports_index', {status: 'open'}) }}"
+            data-loading-label="{{ 'Chargement…'|trans }}"
+          >
+            <div class="mod-work-card__top">
+              <span class="mod-work-card__icon" aria-hidden="true">!</span>
+              <span class="mod-work-card__count">{{ kpi.pendingReports ?? 0 }}</span>
+            </div>
+            <div class="mod-work-card__content">
+              <h3>{% trans %}Traiter les signalements{% endtrans %}</h3>
+              <p>{% trans %}Analysez les alertes, documentez la décision et appliquez l’action adaptée.{% endtrans %}</p>
+            </div>
+            <span class="mod-work-card__action">{% trans %}Traiter maintenant{% endtrans %}<span aria-hidden="true">→</span></span>
+          </a>
+        </div>
+      </section>
+
+      {# =========================================================
+         INDICATEURS DE PILOTAGE
+         ========================================================= #}
+      <section class="mod-section" aria-labelledby="moderation-kpis-title">
+        <div class="mod-section__heading mod-section__heading--compact">
+          <div>
+            <span class="mod-eyebrow">{% trans %}Pilotage{% endtrans %}</span>
+            <h2 id="moderation-kpis-title">{% trans %}État de la modération{% endtrans %}</h2>
+          </div>
+          <a
+            class="mod-text-link"
+            href="{{ path('moderateur_analytics_index') }}"
+            data-loading-label="{{ 'Ouverture…'|trans }}"
+          >
+            {% trans %}Consulter les analytics{% endtrans %}<span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <div class="mod-kpi-grid">
+          <a class="mod-kpi-card" href="{{ path('moderateur_watchlist_index') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+            <span class="mod-kpi-card__label">{% trans %}Comptes à surveiller{% endtrans %}</span>
+            <strong>{{ kpi.watchlist ?? 0 }}</strong>
+            <span class="mod-kpi-card__meta">{% trans %}Watchlist active{% endtrans %}</span>
+          </a>
+
+          <a class="mod-kpi-card" href="{{ path('moderateur_users_index', {'filter': 'new'}) }}" data-loading-label="{{ 'Chargement…'|trans }}">
+            <span class="mod-kpi-card__label">{% trans %}Nouveaux comptes{% endtrans %}</span>
+            <strong>{{ kpi.newUsers24h ?? 0 }}</strong>
+            <span class="mod-kpi-card__meta">{% trans %}Au cours des dernières 24 h{% endtrans %}</span>
+          </a>
+
+          <a class="mod-kpi-card" href="{{ path('moderateur_analytics_user') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+            <span class="mod-kpi-card__label">{% trans %}Temps moyen de traitement{% endtrans %}</span>
+            <strong>{{ kpi.avgHandleHours ?? 0 }}<small>h</small></strong>
+            <span class="mod-kpi-card__meta">{% trans %}Délai moyen actuel{% endtrans %}</span>
+          </a>
+
+          <a class="mod-kpi-card" href="{{ path('moderateur_appeals_index') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+            <span class="mod-kpi-card__label">{% trans %}Contestations{% endtrans %}</span>
+            <strong>{{ kpi.appealRate ?? 0 }}<small>%</small></strong>
+            <span class="mod-kpi-card__meta">{% trans %}Taux d’appel{% endtrans %}</span>
+          </a>
+
+          <a class="mod-kpi-card" href="{{ path('moderateur_logs_index') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+            <span class="mod-kpi-card__label">{% trans %}Actions de modération{% endtrans %}</span>
+            <strong>{{ kpi.actions7d ?? 0 }}</strong>
+            <span class="mod-kpi-card__meta">{% trans %}Sur les 7 derniers jours{% endtrans %}</span>
+          </a>
+
+          <a class="mod-kpi-card" href="{{ path('moderateur_content_suspects') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+            <span class="mod-kpi-card__label">{% trans %}Contenus sensibles{% endtrans %}</span>
+            <strong>{{ kpi.suspectContent ?? (kpi.suspectJobs ?? 0) }}</strong>
+            <span class="mod-kpi-card__meta">{% trans %}À examiner{% endtrans %}</span>
+          </a>
+        </div>
+      </section>
+
+      {# =========================================================
+         ACTIVITÉ RÉCENTE + OUTILS
+         ========================================================= #}
+      <section class="mod-content-grid" aria-label="{{ 'Activité de modération'|trans }}">
+        <div class="mod-panel mod-panel--large">
+          <div class="mod-panel__header">
+            <div>
+              <span class="mod-eyebrow">{% trans %}À traiter{% endtrans %}</span>
+              <h2>{% trans %}Signalements récents{% endtrans %}</h2>
+              <p>{% trans %}Ouvrez un dossier pour vérifier les faits et consigner votre décision.{% endtrans %}</p>
+            </div>
+            <a class="mod-button mod-button--secondary mod-button--small" href="{{ path('moderateur_reports_index') }}" data-loading-label="{{ 'Ouverture…'|trans }}">
+              {% trans %}Voir toute la file{% endtrans %}
+            </a>
+          </div>
+
+          <div class="mod-table-wrap">
+            <table class="mod-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Dossier{% endtrans %}</th>
+                  <th>{% trans %}Cible{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Reçu le{% endtrans %}</th>
+                  <th class="mod-table__action">{% trans %}Action{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in reports %}
+                  {% set st = r.status ?? '' %}
+                  <tr>
+                    <td><strong>#{{ r.id }}</strong></td>
+                    <td>
+                      {% if r.targetUser is defined and r.targetUser %}
+                        {% trans %}Utilisateur{% endtrans %}
+                      {% else %}
+                        {% trans %}Autre contenu{% endtrans %}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if st == 'open' or st == 'OPEN' %}
+                        <span class="mod-pill mod-pill--warning">{% trans %}Ouvert{% endtrans %}</span>
+                      {% elseif st == 'resolved' or st == 'RESOLVED' %}
+                        <span class="mod-pill mod-pill--success">{% trans %}Résolu{% endtrans %}</span>
+                      {% else %}
+                        <span class="mod-pill">{{ st ?: '—' }}</span>
+                      {% endif %}
+                    </td>
+                    <td>{{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                    <td class="mod-table__action">
+                      <a class="mod-row-action" href="{{ path('moderateur_reports_show', {id: r.id}) }}" data-loading-label="{{ 'Ouverture…'|trans }}">
+                        {% trans %}Ouvrir{% endtrans %}<span aria-hidden="true">→</span>
+                      </a>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="5">
+                      <div class="mod-empty-state">
+                        <span aria-hidden="true">✓</span>
+                        <strong>{% trans %}Aucun signalement en attente{% endtrans %}</strong>
+                        <small>{% trans %}La file est actuellement à jour.{% endtrans %}</small>
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mod-panel__footer">
+            <a class="mod-text-link" href="{{ path('moderateur_reports_index') }}" data-loading-label="{{ 'Chargement…'|trans }}">{% trans %}Historique complet{% endtrans %}</a>
+            <a class="mod-text-link mod-text-link--warning" href="{{ path('moderateur_reports_index', {status: 'open'}) }}" data-loading-label="{{ 'Chargement…'|trans }}">{% trans %}Voir uniquement les dossiers ouverts{% endtrans %}</a>
+          </div>
+        </div>
+
+        <aside class="mod-side-stack">
+          <div class="mod-panel">
+            <div class="mod-panel__header">
+              <div>
+                <span class="mod-eyebrow">{% trans %}Accès rapide{% endtrans %}</span>
+                <h2>{% trans %}Contrôles{% endtrans %}</h2>
+              </div>
+            </div>
+
+            <nav class="mod-quick-list" aria-label="{{ 'Raccourcis de modération'|trans }}">
+              <a href="{{ path('moderateur_talents_index') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+                <span class="mod-quick-list__icon">T</span>
+                <span><strong>{% trans %}Talents{% endtrans %}</strong><small>{% trans %}Lister, filtrer et contrôler{% endtrans %}</small></span>
+                <span aria-hidden="true">→</span>
+              </a>
+              <a href="{{ path('moderateur_companies_index') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+                <span class="mod-quick-list__icon">C</span>
+                <span><strong>{% trans %}Compagnies{% endtrans %}</strong><small>{% trans %}Vérifier les recruteurs{% endtrans %}</small></span>
+                <span aria-hidden="true">→</span>
+              </a>
+              <a href="{{ path('moderateur_particuliers_index') }}" data-loading-label="{{ 'Chargement…'|trans }}">
+                <span class="mod-quick-list__icon">P</span>
+                <span><strong>{% trans %}Particuliers{% endtrans %}</strong><small>{% trans %}Contrôler les comptes{% endtrans %}</small></span>
+                <span aria-hidden="true">→</span>
+              </a>
+              <a href="{{ path('moderateur_users_index') }}" data-turbo="false" data-loading-label="{{ 'Chargement…'|trans }}">
+                <span class="mod-quick-list__icon">U</span>
+                <span><strong>{% trans %}Tous les utilisateurs{% endtrans %}</strong><small>{% trans %}Recherche et consultation{% endtrans %}</small></span>
+                <span aria-hidden="true">→</span>
+              </a>
+            </nav>
+          </div>
+
+          <div class="mod-panel">
+            <div class="mod-panel__header">
+              <div>
+                <span class="mod-eyebrow">{% trans %}Vigilance{% endtrans %}</span>
+                <h2>{% trans %}Santé et risques{% endtrans %}</h2>
+              </div>
+              <a class="mod-text-link" href="{{ path('moderateur_risk_index') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Détails{% endtrans %}</a>
+            </div>
+
+            <ul class="mod-risk-list">
+              <li>
+                <div><strong>{% trans %}Spam et messages{% endtrans %}</strong><small>{% trans %}Pics et envois massifs{% endtrans %}</small></div>
+                <span class="mod-pill mod-pill--warning">{{ kpi.spamRate ?? 0 }}%</span>
+              </li>
+              <li>
+                <div><strong>{% trans %}Faux profils{% endtrans %}</strong><small>{% trans %}Données incohérentes{% endtrans %}</small></div>
+                <span class="mod-pill">{{ kpi.fakeProfiles ?? 0 }}</span>
+              </li>
+              <li>
+                <div><strong>{% trans %}Offres douteuses{% endtrans %}</strong><small>{% trans %}À contrôler rapidement{% endtrans %}</small></div>
+                <span class="mod-pill mod-pill--warning">{{ kpi.suspectJobs ?? 0 }}</span>
+              </li>
+            </ul>
+          </div>
+        </aside>
+      </section>
+
+      {# =========================================================
+         DÉCISIONS ET SANCTIONS
+         ========================================================= #}
+      <section class="mod-two-columns" aria-label="{{ 'Décisions et sanctions'|trans }}">
+        <div class="mod-panel">
+          <div class="mod-panel__header">
+            <div>
+              <span class="mod-eyebrow">{% trans %}Traçabilité{% endtrans %}</span>
+              <h2>{% trans %}Dernières décisions{% endtrans %}</h2>
+              <p>{% trans %}Les derniers dossiers examinés, résolus ou rejetés.{% endtrans %}</p>
+            </div>
+            <a class="mod-text-link" href="{{ path('moderateur_reports_index', {status: 'closed'}) }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Voir tout{% endtrans %}</a>
+          </div>
+
+          <div class="mod-table-wrap">
+            <table class="mod-table mod-table--compact">
+              <thead>
+                <tr>
+                  <th>{% trans %}Dossier{% endtrans %}</th>
+                  <th>{% trans %}Décision{% endtrans %}</th>
+                  <th>{% trans %}Traité le{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in lastDecisions %}
+                  <tr>
+                    <td><strong>#{{ r.id }}</strong></td>
+                    <td>{{ r.status ?? '—' }}</td>
+                    <td>{{ r.handledAt ? r.handledAt|date('d/m/Y H:i') : '—' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3"><div class="mod-empty-state mod-empty-state--small">{% trans %}Aucune décision récente{% endtrans %}</div></td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="mod-panel">
+          <div class="mod-panel__header">
+            <div>
+              <span class="mod-eyebrow">{% trans %}Discipline{% endtrans %}</span>
+              <h2>{% trans %}Sanctions récentes{% endtrans %}</h2>
+              <p>{% trans %}Historique des mesures appliquées par les modérateurs.{% endtrans %}</p>
+            </div>
+            <a class="mod-text-link" href="{{ path('moderateur_sanctions_index') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Historique{% endtrans %}</a>
+          </div>
+
+          <div class="mod-panel__body">
+            {% if hasLogs %}
+              <ul class="mod-log-list">
+                {% for l in sanctions %}
+                  <li>
+                    <div>
+                      <strong>{{ l.action ?? ('Action'|trans) }}</strong>
+                      <p>{{ l.details ?? '—' }}</p>
+                    </div>
+                    <time>{{ l.createdAt ? l.createdAt|date('d/m H:i') : '—' }}</time>
+                  </li>
+                {% else %}
+                  <li class="mod-log-list__empty">{% trans %}Aucune sanction récente{% endtrans %}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="mod-note">
+                <strong>{% trans %}Journal non disponible{% endtrans %}</strong>
+                <p>{% trans %}L’entité UserLogs reste optionnelle et peut être ajoutée ultérieurement pour une traçabilité exhaustive.{% endtrans %}</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </section>
+
+      {# =========================================================
+         ANALYTICS : SECOND NIVEAU, REPLIABLE
+         ========================================================= #}
+      <section class="mod-panel mod-analytics" aria-labelledby="moderation-analytics-title">
+        <div class="mod-panel__header">
+          <div>
+            <span class="mod-eyebrow">{% trans %}Analyse secondaire{% endtrans %}</span>
+            <h2 id="moderation-analytics-title">{% trans %}Activité des 7 derniers jours{% endtrans %}</h2>
+            <p>{% trans %}Suivez les inscriptions et la répartition des nouveaux comptes sans surcharger la vue principale.{% endtrans %}</p>
+          </div>
+          <div class="mod-inline-actions">
+            <a class="mod-button mod-button--secondary mod-button--small" href="{{ path('moderateur_analytics_index') }}" data-loading-label="{{ 'Ouverture…'|trans }}">
+              {% trans %}Page analytics{% endtrans %}
+            </a>
+            <button
+              class="mod-button mod-button--ghost mod-button--small"
+              type="button"
+              data-panel-toggle="#moderationAnalyticsContent"
+              data-label-open="{{ 'Afficher les graphiques'|trans }}"
+              data-label-close="{{ 'Masquer les graphiques'|trans }}"
+            >
+              {% trans %}Afficher les graphiques{% endtrans %}
+            </button>
+          </div>
+        </div>
+
+        <div id="moderationAnalyticsContent" class="mod-collapsible" aria-hidden="true">
+          <div class="mod-panel__body">
+            <div class="mod-mini-kpis">
+              <a href="{{ path('moderateur_users_index', {range: '7d'}) }}" data-loading-label="{{ 'Chargement…'|trans }}"><span>{% trans %}Nouveaux inscrits{% endtrans %}</span><strong>{{ analytics.totalNew7d ?? (analytics.total7d ?? 0) }}</strong></a>
+              <a href="{{ path('moderateur_talents_index', {range: '7d'}) }}" data-loading-label="{{ 'Chargement…'|trans }}"><span>{% trans %}Talents{% endtrans %}</span><strong>{{ roles7d.ROLE_TALENT ?? 0 }}</strong></a>
+              <a href="{{ path('moderateur_particuliers_index', {range: '7d'}) }}" data-loading-label="{{ 'Chargement…'|trans }}"><span>{% trans %}Particuliers{% endtrans %}</span><strong>{{ roles7d.ROLE_PARTICULIER ?? 0 }}</strong></a>
+              <a href="{{ path('moderateur_companies_index', {range: '7d'}) }}" data-loading-label="{{ 'Chargement…'|trans }}"><span>{% trans %}Compagnies{% endtrans %}</span><strong>{{ roles7d.ROLE_COMPANY ?? 0 }}</strong></a>
+            </div>
+
+            <div class="mod-chart-grid">
+              <div class="mod-chart-card mod-chart-card--wide">
+                <div class="mod-chart-card__header">
+                  <div><h3>{% trans %}Évolution des inscriptions{% endtrans %}</h3><p>{% trans %}Tendance quotidienne sur 7 jours{% endtrans %}</p></div>
+                  <span class="mod-pill mod-pill--info">{% trans %}Total{% endtrans %} : {{ analytics.total7d ?? 0 }}</span>
+                </div>
+                <canvas id="chartSignups7d" class="mod-chart-canvas"></canvas>
+              </div>
+
+              <div class="mod-chart-card">
+                <div class="mod-chart-card__header"><div><h3>{% trans %}Répartition par sexe{% endtrans %}</h3><p>{% trans %}F, M et personne morale{% endtrans %}</p></div></div>
+                <canvas id="chartGender7d" class="mod-chart-canvas"></canvas>
+              </div>
+
+              <div class="mod-chart-card">
+                <div class="mod-chart-card__header"><div><h3>{% trans %}Répartition par rôle{% endtrans %}</h3><p>{% trans %}Talents, particuliers et compagnies{% endtrans %}</p></div></div>
+                <canvas id="chartRoles7d" class="mod-chart-canvas"></canvas>
+              </div>
+
+              <div class="mod-chart-card mod-chart-card--users">
+                <div class="mod-chart-card__header">
+                  <div><h3>{% trans %}Derniers utilisateurs{% endtrans %}</h3><p>{% trans %}Quatre inscriptions récentes{% endtrans %}</p></div>
+                  <a class="mod-text-link" href="{{ path('moderateur_users_index', {range: '7d'}) }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Voir tous{% endtrans %}</a>
+                </div>
+
+                <div class="mod-table-wrap">
+                  <table class="mod-table mod-table--compact">
+                    <thead><tr><th>{% trans %}Utilisateur{% endtrans %}</th><th>{% trans %}Rôle{% endtrans %}</th><th>{% trans %}Inscrit le{% endtrans %}</th></tr></thead>
+                    <tbody>
+                      {% for u in lastUsers %}
+                        {% set rolesArr = u.roles ?? [] %}
+                        {% set role = u.role ?? '' %}
+                        {% if rolesArr is iterable and rolesArr|length %}
+                          {% if 'ROLE_TALENT' in rolesArr %}
+                            {% set role = 'ROLE_TALENT' %}
+                          {% elseif 'ROLE_COMPANY' in rolesArr %}
+                            {% set role = 'ROLE_COMPANY' %}
+                          {% elseif 'ROLE_PARTICULIER' in rolesArr %}
+                            {% set role = 'ROLE_PARTICULIER' %}
+                          {% endif %}
+                        {% endif %}
+                        <tr>
+                          <td>{{ u.displayName ?? u.fullName ?? u.email ?? ('#' ~ (u.id ?? '—')) }}</td>
+                          <td>
+                            {% if role == 'ROLE_TALENT' %}
+                              <span class="mod-pill mod-pill--info">{% trans %}Talent{% endtrans %}</span>
+                            {% elseif role == 'ROLE_COMPANY' %}
+                              <span class="mod-pill mod-pill--warning">{% trans %}Compagnie{% endtrans %}</span>
+                            {% else %}
+                              <span class="mod-pill mod-pill--success">{% trans %}Particulier{% endtrans %}</span>
+                            {% endif %}
+                          </td>
+                          <td>{{ u.createdAt is defined and u.createdAt ? u.createdAt : '—' }}</td>
+                        </tr>
+                      {% else %}
+                        <tr><td colspan="3"><div class="mod-empty-state mod-empty-state--small">{% trans %}Aucun utilisateur récent{% endtrans %}</div></td></tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="mod-analytics-more" id="modMoreCharts">
+              <div class="mod-placeholder-grid">
+                <div><strong>{% trans %}Signalements — 14 jours{% endtrans %}</strong><p>{% trans %}Emplacement prêt pour le graphique reports14d.{% endtrans %}</p></div>
+                <div><strong>{% trans %}Entonnoir de vérification{% endtrans %}</strong><p>{% trans %}Demandées, validées et refusées.{% endtrans %}</p></div>
+                <div><strong>{% trans %}Messages, spam et activité{% endtrans %}</strong><p>{% trans %}Emplacement prêt pour les indicateurs avancés.{% endtrans %}</p></div>
+              </div>
+              <a class="mod-text-link" href="{{ path('moderateur_analytics_index') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Ouvrir les analytics avancées{% endtrans %}<span aria-hidden="true">→</span></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# =========================================================
+         OUTILS DE MODÉRATION
+         ========================================================= #}
+      <section class="mod-panel" aria-labelledby="moderation-tools-title">
+        <div class="mod-panel__header">
+          <div>
+            <span class="mod-eyebrow">{% trans %}Outils{% endtrans %}</span>
+            <h2 id="moderation-tools-title">{% trans %}Centre de commandes{% endtrans %}</h2>
+            <p>{% trans %}Recherchez, exportez les preuves et utilisez des réponses cohérentes.{% endtrans %}</p>
+          </div>
+        </div>
+
+        <div class="mod-tool-grid">
+          <article class="mod-tool-card">
+            <div class="mod-tool-card__heading">
+              <span class="mod-tool-card__icon" aria-hidden="true">⌕</span>
+              <div><h3>{% trans %}Recherche globale{% endtrans %}</h3><p>{% trans %}Utilisateur, talent, compagnie, signalement ou message{% endtrans %}</p></div>
+            </div>
+            <form class="mod-search-form" method="get" action="{{ path('moderateur_search') }}" data-loading-form>
+              <label class="visually-hidden" for="moderator-global-search">{% trans %}Recherche globale{% endtrans %}</label>
+              <input id="moderator-global-search" name="q" type="search" placeholder="{{ 'Email, téléphone, identifiant ou mot-clé…'|trans }}">
+              <button class="mod-button mod-button--primary" type="submit" data-loading-label="{{ 'Recherche…'|trans }}">{% trans %}Rechercher{% endtrans %}</button>
+            </form>
+            <a class="mod-text-link" href="{{ path('moderateur_search_advanced') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Recherche avancée{% endtrans %}<span aria-hidden="true">→</span></a>
+          </article>
+
+          <article class="mod-tool-card">
+            <div class="mod-tool-card__heading">
+              <span class="mod-tool-card__icon" aria-hidden="true">⇩</span>
+              <div><h3>{% trans %}Exports et preuves{% endtrans %}</h3><p>{% trans %}Conservez une trace avant toute décision sensible{% endtrans %}</p></div>
+            </div>
+            <div class="mod-tool-links">
+              <a href="{{ path('moderateur_export_reports') }}" data-loading-label="{{ 'Préparation…'|trans }}">{% trans %}Exporter les signalements{% endtrans %}<span>→</span></a>
+              <a href="{{ path('moderateur_export_users') }}" data-loading-label="{{ 'Préparation…'|trans }}">{% trans %}Exporter les utilisateurs{% endtrans %}<span>→</span></a>
+              <a href="{{ path('moderateur_export_companies') }}" data-loading-label="{{ 'Préparation…'|trans }}">{% trans %}Exporter les compagnies{% endtrans %}<span>→</span></a>
+            </div>
+          </article>
+
+          <article class="mod-tool-card">
+            <div class="mod-tool-card__heading">
+              <span class="mod-tool-card__icon" aria-hidden="true">Aa</span>
+              <div><h3>{% trans %}Modèles de réponse{% endtrans %}</h3><p>{% trans %}Répondez rapidement avec un ton homogène{% endtrans %}</p></div>
+            </div>
+            <div class="mod-tool-links">
+              <a href="{{ path('moderateur_template_show', {slug: 'warning'}) }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Avertissement{% endtrans %}<span>→</span></a>
+              <a href="{{ path('moderateur_template_show', {slug: 'review'}) }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Demande d’informations{% endtrans %}<span>→</span></a>
+              <a href="{{ path('moderateur_template_show', {slug: 'closure'}) }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Clôture du dossier{% endtrans %}<span>→</span></a>
+            </div>
+          </article>
+        </div>
+
+        <div class="mod-panel__footer mod-panel__footer--actions">
+          <div class="mod-inline-actions">
+            <a class="mod-button mod-button--ghost" href="{{ path('admin_jobs_index') }}" data-turbo="false" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Consulter les offres{% endtrans %}</a>
+            <a class="mod-button mod-button--ghost" href="{{ path('moderateur_content_suspects') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Contenus suspects{% endtrans %}</a>
+            <a class="mod-button mod-button--ghost" href="{{ path('moderateur_appeals_index') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Contestations{% endtrans %}</a>
+          </div>
+
+          <div class="mod-inline-actions">
+            <a class="mod-button mod-button--secondary" href="{{ path('moderateur_settings') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Paramètres{% endtrans %}</a>
+            <a class="mod-button mod-button--secondary" href="{{ path('moderateur_rules_index') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Règles{% endtrans %}</a>
+            <a class="mod-button mod-button--primary" href="{{ path('moderateur_rules') }}" data-loading-label="{{ 'Ouverture…'|trans }}">{% trans %}Règles et politiques{% endtrans %}</a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <script id="moderatorDashboardData" type="application/json">{{ {
+      signups7d: signups7d,
+      gender7d: gender7d,
+      roles7d: roles7d
+    }|json_encode|raw }}</script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+    <script
+        src="{{ asset('js/moderateur-dashboard.js') }}?v=20260726"
+        defer
+    ></script>
+  </main>
+{% endblock %}

@@ -1,0 +1,117 @@
+{# ===================== ACTIONS REGROUPEES ===================== #}
+            <section class="mt-5">
+
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-12">
+                    {# 1. PUBLIER #}
+                    <article class="mol-action-group mol-action-group--publish lg:col-span-4">
+                        <div class="mol-action-group-head">
+                            <span class="mol-action-group-icon" aria-hidden="true">＋</span>
+                            <div>
+                                <h2>{% trans %}Publier{% endtrans %}</h2>
+                                <p>{% trans %}Créez une nouvelle opportunité{% endtrans %}</p>
+                            </div>
+                        </div>
+                        <div class="mol-action-pair">
+                            <a href="{{ path('job_new') }}" data-turbo="false" class="mol-pair-link mol-pair-link--primary">
+                                <span aria-hidden="true">📄</span>
+                                <span>{% trans %}Publier une mission{% endtrans %}</span>
+                            </a>
+                            <a href="{{ path('annonce_new') }}" data-turbo="false" class="mol-pair-link">
+                                <span aria-hidden="true">📣</span>
+                                <span>{% trans %}Publier une annonce{% endtrans %}</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 2. GERER #}
+                    <article class="mol-action-group mol-action-group--manage lg:col-span-4">
+                        <div class="mol-action-group-head">
+                            <span class="mol-action-group-icon" aria-hidden="true">▤</span>
+                            <div>
+                                <h2>{% trans %}Gérer mes publications{% endtrans %}</h2>
+                                <p>{% trans %}Modifiez et suivez vos contenus{% endtrans %}</p>
+                            </div>
+                        </div>
+                        <div class="mol-action-pair">
+                            <a href="{{ path('talent_publisher_jobs') }}" data-turbo="false" class="mol-pair-link">
+                                <span aria-hidden="true">📁</span>
+                                <span>{% trans %}Gérer mes missions{% endtrans %}</span>
+                            </a>
+                            <a href="{{ path('annonce_manage') }}" data-turbo="false" class="mol-pair-link">
+                                <span aria-hidden="true">📋</span>
+                                <span>{% trans %}Gérer mes annonces{% endtrans %}</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 3. BOOSTER #}
+                    <article class="mol-action-group mol-action-group--boost lg:col-span-4">
+                        <div class="mol-action-group-head">
+                            <span class="mol-action-group-icon" aria-hidden="true">🚀</span>
+                            <div>
+                                <h2>{% trans %}Booster ma visibilité{% endtrans %}</h2>
+                                <p>{% trans %}Mettez vos contenus davantage en avant{% endtrans %}</p>
+                            </div>
+                        </div>
+                        <div class="mol-action-pair">
+                            <a href="{{ path('subscription_plans') }}" data-turbo="false" class="mol-pair-link mol-pair-link--boost">
+                                <span aria-hidden="true">⚡</span>
+                                <span>{% trans %}Booster mon profil{% endtrans %}</span>
+                            </a>
+                            <a href="{{ path('annonce_boost') }}" data-turbo="false" class="mol-pair-link mol-pair-link--boost-alt">
+                                <span aria-hidden="true">↗</span>
+                                <span>{% trans %}Booster mes annonces{% endtrans %}</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 4. FAVORIS #}
+                    <article class="mol-action-group mol-action-group--favorites lg:col-span-6">
+                        <div class="mol-action-group-head">
+                            <span class="mol-action-group-icon" aria-hidden="true">♥</span>
+                            <div>
+                                <h2>{% trans %}Mes favoris{% endtrans %}</h2>
+                                <p>{% trans %}Retrouvez vos sélections et les profils intéressés par vous{% endtrans %}</p>
+                            </div>
+                        </div>
+                        <div class="mol-action-pair mol-action-pair--wide">
+                            <a href="{{ path('app_favorites_index') }}" data-turbo="false" class="mol-pair-link">
+                                <span aria-hidden="true">⭐</span>
+                                <span class="min-w-0">
+                                    <strong>{% trans %}Mes favoris{% endtrans %}</strong>
+                                    <small>{{ kpi.favoritesCount|default(0) }} {% trans %}élément(s) sauvegardé(s){% endtrans %}</small>
+                                </span>
+                            </a>
+                            <a href="{{ path('app_favorites_favorited_by') }}" data-turbo="false" class="mol-pair-link">
+                                <span aria-hidden="true">💛</span>
+                                <span class="min-w-0">
+                                    <strong>{% trans %}Qui m’a mis en favori ?{% endtrans %}</strong>
+                                    <small>{{ kpi.favoritedByCount|default(0) }} {% trans %}profil(s) intéressé(s){% endtrans %}</small>
+                                </span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 5. MES DEMANDES / CANDIDATURES #}
+                    <article class="mol-action-group mol-action-group--applications lg:col-span-6">
+                        <div class="mol-action-group-head">
+                            <span class="mol-action-group-icon" aria-hidden="true">📨</span>
+                            <div>
+                                <h2>{% trans %}Mes demandes{% endtrans %}</h2>
+                                <p>{% trans %}Un particulier peut également postuler aux missions disponibles{% endtrans %}</p>
+                            </div>
+                            <span class="mol-action-counter">{{ applicationTotal }}</span>
+                        </div>
+                        <div class="mol-application-content">
+                            <div>
+                                <div class="text-sm font-semibold text-slate-900">{% trans %}Mes candidatures envoyées{% endtrans %}</div>
+                                <div class="mt-1 text-xs leading-5 text-slate-500">{% trans %}Suivez les réponses, les statuts et l’évolution de toutes vos demandes.{% endtrans %}</div>
+                            </div>
+                            <a href="{{ path('talent_applications') }}" data-turbo="false" class="mol-inline-cta">
+                                {% trans %}Voir mes demandes{% endtrans %}
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>

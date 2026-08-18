@@ -48,7 +48,14 @@ vich_uploader:
             namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
             inject_on_load: false
             delete_on_update: false
-            delete_on_remove: false 
+            delete_on_remove: false
+        etablissement_image:
+            uri_prefix: /images/logo
+            upload_destination: '%kernel.project_dir%/public/images/logo'
+            namer: Vich\UploaderBundle\Naming\SmartUniqueNamer
+            inject_on_load: false
+            delete_on_update: false
+            delete_on_remove: false  
 
 
 

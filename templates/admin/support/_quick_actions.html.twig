@@ -1,0 +1,27 @@
+{% set currentRoute = app.request.attributes.get('_route') %}
+
+<div class="vip-actions vip-actions-nav">
+  <a href="{{ path('admin_support_new') }}"
+     class="vip-btn {{ currentRoute == 'admin_support_new' ? 'vip-btn-primary vip-btn-current' : 'vip-btn-soft' }}">
+    <span class="vip-btn-dot"></span>
+    <span>➕ {% trans %}Nouveau ticket{% endtrans %}</span>
+  </a>
+
+  <a href="{{ path('admin_support_index') }}"
+     class="vip-btn {{ currentRoute == 'admin_support_index' ? 'vip-btn-primary vip-btn-current' : 'vip-btn-soft' }}">
+    <span class="vip-btn-dot"></span>
+    <span>{% trans %}Boîte support{% endtrans %}</span>
+  </a>
+
+  <a href="{{ path('admin_faq_index') }}"
+     class="vip-btn {{ currentRoute starts with 'admin_faq_' ? 'vip-btn-primary vip-btn-current' : 'vip-btn-soft' }}">
+    <span class="vip-btn-dot"></span>
+    <span>{% trans %}FAQ{% endtrans %}</span>
+  </a>
+
+  <a href="{{ path('admin_templates_index') }}"
+     class="vip-btn {{ currentRoute starts with 'admin_templates_' ? 'vip-btn-primary vip-btn-current' : 'vip-btn-soft' }}">
+    <span class="vip-btn-dot"></span>
+    <span>{% trans %}Templates{% endtrans %}</span>
+  </a>
+</div>

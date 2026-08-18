@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body_class %}mol-support-body{% endblock %}
+
+{% block body %}
+    {% include 'support/_styles.html.twig' %}
+
+    <main class="mol-support-page mol-support-page--{{ support_active|default('center') }}">
+        {% block support_hero %}{% endblock %}
+
+        <div class="mol-support-shell">
+            {% block support_content %}{% endblock %}
+        </div>
+    </main>
+{% endblock %}

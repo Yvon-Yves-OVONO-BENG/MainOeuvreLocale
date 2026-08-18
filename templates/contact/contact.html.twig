@@ -1,0 +1,312 @@
+{% extends 'base.html.twig' %}
+{% set seo_description = 'Contactez l’équipe Main d’Œuvre Locale pour toute question sur les talents, les offres d’emploi, les missions ou votre compte.' %}
+{% block title %}{{ "Contactez-nous | Main d'oeuvre locale"|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "contact/_vip_ui.html.twig" %}
+
+<section class="mol-page mt-2">
+  <div class="container mol-shell">
+
+    <div class="mol-main">
+      <div class="row">
+
+        <div class="col-lg-8">
+          <div class="mol-form-panel">
+            <div class="mol-head">
+              <div class="mol-ic"><i class="fa fa-paper-plane"></i></div>
+              <div>
+                <h2 class="mol-head-title">{% trans %}Envoyez-nous un message{% endtrans %}</h2>
+                <p class="mol-head-sub">
+                  {% trans %}Remplissez les champs ci-dessous. Nous traiterons votre demande avec attention et confidentialité.{% endtrans %}
+                </p>
+              </div>
+            </div>
+
+            {{ form_start(form, {
+              attr: {
+                novalidate: 'novalidate',
+                'data-turbo': 'false'
+              }
+            }) }}
+
+              {% if form_errors(form) %}
+                <div class="mol-top-errors">
+                  {{ form_errors(form) }}
+                </div>
+              {% endif %}
+
+              <div class="mol-grid">
+
+                <div class="mol-field-wrap">
+                  <div class="mol-field mol-float" data-field>
+                    {{ form_widget(form.name, { attr: { placeholder: ' ' } }) }}
+                    <label class="mol-float-label" for="{{ form.name.vars.id }}">
+                      <i class="fa fa-user"></i>
+                      <span>{% trans %}Nom complet{% endtrans %}</span>
+                    </label>
+                    <span class="mol-field-line"></span>
+                  </div>
+                  <div class="mol-errors">{{ form_errors(form.name) }}</div>
+                </div>
+
+                <div class="mol-field-wrap">
+                  <div class="mol-field mol-float" data-field>
+                    {{ form_widget(form.email, { attr: { placeholder: ' ' } }) }}
+                    <label class="mol-float-label" for="{{ form.email.vars.id }}">
+                      <i class="fa fa-envelope-o"></i>
+                      <span>{% trans %}Adresse email{% endtrans %}</span>
+                    </label>
+                    <span class="mol-field-line"></span>
+                  </div>
+                  <div class="mol-errors">{{ form_errors(form.email) }}</div>
+                </div>
+
+                <div class="mol-field-wrap">
+                  <div class="mol-field mol-float" data-field>
+                    {{ form_widget(form.phone, { attr: { placeholder: ' ' } }) }}
+                    <label class="mol-float-label" for="{{ form.phone.vars.id }}">
+                      <i class="fa fa-phone"></i>
+                      <span>{% trans %}Téléphone{% endtrans %}</span>
+                    </label>
+                    <span class="mol-field-line"></span>
+                  </div>
+                  <div class="mol-errors">{{ form_errors(form.phone) }}</div>
+                </div>
+
+                <div class="mol-field-wrap">
+                  <div class="mol-field mol-float is-static" data-field>
+                    {{ form_widget(form.subject) }}
+                    <label class="mol-float-label" for="{{ form.subject.vars.id }}">
+                      <i class="fa fa-tag"></i>
+                      <span>{% trans %}Sujet{% endtrans %}</span>
+                    </label>
+                    <span class="mol-field-line"></span>
+                  </div>
+                  <div class="mol-errors">{{ form_errors(form.subject) }}</div>
+                </div>
+
+                <div class="mol-field-wrap mol-col-full">
+                  <div class="mol-field mol-float" data-field>
+                    {{ form_widget(form.message, { attr: { placeholder: ' ' } }) }}
+                    <label class="mol-float-label" for="{{ form.message.vars.id }}">
+                      <i class="fa fa-commenting-o"></i>
+                      <span>{% trans %}Votre message{% endtrans %}</span>
+                    </label>
+                    <span class="mol-field-line"></span>
+                  </div>
+                  <div class="mol-mini-note">
+                    <i class="fa fa-lock"></i>
+                    {% trans %}Vos informations sont utilisées uniquement pour le traitement de votre demande.{% endtrans %}
+                  </div>
+                  <div class="mol-errors">{{ form_errors(form.message) }}</div>
+                </div>
+
+                <div class="mol-col-full">
+                  <div class="mol-consent">
+                    {{ form_widget(form.consent) }}
+                    <label for="{{ form.consent.vars.id }}">
+                      {% trans %}J'accepte le traitement de mes données personnelles par Main d'Œuvre Locale dans le seul but de répondre à ma demande, conformément à la politique de confidentialité.{% endtrans %}
+                    </label>
+                  </div>
+                  <div class="mol-errors">{{ form_errors(form.consent) }}</div>
+                </div>
+
+                <div class="mol-col-full mol-submit-wrap">
+                  <button type="submit" class="mol-submit">
+                    <i class="fa fa-paper-plane me-2"></i>
+                    {% trans %}Envoyer le message{% endtrans %}
+                  </button>
+
+                  <div class="mol-foot-note">
+                    {% trans %}Un message clair avec les bonnes informations permet un traitement plus rapide et plus précis.{% endtrans %}
+                  </div>
+                </div>
+
+              </div>
+
+              {{ form_rest(form) }}
+            {{ form_end(form, { render_rest: false }) }}
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <aside class="mol-side-panel">
+            <div class="mol-head">
+              <div class="mol-ic"><i class="fa fa-headphones"></i></div>
+              <div>
+                <h3 class="mol-head-title">{% trans %}Informations utiles{% endtrans %}</h3>
+                <p class="mol-head-sub">
+                  {% trans %}Les principaux canaux pour joindre l’équipe Main d'Oeuvre Locale.{% endtrans %}
+                </p>
+              </div>
+            </div>
+
+            <div class="mol-side-block">
+              <div class="mol-contact-list">
+                <div class="mol-contact-line">
+                  <div class="mini-ic"><i class="fa fa-envelope"></i></div>
+                  <div>
+                    <span class="k">{% trans %}Email{% endtrans %}</span>
+                    <span class="v">support@maindoeuvrelocale.com</span>
+                  </div>
+                </div>
+
+                {# Aucun faux numéro n'est affiché : ajouter ici un numéro réel uniquement lorsqu'il est configuré. #}
+
+                <div class="mol-contact-line">
+                  <div class="mini-ic"><i class="fa fa-map-marker"></i></div>
+                  <div>
+                    <span class="k">{% trans %}Localisation{% endtrans %}</span>
+                    <span class="v">{% trans %}Yaoundé, Cameroun{% endtrans %}</span>
+                  </div>
+                </div>
+              </div>
+
+              <span class="mol-side-chip">
+                <i class="fa fa-shield"></i>
+                {% trans %}Canal officiel de support{% endtrans %}
+              </span>
+            </div>
+
+            <div class="mol-side-block">
+              <h4 class="mol-side-title">{% trans %}Quand nous écrire ?{% endtrans %}</h4>
+              <ul class="mol-side-list">
+                <li><i class="fa fa-check-circle"></i> <span>{% trans %}Pour une assistance technique sur votre compte ou votre espace.{% endtrans %}</span></li>
+                <li><i class="fa fa-check-circle"></i> <span>{% trans %}Pour un partenariat, une collaboration ou une demande business.{% endtrans %}</span></li>
+                <li><i class="fa fa-check-circle"></i> <span>{% trans %}Pour toute question liée au paiement, à la vérification ou à l’utilisation de la plateforme.{% endtrans %}</span></li>
+              </ul>
+            </div>
+
+            <div class="mol-side-block">
+              <h4 class="mol-side-title">{% trans %}Conseil rapide{% endtrans %}</h4>
+              <p class="mol-side-text">
+                {% trans %}Indiquez clairement l’objet de votre demande, le contexte et le résultat attendu. Cela aide notre équipe à vous répondre plus vite et plus précisément.{% endtrans %}
+              </p>
+            </div>
+          </aside>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  window.molAlerts = [
+    {% for message in app.flashes('success') %}
+      {icon: 'success', title: 'Succès', text: {{ message|json_encode|raw }} },
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+      {icon: 'error', title: 'Erreur', text: {{ message|json_encode|raw }} },
+    {% endfor %}
+    {% for message in app.flashes('warning') %}
+      {icon: 'warning', title: 'Attention', text: {{ message|json_encode|raw }} },
+    {% endfor %}
+    {% for message in app.flashes('info') %}
+      {icon: 'info', title: 'Information', text: {{ message|json_encode|raw }} },
+    {% endfor %}
+  ];
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Validation UX immédiate du nom ; la même règle est également imposée côté serveur.
+    const nameInput = document.querySelector('[data-name-validation="1"]');
+    if (nameInput) {
+      const formElement = nameInput.closest('form');
+      const fieldWrap = nameInput.closest('.mol-field-wrap');
+      const clientError = document.createElement('div');
+      clientError.className = 'mol-errors mol-name-client-error';
+      clientError.setAttribute('role', 'alert');
+      clientError.hidden = true;
+      if (fieldWrap) fieldWrap.appendChild(clientError);
+
+      const validateName = function () {
+        const value = (nameInput.value || '').trim();
+        const valid = value === '' || /^[A-Za-zÀ-ÿ\s'’\-]+$/.test(value);
+        const numericOnly = /^\d+$/.test(value);
+        const message = numericOnly
+          ? {{ 'Le nom ne doit pas contenir de chiffres.'|trans|json_encode|raw }}
+          : {{ 'Veuillez entrer un nom valide (lettres, espaces, apostrophes et tirets uniquement).'|trans|json_encode|raw }};
+
+        nameInput.setCustomValidity(valid ? '' : message);
+        nameInput.classList.toggle('is-invalid', !valid);
+        if (clientError) {
+          clientError.textContent = valid ? '' : message;
+          clientError.hidden = valid;
+        }
+        return valid;
+      };
+
+      nameInput.addEventListener('input', validateName);
+      nameInput.addEventListener('blur', validateName);
+      if (formElement) {
+        formElement.addEventListener('submit', function (event) {
+          if (!validateName()) {
+            event.preventDefault();
+            event.stopPropagation();
+            nameInput.focus();
+          }
+        });
+      }
+      validateName();
+    }
+
+    function syncFloatingField(field) {
+      if (!field) return;
+
+      const input = field.querySelector('input, textarea, select');
+      if (!input) return;
+
+      let hasValue = false;
+
+      if (input.tagName === 'SELECT') {
+        hasValue = input.value !== '' && input.value !== null;
+      } else {
+        hasValue = (input.value || '').trim() !== '';
+      }
+
+      field.classList.toggle('is-filled', hasValue);
+    }
+
+    document.querySelectorAll('.mol-float[data-field]').forEach(function (field) {
+      const input = field.querySelector('input, textarea, select');
+      if (!input) return;
+
+      ['input', 'change', 'focus', 'blur'].forEach(function (eventName) {
+        input.addEventListener(eventName, function () {
+          syncFloatingField(field);
+        });
+      });
+
+      syncFloatingField(field);
+
+      setTimeout(function () {
+        syncFloatingField(field);
+      }, 80);
+    });
+
+    if (typeof Swal === 'undefined' || !window.molAlerts || !window.molAlerts.length) {
+      return;
+    }
+
+    window.molAlerts.forEach(function (alert) {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: alert.icon,
+        title: alert.title,
+        text: alert.text,
+        showConfirmButton: false,
+        timer: 4500,
+        timerProgressBar: true,
+        customClass: {
+          popup: 'mol-swal-popup'
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

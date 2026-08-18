@@ -1,0 +1,965 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Edition du profil{% endtrans %}{% endblock %}
+
+{% block body_class %}profile-edit-page{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/profile/edit.css') }}?v=20260805">
+
+    <link rel="stylesheet" href="{{ asset('css/profile/profile-layout.css') }}?v=20260815">
+    <link rel="stylesheet" href="{{ asset('css/profile/profile-selects.css') }}?v=20260815">
+    <link rel="stylesheet" href="{{ asset('css/profile/profile-skills.css') }}?v=20260815">
+    
+    {# ========== STYLES DE VALIDATION ========== #}
+    <style>
+        .mol-photo-picker {
+            display: grid;
+            grid-template-columns: 92px minmax(0, 1fr);
+            gap: 18px;
+            align-items: center;
+            padding: 18px;
+            border: 1px solid #dbe4f0;
+            border-radius: 18px;
+            background: #f8fafc;
+        }
+
+        .mol-photo-picker__preview {
+            width: 92px;
+            height: 92px;
+            border-radius: 18px;
+            object-fit: cover;
+            border: 3px solid #fff;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+            background: #e2e8f0;
+        }
+
+        .mol-photo-picker__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .mol-photo-native-input {
+            position: absolute !important;
+            width: 1px !important;
+            height: 1px !important;
+            padding: 0 !important;
+            margin: -1px !important;
+            overflow: hidden !important;
+            clip: rect(0, 0, 0, 0) !important;
+            white-space: nowrap !important;
+            border: 0 !important;
+        }
+
+        .mol-photo-picker__status {
+            display: block;
+            min-height: 1.25rem;
+            margin-top: 10px;
+            color: #64748b;
+            font-size: .82rem;
+            overflow-wrap: anywhere;
+        }
+
+        .mol-profile-save-status {
+            min-height: 1.25rem;
+            color: #475569;
+            font-size: .85rem;
+        }
+
+        .mol-country-native-wrap {
+            position: relative;
+        }
+
+        .mol-country-native-select {
+            min-height: 48px;
+            padding-left: 54px !important;
+            color: #0f172a !important;
+            background-color: #fff !important;
+        }
+
+        .mol-country-native-wrap:not(.has-flag) .mol-country-native-select {
+            padding-left: 14px !important;
+        }
+
+        .mol-country-flag {
+            position: absolute;
+            z-index: 3;
+            top: 50%;
+            left: 14px;
+            display: inline-flex;
+            width: 28px;
+            height: 20px;
+            transform: translateY(-50%);
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, .10);
+            pointer-events: none;
+        }
+
+        .mol-country-flag[hidden] {
+            display: none !important;
+        }
+
+        .mol-country-flag img {
+            display: block !important;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 28px !important;
+            max-height: 20px !important;
+            object-fit: cover !important;
+            margin: 0 !important;
+        }
+
+        .mol-country-native-select option {
+            color: #0f172a;
+            background: #fff;
+        }
+
+        @media (max-width: 575.98px) {
+            .mol-photo-picker {
+                grid-template-columns: 72px minmax(0, 1fr);
+                gap: 14px;
+                padding: 14px;
+            }
+
+            .mol-photo-picker__preview {
+                width: 72px;
+                height: 72px;
+                border-radius: 15px;
+            }
+
+            .mol-photo-picker__actions .btn {
+                flex: 1 1 100%;
+            }
+
+            .savebar,
+            .savebar-actions {
+                align-items: stretch !important;
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .savebar-actions .btn {
+                width: 100%;
+            }
+        }
+
+        /* Compétences : cases à cocher lisibles sur mobile, sans surlignage natif. */
+        .mol-skills-checklist > div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;max-height:280px;overflow:auto;padding:12px;border:1px solid #dbe4f0;border-radius:15px;background:#fff;overscroll-behavior:contain}
+        .mol-skills-checklist .form-check{display:flex;align-items:flex-start;gap:9px;margin:0;padding:9px 10px;border:1px solid #eef2f7;border-radius:11px;background:#f8fafc;min-width:0}
+        .mol-skills-checklist .form-check-input{float:none;margin:.15rem 0 0;flex:0 0 auto}
+        .mol-skills-checklist .form-check-label{min-width:0;line-height:1.35;overflow-wrap:anywhere}
+        .field-container .validation-icon{opacity:0!important;visibility:hidden!important;transform:scale(.82);transition:.16s ease}
+        .field-container.mol-touched.mol-invalid .validation-icon{opacity:1!important;visibility:visible!important;transform:scale(1)}
+        #submitBtn.mol-save-incomplete{opacity:.58;filter:saturate(.55);box-shadow:none!important}
+        #submitBtn.mol-save-ready{opacity:1;filter:none}
+        @media(max-width:575.98px){.mol-skills-checklist > div{grid-template-columns:1fr;max-height:245px}}
+
+        /* Le menu Compétences reste compact et ne masque plus la suite du formulaire. */
+        .select2-container--open .select2-results__options,
+        .ts-dropdown .ts-dropdown-content {
+            max-height: 220px !important;
+            overflow-y: auto !important;
+            overscroll-behavior: contain;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+
+    <section class="sptb mol-page-under-navbar">
+        <div class="container">
+
+            {% set photoPath = personal.photo ? asset('uploads/profiles/' ~ personal.photo) : asset('uploads/profiles/avatar.png') %}
+
+            <div class="page-hero mb-4 mt-3">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div>
+                        <div class="text-uppercase small text-muted">{% trans %}Paramètres du compte{% endtrans %}</div>
+                        <h2 class="mb-1">{% trans %}Edition du profil{% endtrans %}</h2>
+                        <div class="help-muted">
+                            {% trans %}Mettez à jour vos informations pour améliorer votre visibilité et la confiance des recruteurs.{% endtrans %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3 profile-head">
+                        <div class="position-relative d-inline-block">
+                            <img src="{{ photoPath }}" class="avatar-xl" alt="user">
+                            <span class="position-absolute bottom-0 end-0 translate-middle p-2 bg-success border border-3 border-white rounded-circle"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="online"></span>
+                        </div>
+                        <div class="text-start">
+                            <div class="fw-semibold mol-profile-heading">
+                                {{ personal.fullName ?: user.email }}
+                            </div>
+                            <div class="text-muted small">
+                                {{ user.email }}
+                            </div>
+                            <div class="mt-2 d-flex gap-2 flex-wrap">
+                                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
+                                    <i class="typcn typcn-user-outline"></i> {% trans %}Mon compte{% endtrans %}
+                                </span>
+                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-3 py-2">
+                                    <i class="typcn typcn-phone-outline"></i> {{ user.phone ?? '-' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-12">
+                    <div class="card card-soft mb-0">
+                        <div class="card-header bg-white border-0 pb-0">
+                            <div class="d-flex align-items-start justify-content-between gap-3">
+                                <div>
+                                    <h4 class="mb-1">{% trans %}Informations du profil{% endtrans %}</h4>
+                                    <div class="help-muted">
+                                        {% trans %}Assurez-vous que vos informations sont exactes. Les champs marqués sont importants pour votre compte.{% endtrans %}
+                                    </div>
+                                </div>
+                                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">
+                                    <i class="typcn typcn-tick-outline"></i> {% trans %}Sauvegarde sécurisée{% endtrans %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="card-body">
+
+                            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'data-turbo': 'false', 'id': 'profileForm', 'data-mol-autosave': '1', 'data-mol-autosave-key': 'profile-' ~ mode, 'data-profile-mode': mode, 'data-photo-required': photoRequired ? '1' : '0', 'data-cv-required': cvRequired ? '1' : '0'}}) }}
+
+                                {# ========== COMPTE ========== #}
+                                <div class="mb-3">
+                                    <div class="section-title mb-2">
+                                        <span class="dot"></span> {% trans %}Compte{% endtrans %}
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="mb-0 field-container" data-required="true">
+                                                {{ form_label(form.email, null, {'label_attr': {'class':'form-label'}}) }}
+                                                {{ form_widget(form.email, {'attr': {'class':'form-control', 'placeholder':'ex: nom@email.com'}}) }}
+                                                <span class="validation-icon">!</span>
+                                                {{ form_errors(form.email) }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-0 field-container" data-required="true">
+                                                {{ form_label(form.phone, null, {'label_attr': {'class':'form-label'}}) }}
+                                                {{ form_widget(form.phone, {'attr': {'class':'form-control', 'placeholder':'ex: +237 6XX XXX XXX'}}) }}
+                                                <span class="validation-icon">!</span>
+                                                {{ form_errors(form.phone) }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="mb-0 field-container" data-required="true">
+                                                {{ form_label(form.country, null, {'label_attr': {'class':'form-label'}}) }}
+                                                <div class="mol-country-native-wrap" data-country-native-wrap>
+                                                    <span class="mol-country-flag" id="profileCountryFlag" hidden aria-hidden="true">
+                                                        <img src="" alt="" decoding="async">
+                                                    </span>
+                                                    {{ form_widget(form.country, {'attr': {'class':'form-select mol-country-native-select', 'data-current-country': form.country.vars.value}}) }}
+                                                </div>
+                                                <span class="validation-icon">!</span>
+                                                {{ form_errors(form.country) }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {# ========== IDENTITÉ ========== #}
+                                {% if form.fullName is defined %}
+                                    <div class="mb-4" id="identity-section">
+                                        <div class="section-title"><span class="dot"></span> {% trans %}Identité{% endtrans %}</div>
+                                        <div class="row g-4">
+                                            <div class="col-md-3">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.fullName, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.fullName, {'attr': {'class':'form-control', 'placeholder':'ex: Jean Dupont'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.fullName) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.sexe, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.sexe, {'attr': {'class':'form-select'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.sexe) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.adress, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.adress, {'attr': {'class':'form-control', 'placeholder':"ex: Odza, Yaoundé"}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.adress) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.city, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.city, {'attr': {'class':'form-control', 'placeholder':'ex: Yaoundé'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.city) }}
+                                                </div>
+                                            </div>
+
+                                            {% if form.cniFile is defined %}
+                                                <div class="col-12 mt-3">
+                                                    <div class="section-title">
+                                                        <span class="dot"></span> {% trans %}Vérification du profil{% endtrans %}
+                                                    </div>
+
+                                                    <div class="alert alert-info rounded-4 border-0 shadow-sm">
+                                                        <div class="d-flex align-items-start gap-2">
+                                                            <i class="typcn typcn-info-outline fs-5"></i>
+                                                            <div>
+                                                                <div class="fw-semibold">{% trans %}CNI : facultatif, mais fortement conseillé{% endtrans %}</div>
+                                                                <div class="small">
+                                                                    {% trans %}Vous n’êtes pas obligé(e) d’ajouter votre CNI.{% endtrans %}
+                                                                    {% trans %}Cependant, pour que votre profil soit vérifié/authentifié et boosté (plus de confiance et de visibilité), il est conseillé de la joindre.{% endtrans %}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="field-container" data-required="false">
+                                                        {{ form_label(form.cniFile, null, {'label_attr': {'class':'form-label fw-bold'}}) }}
+
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">
+                                                                <i class="typcn typcn-credit-card text-primary"></i>
+                                                            </span>
+                                                            {{ form_widget(form.cniFile, {
+                                                                attr: {
+                                                                    class: 'form-control',
+                                                                    id: 'cniInput',
+                                                                    accept: 'image/*,.pdf'
+                                                                }
+                                                            }) }}
+                                                        </div>
+                                                        <span class="validation-icon validation-icon--select">!</span>
+
+                                                        <small class="form-text text-muted mt-1">
+                                                            {% trans %}Formats acceptés : JPG/PNG/PDF — Taille max : 4 Mo.{% endtrans %}
+                                                        </small>
+
+                                                        {{ form_errors(form.cniFile) }}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {# ========== PROFIL TALENT ========== #}
+                                {% if form.bio is defined or form.cniFile is defined or form.cvFile is defined %}
+
+                                    <div class="mb-4" id="talent-section">
+                                        {% if (form.bio is defined) %}
+                                            <div class="section-title"><span class="dot"></span> {% trans %}Profil talent{% endtrans %}</div>
+
+                                            <div class="row g-6">
+                                                <div class="col-md-6">
+                                                    <div class="field-container" data-required="true">
+                                                        {{ form_label(form.bio, null, {'label_attr': {'class':'form-label'}}) }}
+                                                        {{ form_widget(form.bio, {'attr': {'class':'form-control', 'rows': 5, 'placeholder':"Présentez-vous en 2-3 lignes : spécialité, forces, objectifs..."}}) }}
+                                                        <span class="validation-icon validation-icon--field">!</span>
+                                                        <div class="help-muted mt-1">{% trans %}Astuce : Une bio claire augmente vos chances d’être contacté.{% endtrans %}</div>
+                                                        {{ form_errors(form.bio) }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="field-container" data-required="true">
+                                                        {{ form_label(form.experience, null, {'label_attr': {'class':'form-label'}}) }}
+                                                        {{ form_widget(form.experience, {'attr': {'class':'form-control', 'rows': 5, 'placeholder':"Présentez-vous en 2-3 lignes : spécialité, forces, objectifs..."}}) }}
+                                                        <span class="validation-icon validation-icon--field">!</span>
+                                                        <div class="help-muted mt-1">{% trans %}Astuce : Une expérience claire augmente vos chances d’être contacté.{% endtrans %}</div>
+                                                        {{ form_errors(form.experience) }}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mt-4 mol-talent-core-grid">
+
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="field-container category-field" data-required="true">
+                                                        {{ form_label(form.categorie, '📂 Catégorie', {
+                                                            'label_attr': {
+                                                                'class':'form-label category-label'
+                                                            }
+                                                        }) }}
+                                                        {{ form_widget(form.categorie, {
+                                                            attr: {
+                                                                class: 'form-control form-select js-categorie',
+                                                                'data-url': path('ajax_professions_by_categorie', {'categorieId': 0})
+                                                            }
+                                                        }) }}
+                                                        <span class="validation-icon">!</span>
+                                                        {{ form_errors(form.categorie) }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-4 col-md-6">
+                                                    <div class="field-container profession-field" data-required="true">
+                                                        {{ form_label(form.profession, '↳ Profession', {
+                                                            'label_attr': {
+                                                                'class':'form-label profession-label'
+                                                            }
+                                                        }) }}
+                                                        {{ form_widget(form.profession, {
+                                                            attr: {
+                                                                class: 'form-control form-select js-profession'
+                                                            }
+                                                        }) }}
+                                                        <small class="text-muted profession-helper">
+                                                            Choisissez d'abord une catégorie.
+                                                        </small>
+                                                        <span class="validation-icon">!</span>
+                                                        {{ form_errors(form.profession) }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-4 col-md-12">
+                                                    <div class="field-container" data-required="true">
+                                                        {{ form_label(form.experienceYears, null, {'label_attr': {'class':'form-label'}}) }}
+                                                        {{ form_widget(form.experienceYears, {'attr': {'class':'form-control', 'placeholder':'ex: 3'}}) }}
+                                                        <span class="validation-icon">!</span>
+                                                        {{ form_errors(form.experienceYears) }}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row g-3 mol-skills-row">
+
+                                                <div class="col-md-12">
+                                                    <div class="field-container mol-skills-field" data-required="true">
+                                                        {{ form_label(form.skills, null, {'label_attr': {'class':'form-label'}}) }}
+                                                        <div id="profile_skills" class="mol-skills-checklist js-skills" role="group" aria-label="Compétences">
+                                                            {{ form_widget(form.skills) }}
+                                                        </div>
+                                                        <span class="validation-icon validation-icon--field">!</span>
+
+                                                        <div class="help-muted mt-1">Tu peux sélectionner plusieurs compétences.</div>
+                                                        {{ form_errors(form.skills) }}
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            {% if form.geolocationEnabled is defined %}
+                                                <div class="mol-geo-panel mt-4">
+                                                    {{ form_widget(form.latitude, {id: 'molGeoLatitude'}) }}
+                                                    {{ form_widget(form.longitude, {id: 'molGeoLongitude'}) }}
+
+                                                    <div class="mol-geo-panel-icon">
+                                                        <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                                                    </div>
+
+                                                    <div class="mol-geo-panel-copy">
+                                                        <label for="molGeoEnabled" class="mol-geo-title">
+                                                            {% trans %}Missions à proximité{% endtrans %}
+                                                        </label>
+                                                        <p>
+                                                            {% trans %}Autoriser la plateforme à utiliser ma position pour me proposer aux clients situés à proximité.{% endtrans %}
+                                                        </p>
+                                                        <small id="molGeoStatus" role="status" aria-live="polite">
+                                                            {% if pro is defined and pro and pro.locationUpdatedAt %}
+                                                                {% trans %}Dernière mise à jour{% endtrans %} :
+                                                                {{ pro.locationUpdatedAt|date('d/m/Y H:i') }}
+                                                            {% else %}
+                                                                {% trans %}Votre position exacte ne sera pas affichée publiquement.{% endtrans %}
+                                                            {% endif %}
+                                                        </small>
+                                                    </div>
+
+                                                    <div class="form-check form-switch mol-geo-switch">
+                                                        {{ form_widget(form.geolocationEnabled, {
+                                                            id: 'molGeoEnabled',
+                                                            attr: {
+                                                                class: 'form-check-input mol-geo-toggle',
+                                                                role: 'switch',
+                                                                'aria-describedby': 'molGeoStatus'
+                                                            }
+                                                        }) }}
+                                                        <label for="molGeoEnabled" class="mol-geo-switch-label">
+                                                            {% trans %}Activer ma position{% endtrans %}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% if form.cvFile is defined %}
+                                            <div class="row g-3 mt-4">
+                                                <div class="mb-3">
+                                                    <div class="field-container" data-required="true">
+                                                        {{ form_label(form.cvFile, null, {'label_attr': {'class':'form-label fw-bold'}}) }}
+
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">
+                                                                <i class="fa fa-file-pdf-o text-danger"></i>
+                                                            </span>
+                                                            {{ form_widget(form.cvFile, {
+                                                                attr: {
+                                                                    class: 'form-control',
+                                                                    id: 'cvInput',
+                                                                    accept: '*/*'
+                                                                }
+                                                            }) }}
+                                                        </div>
+                                                        <span class="validation-icon validation-icon--select">!</span>
+
+                                                        <small class="form-text text-muted mt-1">
+                                                            {% trans %}Formats acceptés : PDF, DOC, DOCX — Taille max : 12 Mo{% endtrans %}
+                                                        </small>
+
+                                                        {{ form_errors(form.cvFile) }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+
+                                    </div>
+                                {% endif %}
+
+                                {# ========== ENTREPRISE ========== #}
+                                {% if form.companyLegalName is defined %}
+                                    <div class="mb-4" id="company-section">
+                                        <div class="section-title"><span class="dot"></span> {% trans %}Entreprise{% endtrans %}</div>
+
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.companyLegalName, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyLegalName, {'attr': {'class':'form-control', 'placeholder':'ex: Freedom Software SARL'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.companyLegalName) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.companyTradeName, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyTradeName, {'attr': {'class':'form-control', 'placeholder':'ex: Freedom Software Pro'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.companyTradeName) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.companyRegistrationNumber, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyRegistrationNumber, {'attr': {'class':'form-control', 'placeholder':'ex: RC/YAO/2026/B/0000', 'autocomplete':'organization'}}) }}
+                                                    <div class="help-muted mt-1">
+                                                        <i class="fa-solid fa-shield-check me-1" aria-hidden="true"></i>
+                                                        {% trans %}Ce numéro d'immatriculation sera soumis à vérification par l'équipe Main d'Œuvre Locale.{% endtrans %}
+                                                    </div>
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.companyRegistrationNumber) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.companyTaxNumber, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyTaxNumber, {'attr': {'class':'form-control', 'placeholder':'ex: M012345678901A'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.companyTaxNumber) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.companyContactName, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyContactName, {'attr': {'class':'form-control', 'placeholder':'ex: Jean Dupont'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.companyContactName) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="false">
+                                                    {{ form_label(form.companyContactPhone, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyContactPhone, {'attr': {'class':'form-control', 'placeholder':'ex: +237 6XX XXX XXX'}}) }}
+                                                    <div class="help-muted mt-1">{% trans %}Facultatif{% endtrans %}</div>
+                                                    {{ form_errors(form.companyContactPhone) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.city, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.city, {'attr': {'class':'form-control', 'placeholder':'ex: Douala'}}) }}
+                                                    <span class="validation-icon">!</span>
+                                                    {{ form_errors(form.city) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <div class="field-container" data-required="false">
+                                                    {{ form_label(form.companyWebsite, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyWebsite, {'attr': {'class':'form-control', 'placeholder':'https://www.entreprise.com'}}) }}
+                                                    <div class="help-muted mt-1">{% trans %}Facultatif — une entreprise sans site web peut laisser ce champ vide.{% endtrans %}</div>
+                                                    {{ form_errors(form.companyWebsite) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <div class="field-container" data-required="false">
+                                                    {{ form_label(form.adress, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.adress, {'attr': {'class':'form-control', 'placeholder':"Adresse de l'entreprise"}}) }}
+                                                    <div class="help-muted mt-1">{% trans %}Facultatif — laissez vide si l'entreprise travaille à domicile ou sans bureau permanent.{% endtrans %}</div>
+                                                    {{ form_errors(form.adress) }}
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <div class="field-container" data-required="true">
+                                                    {{ form_label(form.companyDescription, null, {'label_attr': {'class':'form-label'}}) }}
+                                                    {{ form_widget(form.companyDescription, {'attr': {'class':'form-control', 'rows': 5, 'placeholder':"Présentez l'entreprise, ses activités et ses services"}}) }}
+                                                    <span class="validation-icon validation-icon--field">!</span>
+                                                    {{ form_errors(form.companyDescription) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                                {# ========== PHOTO DE PROFIL ========== #}
+                                <div class="mb-4">
+                                    <div class="section-title"><span class="dot"></span> {% trans %}Photo de profil{% endtrans %}</div>
+
+                                    <div class="field-container" data-required="{{ photoRequired ? 'true' : 'false' }}">
+                                        <div class="mol-photo-picker">
+                                            <img src="{{ photoPath }}" alt="Aperçu de la photo de profil" class="mol-photo-picker__preview" id="profilePhotoPreview" data-original-src="{{ photoPath }}">
+                                            <div>
+                                                <div class="fw-semibold">{% trans %}Ajoutez une photo nette et professionnelle{% endtrans %}</div>
+                                                <div class="help-muted">{% trans %}JPG, PNG, WebP ou GIF — 12 Mo maximum. Vous pouvez prendre une photo ou la choisir dans votre galerie.{% endtrans %}</div>
+                                                <div class="mol-photo-picker__actions">
+                                                    <label class="btn btn-outline-primary rounded-pill" for="{{ form.photoFile.vars.id }}">
+                                                        <i class="fa fa-camera me-1" aria-hidden="true"></i>
+                                                        {% trans %}Choisir ou remplacer la photo{% endtrans %}
+                                                    </label>
+                                                    <button type="button" class="btn btn-light rounded-pill" id="profilePhotoReset" hidden>
+                                                        <i class="fa fa-rotate-left me-1" aria-hidden="true"></i>
+                                                        {% trans %}Annuler la sélection{% endtrans %}
+                                                    </button>
+                                                </div>
+                                                <span class="mol-photo-picker__status" id="profilePhotoStatus" role="status" aria-live="polite">{% trans %}Aucune nouvelle photo sélectionnée.{% endtrans %}</span>
+                                            </div>
+                                        </div>
+                                        {{ form_widget(form.photoFile, {'attr': {'class':'mol-photo-native-input', 'accept':'image/jpeg,image/png,image/webp,image/gif', 'data-profile-photo-input':'1'}}) }}
+                                        {{ form_errors(form.photoFile) }}
+                                    </div>
+                                </div>
+{# ========== BOUTONS ========== #}
+                                <div class="savebar d-flex align-items-center justify-content-between gap-3">
+                                    <div class="help-muted">
+                                        <i class="typcn typcn-info-outline"></i>
+                                        {% trans %}Vos modifications seront appliquées immédiatement après sauvegarde.{% endtrans %}
+                                        <div class="mol-profile-save-status" id="profileSaveStatus" role="status" aria-live="polite"></div>
+                                    </div>
+
+                                    <div class="savebar-actions">
+                                        <a href="{{ path('accueil') }}" class="btn btn-light rounded-pill">
+                                            {% trans %}Annuler{% endtrans %}
+                                        </a>
+
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4" id="submitBtn" aria-disabled="false">
+                                            <i class="typcn typcn-tick-outline"></i>
+                                            {% trans %}Enregistrer{% endtrans %}
+                                        </button>
+                                    </div>
+                                </div>
+
+                            {{ form_end(form) }}
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+
+{# ========== VALIDATION DYNAMIQUE ========== #}
+{# ========== MODE ========== #}
+    <div data-mode="{{ mode }}" hidden></div>
+
+    {# JS PRE-REMPLISSAGE PROFESSION  #}
+
+{# JS FLAG PAS #}
+
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/profile/edit.js') }}?v=20260815" defer></script>
+    <script>
+        (function () {
+            'use strict';
+
+            /** Met à jour le petit drapeau correspondant au pays réellement sélectionné. */
+            function updateCountryFlag(country) {
+                const wrapper = country.closest('[data-country-native-wrap]');
+                const flag = document.getElementById('profileCountryFlag');
+                const image = flag ? flag.querySelector('img') : null;
+                const selectedOption = country.options[country.selectedIndex];
+                const flagUrl = selectedOption ? selectedOption.dataset.flag : '';
+
+                if (!wrapper || !flag || !image || !flagUrl) {
+                    if (wrapper) wrapper.classList.remove('has-flag');
+                    if (flag) flag.hidden = true;
+                    return;
+                }
+
+                image.src = flagUrl;
+                image.alt = '';
+                flag.hidden = false;
+                wrapper.classList.add('has-flag');
+            }
+
+            /** Rend le sélecteur de pays natif et préserve strictement la valeur enregistrée. */
+            function stabilizeCountrySelection() {
+                const country = document.querySelector('.mol-country-native-select');
+                if (!country) return;
+
+                const selectedValue = country.dataset.userSelected || country.dataset.currentCountry || country.value;
+
+                if (country.dataset.selectionGuardBound !== '1') {
+                    country.dataset.selectionGuardBound = '1';
+                    country.addEventListener('change', function () {
+                        country.dataset.userSelected = country.value;
+                        updateCountryFlag(country);
+                    });
+                }
+
+                if (country.tomselect && typeof country.tomselect.destroy === 'function') {
+                    country.tomselect.destroy();
+                }
+
+                if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+                    const field = window.jQuery(country);
+                    if (field.hasClass('select2-hidden-accessible')) {
+                        field.select2('destroy');
+                    }
+                }
+
+                country.classList.remove('select2-hidden-accessible');
+                country.removeAttribute('aria-hidden');
+                country.removeAttribute('tabindex');
+                country.style.display = '';
+                country.value = selectedValue;
+                updateCountryFlag(country);
+            }
+
+            /** Branche la sélection, l'aperçu et l'annulation de la photo de profil. */
+            function initializeProfilePhotoPicker() {
+                const input = document.querySelector('[data-profile-photo-input]');
+                const preview = document.getElementById('profilePhotoPreview');
+                const reset = document.getElementById('profilePhotoReset');
+                const status = document.getElementById('profilePhotoStatus');
+
+                if (!input || !preview || !reset || !status || input.dataset.photoPickerBound === '1') return;
+                input.dataset.photoPickerBound = '1';
+
+                let objectUrl = null;
+
+                /** Libère l'URL temporaire de prévisualisation afin d'éviter une fuite mémoire. */
+                function revokePreviewUrl() {
+                    if (objectUrl) {
+                        URL.revokeObjectURL(objectUrl);
+                        objectUrl = null;
+                    }
+                }
+
+                input.addEventListener('change', function () {
+                    const file = input.files && input.files[0];
+                    if (!file) return;
+
+                    revokePreviewUrl();
+                    objectUrl = URL.createObjectURL(file);
+                    preview.src = objectUrl;
+                    reset.hidden = false;
+                    status.textContent = file.name + ' — ' + Math.max(1, Math.round(file.size / 1024)) + ' Ko';
+                });
+
+                input.addEventListener('mol:files-compressed', function (event) {
+                    const file = event.detail && event.detail.files ? event.detail.files[0] : null;
+                    if (file) {
+                        status.textContent = file.name + ' — optimisée (' + Math.max(1, Math.round(file.size / 1024)) + ' Ko)';
+                    }
+                });
+
+                reset.addEventListener('click', function () {
+                    input.value = '';
+                    revokePreviewUrl();
+                    preview.src = preview.dataset.originalSrc;
+                    reset.hidden = true;
+                    status.textContent = 'Aucune nouvelle photo sélectionnée.';
+                });
+            }
+
+            /** Ferme le menu Compétences après sélection et au clic hors du champ. */
+            function initializeSkillsDropdownBehavior() {
+                const skills = document.getElementById('profile_skills') || document.querySelector('.js-skills');
+                if (!skills || skills.dataset.skillsCloseBound === '1') return;
+                skills.dataset.skillsCloseBound = '1';
+
+                const closeDropdown = function () {
+                    if (skills.tomselect && typeof skills.tomselect.close === 'function') {
+                        skills.tomselect.close();
+                    }
+                    if (window.jQuery && window.jQuery.fn && window.jQuery.fn.select2) {
+                        const field = window.jQuery(skills);
+                        if (field.hasClass('select2-hidden-accessible')) {
+                            field.select2('close');
+                        }
+                    }
+                };
+
+                skills.addEventListener('change', function () {
+                    window.setTimeout(closeDropdown, 0);
+                });
+
+                if (window.jQuery) {
+                    window.jQuery(skills).on('select2:select', function () {
+                        window.setTimeout(closeDropdown, 0);
+                    });
+                }
+
+                document.addEventListener('pointerdown', function (event) {
+                    const field = skills.closest('.mol-skills-field');
+                    const select2Dropdown = event.target.closest && event.target.closest('.select2-container, .select2-dropdown, .ts-dropdown');
+                    if (field && !field.contains(event.target) && !select2Dropdown) {
+                        closeDropdown();
+                    }
+                }, {passive: true});
+            }
+
+            /** Affiche un retour immédiat lorsque le formulaire valide part vers le serveur. */
+            function initializeProfileSaveFeedback() {
+                const form = document.getElementById('profileForm');
+                const button = document.getElementById('submitBtn');
+                const status = document.getElementById('profileSaveStatus');
+                if (!form || !button || form.dataset.saveFeedbackBound === '1') return;
+
+                form.dataset.saveFeedbackBound = '1';
+                form.addEventListener('submit', function () {
+                    if (!form.checkValidity()) return;
+                    button.setAttribute('aria-busy', 'true');
+                    status.textContent = 'Enregistrement sécurisé en cours…';
+                });
+            }
+
+            /** N'affiche l'icône rouge qu'après interaction et donne un état visuel au bouton Enregistrer. */
+            function initializeProfileValidationUX() {
+                const form = document.getElementById('profileForm');
+                const button = document.getElementById('submitBtn');
+                const status = document.getElementById('profileSaveStatus');
+                if (!form || !button || form.dataset.validationUxBound === '1') return;
+                form.dataset.validationUxBound = '1';
+
+                const requiredContainers = Array.from(form.querySelectorAll('.field-container[data-required="true"]'));
+                const relevantInputs = Array.from(form.querySelectorAll('input,select,textarea')).filter(function (el) {
+                    return !['hidden','submit','button'].includes((el.type || '').toLowerCase()) && !el.disabled;
+                });
+
+                function containerIsComplete(container) {
+                    const fields = Array.from(container.querySelectorAll('input,select,textarea')).filter(function (el) {
+                        return !['hidden','submit','button'].includes((el.type || '').toLowerCase()) && !el.disabled;
+                    });
+                    if (!fields.length) return true;
+                    const checkboxes = fields.filter(function (el) { return el.type === 'checkbox' || el.type === 'radio'; });
+                    if (checkboxes.length === fields.length) return checkboxes.some(function (el) { return el.checked; });
+                    return fields.every(function (el) {
+                        if (el.type === 'file') return el.files && el.files.length > 0 || !el.required;
+                        return String(el.value || '').trim() !== '' && el.checkValidity();
+                    });
+                }
+
+                function refresh() {
+                    requiredContainers.forEach(function (container) {
+                        const complete = containerIsComplete(container);
+                        container.classList.toggle('mol-invalid', container.classList.contains('mol-touched') && !complete);
+                    });
+                    const complete = requiredContainers.every(containerIsComplete);
+                    button.classList.toggle('mol-save-incomplete', !complete);
+                    button.classList.toggle('mol-save-ready', complete);
+                    button.setAttribute('aria-disabled', complete ? 'false' : 'true');
+                    // Le bouton reste cliquable : Symfony affiche ainsi précisément les champs manquants.
+                    button.disabled = false;
+                }
+
+                relevantInputs.forEach(function (input) {
+                    ['change','input','blur'].forEach(function (eventName) {
+                        input.addEventListener(eventName, function () {
+                            const container = input.closest('.field-container');
+                            if (container && eventName === 'blur') container.classList.add('mol-touched');
+                            refresh();
+                        });
+                    });
+                });
+
+                form.addEventListener('invalid', function (event) {
+                    const container = event.target.closest && event.target.closest('.field-container');
+                    if (container) {
+                        container.classList.add('mol-touched','mol-invalid');
+                        if (status) status.textContent = 'Vérifiez les champs signalés avant l’enregistrement.';
+                    }
+                    refresh();
+                }, true);
+
+                refresh();
+            }
+
+            /** Sur Android/WebView, accepte le sélecteur générique puis vérifie le type côté client et serveur. */
+            function initializeCvPickerFallback() {
+                const cv = document.getElementById('cvInput') || document.querySelector('input[type="file"][name$="[cvFile]"]');
+                if (!cv || cv.dataset.cvFallbackBound === '1') return;
+                cv.dataset.cvFallbackBound = '1';
+                cv.setAttribute('accept', '*/*');
+                cv.addEventListener('change', function () {
+                    const file = cv.files && cv.files[0];
+                    if (!file) return;
+                    const ok = /\.(pdf|doc|docx)$/i.test(file.name || '');
+                    cv.setCustomValidity(ok ? '' : 'Sélectionnez un CV PDF, DOC ou DOCX.');
+                    if (!ok) {
+                        cv.reportValidity();
+                        cv.value = '';
+                    }
+                });
+            }
+
+            /** Initialise les améliorations mobiles une fois les scripts différés exécutés. */
+            function initializeProfileEnhancements() {
+                stabilizeCountrySelection();
+                initializeProfilePhotoPicker();
+                initializeSkillsDropdownBehavior();
+                initializeProfileSaveFeedback();
+                initializeProfileValidationUX();
+                initializeCvPickerFallback();
+                window.setTimeout(stabilizeCountrySelection, 150);
+                window.setTimeout(initializeSkillsDropdownBehavior, 180);
+            }
+
+            document.addEventListener('DOMContentLoaded', initializeProfileEnhancements);
+            document.addEventListener('turbo:load', initializeProfileEnhancements);
+        }());
+    </script>
+{% endblock %}

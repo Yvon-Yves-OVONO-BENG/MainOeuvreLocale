@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Détail litige{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-5xl px-4 py-6 space-y-4">
+
+    <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <div class="border-b border-slate-200/70 bg-white/60 p-5">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Finance{% endtrans %}</div>
+            <div class="text-2xl font-black tracking-tight text-slate-900">💳 {% trans %}Litige{% endtrans %} #{{ dispute.id }}</div>
+            <div class="mt-1 text-sm font-medium text-slate-600">
+              {% trans %}Détail complet du dossier de contestation.{% endtrans %}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('admin_payment_dispute_edit', {id: dispute.id}) }}"
+               class="rounded-2xl border border-indigo-200/70 bg-indigo-50 px-4 py-2.5 text-xs font-extrabold text-indigo-700 hover:bg-indigo-100/60">
+              📝 {% trans %}Modifier{% endtrans %}
+            </a>
+            <a href="{{ path('admin_payment_dispute_index') }}"
+               class="rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              ← {% trans %}Retour liste{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid gap-4 p-5 md:grid-cols-2">
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Utilisateur{% endtrans %}</div>
+          <div class="mt-2 text-sm font-bold text-slate-900">{{ dispute.user ? dispute.user.email : '—' }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Paiement{% endtrans %}</div>
+          <div class="mt-2 text-sm font-bold text-slate-900">
+            {{ dispute.payment ? ((dispute.payment.amount ?? '0') ~ ' ' ~ (dispute.payment.currency ?? '')) : '—' }}
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Facture{% endtrans %}</div>
+          <div class="mt-2 text-sm font-bold text-slate-900">{{ dispute.invoice ? dispute.invoice.invoiceNumber : '—' }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Source{% endtrans %}</div>
+          <div class="mt-2 text-sm font-bold text-slate-900">{{ dispute.source }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Priorité{% endtrans %}</div>
+          <div class="mt-2 text-sm font-bold text-slate-900">{{ dispute.priority }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Statut{% endtrans %}</div>
+          <div class="mt-2 text-sm font-bold text-slate-900">{{ dispute.status }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4 md:col-span-2">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Motif{% endtrans %}</div>
+          <div class="mt-2 whitespace-pre-line text-sm font-semibold text-slate-800">{{ dispute.reason }}</div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200/70 bg-white p-4 md:col-span-2">
+          <div class="text-xs font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Note admin{% endtrans %}</div>
+          <div class="mt-2 whitespace-pre-line text-sm font-semibold text-slate-800">{{ dispute.adminNote ?: '—' }}</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

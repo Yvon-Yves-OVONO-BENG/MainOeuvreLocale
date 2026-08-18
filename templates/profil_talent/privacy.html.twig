@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Confidentialité - Visiteurs{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "profil_talent/_vip_ui_privacy.html.twig" %}
+
+<div class="container py-4">
+  <div class="vip-wrap">
+    <div class="vip-head">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+        <div>
+          <h2 class="vip-title">{% trans %}Confidentialité{% endtrans %}</h2>
+          <div class="vip-sub">{% trans %}Contrôlez l’affichage de la liste de vos visiteurs.{% endtrans %}</div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="vip-btn" href="{{ path('talent_profile_views') }}">
+            👀 {% trans %}Voir les visiteurs{% endtrans %}
+          </a>
+          <a class="vip-btn" href="{{ path('tableau_de_bord') }}">
+            ← {% trans %}Retour{% endtrans %}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="vip-body">
+      {% for label, messages in app.flashes %}
+        {% for m in messages %}
+          <div class="vip-card mb-3">
+            <div class="vip-label">{{ label|capitalize }}</div>
+            <div class="vip-desc">{{ m }}</div>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <div class="vip-card">
+        <form method="post">
+          <input type="hidden" name="_token" value="{{ csrf_token('privacy_visitors_settings') }}">
+
+          <div class="vip-switch">
+            <div>
+              <div class="vip-label">{% trans %}Masquer la liste des visiteurs{% endtrans %}</div>
+              <div class="vip-desc">
+                {% trans %}Si activé, vous ne verrez plus “Qui a vu mon profil ?” et vos visiteurs ne seront pas affichés.{% endtrans %}
+              </div>
+            </div>
+
+            <div class="form-check form-switch m-0">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="privacySwitch"
+                {{ enabled ? 'checked' : '' }}
+              >
+              <label class="form-check-label vip-label ms-2" for="privacySwitch" id="privacySwitchLabel">
+                {{ (enabled ? 'Activé' : 'Désactivé')|trans }}
+              </label>
+            </div>
+          </div>
+
+          <input type="hidden" name="privacy" id="privacyInput" value="{{ enabled ? '1' : '0' }}">
+
+          <div class="mt-3 d-flex gap-2 flex-wrap">
+            <button class="vip-btn vip-btn-primary" type="submit">
+              💾 {% trans %}Enregistrer{% endtrans %}
+            </button>
+            <a class="vip-btn" href="{{ path('talent_profile_views') }}">
+              {% trans %}Annuler{% endtrans %}
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const privacySwitch = document.getElementById('privacySwitch');
+    const privacyInput = document.getElementById('privacyInput');
+    const privacySwitchLabel = document.getElementById('privacySwitchLabel');
+
+    if (!privacySwitch || !privacyInput || !privacySwitchLabel) {
+      return;
+    }
+
+    function syncPrivacyUI() {
+      const checked = privacySwitch.checked;
+      privacyInput.value = checked ? '1' : '0';
+      privacySwitchLabel.textContent = checked ? "{{ 'Activé'|trans }}" : "{{ 'Désactivé'|trans }}";
+    }
+
+    privacySwitch.addEventListener('change', syncPrivacyUI);
+    syncPrivacyUI();
+  })();
+</script>
+{% endblock %}

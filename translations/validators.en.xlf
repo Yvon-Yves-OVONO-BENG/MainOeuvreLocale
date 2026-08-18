@@ -601,6 +601,138 @@
         <source>Les mots de passe doivent être identiques</source>
         <target>__Les mots de passe doivent être identiques</target>
       </trans-unit>
+      <trans-unit id="NrUbApJ" resname="Veuillez uploader la CNI au format JPG, PNG ou PDF.">
+        <source>Veuillez uploader la CNI au format JPG, PNG ou PDF.</source>
+        <target>__Veuillez uploader la CNI au format JPG, PNG ou PDF.</target>
+      </trans-unit>
+      <trans-unit id="WQFoIwI" resname="Veuillez uploader un CV au format PDF, DOC ou DOCX.">
+        <source>Veuillez uploader un CV au format PDF, DOC ou DOCX.</source>
+        <target>__Veuillez uploader un CV au format PDF, DOC ou DOCX.</target>
+      </trans-unit>
+      <trans-unit id="Gp9uvaH" resname="Téléphone requis.">
+        <source>Téléphone requis.</source>
+        <target>__Téléphone requis.</target>
+      </trans-unit>
+      <trans-unit id="zC_Bt8t" resname="Format téléphone invalide (ex: 6xxxxxxxx).">
+        <source>Format téléphone invalide (ex: 6xxxxxxxx).</source>
+        <target>__Format téléphone invalide (ex: 6xxxxxxxx).</target>
+      </trans-unit>
+      <trans-unit id="pcfgVqh" resname="Champ requis.">
+        <source>Champ requis.</source>
+        <target>__Champ requis.</target>
+      </trans-unit>
+      <trans-unit id="Jmhl__C" resname="Minimum 8 caractères.">
+        <source>Minimum 8 caractères.</source>
+        <target>__Minimum 8 caractères.</target>
+      </trans-unit>
+      <trans-unit id="CJ6tpRk" resname="Veuillez envoyer une image valide.">
+        <source>Veuillez envoyer une image valide.</source>
+        <target>__Veuillez envoyer une image valide.</target>
+      </trans-unit>
+      <trans-unit id="hsxkTA_" resname="Cet email est déjà inscrit à la newsletter.">
+        <source>Cet email est déjà inscrit à la newsletter.</source>
+        <target>__Cet email est déjà inscrit à la newsletter.</target>
+      </trans-unit>
+      <trans-unit id="xvJJcLY" resname="Veuillez renseigner votre nom complet.">
+        <source>Veuillez renseigner votre nom complet.</source>
+        <target>__Veuillez renseigner votre nom complet.</target>
+      </trans-unit>
+      <trans-unit id="lBve_V3" resname="Le nom doit contenir au moins {{ limit }} caractères.">
+        <source>Le nom doit contenir au moins {{ limit }} caractères.</source>
+        <target>__Le nom doit contenir au moins {{ limit }} caractères.</target>
+      </trans-unit>
+      <trans-unit id="c2yIajL" resname="Le nom ne doit pas dépasser {{ limit }} caractères.">
+        <source>Le nom ne doit pas dépasser {{ limit }} caractères.</source>
+        <target>__Le nom ne doit pas dépasser {{ limit }} caractères.</target>
+      </trans-unit>
+      <trans-unit id="aUhOcMY" resname="Veuillez renseigner votre adresse email.">
+        <source>Veuillez renseigner votre adresse email.</source>
+        <target>__Veuillez renseigner votre adresse email.</target>
+      </trans-unit>
+      <trans-unit id="WxnQ5G8" resname="Veuillez renseigner une adresse email valide.">
+        <source>Veuillez renseigner une adresse email valide.</source>
+        <target>__Veuillez renseigner une adresse email valide.</target>
+      </trans-unit>
+      <trans-unit id="tw6Esd4" resname="Le numéro de téléphone ne doit pas dépasser {{ limit }} caractères.">
+        <source>Le numéro de téléphone ne doit pas dépasser {{ limit }} caractères.</source>
+        <target>__Le numéro de téléphone ne doit pas dépasser {{ limit }} caractères.</target>
+      </trans-unit>
+      <trans-unit id="jsj.3dn" resname="Veuillez choisir un sujet.">
+        <source>Veuillez choisir un sujet.</source>
+        <target>__Veuillez choisir un sujet.</target>
+      </trans-unit>
+      <trans-unit id="JQk8mZ3" resname="Sujet invalide.">
+        <source>Sujet invalide.</source>
+        <target>__Sujet invalide.</target>
+      </trans-unit>
+      <trans-unit id=".5aavpI" resname="Veuillez saisir votre message.">
+        <source>Veuillez saisir votre message.</source>
+        <target>__Veuillez saisir votre message.</target>
+      </trans-unit>
+      <trans-unit id="nd3oM2j" resname="Le message doit contenir au moins {{ limit }} caractères.">
+        <source>Le message doit contenir au moins {{ limit }} caractères.</source>
+        <target>__Le message doit contenir au moins {{ limit }} caractères.</target>
+      </trans-unit>
+      <trans-unit id="31Glexj" resname="Le message ne doit pas dépasser {{ limit }} caractères.">
+        <source>Le message ne doit pas dépasser {{ limit }} caractères.</source>
+        <target>__Le message ne doit pas dépasser {{ limit }} caractères.</target>
+      </trans-unit>
+      <trans-unit id="2uwAMr_" resname="Veuillez accepter d’être recontacté(e).">
+        <source>Veuillez accepter d’être recontacté(e).</source>
+        <target>__Veuillez accepter d’être recontacté(e).</target>
+      </trans-unit>
+      <trans-unit id="5ysGN2u" resname="Le titre de l’annonce est obligatoire.">
+        <source>Le titre de l’annonce est obligatoire.</source>
+        <target>__Le titre de l’annonce est obligatoire.</target>
+      </trans-unit>
+      <trans-unit id="ixzkVLj" resname="La description de l’annonce est obligatoire.">
+        <source>La description de l’annonce est obligatoire.</source>
+        <target>__La description de l’annonce est obligatoire.</target>
+      </trans-unit>
+      <trans-unit id="R_sxg7E" resname="La ville est obligatoire.">
+        <source>La ville est obligatoire.</source>
+        <target>__La ville est obligatoire.</target>
+      </trans-unit>
+      <trans-unit id="HJzYlMN" resname="Le salaire journalier est obligatoire.">
+        <source>Le salaire journalier est obligatoire.</source>
+        <target>__Le salaire journalier est obligatoire.</target>
+      </trans-unit>
+      <trans-unit id="Qs8RCuk" resname="Le salaire journalier indiqué est trop élevé.">
+        <source>Le salaire journalier indiqué est trop élevé.</source>
+        <target>__Le salaire journalier indiqué est trop élevé.</target>
+      </trans-unit>
+      <trans-unit id="eY8S9aO" resname="Sélectionnez une catégorie.">
+        <source>Sélectionnez une catégorie.</source>
+        <target>__Sélectionnez une catégorie.</target>
+      </trans-unit>
+      <trans-unit id="ggV07RP" resname="Sélectionnez une profession.">
+        <source>Sélectionnez une profession.</source>
+        <target>__Sélectionnez une profession.</target>
+      </trans-unit>
+      <trans-unit id="K10W9ft" resname="Cet email est déjà inscrit aux alertes offres.">
+        <source>Cet email est déjà inscrit aux alertes offres.</source>
+        <target>__Cet email est déjà inscrit aux alertes offres.</target>
+      </trans-unit>
+      <trans-unit id="Q_3gXuJ" resname="Veuillez sélectionner une image valide.">
+        <source>Veuillez sélectionner une image valide.</source>
+        <target>__Veuillez sélectionner une image valide.</target>
+      </trans-unit>
+      <trans-unit id="LXNcAYj" resname="Veuillez uploader la CNI au format JPG, PNG, WebP ou PDF.">
+        <source>Veuillez uploader la CNI au format JPG, PNG, WebP ou PDF.</source>
+        <target>__Veuillez uploader la CNI au format JPG, PNG, WebP ou PDF.</target>
+      </trans-unit>
+      <trans-unit id="D7dvxAh" resname="Choisissez un type de job.">
+        <source>Choisissez un type de job.</source>
+        <target>__Choisissez un type de job.</target>
+      </trans-unit>
+      <trans-unit id="h424B_I" resname="Choisissez une profession ou une catégorie.">
+        <source>Choisissez une profession ou une catégorie.</source>
+        <target>__Choisissez une profession ou une catégorie.</target>
+      </trans-unit>
+      <trans-unit id="o7dDSio" resname="Saisissez la date et l'heure d'expiration.">
+        <source>Saisissez la date et l'heure d'expiration.</source>
+        <target>__Saisissez la date et l'heure d'expiration.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

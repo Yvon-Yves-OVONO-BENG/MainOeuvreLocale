@@ -1,0 +1,17 @@
+# Ce fichier complète config/packages/security.yaml.
+# Le firewall web doit bien s'appeler "main".
+security:
+    firewalls:
+        main:
+            stateless: false
+            remember_me:
+                secret: '%kernel.secret%'
+                name: 'MOL_REMEMBER_ME'
+                lifetime: 2592000 # 30 jours
+                path: '/'
+                secure: auto
+                httponly: true
+                samesite: lax
+                always_remember_me: false
+                remember_me_parameter: '_remember_me'
+                signature_properties: ['password']

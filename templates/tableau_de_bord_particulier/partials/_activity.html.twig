@@ -1,0 +1,162 @@
+{# ===================== ACTIVITE PRINCIPALE ===================== #}
+            <section class="mt-6 grid grid-cols-1 items-start gap-4 lg:grid-cols-12">
+                <div class="lg:col-span-7">
+                    <div class="mol-card overflow-hidden rounded-[24px]">
+                        <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+                            <div>
+                                <div class="mol-section-heading">{% trans %}Missions actives{% endtrans %}</div>
+                                <div class="mol-section-subtitle">{% trans %}Les missions actuellement ouvertes ou en cours{% endtrans %}</div>
+                            </div>
+                            <a href="{{ path('job_new') }}" data-turbo="false" class="mol-small-button">
+                                <span aria-hidden="true">＋</span>
+                                {% trans %}Publier{% endtrans %}
+                            </a>
+                        </div>
+
+                        <div class="mol-scroll max-h-[480px] space-y-3 overflow-auto p-4 sm:p-5">
+                            {% if tables.activeProjects is defined %}
+                                {% for p in tables.activeProjects %}
+                                    <div class="mol-soft mol-list-item rounded-2xl p-4">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="min-w-0">
+                                                <div class="truncate text-sm font-semibold text-slate-900">{{ p.title|default('Mission #' ~ p.id) }}</div>
+                                                <div class="mt-1 truncate text-xs text-slate-500">
+                                                    {{ p.city|default('—') }}
+                                                    {% if p.status is defined and p.status %} • {{ p.status.name|default('En cours'|trans) }}{% endif %}
+                                                </div>
+                                            </div>
+                                            <a href="{{ path('talent_job_applications', {slug: p.slug}) }}" data-turbo="false" class="mol-small-button">
+                                                {% trans %}Voir{% endtrans %}
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="mol-empty-state rounded-2xl p-6 text-center">
+                                        <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white text-lg shadow-sm" aria-hidden="true">📋</div>
+                                        <div class="mt-3 text-sm font-semibold text-slate-800">{% trans %}Aucune mission active{% endtrans %}</div>
+                                        <div class="mt-1 text-xs leading-5 text-slate-500">{% trans %}Publiez une mission pour commencer à recevoir des propositions.{% endtrans %}</div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="mol-empty-state rounded-2xl p-6 text-center text-sm text-slate-600">
+                                    {% trans %}Aucune mission active.{% endtrans %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="border-t border-slate-100 bg-slate-50/70 px-5 py-3.5 sm:px-6">
+                            <a href="{{ path('talent_publisher_jobs') }}" data-turbo="false" class="text-xs font-semibold text-blue-700 no-underline hover:underline">
+                                {% trans %}Voir toutes mes missions →{% endtrans %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 lg:col-span-5">
+                    <div class="mol-card rounded-[24px] p-5 sm:p-6">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="mol-section-heading">{% trans %}Activité de mon profil{% endtrans %}</div>
+                                <div class="mol-section-subtitle">{% trans %}Visibilité, avis et sécurité de votre espace{% endtrans %}</div>
+                            </div>
+                            <span class="grid h-10 w-10 place-items-center rounded-2xl bg-blue-50 text-lg" aria-hidden="true">📊</span>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-2 gap-3">
+                            <a href="{{ path('talent_profile_views') }}" data-turbo="false" class="mol-profile-stat">
+                                <span>{% trans %}Vues du profil{% endtrans %}</span>
+                                <strong>{{ kpi.totalViews|default(0) }}</strong>
+                                <small>{% trans %}Voir l’activité{% endtrans %}</small>
+                            </a>
+                            <a href="{{ path('review_my_list') }}" data-turbo="false" class="mol-profile-stat">
+                                <span>{% trans %}Commentaires{% endtrans %}</span>
+                                <strong>{{ kpi.reviewsCount|default(0) }}</strong>
+                                <small>{% trans %}Voir les avis{% endtrans %}</small>
+                            </a>
+                            <a href="{{ path('profile_edit') }}" data-turbo="false" class="mol-profile-stat">
+                                <span>{% trans %}Profil & sécurité{% endtrans %}</span>
+                                <strong>{{ completion }}%</strong>
+                                <small>{% trans %}Mettre à jour{% endtrans %}</small>
+                            </a>
+                            <a href="{{ path('help_index') }}" data-turbo="false" class="mol-profile-stat">
+                                <span>{% trans %}Centre d’aide{% endtrans %}</span>
+                                <strong aria-hidden="true">?</strong>
+                                <small>{% trans %}Obtenir de l’aide{% endtrans %}</small>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="mol-card rounded-[24px] p-5 sm:p-6">
+                        <div class="mol-section-heading">{% trans %}Compte & sécurité{% endtrans %}</div>
+                        <div class="mol-section-subtitle">{% trans %}Suivez les éventuels incidents liés à votre activité{% endtrans %}</div>
+
+                        {% set sanctionsTooltip %}
+                            {% if recentActiveSanctions is defined and recentActiveSanctions|length > 0 %}
+                                {% for s in recentActiveSanctions %}
+                                    <div>
+                                        <strong>{{ s.type }}</strong><br>
+                                        <span>{{ s.reason|length > 110 ? s.reason|slice(0, 110) ~ '…' : s.reason }}</span>
+                                        {% if s.endsAt %}<br><small>{% trans %}Fin :{% endtrans %} {{ s.endsAt|date('d/m/Y H:i') }}</small>{% endif %}
+                                    </div>
+                                    {% if not loop.last %}<hr style="border-color: rgba(255,255,255,.12); margin: 8px 0;">{% endif %}
+                                {% endfor %}
+                            {% else %}
+                                {% trans %}Aucune sanction active{% endtrans %}
+                            {% endif %}
+                        {% endset %}
+
+                        <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                            <a href="{{ path('talent_payment_dispute_index') }}" data-turbo="false" class="mol-account-link relative">
+                                <span aria-hidden="true">⚠️</span>
+                                <span>{% trans %}Signalements paiement{% endtrans %}</span>
+                                {% if openPaymentDisputesCount|default(0) > 0 %}<span class="mol-mini-count">{{ openPaymentDisputesCount }}</span>{% endif %}
+                            </a>
+                            <a href="{{ path('talent_sanctions_index') }}" data-turbo="false" class="mol-account-link relative"
+                                data-bs-toggle="tooltip" data-bs-html="true" data-bs-placement="bottom"
+                                data-bs-custom-class="mol-tooltip" title="{{ sanctionsTooltip|e('html_attr') }}">
+                                <span aria-hidden="true">🛡️</span>
+                                <span>{% trans %}Sanctions{% endtrans %}</span>
+                                {% if activeSanctionsCount|default(0) > 0 %}<span class="mol-mini-count">{{ activeSanctionsCount }}</span>{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {# PROPOSITIONS RECUES #}
+                <div class="mol-card overflow-hidden rounded-[24px] lg:col-span-12">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+                        <div>
+                            <div class="mol-section-heading">{% trans %}Propositions reçues{% endtrans %}</div>
+                            <div class="mol-section-subtitle">{% trans %}Comparez rapidement les profils et choisissez le talent adapté{% endtrans %}</div>
+                        </div>
+                        <a href="/particulier/proposals" data-turbo="false" class="text-xs font-semibold text-blue-700 no-underline hover:underline">
+                            {% trans %}Tout voir{% endtrans %}
+                        </a>
+                    </div>
+
+                    <div class="mol-scroll max-h-[360px] space-y-3 overflow-auto p-4 sm:p-5">
+                        {% if tables.recentProposals is defined and tables.recentProposals|length > 0 %}
+                            {% for a in tables.recentProposals %}
+                                <div class="mol-soft mol-list-item rounded-2xl p-4">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <div class="truncate text-sm font-semibold text-slate-900">{{ a.professionalProfile.user.email|default('Talent'|trans) }}</div>
+                                            <div class="mt-1 truncate text-xs text-slate-500">
+                                                {{ a.job.title|default('Mission'|trans) }}
+                                                {% if a.createdAt is defined and a.createdAt %} • {{ a.createdAt|date('d/m/Y') }}{% endif %}
+                                            </div>
+                                        </div>
+                                        <a href="/particulier/proposals/{{ a.id }}" data-turbo="false" class="mol-small-button">{% trans %}Détails{% endtrans %}</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="mol-empty-state rounded-2xl p-6 text-center">
+                                <div class="mx-auto grid h-10 w-10 place-items-center rounded-2xl bg-white text-lg shadow-sm" aria-hidden="true">📬</div>
+                                <div class="mt-3 text-sm font-semibold text-slate-800">{% trans %}Aucune proposition récente{% endtrans %}</div>
+                                <div class="mt-1 text-xs text-slate-500">{% trans %}Les nouvelles propositions apparaîtront ici.{% endtrans %}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>

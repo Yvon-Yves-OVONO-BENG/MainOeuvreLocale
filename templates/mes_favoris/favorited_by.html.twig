@@ -1,0 +1,143 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Ils m'ont ajouté en favori{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "mes_favoris/_vip_ui_favorited_by.html.twig" %}
+
+<div class="container vip-page">
+  <div class="vip-shell">
+    <div class="vip-head">
+      <div class="vip-head-top">
+        <div>
+          <div class="vip-title h4 mb-1">💚 {% trans %}Ils vous ont ajouté en favori{% endtrans %}</div>
+          <div class="vip-sub">
+            {% trans %}Liste des utilisateurs qui ont sauvegardé votre profil pour y revenir plus tard.{% endtrans %}
+          </div>
+          <div class="vip-total mt-2">
+            {% trans %}Total :{% endtrans %} <span class="fw-bold">{{ rows|length }}</span>
+          </div>
+        </div>
+
+        <div class="vip-head-actions">
+          <a class="btn btn-vip btn-primary-soft" href="{{ path('tableau_de_bord') }}">
+            ← {% trans %}Retour au tableau de bord{% endtrans %}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="vip-body">
+      <div class="vip-table-wrap">
+        <div class="vip-table-pad">
+          <table id="favoritedByTable" class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width:70px;">#</th>
+                <th>{% trans %}Utilisateur{% endtrans %}</th>
+                <th style="width:170px;">{% trans %}Type{% endtrans %}</th>
+                <th style="width:180px;">{% trans %}Date{% endtrans %}</th>
+                <th style="width:190px;" class="text-end">{% trans %}Options{% endtrans %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in rows %}
+                {% set u = f.user %}
+                {% set profile = u and u.personalProfile ? u.personalProfile : null %}
+
+                {% set roles = u ? u.roles : [] %}
+                {% set isTalent = 'ROLE_TALENT' in roles %}
+                {% set isCompany = 'ROLE_COMPANY' in roles %}
+                {% set typeLabel = isCompany ? 'Entreprise'|trans : (isTalent ? 'Talent'|trans : 'Particulier'|trans) %}
+                {% set dotClass = isCompany ? 'green' : (isTalent ? 'orange' : '') %}
+
+                {% set displayName =
+                  profile and profile.fullName ? profile.fullName
+                  : (u and u.fullName is defined and u.fullName ? u.fullName
+                  : (u and u.email ? u.email : ('Utilisateur #' ~ (u.id ?? ''))))
+                %}
+
+                {% set profileUrl = path('profil_talent', {slug: profile.slug}) %}
+
+                <tr>
+                  <td class="text-muted fw-semibold">{{ loop.index }}</td>
+
+                  <td>
+                    <div class="vip-profile">
+                      {% if profile and profile.photo %}
+                        <img
+                          src="{{ asset('uploads/profiles/' ~ profile.photo) }}"
+                          alt="{{ displayName }}"
+                          class="vip-avatar"
+                        >
+                      {% else %}
+                        <div class="vip-avatar-fallback">
+                          {{ displayName|slice(0,1)|upper }}
+                        </div>
+                      {% endif %}
+
+                      <div>
+                        <div class="vip-name">{{ displayName }}</div>
+
+                        <div class="vip-meta">
+                          {% if profile and profile.profession is defined and profile.profession %}
+                            {{ profile.profession }}
+                          {% else %}
+                            ID: {{ u.id }}
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="vip-badge">
+                      <span class="vip-dot {{ dotClass }}"></span>
+                      {{ typeLabel }}
+                    </span>
+                  </td>
+
+                  <td class="text-muted">
+                    {{ f.createdAt ? f.createdAt|date('d/m/Y H:i') : '-' }}
+                  </td>
+
+                  <td class="text-end">
+                    <a class="btn btn-vip btn-primary-soft btn-sm" href="{{ profileUrl }}">
+                      👁️ {% trans %}Voir le profil{% endtrans %}
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  $(function () {
+    $('#favoritedByTable').DataTable({
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+      order: [[3, 'desc']],
+      responsive: false,
+      autoWidth: false,
+      language: {
+        search: "Rechercher",
+        lengthMenu: "_MENU_ / page",
+        info: "Affichage _START_ à _END_ sur _TOTAL_",
+        infoEmpty: "Aucun résultat",
+        zeroRecords: "Aucun résultat",
+        paginate: { previous: "Préc.", next: "Suiv." }
+      }
+    });
+  });
+</script>
+{% endblock %}

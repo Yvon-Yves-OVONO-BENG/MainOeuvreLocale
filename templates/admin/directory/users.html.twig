@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin{% endtrans %} • {{ pageTitle }}{% endblock %}
+
+{% block body %}
+  {% include 'admin/directory/_vip_ui.html.twig' %}
+
+  <div class="dir-shell" data-directory-page="users">
+    <div class="dir-container dir-grid">
+
+      <section class="dir-card dir-head">
+        <div class="dir-card-inner">
+          <div class="dir-head-top">
+            <div>
+              <div class="dir-kicker">{{ pageKicker }}</div>
+              <h1 class="dir-title">{{ pageTitle }}</h1>
+              <p class="dir-text">{{ pageDescription }}</p>
+            </div>
+          </div>
+
+          {% include 'admin/directory/_nav.html.twig' %}
+        </div>
+      </section>
+
+      <section class="dir-grid dir-grid-3">
+        <article class="dir-card dir-kpi"><div class="dir-card-inner"><div class="label">{% trans %}Total{% endtrans %}</div><div class="value">{{ stats.total }}</div><div class="hint">{% trans %}Comptes trouvés{% endtrans %}</div></div></article>
+        <article class="dir-card dir-kpi"><div class="dir-card-inner"><div class="label">{% trans %}Actifs{% endtrans %}</div><div class="value">{{ stats.active }}</div><div class="hint">{% trans %}Sur la page courante{% endtrans %}</div></div></article>
+        <article class="dir-card dir-kpi"><div class="dir-card-inner"><div class="label">{% trans %}Vérifiés{% endtrans %}</div><div class="value">{{ stats.verified }}</div><div class="hint">{% trans %}Sur la page courante{% endtrans %}</div></div></article>
+      </section>
+
+      <section class="dir-card">
+        <div class="dir-card-inner">
+          <form method="get" class="dir-filters" data-directory-search-form>
+            <div style="flex:2 1 360px;">
+              <input
+                type="search"
+                name="q"
+                value="{{ filters.q ?? '' }}"
+                class="dir-input"
+                placeholder="{% trans %}Rechercher nom, email, téléphone...{% endtrans %}"
+                data-directory-search="users"
+                autocomplete="off"
+              >
+            </div>
+          </form>
+
+          <div class="dir-separator"></div>
+
+          <div class="dir-table-wrap">
+            <table class="dir-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Utilisateur{% endtrans %}</th>
+                  <th>{% trans %}Type{% endtrans %}</th>
+                  <th>{% trans %}Rôles{% endtrans %}</th>
+                  <th>{% trans %}Pays{% endtrans %}</th>
+                  <th>{% trans %}État{% endtrans %}</th>
+                  <th>{% trans %}Créé le{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in users %}
+                  <tr>
+                    <td>
+                      <div class="dir-row-title">{{ u.name }}</div>
+                      <div class="dir-row-sub">{{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}</div>
+                    </td>
+                    <td>{{ u.typeCompte }}</td>
+                    <td>{{ u.roles }}</td>
+                    <td>{{ u.country }}</td>
+                    <td>
+                      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <span class="dir-badge {{ u.active ? 'active' : 'inactive' }}">{{ u.active ? 'Actif'|trans : 'Inactif'|trans }}</span>
+                        <span class="dir-badge {{ u.verified ? 'verified' : 'unverified' }}">{{ u.verified ? 'Vérifié'|trans : 'Non vérifié'|trans }}</span>
+                      </div>
+                    </td>
+                    <td>{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="6">{% trans %}Aucune donnée disponible.{% endtrans %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="dir-separator"></div>
+
+          <div class="dir-pagination">
+            <div class="dir-pagination-info">
+              {% trans %}Page{% endtrans %} {{ pagination.page }} / {{ pagination.pages }} • {{ pagination.total }} {% trans %}résultat(s){% endtrans %}
+            </div>
+
+            <div class="dir-pagination-links">
+              {% if pagination.page > 1 %}
+                <a class="dir-page-btn" href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({page: pagination.page - 1})) }}">← {% trans %}Précédent{% endtrans %}</a>
+              {% endif %}
+
+              {% for p in 1..pagination.pages %}
+                {% if p == pagination.page %}
+                  <span class="dir-page-btn is-active">{{ p }}</span>
+                {% else %}
+                  <a class="dir-page-btn" href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({page: p})) }}">{{ p }}</a>
+                {% endif %}
+              {% endfor %}
+
+              {% if pagination.page < pagination.pages %}
+                <a class="dir-page-btn" href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({page: pagination.page + 1})) }}">{% trans %}Suivant{% endtrans %} →</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-directory.js') }}"></script>
+{% endblock %}

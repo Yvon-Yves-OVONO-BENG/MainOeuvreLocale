@@ -1,0 +1,52 @@
+<style>
+  :root{
+    --mol-bg:#f6f8fc; --mol-card:rgba(255,255,255,.92);
+    --mol-border:rgba(15,23,42,.08); --mol-muted:rgba(15,23,42,.62);
+    --mol-shadow:0 18px 45px rgba(2,6,23,.08); --r:22px;
+  }
+  .mol-page{ 
+    /* ✅ enlève l'espace en haut */
+    padding-top:0;
+
+    /* ✅ ajoute de l'espace avant le footer */
+    padding-bottom:40px;
+  }
+
+  .mol-hero{
+    border-radius:var(--r); padding:18px;
+    background:
+      radial-gradient(1100px circle at 12% 18%, rgba(13,110,253,.18), transparent 58%),
+      radial-gradient(900px circle at 88% 12%, rgba(32,201,151,.14), transparent 55%),
+      linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
+    border:1px solid var(--mol-border);
+    box-shadow:0 10px 25px rgba(2,6,23,.06);
+  }
+  .mol-card{
+    background:var(--mol-card);
+    border:1px solid var(--mol-border);
+    border-radius:var(--r);
+    box-shadow:0 10px 25px rgba(2,6,23,.06);
+    transition:.18s ease;
+    overflow:hidden;
+  }
+  .mol-card:hover{ transform:translateY(-2px); box-shadow:var(--mol-shadow); }
+  .mol-soft{ color:var(--mol-muted); }
+  .mol-icon{
+    width:48px; height:48px; border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(13,110,253,.10);
+    border:1px solid rgba(13,110,253,.18);
+    font-size:20px; color:#0d6efd;
+  }
+  .mol-tag{
+    display:inline-flex; align-items:center; gap:.35rem;
+    padding:.28rem .55rem; border-radius:999px;
+    background:rgba(13,110,253,.08);
+    border:1px solid rgba(13,110,253,.14);
+    font-weight:900; font-size:.78rem; color:#0d6efd;
+  }
+  .mol-price{ font-weight:950; font-size:30px; letter-spacing:-.02em; }
+  .mol-li{ list-style:none; padding:0; margin:12px 0 0; }
+  .mol-li li{ display:flex; gap:.5rem; padding:.35rem 0; font-weight:700; color:rgba(15,23,42,.78); }
+  .mol-li i{ margin-top:3px; color:#0d6efd; }
+</style>

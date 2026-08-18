@@ -1,0 +1,120 @@
+
+  <style>
+    /* =========================
+       FULL WIDTH (BREAK OUT)
+       ========================= */
+    .vip-fullbleed{
+      width: 100vw;
+      margin-left: calc(50% - 50vw); /* ✅ casse le centrage du container parent */
+      padding: 28px 0 44px;
+      background:
+        radial-gradient(1100px circle at 10% 0%, rgba(13,110,253,.14), transparent 60%),
+        radial-gradient(900px circle at 92% 12%, rgba(220, 38, 38, .12), transparent 58%),
+        radial-gradient(900px circle at 55% 115%, rgba(32, 201, 151, .10), transparent 55%),
+        linear-gradient(180deg, rgba(248,250,252,.98), rgba(255,255,255,.92));
+    }
+
+    /* ✅ Remplit toute la largeur (pas de max-width) + beaux gutters responsives */
+    .vip-wrap{
+      width: 100%;
+      max-width: none;
+      padding: 0 clamp(14px, 2.2vw, 44px);
+    }
+
+    .vip-head{
+      background:
+        radial-gradient(900px circle at 10% 0%, rgba(13,110,253,.14), transparent 55%),
+        radial-gradient(800px circle at 90% 10%, rgba(220, 38, 38, 0.12), transparent 55%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.86));
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 22px;
+      padding: 18px 18px;
+      box-shadow: 0 22px 60px rgba(0,0,0,.06);
+      position: sticky;
+      top: 10px;
+      z-index: 5;
+      backdrop-filter: blur(10px);
+    }
+
+    .vip-card{
+      background:#fff;
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 22px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+    .vip-card-b{ padding: 16px; }
+
+    /* =========================
+       ROWS (HD / GRID VIP)
+       ========================= */
+    .vip-row{
+      display: grid;
+      grid-template-columns: 1fr 270px; /* ✅ colonne actions stable */
+      gap: 14px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid rgba(0,0,0,.06);
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.92));
+      box-shadow: 0 10px 28px rgba(0,0,0,.035);
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .vip-row:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 18px 46px rgba(0,0,0,.06);
+    }
+
+    .vip-meta{ color: rgba(0,0,0,.62); font-size: .92rem; }
+
+    .vip-pill{
+      border-radius: 999px;
+      padding: .40rem .74rem;
+      font-weight: 900;
+      font-size: .78rem;
+      letter-spacing: .35px;
+    }
+
+    .vip-btn{
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      box-shadow: 0 10px 24px rgba(0,0,0,.06);
+    }
+
+    .vip-actions{
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .vip-soft{
+      border: 1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.76);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+
+    .vip-reason{
+      border-left: 3px solid rgba(13,110,253,.28);
+      padding-left: 10px;
+      color: rgba(0,0,0,.78);
+      white-space: pre-line;
+      line-height: 1.55;
+    }
+
+    /* ✅ Responsive */
+    @media (max-width: 992px){
+      .vip-row{ grid-template-columns: 1fr; }
+      .vip-actions{ flex-direction: row; gap: 10px; }
+      .vip-actions form{ flex: 1; }
+    }
+    @media (max-width: 520px){
+      .vip-actions{ flex-direction: column; }
+    }
+  </style>

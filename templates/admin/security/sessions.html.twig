@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Sessions actives{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/security/_vip_ui.html.twig' %}
+
+  <div class="sec-shell" data-security-page="sessions">
+    <div class="sec-container sec-grid">
+
+      <section class="sec-card sec-page-head">
+        <div class="sec-card-inner">
+          <div class="sec-page-head-top">
+            <div class="sec-page-main">
+              <div class="sec-kicker">{% trans %}Sécurité • Sessions{% endtrans %}</div>
+              <h1 class="sec-page-title">{% trans %}Sessions actives{% endtrans %}</h1>
+              <p class="sec-page-text">{% trans %}Données réelles issues de `UserLog` : appareils, IP, localisation et activité récente.{% endtrans %}</p>
+            </div>
+          </div>
+          <div class="sec-page-actions">{% include 'admin/security/_nav.html.twig' %}</div>
+        </div>
+      </section>
+
+      <section class="sec-grid sec-grid-4">
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Actives{% endtrans %}</div><div class="value">{{ stats.active }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Signalées{% endtrans %}</div><div class="value">{{ stats.flagged }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Nouvelles 24h{% endtrans %}</div><div class="value">{{ stats.newDevices24h }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Durée moyenne{% endtrans %}</div><div class="value" style="font-size:1rem;">{{ stats.avgDuration }}</div></div></article>
+      </section>
+
+      <section class="sec-card">
+        <div class="sec-card-inner">
+          <div class="sec-filters">
+            <div style="flex:2 1 360px;">
+              <input type="search" class="sec-input" placeholder="{% trans %}Rechercher utilisateur, email, IP...{% endtrans %}" data-sec-search="sessions">
+            </div>
+            <div style="flex:1 1 220px;">
+              <select class="sec-select" data-sec-risk="sessions">
+                <option value="">{% trans %}Tous les risques{% endtrans %}</option>
+                <option value="low">{% trans %}Low{% endtrans %}</option>
+                <option value="medium">{% trans %}Medium{% endtrans %}</option>
+                <option value="high">{% trans %}High{% endtrans %}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sec-separator"></div>
+
+          <div class="sec-table-wrap">
+            <table class="sec-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Utilisateur{% endtrans %}</th>
+                  <th>{% trans %}Agent{% endtrans %}</th>
+                  <th>{% trans %}Appareil{% endtrans %}</th>
+                  <th>{% trans %}Navigateur{% endtrans %}</th>
+                  <th>{% trans %}Système{% endtrans %}</th>
+                  <th>{% trans %}Pays{% endtrans %}</th>
+                  <th>{% trans %}Localisation{% endtrans %}</th>
+                  <th>IP</th>
+                  <th>{% trans %}Dernière activité{% endtrans %}</th>
+                  <th>{% trans %}Risque{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in sessions %}
+                  <tr class="js-sec-session"
+                      data-sec-text="{{ (s.user ~ ' ' ~ s.email ~ ' ' ~ s.device ~ ' ' ~ s.location ~ ' ' ~ s.ip)|lower }}"
+                      data-sec-risk="{{ s.risk }}">
+                    <td>
+                      <div class="sec-row-title">{{ s.user }}</div>
+                      <div class="sec-row-sub">{{ s.email }}</div>
+                    </td>
+                    
+                    <td>
+                        {{ s.agent }}
+                    </td>
+                    <td>
+                        <img
+                              class="h-6 w-6 rounded-2xl border border-slate-200 bg-slate-50 object-cover"
+                              src="{{ asset('uploads/device/' ~ (s.logoDevice ?? 'avatar.png')) }}"
+                              alt="">
+                        {{ s.device }}
+                    </td>
+                    <td>
+                        <img
+                              class="h-6 w-6 rounded-2xl border border-slate-200 bg-slate-50 object-cover"
+                              src="{{ asset('uploads/browser/' ~ (s.logoBrowser ?? 'avatar.png')) }}"
+                              alt="">
+                        {{ s.browser }}
+                    </td>
+                    <td>
+                        <img
+                              class="h-6 w-6 rounded-2xl border border-slate-200 bg-slate-50 object-cover"
+                              src="{{ asset('uploads/os/' ~ (s.logoOperatingSystem ?? 'avatar.png')) }}"
+                              alt="">
+                        {{ s.operatingSystem }}
+                    </td>
+                    <td>
+                        <img
+                              class="h-6 w-6 rounded-2xl border border-slate-200 bg-slate-50 object-cover"
+                              src="{{ asset('uploads/flag/' ~ (s.logoCountry ?? 'avatar.png')) }}"
+                              alt="">
+                        {{ s.country }}
+                    </td>
+                    <td>{{ s.location }}</td>
+                    <td>{{ s.ip }}</td>
+                    <td>{{ s.lastSeen ? s.lastSeen|date('d/m/Y H:i') : '—' }}</td>
+                    <td><span class="sec-badge {{ s.risk }}">{{ s.risk|upper }}</span></td>
+                    <td><span class="sec-badge {{ s.status }}">{{ s.status|capitalize }}</span></td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="7">{% trans %}Aucune session active.{% endtrans %}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-security.js') }}"></script>
+{% endblock %}

@@ -8,7 +8,7 @@ security:
         app_user_provider:
             entity:
                 class: App\Entity\User
-                property: username
+                property: email
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -17,8 +17,12 @@ security:
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\UserAuthenticator
+            user_checker: App\Security\UserChecker
+            
             logout:
                 path: app_logout
+                target: app_login
+
                 # where to redirect after logout
                 # target: app_any_route
 
@@ -39,8 +43,24 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/connect/google, roles: PUBLIC_ACCESS }
+        - { path: ^/connect/facebook, roles: PUBLIC_ACCESS }
+        - { path: ^/connect/apple, roles: PUBLIC_ACCESS }
+        - { path: ^/connect/microsoft, roles: PUBLIC_ACCESS }
+        - { path: ^/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/tableau-de-bord, roles: ROLE_USER }
+        - { path: ^/tableau-de-bord-administrateur, roles: ROLE_ADMIN }
+        - { path: ^/tableau-de-bord-super-administrateur, roles: ROLE_SUPER_ADMIN }
+        - { path: ^/tableau-de-bord-super-moderateur, roles: ROLE_MODERATEUR }
+        - { path: ^/tableau-de-bord-company, roles: ROLE_COMPANY }
+        - { path: ^/tableau-de-bord-paticulier, roles: ROLE_PARTICULIER }
+        - { path: ^/tableau-de-bord-talent, roles: ROLE_TALENT }
+        - { path: '^/(?:[a-z]{2}(?:_[A-Z]{2})?/)?liste-talents(?:/|$)', roles: PUBLIC_ACCESS }
+        - { path: '^/(?:[a-z]{2}(?:_[A-Z]{2})?/)?api/talents/proximite(?:/|$)', roles: PUBLIC_ACCESS }
+        - { path: '^/(?:[a-z]{2}(?:_[A-Z]{2})?/)?talents/proximite/?$', roles: PUBLIC_ACCESS }
+        # - { path: ^/, roles: PUBLIC_ACCESS }
+
 
 when@test:
     security:

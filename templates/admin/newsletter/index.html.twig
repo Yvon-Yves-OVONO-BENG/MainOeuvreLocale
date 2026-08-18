@@ -1,0 +1,166 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Abonnés aux alertes offres{% endblock %}
+
+{% block body %}
+
+{% include 'admin/newsletter/_vip_ui.html.twig' %}
+
+    <div class="nad-shell">
+        <div class="nad-wrap">
+            <div class="nad-head">
+                <div class="nad-title">
+                    <h1>Alertes offres</h1>
+                    <p>Utilisateurs souhaitant recevoir les nouvelles offres correspondant à leur profession.</p>
+                </div>
+
+                <div class="nad-search">
+                    <input type="text" id="newsletterSearch" class="nad-input" placeholder="Rechercher un utilisateur, un email ou une profession...">
+                </div>
+            </div>
+
+            <div class="nad-grid">
+                <div class="nad-stat">
+                    <small>Total</small>
+                    <strong>{{ totalCount }}</strong>
+                </div>
+
+                <div class="nad-stat">
+                    <small>Abonnés actifs</small>
+                    <strong>{{ activeCount }}</strong>
+                </div>
+
+                <div class="nad-stat">
+                    <small>Désabonnés</small>
+                    <strong>{{ inactiveCount }}</strong>
+                </div>
+            </div>
+
+            <div class="nad-card">
+                <div class="nad-card-head">
+                    <h2>Abonnés enregistrés</h2>
+                    <span>{{ subscribers|length }} ligne(s)</span>
+                </div>
+
+                {% if subscribers is empty %}
+                    <div class="nad-empty">
+                        Aucun abonnement aux alertes offres pour le moment.
+                    </div>
+                {% else %}
+                    <div class="nad-table-wrap">
+                        <table class="nad-table">
+                            <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Email</th>
+                                    <th>Profession suivie</th>
+                                    <th>Statut</th>
+                                    <th>Source</th>
+                                    <th>Date abonnement</th>
+                                    <th>Date désinscription</th>
+                                </tr>
+                            </thead>
+                            <tbody id="newsletterTableBody">
+                                {% for subscriber in subscribers %}
+                                    <tr class="newsletter-row">
+                                        <td>
+                                            {% if subscriber.user %}
+                                                <strong>{{ subscriber.user.personalProfile ? subscriber.user.personalProfile.fullName : subscriber.user.email|split('@')|first }}</strong>
+                                                <small style="display:block;color:#64748b;">Compte #{{ subscriber.user.id }}</small>
+                                            {% else %}
+                                                <span class="nad-source">Visiteur</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="nad-email">{{ subscriber.email }}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ subscriber.profession ? subscriber.profession.profession : 'Toutes les professions (ancien abonnement)' }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if subscriber.isActive %}
+                                                <span class="nad-badge nad-badge-success">Actif</span>
+                                            {% else %}
+                                                <span class="nad-badge nad-badge-danger">Désabonné</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="nad-source">{{ subscriber.source|default('footer') }}</span>
+                                        </td>
+                                        <td>{{ subscriber.subscribedAt ? subscriber.subscribedAt|date('d/m/Y H:i') : '-' }}</td>
+                                        <td>{{ subscriber.unsubscribedAt ? subscriber.unsubscribedAt|date('d/m/Y H:i') : '-' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="nad-pager" id="offerAlertAdminPager">
+                        <span class="nad-pager-info" id="offerAlertAdminInfo"></span>
+                        <div class="nad-pager-actions">
+                            <button id="offerAlertAdminPrev" type="button">Précédent</button>
+                            <span class="nad-pager-page" id="offerAlertAdminPage">1</span>
+                            <button id="offerAlertAdminNext" type="button">Suivant</button>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const input = document.getElementById('newsletterSearch');
+            const rows = Array.from(document.querySelectorAll('.newsletter-row'));
+            const info = document.getElementById('offerAlertAdminInfo');
+            const pageLabel = document.getElementById('offerAlertAdminPage');
+            const prev = document.getElementById('offerAlertAdminPrev');
+            const next = document.getElementById('offerAlertAdminNext');
+            const pageSize = 12;
+            let page = 1;
+
+            if (!input || !rows.length || !info || !pageLabel || !prev || !next) {
+                return;
+            }
+
+            function visibleRows() {
+                const value = input.value.toLowerCase().trim();
+
+                return rows.filter((row) => row.textContent.toLowerCase().includes(value));
+            }
+
+            function render() {
+                const filtered = visibleRows();
+                const pages = Math.max(1, Math.ceil(filtered.length / pageSize));
+                page = Math.min(Math.max(1, page), pages);
+                const start = (page - 1) * pageSize;
+                const current = new Set(filtered.slice(start, start + pageSize));
+
+                rows.forEach((row) => {
+                    row.hidden = !current.has(row);
+                });
+
+                info.textContent = filtered.length
+                    ? `${start + 1} à ${Math.min(start + pageSize, filtered.length)} sur ${filtered.length} abonnement(s)`
+                    : '0 abonnement';
+                pageLabel.textContent = `${page} / ${pages}`;
+                prev.disabled = page <= 1;
+                next.disabled = page >= pages;
+            }
+
+            input.addEventListener('input', function () {
+                page = 1;
+                render();
+            });
+            prev.addEventListener('click', function () {
+                page -= 1;
+                render();
+            });
+            next.addEventListener('click', function () {
+                page += 1;
+                render();
+            });
+
+            render();
+        })();
+    </script>
+{% endblock %}

@@ -1,0 +1,358 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Modérateur • Analytics'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_analytics.html.twig" %}
+
+<div class="page">
+  <div class="wrap">
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="h1">📊 {% trans %}Analytics modération{% endtrans %}</div>
+          <div class="hint">{% trans %}Vue globale : inscriptions, signalements (comptes/jobs), répartition, vérifications (CNI/CV), top risques.{% endtrans %}</div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <select class="select" id="daysSelect">
+            {% for d in [7,14,30,60,90,180] %}
+              <option value="{{ d }}" {{ data.days == d ? 'selected' : '' }}>{{ d }} {% trans %}jours{% endtrans %}</option>
+            {% endfor %}
+          </select>
+          <a class="btn" href="{{ path ('moderateur_verifications_index')}}">✅ {% trans %}Vérifications{% endtrans %}</a>
+          <a class="btn primary" href="{{ path ('moderateur_rules_index') }}">🛡️ {% trans %}Règles{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div class="bd">
+        {# KPIs #}
+        {% set rc = data.rolesCounts %}
+        {% set rs = data.reportStatus %}
+        {% set js = data.jobStatus %}
+        <div class="kpis">
+          <div class="kpi">
+            <div class="t">{% trans %}Nouveaux utilisateurs{% endtrans %} ({{ data.days }}{% trans %}j{% endtrans %})</div>
+            <div class="v">{{ data.newUsersDaily.values|reduce((a,b)=>a+b, 0) }}</div>
+            <div class="s">{% trans %}Talents{% endtrans %} {{ rc.ROLE_TALENT }} • {% trans %}Particuliers{% endtrans %} {{ rc.ROLE_PARTICULIER }} • {% trans %}Company{% endtrans %} {{ rc.ROLE_COMPANY }}</div>
+          </div>
+          <div class="kpi">
+            <div class="t">{% trans %}Signalements comptes{% endtrans %} ({{ data.days }}{% trans %}j{% endtrans %})</div>
+            <div class="v">{{ data.reportsDaily.values|reduce((a,b)=>a+b, 0) }}</div>
+            <div class="s">Open {{ rs.open }} • Resolved {{ rs.resolved }} • Canceled {{ rs.canceled }}</div>
+          </div>
+          <div class="kpi">
+            <div class="t">{% trans %}Signalements jobs{% endtrans %} ({{ data.days }}{% trans %}j{% endtrans %})</div>
+            <div class="v">{{ data.jobReportsDaily.values|reduce((a,b)=>a+b, 0) }}</div>
+            <div class="s">Pending {{ js.pending }} • Reviewed {{ js.reviewed }} • Rejected {{ js.rejected }} • Resolved {{ js.resolved }}</div>
+          </div>
+          <div class="kpi">
+            <div class="t">{% trans %}Vérifications{% endtrans %}</div>
+            <div class="v">{{ (data.cniStats.verified ?? 0) + (data.cvStats.verified ?? 0) }}</div>
+            <div class="s">CNI ✅ {{ data.cniStats.verified ?? 0 }} • CV ✅ {{ data.cvStats.verified ?? 0 }}</div>
+          </div>
+        </div>
+
+        {# Charts #}
+        <div class="grid">
+
+          <div class="col-8">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Inscriptions{% endtrans %} ({{ data.days }} {% trans %}jours{% endtrans %})</div>
+                  <div class="chartsub">{% trans %}Volume quotidien des nouveaux comptes.{% endtrans %}</div>
+                </div>
+                <span class="chip">📈 {% trans %}Trend{% endtrans %}</span>
+              </div>
+              <div class="canvaswrap"><canvas id="chUsers"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Pie — Rôles{% endtrans %} ({{ data.days }}{% trans %}j{% endtrans %})</div>
+                  <div class="chartsub">{% trans %}Talent / Particulier / Company.{% endtrans %}</div>
+                </div>
+              </div>
+              <div class="canvaswrap"><canvas id="chRoles"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Pie — Sexe{% endtrans %} ({{ data.days }}{% trans %}j{% endtrans %})</div>
+                  <div class="chartsub">{% trans %}PM = personne morale (sexe null).{% endtrans %}</div>
+                </div>
+              </div>
+              <div class="canvaswrap"><canvas id="chGender"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-8">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Combination — Signalements comptes{% endtrans %}</div>
+                  <div class="chartsub">{% trans %}Barres = total/jour • Ligne = cumul.{% endtrans %}</div>
+                </div>
+                <span class="chip">🚨 {% trans %}Accounts{% endtrans %}</span>
+              </div>
+              <div class="canvaswrap"><canvas id="chReportsCombo"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Area — Signalements jobs{% endtrans %} ({{ data.days }}{% trans %}j{% endtrans %})</div>
+                  <div class="chartsub">{% trans %}Évolution des reports jobs.{% endtrans %}</div>
+                </div>
+                <span class="chip">📦 {% trans %}Jobs{% endtrans %}</span>
+              </div>
+              <div class="canvaswrap"><canvas id="chJobReports"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Pie — Statuts jobs{% endtrans %} ({{ data.days }}{% trans %}j{% endtrans %})</div>
+                  <div class="chartsub">{% trans %}pending / reviewed / rejected / resolved.{% endtrans %}</div>
+                </div>
+              </div>
+              <div class="canvaswrap"><canvas id="chJobStatus"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Horizontal Bar — Top comptes signalés{% endtrans %}</div>
+                  <div class="chartsub">{% trans %}Plus d’occurrences = risque.{% endtrans %}</div>
+                </div>
+              </div>
+              <div class="canvaswrap"><canvas id="chTopTargets"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-6">
+            <div class="chartbox">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Horizontal Bar — Top jobs signalés{% endtrans %}</div>
+                  <div class="chartsub">{% trans %}Jobs à surveiller.{% endtrans %}</div>
+                </div>
+              </div>
+              <div class="canvaswrap"><canvas id="chTopJobs"></canvas></div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="chartbox" style="min-height: 340px;">
+              <div class="charthead">
+                <div>
+                  <div class="charttitle">{% trans %}Horizontal Bar — Catégories de signalements{% endtrans %} (30{% trans %}j{% endtrans %})</div>
+                  <div class="chartsub">{% trans %}Top catégories de reports comptes.{% endtrans %}</div>
+                </div>
+                <span class="chip">🧩 {% trans %}Categories{% endtrans %}</span>
+              </div>
+              <div class="canvaswrap"><canvas id="chTopCats"></canvas></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  // Toast minimal
+  function toast(message, type='ok', sub=''){
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+      <div class="t-ico">${type==='ok'?'✅':type==='warn'?'⚠️':'⛔'}</div>
+      <div><div class="t-msg">${message}</div>${sub?`<div class="t-sub">${sub}</div>`:''}</div>
+    `;
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 3200);
+  }
+
+  const initial = {{ data|json_encode|raw }};
+
+  // ✅ crée un chart safe (pas de jump)
+  function makeChart(id, cfg){
+    const el = document.getElementById(id);
+    if (!el) return null;
+    return new Chart(el, {
+      ...cfg,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        ...cfg.options
+      }
+    });
+  }
+
+  function cumulate(arr){
+    const out=[]; let acc=0;
+    for (const v of arr){ acc += Number(v||0); out.push(acc); }
+    return out;
+  }
+
+  // Instances
+  let chUsers, chRoles, chGender, chReportsCombo, chJobReports, chJobStatus, chTopTargets, chTopJobs, chTopCats;
+
+  function renderAll(d){
+    const users = d.newUsersDaily || {labels:[], values:[]};
+    const roles = d.rolesCounts || {};
+    const gender = d.genderCounts || {};
+    const rep = d.reportsDaily || {labels:[], values:[]};
+    const repCum = cumulate(rep.values||[]);
+    const repStatus = d.reportStatus || {};
+    const job = d.jobReportsDaily || {labels:[], values:[]};
+    const jobStatus = d.jobStatus || {};
+    const topTargets = (d.topTargets||[]);
+    const topJobs = (d.topJobs||[]);
+    const topCats = (d.topCategories||[]);
+
+    // Destroy old
+    [chUsers,chRoles,chGender,chReportsCombo,chJobReports,chJobStatus,chTopTargets,chTopJobs,chTopCats].forEach(c=>c && c.destroy());
+
+    chUsers = makeChart('chUsers', {
+      type: 'line',
+      data: {
+        labels: users.labels,
+        datasets: [{
+          label: '{{ "Nouveaux utilisateurs"|trans|e("js") }}',
+          data: users.values,
+          tension: .35,
+          fill: true,
+          borderWidth: 2,
+          pointRadius: 2,
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a1').trim() || 'rgba(56,189,248,.35)'
+        }]
+      },
+      options: { plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+    });
+
+    chRoles = makeChart('chRoles', {
+      type: 'pie',
+      data: {
+        labels: ['ROLE_TALENT','ROLE_PARTICULIER','ROLE_COMPANY'],
+        datasets: [{ data: [roles.ROLE_TALENT||0, roles.ROLE_PARTICULIER||0, roles.ROLE_COMPANY||0], borderWidth: 1 }]
+      },
+      options: { plugins:{ legend:{ position:'bottom' } } }
+    });
+
+    chGender = makeChart('chGender', {
+      type: 'doughnut',
+      data: {
+        labels: ['F','M','PM'],
+        datasets: [{ data: [gender.F||0, gender.M||0, gender.PM||0], borderWidth: 1 }]
+      },
+      options: { plugins:{ legend:{ position:'bottom' } } }
+    });
+
+    chReportsCombo = makeChart('chReportsCombo', {
+      data: {
+        labels: rep.labels,
+        datasets: [
+          { type:'bar', label:'{{ "Total/jour"|trans|e("js") }}', data: rep.values, borderWidth: 1 },
+          { type:'line', label:'{{ "Cumul"|trans|e("js") }}', data: repCum, tension:.35, fill:true, borderWidth:2, pointRadius:1,
+            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a4').trim() || 'rgba(168,85,247,.28)' }
+        ]
+      },
+      options: { plugins:{ legend:{ position:'bottom' } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+    });
+
+    chJobReports = makeChart('chJobReports', {
+      type: 'line',
+      data: {
+        labels: job.labels,
+        datasets: [{
+          label: '{{ "Reports jobs"|trans|e("js") }}',
+          data: job.values,
+          tension: .35,
+          fill: true,
+          borderWidth: 2,
+          pointRadius: 2,
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a2').trim() || 'rgba(34,197,94,.30)'
+        }]
+      },
+      options: { plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+    });
+
+    chJobStatus = makeChart('chJobStatus', {
+      type: 'pie',
+      data: {
+        labels: ['pending','reviewed','rejected','resolved'],
+        datasets: [{ data: [jobStatus.pending||0, jobStatus.reviewed||0, jobStatus.rejected||0, jobStatus.resolved||0], borderWidth: 1 }]
+      },
+      options: { plugins:{ legend:{ position:'bottom' } } }
+    });
+
+    chTopTargets = makeChart('chTopTargets', {
+      type: 'bar',
+      data: {
+        labels: topTargets.map(x=>x.label),
+        datasets: [{ label:'{{ "Signalements"|trans|e("js") }}', data: topTargets.map(x=>Number(x.value||0)), borderWidth: 1 }]
+      },
+      options: { indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
+    });
+
+    chTopJobs = makeChart('chTopJobs', {
+      type: 'bar',
+      data: {
+        labels: topJobs.map(x=>x.label),
+        datasets: [{ label:'{{ "Reports"|trans|e("js") }}', data: topJobs.map(x=>Number(x.value||0)), borderWidth: 1 }]
+      },
+      options: { indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
+    });
+
+    chTopCats = makeChart('chTopCats', {
+      type: 'bar',
+      data: {
+        labels: topCats.map(x=>x.label),
+        datasets: [{ label:'{{ "Occurrences"|trans|e("js") }}', data: topCats.map(x=>Number(x.value||0)), borderWidth: 1 }]
+      },
+      options: { indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
+    });
+  }
+
+  renderAll(initial);
+
+  // Refresh (sans reload)
+  async function loadDays(days){
+    const url = "{{ path('moderateur_analytics_data') }}" + "?days=" + encodeURIComponent(days);
+    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const data = await res.json();
+    if (!data || data.ok !== true) throw new Error(data?.message || '{{ "Erreur data"|trans|e("js") }}');
+    renderAll(data);
+  }
+
+  document.getElementById('daysSelect')?.addEventListener('change', async (e)=>{
+    try{
+      toast('{{ "Actualisation…"|trans|e("js") }}', 'warn');
+      await loadDays(e.target.value);
+      toast('{{ "Analytics mises à jour ✅"|trans|e("js") }}', 'ok');
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }
+  });
+</script>
+{% endblock %}

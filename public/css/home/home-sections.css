@@ -1,0 +1,881 @@
+
+        /* =========================
+           MAIN D’OEUVRE LOCAL — SAAS PREMIUM SOFT
+           Drop-in CSS, sans casser ta structure
+           ========================= */
+        .mol-saas-premium{
+            --mol-bg:#f6f8fc;
+            --mol-bg-2:#fbfcff;
+            --mol-surface:rgba(255,255,255,.78);
+            --mol-surface-2:rgba(255,255,255,.92);
+            --mol-surface-3:rgba(255,255,255,.64);
+            --mol-line:rgba(15,23,42,.08);
+            --mol-line-strong:rgba(15,23,42,.13);
+            --mol-text:#0f172a;
+            --mol-text-soft:#1e293b;
+            --mol-muted:#667085;
+            --mol-muted-2:#94a3b8;
+            --mol-primary:#2563eb;
+            --mol-primary-2:#4f46e5;
+            --mol-accent:#10b981;
+            --mol-gold:#c8a96b;
+            --mol-danger:#ef4444;
+            --mol-shadow-sm:0 10px 30px rgba(15,23,42,.05);
+            --mol-shadow:0 20px 60px rgba(15,23,42,.08);
+            --mol-shadow-lg:0 28px 90px rgba(15,23,42,.10);
+            --mol-radius:28px;
+            --mol-radius-lg:34px;
+            --mol-radius-md:22px;
+            --mol-radius-sm:16px;
+            background:
+                radial-gradient(1200px circle at 0% 0%, rgba(37,99,235,.07), transparent 40%),
+                radial-gradient(900px circle at 100% 10%, rgba(79,70,229,.06), transparent 42%),
+                radial-gradient(900px circle at 50% 100%, rgba(16,185,129,.05), transparent 45%),
+                linear-gradient(180deg, #f8fbff 0%, #f5f8fc 100%);
+            color:var(--mol-text);
+        }
+        
+        /* Largeur plus pleine page */
+        .mol-saas-premium .container{
+            max-width: min(100%, 1720px);
+            padding-left: clamp(16px, 3vw, 48px);
+            padding-right: clamp(16px, 3vw, 48px);
+        }
+        
+        .mol-saas-premium .sptb,
+        .mol-saas-premium .vip-latest-jobs{
+            position: relative;
+            padding-top: clamp(26px, 3vw, 42px) !important;
+            padding-bottom: clamp(38px, 4vw, 60px) !important;
+        }
+        
+        /* Titres raffinés */
+        .mol-saas-premium .section-title{
+            margin-bottom: 18px;
+        }
+        .mol-saas-premium .section-title h1,
+        .mol-saas-premium .section-title h2{
+            margin:0 0 12px;
+            font-size: clamp(1.42rem, 1.3vw + 1rem, 2.15rem);
+            line-height:1.08;
+            letter-spacing:-.04em;
+            font-weight: 900;
+            color:var(--mol-text);
+        }
+        
+        .mol-saas-premium .section-title.center-block.text-center.mol-saas-title{
+            padding-top: 0 !important;
+            margin-top: 0 !important;
+        }
+        
+        .mol-saas-premium .row.g-4.mt-2{
+            margin-top: .35rem !important;
+        }
+        
+        .mol-saas-premium .section-title p{
+            max-width: 760px;
+            margin: 0 auto;
+            font-size: .93rem;
+            line-height: 1.75;
+            font-weight: 500;
+            color:var(--mol-muted);
+        }
+        
+        /* Petite police générale */
+        .mol-saas-premium p,
+        .mol-saas-premium li,
+        .mol-saas-premium .btn,
+        .mol-saas-premium .form-control,
+        .mol-saas-premium .form-select{
+            font-size: .92rem;
+        }
+        
+        /* =========================
+           VALUE PROP + KPI
+           ========================= */
+        .mol-saas-premium .mol-saas-title{
+            max-width: 980px;
+            margin-inline:auto;
+        }
+        
+        .mol-saas-premium .mol-kpi{
+            display:grid;
+            grid-template-columns: repeat(4, minmax(0,1fr));
+            gap:14px;
+            margin-top: 24px;
+        }
+        .mol-saas-premium .mol-kpi .k{
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            gap:4px;
+            min-height:104px;
+            text-align:center;
+            padding:16px 14px;
+            border-radius: 22px;
+            border:1px solid rgba(15,23,42,.07);
+            background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.78));
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            box-shadow: var(--mol-shadow-sm);
+            font-size: 1.05rem;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+        .mol-saas-premium .mol-kpi .k:hover{
+            transform: translateY(-3px);
+            box-shadow: var(--mol-shadow);
+            border-color: rgba(37,99,235,.18);
+        }
+        .mol-saas-premium .mol-kpi .k span{
+            display:block;
+            font-size:.84rem;
+            line-height:1.3;
+            font-weight:800;
+            letter-spacing:-.01em;
+            color:var(--mol-text);
+        }
+        .mol-saas-premium .mol-kpi .k small{
+            display:block;
+            font-size:.74rem;
+            line-height:1.35;
+            font-weight:600;
+            color:var(--mol-muted);
+        }
+        
+        /* =========================
+           CARDS GLOBALES
+           ========================= */
+        .mol-saas-premium .mol-saas-card{
+            position:relative;
+            height:100%;
+            padding: 26px !important;
+            border-radius: var(--mol-radius);
+            border:1px solid rgba(15,23,42,.08);
+            background:
+                linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.82));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: var(--mol-shadow-sm);
+            overflow:hidden;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+        }
+        .mol-saas-premium .mol-saas-card::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:
+                radial-gradient(500px circle at 10% 0%, rgba(37,99,235,.06), transparent 48%),
+                radial-gradient(500px circle at 100% 100%, rgba(16,185,129,.05), transparent 48%);
+            pointer-events:none;
+        }
+        .mol-saas-premium .mol-saas-card > *{
+            position:relative;
+            z-index:1;
+        }
+        .mol-saas-premium .mol-saas-card:hover{
+            transform: translateY(-4px);
+            box-shadow: var(--mol-shadow-lg);
+            border-color: rgba(37,99,235,.15);
+        }
+        
+        .mol-saas-premium .mol-saas-card h4,
+        .mol-saas-premium .mol-saas-card h5{
+            margin-bottom:10px !important;
+            color:var(--mol-text);
+            line-height:1.18;
+            letter-spacing:-.03em;
+        }
+        .mol-saas-premium .mol-saas-card h4{
+            font-size: 1.06rem;
+            font-weight:900 !important;
+        }
+        .mol-saas-premium .mol-saas-card h5{
+            font-size: .98rem;
+            font-weight:900 !important;
+        }
+        .mol-saas-premium .mol-saas-card p{
+            margin-bottom:0;
+            color:var(--mol-muted) !important;
+            font-weight:500 !important;
+            line-height:1.72;
+        }
+        .mol-saas-premium .mol-saas-card ul{
+            margin: 12px 0 0;
+            padding-left: 1.05rem;
+        }
+        .mol-saas-premium .mol-saas-card ul li{
+            color:var(--mol-muted) !important;
+            font-weight:600 !important;
+            line-height:1.7;
+            margin-bottom:6px;
+        }
+        
+        .mol-saas-premium .mol-icon{
+            width:58px;
+            height:58px;
+            min-width:58px;
+            border-radius: 18px;
+            display:grid;
+            place-items:center;
+            border:1px solid rgba(15,23,42,.08);
+            background:
+                linear-gradient(135deg, rgba(37,99,235,.10), rgba(79,70,229,.08) 45%, rgba(16,185,129,.08));
+            box-shadow: 0 12px 28px rgba(15,23,42,.06);
+        }
+        .mol-saas-premium .mol-icon i{
+            font-size: 1.15rem;
+            color: var(--mol-primary);
+        }
+        
+        /* =========================
+           BOUTONS PREMIUM
+           ========================= */
+        .mol-saas-premium .btn{
+            border-radius: 999px;
+            font-weight:800;
+            font-size:.84rem;
+            padding: .82rem 1.1rem;
+            letter-spacing:-.01em;
+            box-shadow:none;
+            transition:transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+        }
+        .mol-saas-premium .btn:hover{
+            transform: translateY(-2px);
+        }
+        .mol-saas-premium .btn-primary{
+            color:#fff !important;
+            border-color: transparent !important;
+            background: linear-gradient(135deg, var(--mol-primary), var(--mol-primary-2)) !important;
+            box-shadow: 0 16px 36px rgba(37,99,235,.24);
+        }
+        .mol-saas-premium .btn-primary:hover{
+            box-shadow: 0 22px 46px rgba(37,99,235,.30);
+        }
+        .mol-saas-premium .btn-outline-secondary{
+            border-color: rgba(15,23,42,.12) !important;
+            background: rgba(255,255,255,.78) !important;
+            color: var(--mol-text-soft) !important;
+        }
+        .mol-saas-premium .btn-outline-light{
+            border-color: rgba(255,255,255,.28) !important;
+            background: rgba(255,255,255,.12) !important;
+            color:#fff !important;
+        }
+        
+        /* =========================
+           LATEST JOBS — VERSION PLUS FINE
+           ========================= */
+        .mol-saas-premium .vip-latest-jobs{
+            --ink:#0f172a;
+            --muted:#6b7280;
+            --line:rgba(15,23,42,.09);
+            --glass:rgba(255,255,255,.70);
+            --shadow:0 24px 70px rgba(15,23,42,.08);
+            background:
+                radial-gradient(1000px circle at 5% 0%, rgba(37,99,235,.08), transparent 45%),
+                radial-gradient(1000px circle at 100% 10%, rgba(16,185,129,.07), transparent 45%),
+                linear-gradient(180deg, rgba(249,251,255,.94), rgba(255,255,255,.92));
+            border-top:1px solid rgba(15,23,42,.05);
+            border-bottom:1px solid rgba(15,23,42,.05);
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-shell{
+            border:1px solid rgba(15,23,42,.08);
+            border-radius: 34px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: var(--shadow);
+            overflow:hidden;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-top{
+            padding: 24px 28px 16px;
+            border-bottom:1px solid rgba(15,23,42,.07);
+            background:
+                linear-gradient(90deg, rgba(37,99,235,.08), rgba(255,255,255,.72), rgba(16,185,129,.06));
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-title{
+            margin:0;
+            color:var(--ink);
+            font-weight:900;
+            letter-spacing:-.04em;
+            font-size: clamp(1.35rem, 1.2vw + 1rem, 2rem);
+            line-height:1.04;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-sub{
+            margin:8px 0 0;
+            color:var(--muted);
+            font-size:.88rem;
+            line-height:1.7;
+            max-width:700px;
+        }
+        
+        .mol-saas-premium .vip-latest-jobs .vip-actions{
+            padding: 16px 28px;
+            border-bottom:1px solid rgba(15,23,42,.07);
+            background: rgba(255,255,255,.56);
+            display:flex;
+            gap:12px;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-search{
+            position:relative;
+            flex:1 1 420px;
+            max-width: 760px;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-search .form-control{
+            height: 50px;
+            border-radius: 999px;
+            border:1px solid rgba(15,23,42,.10);
+            background: rgba(255,255,255,.86);
+            box-shadow:none;
+            padding-left:48px;
+            padding-right:52px;
+            font-size:.87rem;
+            font-weight:600;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-search .form-control:focus{
+            border-color: rgba(37,99,235,.22);
+            box-shadow: 0 0 0 4px rgba(37,99,235,.08);
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-search .ico{
+            position:absolute;
+            left:17px;
+            top:50%;
+            transform:translateY(-50%);
+            color:#94a3b8;
+            font-size:13px;
+            pointer-events:none;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-clear{
+            position:absolute;
+            right:10px;
+            top:50%;
+            transform:translateY(-50%);
+            width:34px;
+            height:34px;
+            border:none;
+            border-radius:999px;
+            display:grid;
+            place-items:center;
+            background: rgba(15,23,42,.05);
+            color:#64748b;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-clear:hover{
+            background: rgba(15,23,42,.09);
+        }
+        
+        .mol-saas-premium .vip-latest-jobs .vip-cta{
+            border-radius:999px;
+            font-weight:800;
+            font-size:.84rem;
+            padding:12px 16px;
+            box-shadow: 0 18px 40px rgba(37,99,235,.18);
+            white-space:nowrap;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-tabs{
+            padding: 14px 24px;
+            border-bottom:1px solid rgba(15,23,42,.07);
+            background: rgba(255,255,255,.48);
+            gap:10px;
+            flex-wrap:wrap;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-tabs .nav-link{
+            border-radius:999px;
+            border:1px solid rgba(15,23,42,.10);
+            background: rgba(255,255,255,.82);
+            color:var(--ink);
+            font-weight:800;
+            font-size:.82rem;
+            padding: 10px 14px;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            transition:.16s ease;
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-tabs .nav-link:hover{
+            transform:translateY(-1px);
+            box-shadow:0 12px 26px rgba(15,23,42,.07);
+        }
+        .mol-saas-premium .vip-latest-jobs .vip-tabs .nav-link.active{
+            border-color: rgba(37,99,235,.18);
+            background: linear-gradient(90deg, rgba(37,99,235,.10), rgba(255,255,255,.92));
+            box-shadow:0 14px 30px rgba(37,99,235,.10);
+        }
+        
+        .mol-saas-premium .vip-latest-jobs .vip-body{
+            padding: 22px;
+        }
+        
+        /* Job cards */
+        .mol-saas-premium .vip-latest-jobs .job{
+            height:100%;
+            border:1px solid rgba(15,23,42,.08);
+            border-radius: 24px;
+            background: rgba(255,255,255,.88);
+            box-shadow: 0 14px 34px rgba(15,23,42,.05);
+            overflow:hidden;
+            transition:.18s ease;
+            position:relative;
+        }
+        .mol-saas-premium .vip-latest-jobs .job:hover{
+            transform: translateY(-3px);
+            box-shadow: 0 24px 56px rgba(15,23,42,.08);
+            border-color: rgba(37,99,235,.12);
+        }
+        .mol-saas-premium .vip-latest-jobs .job .job-head{
+            padding:16px 16px 0;
+            display:flex;
+            align-items:flex-start;
+            justify-content:space-between;
+            gap:10px;
+        }
+        .mol-saas-premium .vip-latest-jobs .badge-soft,
+        .mol-saas-premium .vip-latest-jobs .badge-hot{
+            font-size:.74rem;
+            font-weight:800;
+            letter-spacing:-.01em;
+            padding:8px 11px;
+            border-radius:999px;
+        }
+        .mol-saas-premium .vip-latest-jobs .badge-soft{
+            border:1px solid rgba(15,23,42,.08);
+            background: rgba(248,250,252,.88);
+            color:var(--ink);
+        }
+        .mol-saas-premium .vip-latest-jobs .badge-hot{
+            border:1px solid rgba(245,158,11,.26);
+            background: rgba(245,158,11,.12);
+            color:#92400e;
+        }
+        .mol-saas-premium .vip-latest-jobs .job-body{
+            padding: 12px 16px 16px;
+        }
+        .mol-saas-premium .vip-latest-jobs .job-title{
+            margin:0;
+            font-weight:900;
+            letter-spacing:-.03em;
+            color:var(--ink);
+            font-size: 1rem;
+            line-height:1.25;
+        }
+        .mol-saas-premium .vip-latest-jobs .featured .job-title{
+            font-size: 1.15rem;
+        }
+        .mol-saas-premium .vip-latest-jobs .job-title a{
+            color:inherit;
+            text-decoration:none;
+        }
+        .mol-saas-premium .vip-latest-jobs .job-desc{
+            margin:9px 0 0;
+            color:var(--muted);
+            font-size:.82rem;
+            line-height:1.72;
+            min-height:50px;
+        }
+        .mol-saas-premium .vip-latest-jobs .job-meta{
+            margin-top: 14px;
+            display:flex;
+            flex-wrap:wrap;
+            gap:8px;
+            color:#475569;
+            font-size:.78rem;
+            font-weight:700;
+        }
+        .mol-saas-premium .vip-latest-jobs .chip{
+            border:1px solid rgba(15,23,42,.08);
+            background: rgba(248,250,252,.9);
+            border-radius:999px;
+            padding:8px 11px;
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+        }
+        .mol-saas-premium .vip-latest-jobs .chip i{
+            color:#94a3b8;
+        }
+        .mol-saas-premium .vip-latest-jobs .job-foot{
+            padding: 14px 16px 16px;
+            border-top:1px solid rgba(15,23,42,.07);
+            background: rgba(255,255,255,.74);
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+        }
+        .mol-saas-premium .vip-latest-jobs .company{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:0;
+        }
+        .mol-saas-premium .vip-latest-jobs .avatar{
+            width:42px;
+            height:42px;
+            border-radius:16px;
+            display:grid;
+            place-items:center;
+            font-size:.82rem;
+            font-weight:900;
+            color:var(--ink);
+            background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(16,185,129,.10));
+            border:1px solid rgba(15,23,42,.08);
+            flex:0 0 auto;
+        }
+        .mol-saas-premium .vip-latest-jobs .company a{
+            display:block;
+            font-weight:800;
+            font-size:.82rem;
+            color:var(--ink);
+            text-decoration:none;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            max-width:220px;
+        }
+        .mol-saas-premium .vip-latest-jobs .time{
+            color:var(--muted);
+            font-size:.72rem;
+            margin-top:2px;
+            font-weight:700;
+        }
+        .mol-saas-premium .vip-latest-jobs .btn-pill{
+            border-radius:999px;
+            font-weight:800;
+            font-size:.78rem;
+            padding:10px 14px;
+            border:1px solid rgba(15,23,42,.10);
+            background: rgba(255,255,255,.92);
+            color:var(--mol-text) !important;
+        }
+        .mol-saas-premium .vip-latest-jobs .btn-pill:hover{
+            box-shadow: 0 12px 30px rgba(15,23,42,.08);
+        }
+        .mol-saas-premium .vip-latest-jobs .btn-save{
+            width:40px;
+            height:40px;
+            border-radius:14px;
+            display:grid;
+            place-items:center;
+            border:1px solid rgba(15,23,42,.10);
+            background: rgba(255,255,255,.92);
+            color:#0f172a;
+        }
+        .mol-saas-premium .vip-latest-jobs .btn-save:hover{
+            box-shadow: 0 12px 26px rgba(15,23,42,.08);
+        }
+        .mol-saas-premium .vip-latest-jobs .job.featured{
+            border-color: rgba(37,99,235,.12);
+            background: linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.84));
+        }
+        .mol-saas-premium .vip-latest-jobs .job.featured:before{
+            content:"";
+            position:absolute;
+            inset:-2px;
+            background:
+                radial-gradient(700px circle at 20% 0%, rgba(37,99,235,.10), transparent 52%),
+                radial-gradient(700px circle at 90% 10%, rgba(16,185,129,.08), transparent 52%);
+            z-index:0;
+        }
+        .mol-saas-premium .vip-latest-jobs .job.featured > *{
+            position:relative;
+            z-index:1;
+        }
+        
+        /* =========================
+           STATS — PLUS PREMIUM
+           ========================= */
+        .mol-saas-premium .about-1.cover-image{
+            position:relative;
+            border-radius: 0;
+            overflow:hidden;
+        }
+        .mol-saas-premium .about-1.cover-image::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:
+                linear-gradient(135deg, rgba(2,6,23,.78), rgba(15,23,42,.60)),
+                radial-gradient(900px circle at 15% 10%, rgba(37,99,235,.22), transparent 40%),
+                radial-gradient(800px circle at 85% 10%, rgba(16,185,129,.18), transparent 40%);
+        }
+        .mol-saas-premium .about-1 .content-text{
+            position:relative;
+            z-index:1;
+            padding-top: 26px;
+            padding-bottom: 26px;
+        }
+        .mol-saas-premium .counter-status{
+            min-height: 228px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            border:1px solid rgba(255,255,255,.10);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition:.18s ease;
+        }
+        .mol-saas-premium .counter-status:hover{
+            transform: translateY(-3px);
+        }
+        .mol-saas-premium .counter-icon{
+            margin-bottom:12px;
+        }
+        .mol-saas-premium .counter-icon i{
+            font-size: 1.55rem;
+        }
+        .mol-saas-premium .counter-status h5{
+            font-size:.88rem;
+            letter-spacing:-.01em;
+            font-weight:800;
+            margin-bottom:10px;
+        }
+        .mol-saas-premium .counter-status h2{
+            font-size: clamp(1.45rem, 1vw + 1rem, 2.1rem);
+            font-weight:900;
+            letter-spacing:-.04em;
+        }
+        
+        /* =========================
+           CTA FINAL
+           ========================= */
+        .mol-saas-premium .mol-cta{
+            position:relative;
+            padding: clamp(24px, 4vw, 44px) !important;
+            border-radius: 32px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.10);
+            background:
+                linear-gradient(135deg, rgba(37,99,235,.94), rgba(79,70,229,.92) 55%, rgba(16,185,129,.82));
+            box-shadow: 0 28px 80px rgba(37,99,235,.22);
+            color:#fff;
+        }
+        .mol-saas-premium .mol-cta::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:
+                radial-gradient(700px circle at 0% 0%, rgba(255,255,255,.22), transparent 38%),
+                radial-gradient(700px circle at 100% 100%, rgba(255,255,255,.14), transparent 38%);
+            pointer-events:none;
+        }
+        .mol-saas-premium .mol-cta > *{
+            position:relative;
+            z-index:1;
+        }
+        .mol-saas-premium .mol-cta h2{
+            margin:0 0 10px;
+            color:#fff;
+            font-size: clamp(1.3rem, 1vw + 1rem, 2rem);
+            line-height:1.1;
+            letter-spacing:-.04em;
+            font-weight:900;
+        }
+        .mol-saas-premium .mol-cta p{
+            color: rgba(255,255,255,.88);
+            font-size:.92rem;
+            line-height:1.75;
+            font-weight:500;
+        }
+        
+        /* =========================
+           DOWNLOAD APPS
+           ========================= */
+        .mol-saas-premium .mol-app-strip{
+            border-radius: 32px;
+            border:1px solid rgba(15,23,42,.08);
+            background:
+                radial-gradient(900px circle at 10% 0%, rgba(37,99,235,.08), transparent 45%),
+                radial-gradient(900px circle at 100% 10%, rgba(16,185,129,.08), transparent 50%),
+                linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.90));
+            box-shadow: 0 22px 60px rgba(2,6,23,.08);
+            overflow:hidden;
+            position:relative;
+        }
+        .mol-saas-premium .mol-app-strip:before{
+            content:"";
+            position:absolute;
+            inset:-2px;
+            background: linear-gradient(120deg, rgba(37,99,235,.12), rgba(16,185,129,.10), rgba(79,70,229,.10));
+            opacity:.55;
+            pointer-events:none;
+        }
+        .mol-saas-premium .mol-app-strip > *{
+            position:relative;
+            z-index:1;
+        }
+        .mol-saas-premium .mol-app-title{
+            font-weight:900;
+            letter-spacing:-.04em;
+            color: rgba(15,23,42,.96);
+            font-size: clamp(1.22rem, 1vw + 1rem, 1.85rem);
+            line-height:1.1;
+        }
+        .mol-saas-premium .mol-app-sub{
+            color: rgba(15,23,42,.64);
+            font-weight:500;
+            max-width: 760px;
+            font-size:.92rem;
+            line-height:1.72;
+        }
+        .mol-saas-premium .mol-store-btn{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-height:84px;
+            padding: 16px 17px;
+            border-radius: 22px;
+            border:1px solid rgba(15,23,42,.08);
+            background: rgba(255,255,255,.92);
+            box-shadow: 0 16px 35px rgba(2,6,23,.08);
+            text-decoration:none;
+            transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+        }
+        .mol-saas-premium .mol-store-btn:hover{
+            transform: translateY(-3px);
+            box-shadow: 0 24px 60px rgba(2,6,23,.10);
+            filter: saturate(1.03);
+            text-decoration:none;
+        }
+        .mol-saas-premium .mol-store-ico{
+            width:50px;
+            height:50px;
+            border-radius: 17px;
+            display:grid;
+            place-items:center;
+            border:1px solid rgba(255,255,255,.7);
+            box-shadow: 0 10px 18px rgba(2,6,23,.08);
+            position:relative;
+            overflow:hidden;
+        }
+        .mol-saas-premium .mol-store-ico:before{
+            content:"";
+            position:absolute;
+            inset:-40%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.80), transparent 55%);
+            transform:rotate(18deg);
+        }
+        .mol-saas-premium .mol-store-ico i{
+            position:relative;
+            z-index:1;
+            font-size: 18px;
+            color: rgba(15,23,42,.86);
+        }
+        .mol-saas-premium .mol-store-meta small{
+            display:block;
+            color: rgba(15,23,42,.52);
+            font-weight:800;
+            letter-spacing:.02em;
+            text-transform:uppercase;
+            font-size:.67rem;
+        }
+        .mol-saas-premium .mol-store-meta strong{
+            display:block;
+            font-weight:900;
+            letter-spacing:-.02em;
+            color: rgba(15,23,42,.92);
+            line-height:1.12;
+            font-size:.98rem;
+        }
+        .mol-saas-premium .mol-store-arrow{
+            margin-left:auto;
+            width:40px;
+            height:40px;
+            border-radius: 14px;
+            display:grid;
+            place-items:center;
+            border:1px solid rgba(15,23,42,.08);
+            background: rgba(255,255,255,.72);
+            box-shadow: 0 10px 18px rgba(2,6,23,.06);
+            transition: transform .16s ease;
+        }
+        .mol-saas-premium .mol-store-btn:hover .mol-store-arrow{
+            transform: translateX(2px);
+        }
+        .mol-saas-premium .mol-android{ background: rgba(16,185,129,.16); }
+        .mol-saas-premium .mol-apple{ background: rgba(37,99,235,.14); }
+        .mol-saas-premium .mol-wp{ background: rgba(79,70,229,.14); }
+        
+        /* Espaces mieux gérés */
+        .mol-saas-premium .row.g-4{ --bs-gutter-x: 1.35rem; --bs-gutter-y: 1.35rem; }
+        .mol-saas-premium .row.g-3{ --bs-gutter-x: 1rem; --bs-gutter-y: 1rem; }
+        
+        /* Responsive */
+        @media (max-width: 1199.98px){
+            .mol-saas-premium .mol-kpi{
+                grid-template-columns: repeat(2, minmax(0,1fr));
+            }
+        }
+        @media (max-width: 991.98px){
+            .mol-saas-premium .section-title{
+                margin-bottom: 26px;
+            }
+            .mol-saas-premium .mol-saas-card{
+                padding: 22px !important;
+            }
+            .mol-saas-premium .vip-latest-jobs .vip-top,
+            .mol-saas-premium .vip-latest-jobs .vip-actions,
+            .mol-saas-premium .vip-latest-jobs .vip-tabs{
+                padding-left:18px;
+                padding-right:18px;
+            }
+            .mol-saas-premium .vip-latest-jobs .vip-body{
+                padding:18px;
+            }
+        }
+        @media (max-width: 767.98px){
+        	.mol-saas-premium .sptb,
+            .mol-saas-premium .vip-latest-jobs{
+                padding-top: 22px !important;
+                padding-bottom: 34px !important;
+            }
+        
+            .mol-saas-premium .section-title{
+                margin-bottom: 14px;
+            }
+        
+            .mol-saas-premium .container{
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+            .mol-saas-premium .mol-kpi{
+                grid-template-columns: 1fr 1fr;
+                gap:10px;
+            }
+            .mol-saas-premium .mol-kpi .k{
+                min-height: 94px;
+                padding: 14px 10px;
+            }
+            .mol-saas-premium .mol-saas-card{
+                border-radius: 22px;
+            }
+            .mol-saas-premium .vip-latest-jobs .vip-search{
+                max-width:100%;
+            }
+            .mol-saas-premium .vip-latest-jobs .job-foot{
+                flex-direction:column;
+                align-items:flex-start;
+            }
+            .mol-saas-premium .vip-latest-jobs .btn-pill{
+                width:100%;
+                text-align:center;
+            }
+            .mol-saas-premium .mol-store-btn{
+                min-height: 76px;
+                border-radius:18px;
+            }
+        }
+        @media (max-width: 575.98px){
+            .mol-saas-premium .mol-kpi{
+                grid-template-columns: 1fr;
+            }
+            .mol-saas-premium .vip-latest-jobs .vip-title{
+                font-size:1.25rem;
+            }
+            .mol-saas-premium .section-title h1,
+            .mol-saas-premium .section-title h2{
+                font-size:1.28rem;
+            }
+        }

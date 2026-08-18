@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Permissions{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/security/_vip_ui.html.twig' %}
+
+  <div class="sec-shell" data-security-page="permissions">
+    <div class="sec-container sec-grid">
+
+      <section class="sec-card sec-page-head">
+        <div class="sec-card-inner">
+          <div class="sec-page-head-top">
+            <div class="sec-page-main">
+              <div class="sec-kicker">{% trans %}Sécurité • Permissions{% endtrans %}</div>
+              <h1 class="sec-page-title">{% trans %}Matrice des permissions{% endtrans %}</h1>
+              <p class="sec-page-text">{% trans %}Cartographie réelle des permissions stockées en base et liées à tes rôles.{% endtrans %}</p>
+            </div>
+          </div>
+          <div class="sec-page-actions">{% include 'admin/security/_nav.html.twig' %}</div>
+        </div>
+      </section>
+
+      <section class="sec-grid sec-grid-4">
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Domaines{% endtrans %}</div><div class="value">{{ stats.domains }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Permissions{% endtrans %}</div><div class="value">{{ stats.permissions }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Sensibles{% endtrans %}</div><div class="value">{{ stats.sensitive }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Dérive{% endtrans %}</div><div class="value" style="font-size:1rem;">{{ stats.drift }}</div></div></article>
+      </section>
+
+      <section class="sec-card">
+        <div class="sec-card-inner">
+          <div class="sec-filters">
+            <div style="flex:2 1 360px;">
+              <input type="search" class="sec-input" placeholder="{% trans %}Rechercher une permission...{% endtrans %}" data-sec-search="permissions">
+            </div>
+          </div>
+
+          <div class="sec-separator"></div>
+
+          <div class="sec-card-list">
+            {% for group in groups %}
+              <article class="sec-mini-card">
+                <div class="sec-row-title">{{ group.domain }}</div>
+                <div class="sec-row-sub">{{ group.permissions|length }} {% trans %}permissions{% endtrans %}</div>
+
+                <div class="sec-separator"></div>
+
+                <div class="sec-card-list">
+                  {% for permission in group.permissions %}
+                    <div class="js-sec-permission"
+                         data-sec-text="{{ (group.domain ~ ' ' ~ permission.code ~ ' ' ~ permission.label ~ ' ' ~ permission.roles|join(' '))|lower }}"
+                         style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                      <div style="min-width:0;flex:1 1 auto;">
+                        <div class="sec-row-title">{{ permission.label }}</div>
+                        <div class="sec-row-sub">{{ permission.code }}</div>
+                        {% if permission.description %}
+                          <div style="margin-top:8px;color:var(--sec-muted);">{{ permission.description }}</div>
+                        {% endif %}
+                      </div>
+
+                      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <span class="sec-badge {{ permission.risk }}">{{ permission.risk|upper }}</span>
+                        {% for role in permission.roles %}
+                          <span class="sec-badge sec-badge-neutral">{{ role }}</span>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </article>
+            {% else %}
+              <div class="sec-mini-card">{% trans %}Aucune permission trouvée.{% endtrans %}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-security.js') }}"></script>
+{% endblock %}

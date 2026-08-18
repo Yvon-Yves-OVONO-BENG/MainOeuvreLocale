@@ -1,0 +1,222 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Support{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/support/_vip_ui.html.twig' %}
+
+  <div class="vip-shell" data-admin-support-page="index">
+    <div class="vip-container vip-grid">
+
+      <section class="vip-card vip-page-head">
+        <div class="vip-card-inner">
+          <div class="vip-page-head-top">
+            <div class="vip-page-head-main">
+              <div class="vip-page-kicker">{% trans %}Support • Back-office{% endtrans %}</div>
+              <h1 class="vip-page-head-title">{% trans %}Boîte de support{% endtrans %}</h1>
+              <p class="vip-page-head-text">
+                {% trans %}Centralise les tickets, les demandes clients, les urgences, les escalades et le suivi opérationnel dans une interface premium, moderne et fluide.{% endtrans %}
+              </p>
+            </div>
+
+            <div class="vip-page-head-side">
+              <span class="vip-badge vip-badge-neutral">{% trans %}Support Desk{% endtrans %}</span>
+              <span class="vip-badge medium">{% trans %}Ops • Admin{% endtrans %}</span>
+            </div>
+          </div>
+
+          <div class="vip-page-head-actions">
+            {% include 'admin/support/_quick_actions.html.twig' %}
+          </div>
+        </div>
+      </section>
+
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="vip-alert vip-alert-{{ label }}">
+            <strong>{{ label|capitalize }}</strong>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <section class="vip-grid vip-grid-4">
+        <article class="vip-card vip-kpi vip-kpi-accent">
+          <div class="vip-card-inner">
+            <div class="label">{% trans %}Tickets totaux{% endtrans %}</div>
+            <div class="value">{{ stats.total }}</div>
+            <div class="hint">{% trans %}Volume global de la boîte support{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="vip-card vip-kpi vip-kpi-accent">
+          <div class="vip-card-inner">
+            <div class="label">{% trans %}Ouverts{% endtrans %}</div>
+            <div class="value">{{ stats.open }}</div>
+            <div class="hint">{% trans %}Demandes actuellement en traitement{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="vip-card vip-kpi vip-kpi-accent">
+          <div class="vip-card-inner">
+            <div class="label">{% trans %}Urgents{% endtrans %}</div>
+            <div class="value">{{ stats.urgent }}</div>
+            <div class="hint">{% trans %}Tickets high + critical{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="vip-card vip-kpi vip-kpi-accent">
+          <div class="vip-card-inner">
+            <div class="label">{% trans %}Temps moyen{% endtrans %}</div>
+            <div class="value">{{ stats.avgResponse }}</div>
+            <div class="hint">{% trans %}Première réponse support{% endtrans %}</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="vip-card">
+        <div class="vip-card-inner">
+          <div class="vip-toolbar">
+            <div>
+              <h2 class="vip-section-title">{% trans %}Boîte support{% endtrans %}</h2>
+              <p class="vip-section-subtitle">{% trans %}Recherche, filtrage et accès rapide aux tickets.{% endtrans %}</p>
+            </div>
+          </div>
+
+          <div class="vip-separator"></div>
+
+          <form method="get" class="vip-filters">
+            <div style="flex:2 1 360px;">
+              <input
+                type="search"
+                name="q"
+                value="{{ filters.q ?? '' }}"
+                class="vip-input"
+                placeholder="{% trans %}Rechercher : sujet, client, email, agent...{% endtrans %}"
+                data-support-search
+              >
+            </div>
+
+            <div style="flex:1 1 220px;">
+              <select name="status" class="vip-select" data-support-status>
+                <option value="">{% trans %}Tous les statuts{% endtrans %}</option>
+                {% for status in statuses %}
+                  <option value="{{ status }}" {{ (filters.status ?? '') == status ? 'selected' : '' }}>
+                    {% if status == 'open' %}
+                      {% trans %}Ouvert{% endtrans %}
+                    {% elseif status == 'pending' %}
+                      {% trans %}En attente{% endtrans %}
+                    {% elseif status == 'resolved' %}
+                      {% trans %}Résolu{% endtrans %}
+                    {% elseif status == 'closed' %}
+                      {% trans %}Fermé{% endtrans %}
+                    {% else %}
+                      {{ status|capitalize }}
+                    {% endif %}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div style="flex:1 1 220px;">
+              <select name="priority" class="vip-select" data-support-priority>
+                <option value="">{% trans %}Toutes les priorités{% endtrans %}</option>
+                {% for priority in priorities %}
+                  <option value="{{ priority }}" {{ (filters.priority ?? '') == priority ? 'selected' : '' }}>
+                    {{ priority|upper }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button type="submit" class="vip-btn vip-btn-primary">{% trans %}Filtrer{% endtrans %}</button>
+              <a href="{{ path('admin_support_index') }}" class="vip-btn vip-btn-soft">{% trans %}Réinitialiser{% endtrans %}</a>
+            </div>
+          </form>
+
+          <div class="vip-separator"></div>
+
+          <div class="vip-table-wrap">
+            <table class="vip-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{% trans %}Sujet{% endtrans %}</th>
+                  <th>{% trans %}Client{% endtrans %}</th>
+                  <th>{% trans %}Canal{% endtrans %}</th>
+                  <th>{% trans %}Priorité{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Assigné à{% endtrans %}</th>
+                  <th>{% trans %}Mise à jour{% endtrans %}</th>
+                  <th style="text-align:right;">{% trans %}Actions{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for t in tickets %}
+                  <tr class="js-ticket-row"
+                      data-status="{{ t.status }}"
+                      data-priority="{{ t.priority }}"
+                      data-ticket-text="{{ (t.subject ~ ' ' ~ (t.customerName ?? '') ~ ' ' ~ (t.customerEmail ?? '') ~ ' ' ~ (t.ownerName ?? ''))|lower }}">
+                    <td><span class="vip-id">#{{ t.id }}</span></td>
+
+                    <td>
+                      <div class="vip-row-title">{{ t.subject }}</div>
+                      <div class="vip-row-sub">{{ t.customerEmail }}</div>
+                    </td>
+
+                    <td>{{ t.customerName }}</td>
+
+                    <td>
+                      <span class="vip-badge vip-badge-neutral">{{ t.channel|upper }}</span>
+                    </td>
+
+                    <td>
+                      <span class="vip-badge {{ t.priority }}">{{ t.priority|upper }}</span>
+                    </td>
+
+                    <td>
+                      <span class="vip-badge {{ t.status }}">
+                        {% if t.status == 'open' %}
+                          {% trans %}Ouvert{% endtrans %}
+                        {% elseif t.status == 'pending' %}
+                          {% trans %}En attente{% endtrans %}
+                        {% elseif t.status == 'resolved' %}
+                          {% trans %}Résolu{% endtrans %}
+                        {% elseif t.status == 'closed' %}
+                          {% trans %}Fermé{% endtrans %}
+                        {% else %}
+                          {{ t.status|capitalize }}
+                        {% endif %}
+                      </span>
+                    </td>
+
+                    <td>{{ t.ownerName ?: '—' }}</td>
+
+                    <td>{{ t.updatedAt ? t.updatedAt|date('d/m/Y H:i') : '—' }}</td>
+
+                    <td>
+                      <div class="vip-row-actions">
+                        <a href="{{ path('admin_support_show', {id: t.id}) }}" class="vip-btn vip-btn-soft vip-btn-xs">{% trans %}Voir{% endtrans %}</a>
+                        <a href="{{ path('admin_support_edit', {id: t.id}) }}" class="vip-btn vip-btn-primary vip-btn-xs">{% trans %}Modifier{% endtrans %}</a>
+                      </div>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="9">
+                      <div class="vip-empty">{% trans %}Aucun ticket disponible.{% endtrans %}</div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-support.js') }}"></script>
+{% endblock %}

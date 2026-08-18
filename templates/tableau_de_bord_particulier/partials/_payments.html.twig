@@ -1,0 +1,92 @@
+{# ===================== PAIEMENTS & FACTURES ===================== #}
+            <section class="mol-card mt-6 overflow-hidden rounded-[24px]">
+                <div class="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div class="flex items-center gap-3">
+                        <span class="grid h-11 w-11 place-items-center rounded-2xl bg-emerald-50 text-lg" aria-hidden="true">💳</span>
+                        <div>
+                            <div class="mol-section-heading">{% trans %}Mes paiements & factures{% endtrans %}</div>
+                            <div class="mol-section-subtitle">{% trans %}Consultez vos opérations et téléchargez les factures disponibles{% endtrans %}</div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="mol-payment-count">{{ paymentTotal }} {% trans %}paiement(s){% endtrans %}</span>
+                        <a href="{{ path('payments_index') }}" data-turbo="false" class="mol-small-button">
+                            {% trans %}Voir tous les paiements{% endtrans %}
+                        </a>
+                    </div>
+                </div>
+
+                {% if payments is defined and payments|length > 0 %}
+                    <div class="mol-payment-table-wrap">
+                        <table class="mol-payment-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans %}Mode{% endtrans %}</th>
+                                    <th>{% trans %}Facture{% endtrans %}</th>
+                                    <th>{% trans %}Montant{% endtrans %}</th>
+                                    <th>{% trans %}Date{% endtrans %}</th>
+                                    <th class="text-right">{% trans %}Options{% endtrans %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in payments %}
+                                    {# Compatibilité avec les deux mappings rencontrés dans le projet : invoice ou invoices. #}
+                                    {% set inv = null %}
+                                    {% if p.invoice is defined and p.invoice %}
+                                        {% set inv = p.invoice %}
+                                    {% elseif p.invoices is defined and p.invoices|length > 0 %}
+                                        {% set inv = p.invoices|first %}
+                                    {% endif %}
+                                    <tr>
+                                        <td data-label="{{ 'Mode'|trans }}">
+                                            <span class="mol-payment-method">💳 {{ p.provider is defined and p.provider ? p.provider.name|default('—') : p.method|default('—') }}</span>
+                                        </td>
+                                        <td data-label="{{ 'Facture'|trans }}">
+                                            {% if inv %}
+                                                <div class="font-semibold text-slate-900">{{ inv.invoiceNumber|default('INV-' ~ inv.id) }}</div>
+                                            {% else %}
+                                                <span class="text-slate-400">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td data-label="{{ 'Montant'|trans }}">
+                                            <strong class="text-slate-900">
+                                                {{ p.amount is defined and p.amount is not null ? p.amount|number_format(0, ',', ' ') : '—' }}
+                                                {{ p.currency|default('FCFA') }}
+                                            </strong>
+                                        </td>
+                                        <td data-label="{{ 'Date'|trans }}">
+                                            {{ p.createdAt is defined and p.createdAt ? p.createdAt|date('d/m/Y H:i') : (inv and inv.createdAt is defined and inv.createdAt ? inv.createdAt|date('d/m/Y H:i') : '—') }}
+                                        </td>
+                                        <td data-label="{{ 'Options'|trans }}" class="text-right">
+                                            {% if inv %}
+                                                <div class="mol-payment-actions">
+                                                    <a href="{{ path('invoice_print', {id: p.id}) }}" target="_blank" rel="noopener" data-turbo="false" class="mol-payment-btn">
+                                                        👁️ {% trans %}Voir{% endtrans %}
+                                                    </a>
+                                                    {% if inv.slug is defined and inv.slug %}
+                                                        <a href="{{ path('invoice_download', {slug: inv.slug}) }}" target="_blank" rel="noopener" data-turbo="false" class="mol-payment-btn mol-payment-btn--download">
+                                                            ⬇️ {% trans %}Télécharger la facture{% endtrans %}
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                <span class="mol-payment-unavailable">{% trans %}Facture indisponible{% endtrans %}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="mol-payment-empty">
+                        <span class="mol-payment-empty-icon" aria-hidden="true">🧾</span>
+                        <div>
+                            <div class="text-sm font-semibold text-slate-900">{% trans %}Aucun paiement pour le moment{% endtrans %}</div>
+                            <div class="mt-1 text-xs leading-5 text-slate-500">{% trans %}Dès qu’une opération sera effectuée, elle apparaîtra ici avec sa facture disponible.{% endtrans %}</div>
+                        </div>
+                        <a href="{{ path('payments_index') }}" data-turbo="false" class="mol-small-button">{% trans %}Ouvrir mes paiements{% endtrans %}</a>
+                    </div>
+                {% endif %}
+            </section>

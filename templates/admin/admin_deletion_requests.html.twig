@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Demandes de suppression{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-80px)] bg-gradient-to-b from-slate-50 via-white to-slate-50">
+  <div class="mx-auto max-w-7xl px-4 py-8">
+
+    <div class="rounded-3xl border border-slate-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,.08)] overflow-hidden">
+      <div class="p-6 sm:p-8 bg-gradient-to-r from-indigo-50 via-white to-emerald-50">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-700">
+              <span class="h-2 w-2 rounded-full bg-rose-500"></span>
+              {% trans %}Admin • Account Deletions{% endtrans %}
+            </div>
+            <h1 class="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">{% trans %}Demandes de suppression{% endtrans %}</h1>
+            <p class="mt-1 text-sm text-slate-600">{% trans %}Approuver = programmer l’anonymisation. Rejeter = réactiver.{% endtrans %}</p>
+          </div>
+
+          <form class="flex gap-2 flex-wrap" method="get">
+            <select name="status" class="rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm">
+              <option value="">{% trans %}Tous{% endtrans %}</option>
+              <option value="PENDING" {{ filters.status=='PENDING'?'selected':'' }}>{% trans %}PENDING{% endtrans %}</option>
+              <option value="APPROVED" {{ filters.status=='APPROVED'?'selected':'' }}>{% trans %}APPROVED{% endtrans %}</option>
+              <option value="REJECTED" {{ filters.status=='REJECTED'?'selected':'' }}>{% trans %}REJECTED{% endtrans %}</option>
+              <option value="DONE" {{ filters.status=='DONE'?'selected':'' }}>{% trans %}DONE{% endtrans %}</option>
+            </select>
+            <input name="q" value="{{ filters.q }}" placeholder="{% trans %}email...{% endtrans %}" class="rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm"/>
+            <button class="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-extrabold text-white">{% trans %}Filtrer{% endtrans %}</button>
+          </form>
+        </div>
+
+        <div class="mt-4 space-y-2">
+          {% for msg in app.flashes('success') %}
+            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-3 text-sm font-extrabold text-emerald-700">{{ msg }}</div>
+          {% endfor %}
+          {% for msg in app.flashes('error') %}
+            <div class="rounded-2xl border border-rose-200 bg-rose-50/60 p-3 text-sm font-extrabold text-rose-700">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-6 overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="border-b border-slate-200 text-xs font-black text-slate-600 uppercase tracking-wider">
+              <th class="py-3 text-left">{% trans %}User{% endtrans %}</th>
+              <th class="py-3 text-left">{% trans %}Status{% endtrans %}</th>
+              <th class="py-3 text-left">{% trans %}Demandé{% endtrans %}</th>
+              <th class="py-3 text-left">{% trans %}Programmé{% endtrans %}</th>
+              <th class="py-3 text-left">{% trans %}Note{% endtrans %}</th>
+              <th class="py-3 text-right">{% trans %}Actions{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in items %}
+              <tr class="border-b border-slate-100 hover:bg-slate-50/60">
+                <td class="py-3">
+                  <div class="font-extrabold text-slate-900">{{ r.user.email }}</div>
+                  <div class="text-xs text-slate-500">ID: {{ r.user.id }}</div>
+                </td>
+                <td class="py-3">
+                  <span class="inline-flex items-center rounded-full border px-2 py-1 text-xs font-black
+                    {{ r.status=='PENDING' ? 'border-amber-200 bg-amber-50 text-amber-700' :
+                       r.status=='APPROVED' ? 'border-indigo-200 bg-indigo-50 text-indigo-700' :
+                       r.status=='DONE' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' :
+                       'border-rose-200 bg-rose-50 text-rose-700' }}">
+                    {{ r.status }}
+                  </span>
+                </td>
+                <td class="py-3 text-sm text-slate-700">{{ r.requestedAt ? r.requestedAt|date('d/m/Y H:i') : '—' }}</td>
+                <td class="py-3 text-sm text-slate-700">{{ r.scheduledAt ? r.scheduledAt|date('d/m/Y H:i') : '—' }}</td>
+                <td class="py-3 text-sm text-slate-600 max-w-[260px] truncate">{{ r.adminNote ?? '—' }}</td>
+
+                <td class="py-3 text-right">
+                  {% if r.status == 'PENDING' %}
+                    <div class="flex gap-2 justify-end flex-wrap">
+                      <form method="post" action="{{ path('admin_deletion_requests_approve', {id:r.id}) }}" class="flex gap-2 items-center">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delreq_approve_' ~ r.id) }}">
+                        <input type="number" name="days" value="7" min="0" max="60" class="w-20 rounded-xl border-slate-200 bg-white px-2 py-1 text-sm" title="{% trans %}jours{% endtrans %}">
+                        <input type="text" name="note" placeholder="{% trans %}note...{% endtrans %}" class="w-44 rounded-xl border-slate-200 bg-white px-2 py-1 text-sm">
+                        <button class="rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-extrabold text-white">{% trans %}Approuver{% endtrans %}</button>
+                      </form>
+
+                      <form method="post" action="{{ path('admin_deletion_requests_reject', {id:r.id}) }}" class="flex gap-2 items-center">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delreq_reject_' ~ r.id) }}">
+                        <input type="text" name="note" placeholder="{% trans %}raison rejet...{% endtrans %}" class="w-44 rounded-xl border-slate-200 bg-white px-2 py-1 text-sm">
+                        <button class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-extrabold text-slate-900">{% trans %}Rejeter{% endtrans %}</button>
+                      </form>
+                    </div>
+                  {% else %}
+                    <span class="text-xs text-slate-500">—</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="py-8 text-center text-sm text-slate-500">{% trans %}Aucune demande.{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

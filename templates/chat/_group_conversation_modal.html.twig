@@ -1,0 +1,3242 @@
+<div id="molGroupRoomModal" class="mol-group-room" hidden>
+    <div class="mol-group-room__backdrop" data-group-room-close></div>
+
+    <section class="mol-group-room__shell">
+        <aside class="mol-group-room__groups">
+            <div class="mol-group-room__groups-head">
+                <div>
+                    <strong>Groupes</strong>
+                    <span>Navigation rapide</span>
+                </div>
+                <button type="button" data-group-list-refresh>
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+
+            <div id="molGroupRoomGroupsList" class="mol-group-room__groups-list">
+                <div class="mol-group-room__empty">Chargement...</div>
+            </div>
+        </aside>
+        <aside class="mol-group-room__sidebar">
+            <div class="mol-group-room__brand">
+                <div class="mol-group-room__avatar">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+
+                <div>
+                    <div class="mol-group-room__eyebrow">Groupe actif</div>
+                    <h2 id="molGroupRoomName">Groupe</h2>
+                    <p id="molGroupRoomDescription">Chargement...</p>
+                </div>
+            </div>
+
+            <div class="mol-group-room__stats">
+                <div>
+                    <strong id="molGroupRoomMembersCount">0</strong>
+                    <span>Membres</span>
+                </div>
+
+                <div>
+                    <strong id="molGroupRoomVisibility">Privé</strong>
+                    <span>Visibilité</span>
+                </div>
+            </div>
+
+            <div class="mol-group-room__action-card">
+                <div class="mol-group-room__action-title">
+                    <i class="bi bi-share"></i>
+                    Recommander ce groupe
+                </div>
+
+                <button type="button" data-open-group-recommend-modal>
+                    <i class="bi bi-stars"></i>
+                    Choisir parmi mes amis
+                </button>
+
+                <small>Choisis un ami dans ta liste. Il devra ensuite demander à intégrer le groupe.</small>
+            </div>
+
+            <div class="mol-group-room__side-title">
+                <span>Membres</span>
+                <button type="button" data-group-room-refresh>
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+
+            <div id="molGroupRoomMembers" class="mol-group-room__members">
+                <div class="mol-group-room__empty">Chargement des membres...</div>
+            </div>
+        </aside>
+
+        <main class="mol-group-room__main">
+            <header class="mol-group-room__header">
+                <button type="button" class="mol-group-room__mobile-members" data-group-room-toggle-members>
+                    <i class="bi bi-people"></i>
+                </button>
+
+                <div class="mol-group-room__header-main">
+                    <div class="mol-group-room__title-row">
+                        <h3 id="molGroupRoomHeaderName">Conversation groupe</h3>
+                        <span id="molGroupRoomOwnerBadge">Créateur</span>
+                    </div>
+                    <div id="molGroupRoomHeaderMeta" class="mol-group-room__meta">Messages, fichiers, images, vocaux, PDF, Word</div>
+                </div>
+
+                <button type="button" class="mol-group-room__call-btn" data-group-call-start title="Appel de groupe">
+                    <i class="bi bi-camera-video-fill"></i>
+                </button>
+
+                <button type="button" class="mol-group-room__close" data-group-room-close>
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </header>
+
+            <div id="molGroupRoomMessages" class="mol-group-room__messages">
+                <div class="mol-group-room__empty">Chargement des messages...</div>
+            </div>
+
+            <footer class="mol-group-room__composer">
+                <input id="molGroupRoomFile" type="file" hidden
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.zip,.rar,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+
+                <input id="molGroupRoomImage" type="file" hidden
+                    accept="video/*"
+                    capture="environment">
+
+                <input id="molGroupRoomAudio" type="file" hidden
+                    accept="audio/*"
+                    capture>
+
+                <div id="molGroupReplyPreview" class="mol-group-reply-preview" hidden>
+                    <div>
+                        <strong id="molGroupReplyAuthor">Réponse</strong>
+                        <span id="molGroupReplyText">Message sélectionné</span>
+                    </div>
+                    <button type="button" data-cancel-group-reply>
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                <button type="button" class="mol-group-room__tool" title="Fichier" data-group-room-file>
+                    <i class="bi bi-paperclip"></i>
+                </button>
+
+                <button type="button" class="mol-group-room__tool" title="Filmer avec la caméra" data-group-room-camera>
+                    <i class="bi bi-camera-video"></i>
+                </button>
+
+                <button type="button" class="mol-group-room__tool" title="Enregistrer un audio" data-group-room-microphone>
+                    <i class="bi bi-mic-fill"></i>
+                </button>
+
+                <button type="button" class="mol-group-room__tool" title="Emoji" data-group-room-emoji>
+                    <i class="bi bi-emoji-smile"></i>
+                </button>
+
+                <textarea id="molGroupRoomInput" rows="1" placeholder="Écrire dans le groupe..."></textarea>
+
+                <button type="button" class="mol-group-room__send" data-group-room-send>
+                    <i class="bi bi-send-fill"></i>
+                </button>
+
+                <emoji-picker
+                    id="molGroupEmojiPicker"
+                    class="mol-group-emoji-picker"
+                    hidden
+                ></emoji-picker>
+
+                <emoji-picker
+                    id="molGroupReactionPicker"
+                    class="mol-group-reaction-picker"
+                    hidden
+                ></emoji-picker>
+            </footer>
+        </main>
+    </section>
+</div>
+
+<div id="molGroupRecorderModal" class="mol-group-recorder" hidden>
+    <div class="mol-group-recorder__backdrop" data-group-recorder-cancel></div>
+
+    <section class="mol-group-recorder__box">
+        <header>
+            <div>
+                <span id="molGroupRecorderBadge">Enregistrement</span>
+                <h3 id="molGroupRecorderTitle">Caméra</h3>
+                <p id="molGroupRecorderHint">Préparation...</p>
+            </div>
+
+            <button type="button" data-group-recorder-cancel>
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <video id="molGroupRecorderVideo" autoplay muted playsinline hidden></video>
+
+        <div id="molGroupRecorderAudioView" class="mol-group-recorder__audio" hidden>
+            <i class="bi bi-mic-fill"></i>
+            <strong>Micro actif</strong>
+            <span id="molGroupRecorderTimer">00:00</span>
+        </div>
+
+        <footer>
+            <button type="button" class="mol-group-recorder__secondary" data-group-recorder-cancel>
+                Annuler
+            </button>
+
+            <button type="button" class="mol-group-recorder__danger" data-group-recorder-stop>
+                <i class="bi bi-stop-fill"></i>
+                Terminer et envoyer
+            </button>
+        </footer>
+    </section>
+</div>
+
+<div id="molGroupCallModal" class="mol-group-call" hidden>
+    <div class="mol-group-call__backdrop"></div>
+
+    <section class="mol-group-call__box">
+        <header>
+            <div>
+                <span>Appel de groupe</span>
+                <h3 id="molGroupCallTitle">Appel en cours</h3>
+                <p id="molGroupCallStatus">Caméra et micro prêts.</p>
+            </div>
+
+            <button type="button" data-group-call-end>
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <div class="mol-group-call__stage">
+            <video id="molGroupCallLocalVideo" autoplay muted playsinline></video>
+
+            <div id="molGroupCallCameraOff" class="mol-group-call__camera-off" hidden>
+                <i class="bi bi-camera-video-off-fill"></i>
+                <span>Caméra désactivée</span>
+            </div>
+
+            <div class="mol-group-call__waiting">
+                <i class="bi bi-people-fill"></i>
+                <span>Appel groupe démarré</span>
+            </div>
+        </div>
+
+        <footer>
+            <button type="button" data-group-call-toggle-mic title="Activer/Désactiver micro">
+                <i class="bi bi-mic-fill"></i>
+            </button>
+
+            <button type="button" data-group-call-toggle-camera title="Activer/Désactiver caméra">
+                <i class="bi bi-camera-video-fill"></i>
+            </button>
+
+            <button type="button" class="is-danger" data-group-call-end title="Raccrocher">
+                <i class="bi bi-telephone-x-fill"></i>
+            </button>
+        </footer>
+    </section>
+</div>
+
+<div id="molGroupRecommendModal" class="mol-group-recommend-modal" hidden>
+    <div class="mol-group-recommend-modal__backdrop" data-close-group-recommend></div>
+
+    <section class="mol-group-recommend-modal__dialog">
+        <header class="mol-group-recommend-modal__header">
+            <div>
+                <div class="mol-group-recommend-modal__badge">
+                    <i class="bi bi-stars"></i>
+                    Recommandation
+                </div>
+
+                <h3>Recommander le groupe</h3>
+                <p>Choisis un ami à qui recommander ce groupe.</p>
+            </div>
+
+            <button type="button" data-close-group-recommend>
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <div class="mol-group-recommend-modal__note">
+            <label>Message optionnel</label>
+            <input id="molGroupRecommendNote" type="text" placeholder="Ex : Ce groupe peut t’intéresser...">
+        </div>
+
+        <div id="molGroupRecommendFriendsList" class="mol-group-recommend-friends">
+            <div class="mol-group-room__empty">Chargement de vos amis...</div>
+        </div>
+    </section>
+</div>
+
+<style>
+    .mol-group-room[hidden] {
+        display: none !important;
+    }
+
+    .mol-group-room {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .mol-group-room__backdrop {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at top right, rgba(37,99,235,.30), transparent 34%),
+            radial-gradient(circle at bottom left, rgba(14,165,233,.18), transparent 34%),
+            rgba(15,23,42,.70);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .mol-group-room__shell {
+        position: relative;
+        width: min(1180px, 100%);
+        height: min(820px, calc(100vh - 32px));
+        display: grid;
+        grid-template-columns: 330px minmax(0, 1fr);
+        overflow: hidden;
+        border-radius: 32px;
+        background: rgba(255,255,255,.98);
+        border: 1px solid rgba(226,232,240,.95);
+        box-shadow: 0 34px 110px rgba(15,23,42,.36);
+        opacity: 0;
+        transform: translateY(18px) scale(.975);
+        transition: .22s ease;
+    }
+
+    .mol-group-room.is-open .mol-group-room__shell {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .mol-group-room__sidebar {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 22px;
+        background:
+            linear-gradient(180deg, #f8fafc, #ffffff);
+        border-right: 1px solid rgba(148,163,184,.18);
+    }
+
+    .mol-group-room__brand {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        margin-bottom: 18px;
+    }
+
+    .mol-group-room__avatar {
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: #fff;
+        font-size: 24px;
+        box-shadow: 0 18px 34px rgba(37,99,235,.26);
+    }
+
+    .mol-group-room__eyebrow {
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 950;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        margin-bottom: 5px;
+    }
+
+    .mol-group-room h2,
+    .mol-group-room h3 {
+        margin: 0;
+        color: #0f172a;
+        font-weight: 950;
+        letter-spacing: -.03em;
+    }
+
+    .mol-group-room h2 {
+        font-size: 20px;
+        line-height: 1.1;
+    }
+
+    .mol-group-room h3 {
+        font-size: 17px;
+    }
+
+    .mol-group-room p,
+    .mol-group-room__meta {
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.55;
+        margin: 6px 0 0;
+    }
+
+    .mol-group-room__stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .mol-group-room__stats div {
+        padding: 14px;
+        border-radius: 20px;
+        background: #fff;
+        border: 1px solid rgba(148,163,184,.18);
+        box-shadow: 0 12px 28px rgba(15,23,42,.045);
+    }
+
+    .mol-group-room__stats strong {
+        display: block;
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 950;
+    }
+
+    .mol-group-room__stats span {
+        display: block;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 800;
+        margin-top: 3px;
+    }
+
+    .mol-group-room__side-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 950;
+        margin-bottom: 10px;
+    }
+
+    .mol-group-room__side-title button {
+        width: 30px;
+        height: 30px;
+        border: 0;
+        border-radius: 11px;
+        background: #eef4ff;
+        color: #2563eb;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .mol-group-room__members {
+        display: grid;
+        gap: 9px;
+        overflow: auto;
+        padding-right: 4px;
+        min-height: 0;
+    }
+
+    .mol-group-member {
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+        border-radius: 18px;
+        background: #fff;
+        border: 1px solid rgba(148,163,184,.16);
+    }
+
+    .mol-group-member__avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+        background: #eef4ff;
+        color: #2563eb;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 950;
+        font-size: 13px;
+    }
+
+    .mol-group-member__name {
+        color: #0f172a;
+        font-size: 12px;
+        font-weight: 950;
+        line-height: 1.2;
+    }
+
+    .mol-group-member__role {
+        color: #64748b;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    .mol-group-member__remove {
+        width: 32px;
+        height: 32px;
+        border: 0;
+        border-radius: 12px;
+        background: #fee2e2;
+        color: #b91c1c;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .mol-group-room__main {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        background:
+            radial-gradient(circle at top right, rgba(37,99,235,.06), transparent 28%),
+            #ffffff;
+    }
+
+    .mol-group-room__header {
+        height: 74px;
+        min-height: 74px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid rgba(148,163,184,.18);
+        background: rgba(255,255,255,.92);
+        backdrop-filter: blur(10px);
+    }
+
+    .mol-group-room__header-main {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .mol-group-room__title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    #molGroupRoomOwnerBadge {
+        display: inline-flex;
+        align-items: center;
+        height: 22px;
+        padding: 0 9px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 900;
+    }
+
+    .mol-group-room__close,
+    .mol-group-room__mobile-members {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border: 0;
+        border-radius: 15px;
+        background: #f8fafc;
+        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: inset 0 0 0 1px rgba(148,163,184,.22);
+    }
+
+    .mol-group-room__mobile-members {
+        display: none;
+    }
+
+    .mol-group-room__messages {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        padding: 18px;
+        background: rgba(248,250,252,.65);
+    }
+
+    .mol-group-msg {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .mol-group-msg.is-mine {
+        justify-content: flex-end;
+    }
+
+    .mol-group-msg__bubble {
+        width: fit-content;
+        max-width: min(560px, 78%);
+        border-radius: 22px;
+        padding: 11px 13px;
+        background: #fff;
+        border: 1px solid rgba(148,163,184,.18);
+        box-shadow: 0 10px 25px rgba(15,23,42,.055);
+    }
+
+    .mol-group-msg.is-mine .mol-group-msg__bubble {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        border-color: transparent;
+    }
+
+    .mol-group-msg__author {
+        font-size: 11px;
+        font-weight: 950;
+        color: #2563eb;
+        margin-bottom: 4px;
+    }
+
+    .mol-group-msg.is-mine .mol-group-msg__author {
+        color: rgba(255,255,255,.86);
+    }
+
+    .mol-group-msg__content {
+        font-size: 13px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .mol-group-msg__meta {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 6px;
+        font-size: 10px;
+        color: #94a3b8;
+    }
+
+    .mol-group-msg.is-mine .mol-group-msg__meta {
+        color: rgba(255,255,255,.72);
+    }
+
+    .mol-group-msg__delete {
+        border: 0;
+        background: transparent;
+        color: inherit;
+        opacity: .75;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .mol-group-file {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 220px;
+        padding: 10px;
+        border-radius: 16px;
+        background: rgba(15,23,42,.04);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .mol-group-msg.is-mine .mol-group-file {
+        background: rgba(255,255,255,.16);
+    }
+
+    .mol-group-file i {
+        font-size: 24px;
+    }
+
+    .mol-group-file strong {
+        display: block;
+        font-size: 12px;
+        line-height: 1.2;
+        max-width: 260px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mol-group-file span {
+        display: block;
+        font-size: 10px;
+        opacity: .75;
+        margin-top: 2px;
+    }
+
+    .mol-group-image {
+        max-width: 280px;
+        border-radius: 16px;
+        display: block;
+    }
+
+    .mol-group-audio {
+        width: 260px;
+        max-width: 100%;
+    }
+
+    .mol-group-system {
+        text-align: center;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 750;
+        margin: 14px 0;
+    }
+
+    .mol-group-room__composer {
+        min-height: 74px;
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr) 48px;
+        gap: 10px;
+        align-items: center;
+        padding: 13px 16px;
+        border-top: 1px solid rgba(148,163,184,.18);
+        background: #fff;
+    }
+
+    .mol-group-room__composer textarea {
+        width: 100%;
+        min-height: 46px;
+        max-height: 110px;
+        resize: none;
+        border: 1px solid rgba(148,163,184,.24);
+        border-radius: 18px;
+        outline: none;
+        padding: 12px 14px;
+        background: #f8fafc;
+        color: #0f172a;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .mol-group-room__composer textarea:focus {
+        background: #fff;
+        border-color: rgba(37,99,235,.45);
+        box-shadow: 0 0 0 4px rgba(37,99,235,.08);
+    }
+
+    .mol-group-room__tool,
+    .mol-group-room__send {
+        height: 44px;
+        width: 44px;
+        border: 0;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .mol-group-room__tool {
+        background: #eef4ff;
+        color: #2563eb;
+    }
+
+    .mol-group-room__send {
+        width: 48px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        box-shadow: 0 12px 22px rgba(37,99,235,.22);
+    }
+
+    .mol-group-room__empty {
+        padding: 20px;
+        text-align: center;
+        border-radius: 18px;
+        color: #64748b;
+        background: #f8fafc;
+        border: 1px dashed rgba(148,163,184,.34);
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    @media (max-width: 860px) {
+        .mol-group-room {
+            padding: 0;
+        }
+
+        .mol-group-room__shell {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            grid-template-columns: 1fr;
+        }
+
+        .mol-group-room__sidebar {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 4;
+            width: min(330px, 88vw);
+            transform: translateX(-105%);
+            transition: .22s ease;
+            box-shadow: 24px 0 60px rgba(15,23,42,.20);
+        }
+
+        .mol-group-room.members-open .mol-group-room__sidebar {
+            transform: translateX(0);
+        }
+
+        .mol-group-room__mobile-members {
+            display: inline-flex;
+        }
+
+        .mol-group-msg__bubble {
+            max-width: 86%;
+        }
+    }
+
+
+    .mol-group-room__action-card {
+        display: grid;
+        gap: 10px;
+        padding: 13px;
+        margin-bottom: 14px;
+        border-radius: 20px;
+        background:
+            linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid rgba(148, 163, 184, .18);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, .045);
+    }
+
+    .mol-group-room__action-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #0f172a;
+        font-size: 12px;
+        font-weight: 950;
+    }
+
+    .mol-group-room__action-title i {
+        color: #2563eb;
+    }
+
+    .mol-group-room__action-card form {
+        display: grid;
+        gap: 8px;
+    }
+
+    .mol-group-room__action-card input {
+        width: 100%;
+        height: 38px;
+        border: 1px solid rgba(148, 163, 184, .25);
+        border-radius: 13px;
+        background: #f8fafc;
+        color: #0f172a;
+        outline: none;
+        padding: 0 11px;
+        font-size: 12px;
+        font-weight: 650;
+    }
+
+    .mol-group-room__action-card input:focus {
+        background: #fff;
+        border-color: rgba(37, 99, 235, .45);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, .08);
+    }
+
+    .mol-group-room__action-card button {
+        height: 38px;
+        border: 0;
+        border-radius: 13px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        font-size: 12px;
+        font-weight: 900;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(37, 99, 235, .20);
+    }
+
+    .mol-group-room__action-card small {
+        color: #64748b;
+        font-size: 11px;
+        line-height: 1.45;
+    }
+
+    .mol-group-recommend-modal[hidden] {
+        display: none !important;
+    }
+
+    .mol-group-recommend-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .mol-group-recommend-modal__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, .62);
+        backdrop-filter: blur(12px);
+    }
+
+    .mol-group-recommend-modal__dialog {
+        position: relative;
+        width: min(520px, 100%);
+        max-height: calc(100vh - 32px);
+        overflow: auto;
+        border-radius: 28px;
+        padding: 22px;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid rgba(226, 232, 240, .95);
+        box-shadow: 0 34px 110px rgba(15, 23, 42, .34);
+        opacity: 0;
+        transform: translateY(16px) scale(.975);
+        transition: .2s ease;
+    }
+
+    .mol-group-recommend-modal.is-open .mol-group-recommend-modal__dialog {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .mol-group-recommend-modal__header {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 16px;
+    }
+
+    .mol-group-recommend-modal__badge {
+        width: fit-content;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 950;
+        margin-bottom: 10px;
+    }
+
+    .mol-group-recommend-modal__header h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 950;
+        letter-spacing: -.03em;
+    }
+
+    .mol-group-recommend-modal__header p {
+        margin: 6px 0 0;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    .mol-group-recommend-modal__header button {
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 15px;
+        background: #f8fafc;
+        color: #0f172a;
+        cursor: pointer;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .22);
+    }
+
+    .mol-group-recommend-modal__note {
+        margin-bottom: 14px;
+    }
+
+    .mol-group-recommend-modal__note label {
+        display: block;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 850;
+        margin-bottom: 6px;
+    }
+
+    .mol-group-recommend-modal__note input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid rgba(148, 163, 184, .28);
+        border-radius: 14px;
+        background: #f8fafc;
+        color: #0f172a;
+        outline: none;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .mol-group-recommend-friends {
+        display: grid;
+        gap: 10px;
+    }
+
+    .mol-group-friend-card {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        padding: 11px;
+        border-radius: 18px;
+        background: #fff;
+        border: 1px solid rgba(148, 163, 184, .18);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, .045);
+    }
+
+    .mol-group-friend-card__avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 950;
+    }
+
+    .mol-group-friend-card__name {
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 950;
+        line-height: 1.2;
+    }
+
+    .mol-group-friend-card__email {
+        color: #64748b;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    .mol-group-friend-card button {
+        height: 36px;
+        border: 0;
+        border-radius: 13px;
+        padding: 0 12px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 850;
+        cursor: pointer;
+    }
+
+    .mol-group-friend-card button[disabled] {
+        background: #e2e8f0;
+        color: #64748b;
+        cursor: not-allowed;
+    }
+
+
+    .mol-group-room__shell {
+        grid-template-columns: 230px 310px minmax(0, 1fr);
+    }
+
+    .mol-group-room__groups {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        padding: 18px;
+        background: linear-gradient(180deg, #f8fafc, #eef4ff);
+        border-right: 1px solid rgba(148,163,184,.18);
+    }
+
+    .mol-group-room__groups-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .mol-group-room__groups-head strong {
+        display: block;
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 950;
+    }
+
+    .mol-group-room__groups-head span {
+        display: block;
+        color: #64748b;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    .mol-group-room__groups-head button {
+        width: 32px;
+        height: 32px;
+        border: 0;
+        border-radius: 12px;
+        background: #fff;
+        color: #2563eb;
+        cursor: pointer;
+    }
+
+    .mol-group-room__groups-list {
+        display: grid;
+        gap: 8px;
+        overflow: auto;
+        min-height: 0;
+        padding-right: 3px;
+    }
+
+    .mol-group-room__group-item {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr);
+        gap: 9px;
+        align-items: center;
+        border: 0;
+        text-align: left;
+        padding: 9px;
+        border-radius: 16px;
+        background: rgba(255,255,255,.78);
+        color: #0f172a;
+        cursor: pointer;
+        transition: .16s ease;
+    }
+
+    .mol-group-room__group-item:hover,
+    .mol-group-room__group-item.is-active {
+        background: #fff;
+        box-shadow: 0 12px 26px rgba(15,23,42,.08);
+    }
+
+    .mol-group-room__group-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .mol-group-room__group-name {
+        font-size: 12px;
+        font-weight: 950;
+        line-height: 1.2;
+    }
+
+    .mol-group-room__group-meta {
+        color: #64748b;
+        font-size: 10px;
+        margin-top: 2px;
+    }
+
+    .mol-group-room__sidebar {
+        overflow: hidden;
+    }
+
+    .mol-group-room__members {
+        flex: 1;
+        max-height: none;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .mol-group-member {
+        position: relative;
+    }
+
+    .mol-group-member__presence {
+        position: absolute;
+        right: 9px;
+        bottom: 9px;
+        width: 9px;
+        height: 9px;
+        border-radius: 999px;
+        border: 2px solid #fff;
+        background: #94a3b8;
+    }
+
+    .mol-group-member__presence.is-online {
+        background: #22c55e;
+    }
+
+    .mol-group-member__presence.is-away {
+        background: #facc15;
+    }
+
+    .mol-group-member__presence.is-offline {
+        background: #94a3b8;
+    }
+
+    .mol-group-room__messages {
+        padding: 14px 16px;
+    }
+
+    .mol-group-room__composer {
+        position: relative;
+        min-height: 62px;
+        grid-template-columns: 38px 38px 38px 38px minmax(0, 1fr) 44px;
+        gap: 7px;
+        padding: 10px 12px;
+    }
+
+    .mol-group-room__tool,
+    .mol-group-room__send {
+        width: 38px;
+        height: 38px;
+        border-radius: 14px;
+    }
+
+    .mol-group-room__send {
+        width: 44px;
+    }
+
+    .mol-group-room__composer textarea {
+        min-height: 38px;
+        max-height: 82px;
+        padding: 9px 12px;
+        border-radius: 15px;
+        font-size: 12.5px;
+    }
+
+    .mol-group-reply-preview {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: calc(100% + 6px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 16px;
+        background: #eff6ff;
+        border-left: 4px solid #2563eb;
+        box-shadow: 0 16px 34px rgba(15,23,42,.12);
+    }
+
+    .mol-group-reply-preview[hidden] {
+        display: none !important;
+    }
+
+    .mol-group-reply-preview strong {
+        display: block;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 950;
+    }
+
+    .mol-group-reply-preview span {
+        display: block;
+        color: #475569;
+        font-size: 12px;
+        margin-top: 2px;
+        max-width: 520px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .mol-group-reply-preview button {
+        border: 0;
+        background: transparent;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .mol-group-msg__reply {
+        padding: 7px 9px;
+        border-left: 3px solid currentColor;
+        border-radius: 11px;
+        margin-bottom: 7px;
+        background: rgba(15,23,42,.05);
+        opacity: .86;
+    }
+
+    .mol-group-msg.is-mine .mol-group-msg__reply {
+        background: rgba(255,255,255,.15);
+    }
+
+    .mol-group-msg__reply strong {
+        display: block;
+        font-size: 10.5px;
+        margin-bottom: 2px;
+    }
+
+    .mol-group-msg__reply span {
+        display: block;
+        font-size: 11px;
+        line-height: 1.35;
+    }
+
+    .mol-group-msg__actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mol-group-msg__action {
+        border: 0;
+        background: transparent;
+        color: inherit;
+        opacity: .78;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .mol-group-reactions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 7px;
+    }
+
+    .mol-group-reaction {
+        border: 0;
+        border-radius: 999px;
+        padding: 2px 7px;
+        background: rgba(15,23,42,.07);
+        color: inherit;
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    .mol-group-msg.is-mine .mol-group-reaction {
+        background: rgba(255,255,255,.18);
+    }
+
+    .mol-group-emoji-picker,
+    .mol-group-reaction-picker {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        right: 58px;
+        width: 340px;
+        height: 360px;
+        max-width: calc(100vw - 28px);
+        border-radius: 22px;
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid rgba(148, 163, 184, .22);
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .24);
+        z-index: 20;
+    }
+
+    .mol-group-reaction-picker {
+        right: 16px;
+        width: 320px;
+        height: 340px;
+    }
+
+    .mol-group-emoji-picker[hidden],
+    .mol-group-reaction-picker[hidden] {
+        display: none !important;
+    }
+
+    emoji-picker {
+        --border-radius: 22px;
+        --background: #ffffff;
+        --category-emoji-size: 1.15rem;
+        --emoji-size: 1.35rem;
+        --num-columns: 8;
+        --outline-color: #2563eb;
+        --input-border-color: rgba(148, 163, 184, .28);
+        --input-font-color: #0f172a;
+        --input-placeholder-color: #94a3b8;
+    }
+
+    @media (max-width: 620px) {
+        .mol-group-emoji-picker,
+        .mol-group-reaction-picker {
+            left: 10px;
+            right: 10px;
+            width: auto;
+            height: 340px;
+        }
+    }
+
+    .mol-group-reaction-picker {
+        right: 16px;
+        width: 190px;
+    }
+
+    .mol-group-emoji-picker[hidden],
+    .mol-group-reaction-picker[hidden] {
+        display: none !important;
+    }
+
+    .mol-group-emoji-picker button,
+    .mol-group-reaction-picker button {
+        border: 0;
+        background: #f8fafc;
+        border-radius: 10px;
+        height: 28px;
+        cursor: pointer;
+    }
+
+    @media (max-width: 980px) {
+        .mol-group-room__shell {
+            grid-template-columns: 1fr;
+        }
+
+        .mol-group-room__groups {
+            display: none;
+        }
+    }
+
+
+    .mol-group-room__call-btn {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border: 0;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 12px 22px rgba(37, 99, 235, .22);
+    }
+
+    .mol-group-recorder[hidden],
+    .mol-group-call[hidden] {
+        display: none !important;
+    }
+
+    .mol-group-recorder,
+    .mol-group-call {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .mol-group-recorder__backdrop,
+    .mol-group-call__backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, .72);
+        backdrop-filter: blur(14px);
+    }
+
+    .mol-group-recorder__box,
+    .mol-group-call__box {
+        position: relative;
+        width: min(720px, 100%);
+        border-radius: 30px;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid rgba(226, 232, 240, .95);
+        box-shadow: 0 34px 110px rgba(15, 23, 42, .36);
+        overflow: hidden;
+    }
+
+    .mol-group-recorder__box header,
+    .mol-group-call__box header {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 20px;
+        border-bottom: 1px solid rgba(148, 163, 184, .18);
+    }
+
+    .mol-group-recorder__box header span,
+    .mol-group-call__box header span {
+        display: inline-flex;
+        width: fit-content;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #2563eb;
+        font-size: 11px;
+        font-weight: 950;
+        margin-bottom: 8px;
+    }
+
+    .mol-group-recorder__box h3,
+    .mol-group-call__box h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 950;
+        letter-spacing: -.03em;
+    }
+
+    .mol-group-recorder__box p,
+    .mol-group-call__box p {
+        margin: 6px 0 0;
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .mol-group-recorder__box header button,
+    .mol-group-call__box header button {
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 15px;
+        background: #f8fafc;
+        color: #0f172a;
+        cursor: pointer;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .22);
+    }
+
+    #molGroupRecorderVideo,
+    #molGroupCallLocalVideo {
+        width: 100%;
+        max-height: 460px;
+        display: block;
+        background: #020617;
+        object-fit: cover;
+    }
+
+    .mol-group-recorder__audio {
+        min-height: 280px;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        gap: 8px;
+        background:
+            radial-gradient(circle at center, rgba(37, 99, 235, .16), transparent 40%),
+            #f8fafc;
+    }
+
+    .mol-group-recorder__audio i {
+        width: 74px;
+        height: 74px;
+        border-radius: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: #fff;
+        font-size: 34px;
+        box-shadow: 0 18px 34px rgba(37, 99, 235, .26);
+    }
+
+    .mol-group-recorder__audio strong {
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 950;
+    }
+
+    .mol-group-recorder__audio span {
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 850;
+    }
+
+    .mol-group-recorder__box footer,
+    .mol-group-call__box footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 16px;
+        border-top: 1px solid rgba(148, 163, 184, .18);
+    }
+
+    .mol-group-recorder__box footer button,
+    .mol-group-call__box footer button {
+        height: 42px;
+        border: 0;
+        border-radius: 15px;
+        padding: 0 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .mol-group-recorder__secondary {
+        background: #f8fafc;
+        color: #334155;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .24);
+    }
+
+    .mol-group-recorder__danger,
+    .mol-group-call__box footer .is-danger {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .mol-group-call__box footer button:not(.is-danger) {
+        width: 46px;
+        padding: 0;
+        background: #eef4ff;
+        color: #2563eb;
+    }
+
+    .mol-group-call__box footer button.is-off {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .mol-group-call__stage {
+        position: relative;
+        background: #020617;
+        min-height: 420px;
+    }
+
+    .mol-group-call__camera-off {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        gap: 8px;
+        color: #fff;
+        background: radial-gradient(circle at center, rgba(37,99,235,.20), rgba(2,6,23,.94));
+        text-align: center;
+        font-weight: 900;
+    }
+
+    .mol-group-call__camera-off i {
+        font-size: 46px;
+    }
+
+    .mol-group-call__waiting {
+        position: absolute;
+        left: 16px;
+        bottom: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 36px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.14);
+        color: #fff;
+        backdrop-filter: blur(8px);
+        font-size: 12px;
+        font-weight: 850;
+    }
+
+    @media (max-width: 620px) {
+        .mol-group-recorder,
+        .mol-group-call {
+            padding: 0;
+        }
+
+        .mol-group-recorder__box,
+        .mol-group-call__box {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+        }
+
+        #molGroupRecorderVideo,
+        #molGroupCallLocalVideo,
+        .mol-group-call__stage {
+            min-height: calc(100vh - 160px);
+            max-height: none;
+        }
+    }
+</style>
+
+
+<script id="mol-group-conversation-pro-v2">
+    (() => {
+        if (window.__MOL_GROUP_CONVERSATION_PRO_V2__) return;
+        window.__MOL_GROUP_CONVERSATION_PRO_V2__ = true;
+
+        let currentGroupId = 0;
+        let replyToMessage = null;
+        let refreshTimer = null;
+        let presenceTimer = null;
+        let reactionTargetMessageId = 0;
+
+        const $ = (id) => document.getElementById(id);
+
+        function cfg() {
+            return $('molGroupChatModal');
+        }
+
+        function room() {
+            return $('molGroupRoomModal');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function formatLocalMessageTime(isoValue, fallback = '') {
+            const raw = String(isoValue || '').trim();
+            if (!raw) return String(fallback || '');
+
+            const normalized = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(raw)
+                ? raw.replace(' ', 'T')
+                : raw;
+            const date = new Date(normalized);
+
+            if (Number.isNaN(date.getTime())) return String(fallback || raw);
+
+            return new Intl.DateTimeFormat(
+                document.documentElement.lang || navigator.language || 'fr',
+                { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }
+            ).format(date);
+        }
+
+        function url(template, id) {
+            return String(template || '')
+                .replace('/0/', '/' + encodeURIComponent(id) + '/')
+                .replace('/0', '/' + encodeURIComponent(id))
+                .replace('=0', '=' + encodeURIComponent(id));
+        }
+
+        async function fetchJson(fetchUrl, options = {}) {
+            const response = await fetch(fetchUrl, {
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(options.headers || {})
+                },
+                ...options
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.ok === false) {
+                throw new Error(data.message || data.error || 'Erreur serveur.');
+            }
+
+            return data;
+        }
+
+        function bytesToSize(bytes) {
+            const n = Number(bytes || 0);
+            if (!n) return '';
+            const units = ['o', 'Ko', 'Mo', 'Go'];
+            let i = 0;
+            let value = n;
+
+            while (value >= 1024 && i < units.length - 1) {
+                value /= 1024;
+                i++;
+            }
+
+            return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+        }
+
+        function memberInitial(name) {
+            return String(name || 'U').trim().charAt(0).toUpperCase() || 'U';
+        }
+
+        function openShell() {
+            const modal = room();
+            if (!modal) return;
+
+            modal.hidden = false;
+            requestAnimationFrame(() => modal.classList.add('is-open'));
+        }
+
+        function closeShell() {
+            const modal = room();
+            if (!modal) return;
+
+            modal.classList.remove('is-open', 'members-open');
+
+            clearInterval(refreshTimer);
+            clearInterval(presenceTimer);
+
+            refreshTimer = null;
+            presenceTimer = null;
+            currentGroupId = 0;
+            replyToMessage = null;
+
+            setTimeout(() => {
+                modal.hidden = true;
+            }, 180);
+        }
+
+        function closeCreateModal() {
+            const createModal = $('molGroupChatModal');
+
+            if (createModal) {
+                createModal.classList.remove('is-open');
+                createModal.hidden = true;
+            }
+        }
+
+        async function pingPresence() {
+            if (!cfg() || !currentGroupId || !cfg().dataset.presenceUrlTemplate) return;
+
+            try {
+                await fetchJson(url(cfg().dataset.presenceUrlTemplate, currentGroupId), {
+                    method: 'POST',
+                    body: new FormData()
+                });
+            } catch (e) {}
+        }
+
+        async function loadGroupList() {
+            if (!cfg()?.dataset.mineUrl) return;
+
+            const box = $('molGroupRoomGroupsList');
+            if (!box) return;
+
+            try {
+                const data = await fetchJson(cfg().dataset.mineUrl);
+                const groups = data.items || [];
+
+                if (!groups.length) {
+                    box.innerHTML = `<div class="mol-group-room__empty">Aucun groupe.</div>`;
+                    return;
+                }
+
+                box.innerHTML = groups.map((group) => `
+                    <button type="button"
+                            class="mol-group-room__group-item ${Number(group.id) === Number(currentGroupId) ? 'is-active' : ''}"
+                            data-open-group="${Number(group.id)}">
+                        <span class="mol-group-room__group-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </span>
+                        <span>
+                            <span class="mol-group-room__group-name">${escapeHtml(group.name)}</span>
+                            <span class="mol-group-room__group-meta">${Number(group.memberCount || 0)} membre(s)</span>
+                        </span>
+                    </button>
+                `).join('');
+            } catch (error) {
+                box.innerHTML = `<div class="mol-group-room__empty">Groupes indisponibles.</div>`;
+            }
+        }
+
+        function renderMembers(members = []) {
+            const box = $('molGroupRoomMembers');
+            if (!box) return;
+
+            if (!members.length) {
+                box.innerHTML = `<div class="mol-group-room__empty">Aucun membre.</div>`;
+                return;
+            }
+
+            box.innerHTML = members.map((member) => {
+                const presence = member.presence || 'offline';
+
+                return `
+                    <article class="mol-group-member">
+                        <div class="mol-group-member__avatar">${escapeHtml(memberInitial(member.name))}</div>
+
+                        <div style="min-width:0;">
+                            <div class="mol-group-member__name text-truncate">${escapeHtml(member.name || 'Utilisateur')}</div>
+                            <div class="mol-group-member__role">
+                                ${member.isOwner ? 'Créateur' : escapeHtml(member.role || 'member')}
+                                ${member.isMe ? ' · vous' : ''}
+                                · ${escapeHtml(member.lastSeenLabel || '')}
+                            </div>
+                        </div>
+
+                        ${member.canRemove ? `
+                            <button type="button"
+                                    class="mol-group-member__remove"
+                                    data-remove-group-member="${Number(member.id)}"
+                                    data-member-name="${escapeHtml(member.name || 'Ce membre')}"
+                                    title="Retirer du groupe">
+                                <i class="bi bi-person-x"></i>
+                            </button>
+                        ` : ''}
+
+                        <span class="mol-group-member__presence is-${escapeHtml(presence)}"></span>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function renderGroup(group = {}, members = []) {
+            $('molGroupRoomName').textContent = group.name || 'Groupe';
+            $('molGroupRoomHeaderName').textContent = group.name || 'Conversation groupe';
+            $('molGroupRoomDescription').textContent = group.description || 'Aucune description.';
+            $('molGroupRoomMembersCount').textContent = String(group.memberCount || members.length || 0);
+            $('molGroupRoomVisibility').textContent = group.visibility || 'private';
+            $('molGroupRoomHeaderMeta').textContent =
+                `${group.memberCount || members.length || 0} membre(s) · ${group.allowFiles ? 'Fichiers autorisés' : 'Fichiers désactivés'}`;
+
+            const badge = $('molGroupRoomOwnerBadge');
+            if (badge) badge.textContent = group.canManage ? 'Gestionnaire' : 'Membre';
+
+            const inviteBox = $('molGroupInviteBox');
+            if (inviteBox) inviteBox.hidden = !group.canManage;
+
+            renderMembers(members);
+        }
+
+        function renderAttachment(message) {
+            const type = message.type || 'text';
+            const meta = message.meta || {};
+            const fileUrl = message.attachmentUrl || meta.url || '';
+            const filename = meta.originalName || message.content || 'Fichier';
+
+            if (!fileUrl) return '';
+
+            if (type === 'image') {
+                return `<a href="${escapeHtml(fileUrl)}" target="_blank"><img src="${escapeHtml(fileUrl)}" class="mol-group-image" alt="${escapeHtml(filename)}"></a>`;
+            }
+
+            if (type === 'audio' || type === 'voice') {
+                return `<audio class="mol-group-audio" controls preload="metadata"><source src="${escapeHtml(fileUrl)}" type="${escapeHtml(meta.mimeType || 'audio/webm')}"></audio>`;
+            }
+
+            return `
+                <a class="mol-group-file" href="${escapeHtml(fileUrl)}" target="_blank" download="${escapeHtml(filename)}">
+                    <i class="bi bi-file-earmark"></i>
+                    <div>
+                        <strong>${escapeHtml(filename)}</strong>
+                        <span>${escapeHtml(bytesToSize(meta.size || 0) || type)}</span>
+                    </div>
+                </a>
+            `;
+        }
+
+        function renderMessages(items = []) {
+            const box = $('molGroupRoomMessages');
+            if (!box) return;
+
+            if (!items.length) {
+                box.innerHTML = `<div class="mol-group-room__empty">Aucun message dans ce groupe.</div>`;
+                return;
+            }
+
+            box.innerHTML = items.map((message) => {
+                if (message.type === 'system') {
+                    return `<div class="mol-group-system">${escapeHtml(message.content)}</div>`;
+                }
+
+                if (message.type === 'deleted') {
+                    return `<div class="mol-group-system">Message supprimé</div>`;
+                }
+
+                const mine = !!message.mine;
+                const reply = message.replyTo ? `
+                    <div class="mol-group-msg__reply" data-scroll-message="${Number(message.replyTo.id)}">
+                        <strong>${escapeHtml(message.replyTo.authorName || 'Message')}</strong>
+                        <span>${escapeHtml(message.replyTo.content || '')}</span>
+                    </div>
+                ` : '';
+
+                const text = message.type === 'text'
+                    ? `<div class="mol-group-msg__content">${escapeHtml(message.content || '')}</div>`
+                    : '';
+
+                const reactions = (message.reactions || []).length ? `
+                    <div class="mol-group-reactions">
+                        ${(message.reactions || []).map((reaction) => `
+                            <button type="button"
+                                    class="mol-group-reaction ${reaction.reactedByMe ? 'is-mine' : ''}"
+                                    data-quick-react="${escapeHtml(reaction.emoji)}"
+                                    data-message-id="${Number(message.id)}">
+                                ${escapeHtml(reaction.emoji)} ${Number(reaction.count || 0)}
+                            </button>
+                        `).join('')}
+                    </div>
+                ` : '';
+
+                return `
+                    <div class="mol-group-msg ${mine ? 'is-mine' : ''}" data-group-message-id="${Number(message.id)}">
+                        <div class="mol-group-msg__bubble">
+                            <div class="mol-group-msg__author">${mine ? 'Vous' : escapeHtml(message.authorName || 'Membre')}</div>
+                            ${reply}
+                            ${text}
+                            ${renderAttachment(message)}
+                            ${reactions}
+
+                            <div class="mol-group-msg__meta">
+                                <span>${escapeHtml(formatLocalMessageTime(message.createdAtIso, message.createdAt))}</span>
+
+                                <span class="mol-group-msg__actions">
+                                    <button type="button" class="mol-group-msg__action" data-reply-group-message="${Number(message.id)}" data-author="${escapeHtml(message.authorName || 'Membre')}" data-content="${escapeHtml(message.content || message.type || 'Message')}">
+                                        <i class="bi bi-reply"></i>
+                                    </button>
+
+                                    <button type="button" class="mol-group-msg__action" data-open-reaction-picker="${Number(message.id)}">
+                                        <i class="bi bi-emoji-smile"></i>
+                                    </button>
+
+                                    ${message.canDelete ? `
+                                        <button type="button" class="mol-group-msg__action" data-delete-group-message="${Number(message.id)}">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    ` : ''}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function loadDetail() {
+            if (!cfg() || !currentGroupId) return;
+
+            const data = await fetchJson(url(cfg().dataset.detailUrlTemplate, currentGroupId));
+            renderGroup(data.group || {}, data.members || []);
+        }
+
+        async function loadMessages() {
+            if (!cfg() || !currentGroupId) return;
+
+            const data = await fetchJson(url(cfg().dataset.messagesUrlTemplate, currentGroupId));
+            renderMessages(data.items || []);
+        }
+
+        async function reloadRoom() {
+            await loadDetail();
+            await loadMessages();
+            await loadGroupList();
+        }
+
+        async function openGroup(groupId) {
+            currentGroupId = Number(groupId || 0);
+            if (!currentGroupId) return;
+
+            room().dataset.currentGroupId = String(currentGroupId);
+
+            closeCreateModal();
+            openShell();
+
+            $('molGroupRoomMessages').innerHTML = `<div class="mol-group-room__empty">Chargement des messages...</div>`;
+            $('molGroupRoomMembers').innerHTML = `<div class="mol-group-room__empty">Chargement des membres...</div>`;
+
+            await pingPresence();
+            await reloadRoom();
+
+            clearInterval(refreshTimer);
+            clearInterval(presenceTimer);
+
+            refreshTimer = setInterval(() => loadMessages().catch(() => {}), 8000);
+            presenceTimer = setInterval(() => {
+                pingPresence().catch(() => {});
+                loadDetail().catch(() => {});
+            }, 30000);
+        }
+
+        function setReply(messageId, author, content) {
+            replyToMessage = {
+                id: Number(messageId),
+                author,
+                content,
+            };
+
+            $('molGroupReplyAuthor').textContent = author || 'Réponse';
+            $('molGroupReplyText').textContent = content || 'Message sélectionné';
+            $('molGroupReplyPreview').hidden = false;
+            $('molGroupRoomInput').focus();
+        }
+
+        function clearReply() {
+            replyToMessage = null;
+            $('molGroupReplyPreview').hidden = true;
+        }
+
+        async function sendText() {
+            const input = $('molGroupRoomInput');
+            const content = input.value.trim();
+
+            if (!content || !cfg() || !currentGroupId) return;
+
+            const payload = {
+                content,
+                replyToId: replyToMessage?.id || null,
+                clientSentAt: new Date().toISOString(),
+            };
+
+            input.disabled = true;
+
+            try {
+                await fetchJson(url(cfg().dataset.sendUrlTemplate, currentGroupId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                input.value = '';
+                input.textContent = '';
+                input.style.height = 'auto';
+                clearReply();
+
+                await loadMessages();
+                window.MolMessageSounds?.playSelected?.();
+            } finally {
+                input.disabled = false;
+                input.value = '';
+                input.focus();
+            }
+        }
+
+        async function sendFile(file) {
+            if (!file || !cfg() || !currentGroupId) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('clientSentAt', new Date().toISOString());
+
+            if (replyToMessage?.id) {
+                formData.append('replyToId', replyToMessage.id);
+            }
+
+            await fetchJson(url(cfg().dataset.sendFileUrlTemplate, currentGroupId), {
+                method: 'POST',
+                body: formData
+            });
+
+            clearReply();
+            await loadMessages();
+            window.MolMessageSounds?.playSelected?.();
+        }
+
+        async function toggleReaction(messageId, emoji) {
+            if (!cfg() || !messageId || !emoji) return;
+
+            await fetchJson(url(cfg().dataset.toggleReactionUrlTemplate, messageId), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ emoji })
+            });
+
+            await loadMessages();
+        }
+
+        async function deleteMessage(messageId) {
+            const confirmed = window.Swal
+                ? (await Swal.fire({
+                    icon: 'warning',
+                    title: 'Supprimer ce message ?',
+                    showCancelButton: true,
+                    confirmButtonText: 'Supprimer',
+                    cancelButtonText: 'Annuler',
+                    confirmButtonColor: '#dc2626'
+                })).isConfirmed
+                : confirm('Supprimer ce message ?');
+
+            if (!confirmed) return;
+
+            await fetchJson(url(cfg().dataset.deleteMessageUrlTemplate, messageId), {
+                method: 'POST',
+                body: new FormData()
+            });
+
+            await loadMessages();
+        }
+
+        async function removeMember(memberId, memberName) {
+            const template = cfg().dataset.removeMemberUrlTemplate;
+            const removeUrl = String(template || '')
+                .replace('/0/members/0/remove', '/' + currentGroupId + '/members/' + encodeURIComponent(memberId) + '/remove');
+
+            const confirmed = window.Swal
+                ? (await Swal.fire({
+                    icon: 'warning',
+                    title: 'Retirer ce membre ?',
+                    text: `${memberName || 'Ce membre'} ne pourra plus accéder au groupe.`,
+                    showCancelButton: true,
+                    confirmButtonText: 'Retirer',
+                    cancelButtonText: 'Annuler',
+                    confirmButtonColor: '#dc2626'
+                })).isConfirmed
+                : confirm('Retirer ce membre du groupe ?');
+
+            if (!confirmed) return;
+
+            await fetchJson(removeUrl, {
+                method: 'POST',
+                body: new FormData()
+            });
+
+            await reloadRoom();
+        }
+
+        function toggleEmojiPicker() {
+            $('molGroupEmojiPicker').hidden = !$('molGroupEmojiPicker').hidden;
+            $('molGroupReactionPicker').hidden = true;
+        }
+
+        function openReactionPicker(messageId, anchor) {
+            reactionTargetMessageId = Number(messageId);
+            $('molGroupReactionPicker').hidden = false;
+            $('molGroupEmojiPicker').hidden = true;
+        }
+
+        document.addEventListener('click', async (event) => {
+            const openBtn = event.target.closest('[data-open-group]');
+            if (openBtn) {
+                event.preventDefault();
+                await openGroup(openBtn.dataset.openGroup);
+                return;
+            }
+
+            const closeBtn = event.target.closest('[data-group-room-close]');
+            if (closeBtn && room()?.contains(closeBtn)) {
+                event.preventDefault();
+                closeShell();
+                return;
+            }
+
+            const refreshGroupList = event.target.closest('[data-group-list-refresh]');
+            if (refreshGroupList && room()?.contains(refreshGroupList)) {
+                event.preventDefault();
+                await loadGroupList();
+                return;
+            }
+
+            const fileBtn = event.target.closest('[data-group-room-file]');
+            if (fileBtn && room()?.contains(fileBtn)) {
+                event.preventDefault();
+                $('molGroupRoomFile').click();
+                return;
+            }
+
+            const imageBtn = event.target.closest('[data-group-room-image]');
+            if (imageBtn && room()?.contains(imageBtn)) {
+                event.preventDefault();
+                $('molGroupRoomImage').click();
+                return;
+            }
+
+            const audioBtn = event.target.closest('[data-group-room-audio]');
+            if (audioBtn && room()?.contains(audioBtn)) {
+                event.preventDefault();
+                $('molGroupRoomAudio').click();
+                return;
+            }
+
+            const emojiBtn = event.target.closest('[data-group-room-emoji]');
+            if (emojiBtn && room()?.contains(emojiBtn)) {
+                event.preventDefault();
+                toggleEmojiPicker();
+                return;
+            }
+
+            const sendBtn = event.target.closest('[data-group-room-send]');
+            if (sendBtn && room()?.contains(sendBtn)) {
+                event.preventDefault();
+                await sendText();
+                return;
+            }
+
+            const replyBtn = event.target.closest('[data-reply-group-message]');
+            if (replyBtn && room()?.contains(replyBtn)) {
+                event.preventDefault();
+                setReply(replyBtn.dataset.replyGroupMessage, replyBtn.dataset.author, replyBtn.dataset.content);
+                return;
+            }
+
+            const cancelReply = event.target.closest('[data-cancel-group-reply]');
+            if (cancelReply && room()?.contains(cancelReply)) {
+                event.preventDefault();
+                clearReply();
+                return;
+            }
+
+            const reactionBtn = event.target.closest('[data-open-reaction-picker]');
+            if (reactionBtn && room()?.contains(reactionBtn)) {
+                event.preventDefault();
+                openReactionPicker(reactionBtn.dataset.openReactionPicker, reactionBtn);
+                return;
+            }
+
+            function closeEmojiPickers() {
+                const emojiPicker = $('molGroupEmojiPicker');
+                const reactionPicker = $('molGroupReactionPicker');
+
+                if (emojiPicker) {
+                    emojiPicker.hidden = true;
+                }
+
+                if (reactionPicker) {
+                    reactionPicker.hidden = true;
+                }
+            }
+
+            function insertEmojiIntoComposer(emoji) {
+                const input = $('molGroupRoomInput');
+
+                if (!input || !emoji) {
+                    return;
+                }
+
+                const start = input.selectionStart ?? input.value.length;
+                const end = input.selectionEnd ?? input.value.length;
+
+                input.value = input.value.slice(0, start) + emoji + input.value.slice(end);
+
+                const nextPosition = start + emoji.length;
+                input.setSelectionRange(nextPosition, nextPosition);
+
+                input.focus();
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+
+            $('molGroupEmojiPicker')?.addEventListener('emoji-click', (event) => {
+                const emoji = event.detail?.unicode;
+
+                insertEmojiIntoComposer(emoji);
+
+                $('molGroupEmojiPicker').hidden = true;
+            });
+
+            $('molGroupReactionPicker')?.addEventListener('emoji-click', async (event) => {
+                const emoji = event.detail?.unicode;
+
+                if (!emoji || !reactionTargetMessageId) {
+                    return;
+                }
+
+                await toggleReaction(reactionTargetMessageId, emoji);
+
+                $('molGroupReactionPicker').hidden = true;
+                reactionTargetMessageId = 0;
+            });
+
+            document.addEventListener('click', (event) => {
+                const clickedInsidePicker =
+                    event.target.closest('#molGroupEmojiPicker') ||
+                    event.target.closest('#molGroupReactionPicker') ||
+                    event.target.closest('[data-group-room-emoji]') ||
+                    event.target.closest('[data-open-reaction-picker]');
+
+                if (!clickedInsidePicker) {
+                    closeEmojiPickers();
+                }
+            });
+
+            const quickReact = event.target.closest('[data-quick-react]');
+            if (quickReact && room()?.contains(quickReact)) {
+                event.preventDefault();
+                await toggleReaction(quickReact.dataset.messageId, quickReact.dataset.quickReact);
+                return;
+            }
+
+            const deleteBtn = event.target.closest('[data-delete-group-message]');
+            if (deleteBtn && room()?.contains(deleteBtn)) {
+                event.preventDefault();
+                await deleteMessage(deleteBtn.dataset.deleteGroupMessage);
+                return;
+            }
+
+            const removeBtn = event.target.closest('[data-remove-group-member]');
+            if (removeBtn && room()?.contains(removeBtn)) {
+                event.preventDefault();
+                await removeMember(removeBtn.dataset.removeGroupMember, removeBtn.dataset.memberName);
+            }
+        }, true);
+
+        ['molGroupRoomFile', 'molGroupRoomImage', 'molGroupRoomAudio'].forEach((id) => {
+            $(id)?.addEventListener('change', async () => {
+                const input = $(id);
+                const file = input?.files?.[0];
+
+                if (file) {
+                    try {
+                        await sendFile(file);
+                    } catch (error) {
+                        alert(error.message || 'Impossible d’envoyer le fichier.');
+                    }
+                }
+
+                if (input) input.value = '';
+            });
+        });
+
+        $('molGroupRoomInput')?.addEventListener('keydown', async (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                await sendText();
+            }
+        });
+
+        $('molGroupRoomInput')?.addEventListener('input', (event) => {
+            const input = event.currentTarget;
+            input.style.height = 'auto';
+            input.style.height = Math.min(input.scrollHeight, 82) + 'px';
+        });
+
+        window.MolGroupConversation = {
+            open: openGroup,
+            close: closeShell,
+            reload: reloadRoom,
+        };
+    })();
+
+
+    async function recommendGroup(form) {
+        const cfg = rootConfig();
+
+        if (!cfg || !currentGroupId) return;
+
+        const formData = new FormData(form);
+        const identifier = String(formData.get('identifier') || '').trim();
+
+        if (!identifier) {
+            showGroupToast('Email obligatoire.', 'error');
+            return;
+        }
+
+        await fetchJson(urlGroup(cfg.dataset.recommendUrlTemplate, currentGroupId), {
+            method: 'POST',
+            body: formData
+        });
+
+        form.reset();
+
+        showGroupToast('Groupe recommandé avec succès.', 'success');
+    }
+
+    function showGroupToast(message, icon = 'success') {
+        if (window.Swal) {
+            Swal.fire({
+                icon,
+                title: message,
+                timer: 1500,
+                showConfirmButton: false,
+                confirmButtonColor: '#2563eb'
+            });
+            return;
+        }
+
+        alert(message);
+    }
+</script>
+
+<script id="mol-group-camera-mic-call-patch">
+    (() => {
+        if (window.__MOL_GROUP_CAMERA_MIC_CALL_PATCH__) return;
+        window.__MOL_GROUP_CAMERA_MIC_CALL_PATCH__ = true;
+
+        let activeGroupId = 0;
+
+        let recorder = null;
+        let recorderStream = null;
+        let recorderChunks = [];
+        let recorderMode = 'video';
+        let recorderShouldUpload = false;
+        let recorderStartedAt = 0;
+        let recorderTimer = null;
+
+        let callStream = null;
+        let callCameraEnabled = true;
+        let callMicEnabled = true;
+
+        function qs(id) {
+            return document.getElementById(id);
+        }
+
+        function cfg() {
+            return qs('molGroupChatModal');
+        }
+
+        function room() {
+            return qs('molGroupRoomModal');
+        }
+
+        function getGroupId() {
+            return Number(
+                room()?.dataset.currentGroupId ||
+                activeGroupId ||
+                0
+            );
+        }
+
+        function setGroupId(groupId) {
+            activeGroupId = Number(groupId || 0);
+
+            if (room()) {
+                room().dataset.currentGroupId = String(activeGroupId);
+            }
+        }
+
+        function isMobileDevice() {
+            return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        }
+
+        function urlFromTemplate(template, id) {
+            return String(template || '')
+                .replace('/0/', '/' + encodeURIComponent(id) + '/')
+                .replace('/0', '/' + encodeURIComponent(id))
+                .replace('=0', '=' + encodeURIComponent(id));
+        }
+
+        async function fetchJson(fetchUrl, options = {}) {
+            const response = await fetch(fetchUrl, {
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(options.headers || {})
+                },
+                ...options
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.ok === false) {
+                throw new Error(data.message || data.error || 'Erreur serveur.');
+            }
+
+            return data;
+        }
+
+        function showError(message) {
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Action impossible',
+                    text: message,
+                    confirmButtonColor: '#2563eb'
+                });
+                return;
+            }
+
+            alert(message);
+        }
+
+        async function uploadGroupFile(file) {
+            const groupId = getGroupId();
+            const config = cfg();
+
+            if (!groupId) {
+                throw new Error('Aucun groupe actif.');
+            }
+
+            if (!config?.dataset?.sendFileUrlTemplate) {
+                throw new Error('URL d’envoi de fichier manquante.');
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            await fetchJson(urlFromTemplate(config.dataset.sendFileUrlTemplate, groupId), {
+                method: 'POST',
+                body: formData
+            });
+
+            if (window.MolGroupConversation?.reload) {
+                await window.MolGroupConversation.reload();
+            }
+        }
+
+        function getBestMime(mode) {
+            const candidates = mode === 'video'
+                ? ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm']
+                : ['audio/webm;codecs=opus', 'audio/webm'];
+
+            for (const mime of candidates) {
+                if (window.MediaRecorder && MediaRecorder.isTypeSupported(mime)) {
+                    return mime;
+                }
+            }
+
+            return '';
+        }
+
+        function openRecorderModal(mode) {
+            const modal = qs('molGroupRecorderModal');
+            const video = qs('molGroupRecorderVideo');
+            const audioView = qs('molGroupRecorderAudioView');
+
+            if (!modal) return;
+
+            qs('molGroupRecorderTitle').textContent = mode === 'video'
+                ? 'Filmer une vidéo'
+                : 'Enregistrer un audio';
+
+            qs('molGroupRecorderHint').textContent = mode === 'video'
+                ? 'La caméra et le micro sont actifs.'
+                : 'Le micro est actif.';
+
+            video.hidden = mode !== 'video';
+            audioView.hidden = mode !== 'audio';
+
+            modal.hidden = false;
+        }
+
+        function closeRecorderModal() {
+            const modal = qs('molGroupRecorderModal');
+            const video = qs('molGroupRecorderVideo');
+
+            if (modal) modal.hidden = true;
+
+            if (video) {
+                video.pause();
+                video.srcObject = null;
+            }
+
+            clearInterval(recorderTimer);
+            recorderTimer = null;
+
+            if (qs('molGroupRecorderTimer')) {
+                qs('molGroupRecorderTimer').textContent = '00:00';
+            }
+        }
+
+        function updateRecorderTimer() {
+            const target = qs('molGroupRecorderTimer');
+
+            if (!target) return;
+
+            const seconds = Math.floor((Date.now() - recorderStartedAt) / 1000);
+            const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const ss = String(seconds % 60).padStart(2, '0');
+
+            target.textContent = `${mm}:${ss}`;
+        }
+
+        function stopRecorderTracks() {
+            if (recorderStream) {
+                recorderStream.getTracks().forEach((track) => track.stop());
+                recorderStream = null;
+            }
+        }
+
+        async function startRecorder(mode) {
+            if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+                throw new Error('Votre navigateur ne supporte pas l’enregistrement média.');
+            }
+
+            recorderMode = mode;
+            recorderShouldUpload = false;
+            recorderChunks = [];
+
+            const constraints = mode === 'video'
+                ? {
+                    video: {
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: true
+                }
+                : {
+                    audio: true,
+                    video: false
+                };
+
+            recorderStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+            openRecorderModal(mode);
+
+            if (mode === 'video') {
+                const video = qs('molGroupRecorderVideo');
+                video.srcObject = recorderStream;
+                await video.play().catch(() => {});
+            }
+
+            const mimeType = getBestMime(mode);
+            recorder = mimeType
+                ? new MediaRecorder(recorderStream, { mimeType })
+                : new MediaRecorder(recorderStream);
+
+            recorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) {
+                    recorderChunks.push(event.data);
+                }
+            };
+
+            recorder.onstop = async () => {
+                const chunks = recorderChunks.slice();
+                const shouldUpload = recorderShouldUpload;
+                const mode = recorderMode;
+
+                recorderChunks = [];
+                recorder = null;
+
+                stopRecorderTracks();
+                closeRecorderModal();
+
+                if (!shouldUpload || !chunks.length) {
+                    return;
+                }
+
+                const type = mode === 'video' ? 'video/webm' : 'audio/webm';
+                const extension = mode === 'video' ? 'webm' : 'webm';
+                const blob = new Blob(chunks, { type });
+                const filename = mode === 'video'
+                    ? `camera-${Date.now()}.${extension}`
+                    : `audio-${Date.now()}.${extension}`;
+
+                const file = new File([blob], filename, { type });
+
+                await uploadGroupFile(file);
+            };
+
+            recorder.start(500);
+
+            recorderStartedAt = Date.now();
+            updateRecorderTimer();
+
+            recorderTimer = setInterval(updateRecorderTimer, 500);
+        }
+
+        function stopRecorderAndUpload() {
+            if (!recorder) return;
+
+            recorderShouldUpload = true;
+            recorder.stop();
+        }
+
+        function cancelRecorder() {
+            if (!recorder) {
+                stopRecorderTracks();
+                closeRecorderModal();
+                return;
+            }
+
+            recorderShouldUpload = false;
+            recorder.stop();
+        }
+
+        async function handleCameraButton() {
+            setGroupId(getGroupId());
+
+            if (isMobileDevice()) {
+                qs('molGroupRoomImage')?.click();
+                return;
+            }
+
+            try {
+                await startRecorder('video');
+            } catch (error) {
+                showError(error.message || 'Impossible d’ouvrir la caméra.');
+            }
+        }
+
+        async function handleMicrophoneButton() {
+            setGroupId(getGroupId());
+
+            if (isMobileDevice()) {
+                qs('molGroupRoomAudio')?.click();
+                return;
+            }
+
+            try {
+                await startRecorder('audio');
+            } catch (error) {
+                showError(error.message || 'Impossible d’ouvrir le micro.');
+            }
+        }
+
+        async function startGroupCall() {
+            if (!navigator.mediaDevices?.getUserMedia) {
+                showError('Votre navigateur ne supporte pas les appels audio/vidéo.');
+                return;
+            }
+
+            try {
+                callStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+                callCameraEnabled = true;
+                callMicEnabled = true;
+
+                const video = qs('molGroupCallLocalVideo');
+                video.srcObject = callStream;
+                await video.play().catch(() => {});
+
+                qs('molGroupCallModal').hidden = false;
+                updateCallButtons();
+
+                await notifyGroupCallStarted();
+            } catch (error) {
+                showError(error.message || 'Impossible de démarrer l’appel de groupe.');
+            }
+        }
+
+        async function notifyGroupCallStarted() {
+            const groupId = getGroupId();
+            const config = cfg();
+
+            if (!groupId || !config?.dataset?.sendUrlTemplate) {
+                return;
+            }
+
+            try {
+                await fetchJson(urlFromTemplate(config.dataset.sendUrlTemplate, groupId), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: '📹 Appel de groupe démarré.',
+                        clientSentAt: new Date().toISOString()
+                    })
+                });
+
+                if (window.MolGroupConversation?.reload) {
+                    await window.MolGroupConversation.reload();
+                }
+            } catch (error) {
+                console.warn('[MOL GROUP CALL] notification message failed', error);
+            }
+        }
+
+        function updateCallButtons() {
+            const micButton = document.querySelector('[data-group-call-toggle-mic]');
+            const cameraButton = document.querySelector('[data-group-call-toggle-camera]');
+            const cameraOff = qs('molGroupCallCameraOff');
+
+            if (micButton) {
+                micButton.classList.toggle('is-off', !callMicEnabled);
+                micButton.innerHTML = callMicEnabled
+                    ? '<i class="bi bi-mic-fill"></i>'
+                    : '<i class="bi bi-mic-mute-fill"></i>';
+            }
+
+            if (cameraButton) {
+                cameraButton.classList.toggle('is-off', !callCameraEnabled);
+                cameraButton.innerHTML = callCameraEnabled
+                    ? '<i class="bi bi-camera-video-fill"></i>'
+                    : '<i class="bi bi-camera-video-off-fill"></i>';
+            }
+
+            if (cameraOff) {
+                cameraOff.hidden = callCameraEnabled;
+            }
+        }
+
+        function toggleCallMic() {
+            if (!callStream) return;
+
+            callMicEnabled = !callMicEnabled;
+
+            callStream.getAudioTracks().forEach((track) => {
+                track.enabled = callMicEnabled;
+            });
+
+            updateCallButtons();
+        }
+
+        function toggleCallCamera() {
+            if (!callStream) return;
+
+            callCameraEnabled = !callCameraEnabled;
+
+            callStream.getVideoTracks().forEach((track) => {
+                track.enabled = callCameraEnabled;
+            });
+
+            updateCallButtons();
+        }
+
+        function endGroupCall() {
+            if (callStream) {
+                callStream.getTracks().forEach((track) => track.stop());
+                callStream = null;
+            }
+
+            const video = qs('molGroupCallLocalVideo');
+
+            if (video) {
+                video.pause();
+                video.srcObject = null;
+            }
+
+            if (qs('molGroupCallModal')) {
+                qs('molGroupCallModal').hidden = true;
+            }
+        }
+
+        document.addEventListener('click', async (event) => {
+            const openGroup = event.target.closest('[data-open-group]');
+
+            if (openGroup) {
+                setGroupId(openGroup.dataset.openGroup);
+            }
+
+            const cameraButton = event.target.closest('[data-group-room-camera]');
+
+            if (cameraButton && room()?.contains(cameraButton)) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                await handleCameraButton();
+                return;
+            }
+
+            const micButton = event.target.closest('[data-group-room-microphone]');
+
+            if (micButton && room()?.contains(micButton)) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                await handleMicrophoneButton();
+                return;
+            }
+
+            const callButton = event.target.closest('[data-group-call-start]');
+
+            if (callButton && room()?.contains(callButton)) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                await startGroupCall();
+                return;
+            }
+
+            const cancelRecorderButton = event.target.closest('[data-group-recorder-cancel]');
+
+            if (cancelRecorderButton && qs('molGroupRecorderModal')?.contains(cancelRecorderButton)) {
+                event.preventDefault();
+                cancelRecorder();
+                return;
+            }
+
+            const stopRecorderButton = event.target.closest('[data-group-recorder-stop]');
+
+            if (stopRecorderButton && qs('molGroupRecorderModal')?.contains(stopRecorderButton)) {
+                event.preventDefault();
+                stopRecorderAndUpload();
+                return;
+            }
+
+            const toggleMic = event.target.closest('[data-group-call-toggle-mic]');
+
+            if (toggleMic && qs('molGroupCallModal')?.contains(toggleMic)) {
+                event.preventDefault();
+                toggleCallMic();
+                return;
+            }
+
+            const toggleCamera = event.target.closest('[data-group-call-toggle-camera]');
+
+            if (toggleCamera && qs('molGroupCallModal')?.contains(toggleCamera)) {
+                event.preventDefault();
+                toggleCallCamera();
+                return;
+            }
+
+            const endCall = event.target.closest('[data-group-call-end]');
+
+            if (endCall && qs('molGroupCallModal')?.contains(endCall)) {
+                event.preventDefault();
+                endGroupCall();
+            }
+        }, true);
+
+        ['molGroupRoomImage', 'molGroupRoomAudio'].forEach((inputId) => {
+            const input = qs(inputId);
+
+            input?.addEventListener('change', async (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                const file = input.files?.[0];
+
+                if (!file) return;
+
+                try {
+                    await uploadGroupFile(file);
+                } catch (error) {
+                    showError(error.message || 'Impossible d’envoyer le média.');
+                } finally {
+                    input.value = '';
+                }
+            }, true);
+        });
+
+        const oldConversation = window.MolGroupConversation || {};
+        const oldOpen = oldConversation.open;
+
+        window.MolGroupConversation = {
+            ...oldConversation,
+
+            async open(groupId) {
+                setGroupId(groupId);
+
+                if (typeof oldOpen === 'function') {
+                    return await oldOpen(groupId);
+                }
+
+                return null;
+            },
+
+            getCurrentGroupId() {
+                return getGroupId();
+            }
+        };
+    })();
+</script>
+
+<script id="mol-group-recommend-friends-modal-final">
+    (() => {
+        if (window.__MOL_GROUP_RECOMMEND_FRIENDS_MODAL_FINAL__) return;
+        window.__MOL_GROUP_RECOMMEND_FRIENDS_MODAL_FINAL__ = true;
+
+        let activeGroupId = 0;
+
+        function config() {
+            return document.getElementById('molGroupChatModal');
+        }
+
+        function room() {
+            return document.getElementById('molGroupRoomModal');
+        }
+
+        function recommendModal() {
+            return document.getElementById('molGroupRecommendModal');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function urlFromTemplate(template, id) {
+            return String(template || '')
+                .replace('/0/', '/' + encodeURIComponent(id) + '/')
+                .replace('/0', '/' + encodeURIComponent(id))
+                .replace('=0', '=' + encodeURIComponent(id));
+        }
+
+        async function fetchJson(url, options = {}) {
+            const response = await fetch(url, {
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    ...(options.headers || {})
+                },
+                ...options
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.ok === false) {
+                throw new Error(data.message || data.error || 'Erreur serveur.');
+            }
+
+            return data;
+        }
+
+        function getGroupId() {
+            return Number(
+                activeGroupId ||
+                room()?.dataset.currentGroupId ||
+                0
+            );
+        }
+
+        function setGroupId(groupId) {
+            activeGroupId = Number(groupId || 0);
+
+            if (room()) {
+                room().dataset.currentGroupId = String(activeGroupId);
+            }
+        }
+
+        function openModal() {
+            const modal = recommendModal();
+
+            if (!modal) return;
+
+            modal.hidden = false;
+
+            requestAnimationFrame(() => {
+                modal.classList.add('is-open');
+            });
+
+            loadFriends();
+        }
+
+        function closeModal() {
+            const modal = recommendModal();
+
+            if (!modal) return;
+
+            modal.classList.remove('is-open');
+
+            setTimeout(() => {
+                modal.hidden = true;
+            }, 180);
+        }
+
+        function renderFriends(items = []) {
+            const list = document.getElementById('molGroupRecommendFriendsList');
+
+            if (!list) return;
+
+            if (!items.length) {
+                list.innerHTML = `<div class="mol-group-room__empty">Aucun ami disponible.</div>`;
+                return;
+            }
+
+            list.innerHTML = items.map((friend) => {
+                let disabled = '';
+                let label = 'Recommander';
+
+                if (friend.alreadyMember) {
+                    disabled = 'disabled';
+                    label = 'Déjà membre';
+                } else if (friend.alreadyRecommended) {
+                    disabled = 'disabled';
+                    label = 'Déjà recommandé';
+                } else if (friend.membershipStatus === 'pending') {
+                    disabled = 'disabled';
+                    label = 'Invitation en attente';
+                }
+
+                return `
+                    <article class="mol-group-friend-card">
+                        <div class="mol-group-friend-card__avatar">
+                            ${escapeHtml(friend.initial || 'U')}
+                        </div>
+
+                        <div style="min-width:0;">
+                            <div class="mol-group-friend-card__name">${escapeHtml(friend.name || 'Utilisateur')}</div>
+                            <div class="mol-group-friend-card__email">${escapeHtml(friend.email || '')}</div>
+                        </div>
+
+                        <button type="button" data-recommend-friend="${Number(friend.id)}" ${disabled}>
+                            ${label}
+                        </button>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        async function loadFriends() {
+            const cfg = config();
+            const groupId = getGroupId();
+            const list = document.getElementById('molGroupRecommendFriendsList');
+
+            if (!cfg || !groupId || !list) return;
+
+            list.innerHTML = `<div class="mol-group-room__empty">Chargement de vos amis...</div>`;
+
+            try {
+                const data = await fetchJson(urlFromTemplate(cfg.dataset.recommendableFriendsUrlTemplate, groupId));
+                renderFriends(data.items || []);
+            } catch (error) {
+                list.innerHTML = `<div class="mol-group-room__empty">Impossible de charger vos amis.</div>`;
+            }
+        }
+
+        async function recommendFriend(friendId) {
+            const cfg = config();
+            const groupId = getGroupId();
+
+            if (!cfg || !groupId || !friendId) {
+                throw new Error('Groupe ou ami introuvable.');
+            }
+
+            const note = document.getElementById('molGroupRecommendNote')?.value || '';
+
+            const formData = new FormData();
+            formData.append('userId', friendId);
+            formData.append('note', note);
+
+            await fetchJson(urlFromTemplate(cfg.dataset.recommendUrlTemplate, groupId), {
+                method: 'POST',
+                body: formData
+            });
+
+            await loadFriends();
+
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Groupe recommandé',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    confirmButtonColor: '#2563eb'
+                });
+            }
+        }
+
+        const oldConversation = window.MolGroupConversation || {};
+        const oldOpen = oldConversation.open;
+
+        window.MolGroupConversation = {
+            ...oldConversation,
+
+            async open(groupId) {
+                setGroupId(groupId);
+
+                if (typeof oldOpen === 'function') {
+                    await oldOpen(groupId);
+                }
+            }
+        };
+
+        document.addEventListener('click', async (event) => {
+            const openButton = event.target.closest('[data-open-group]');
+
+            if (openButton) {
+                setGroupId(openButton.dataset.openGroup);
+            }
+
+            const recommendButton = event.target.closest('[data-open-group-recommend-modal]');
+
+            if (recommendButton && room()?.contains(recommendButton)) {
+                event.preventDefault();
+                openModal();
+                return;
+            }
+
+            const closeButton = event.target.closest('[data-close-group-recommend]');
+
+            if (closeButton && recommendModal()?.contains(closeButton)) {
+                event.preventDefault();
+                closeModal();
+                return;
+            }
+
+            const friendButton = event.target.closest('[data-recommend-friend]');
+
+            if (friendButton && recommendModal()?.contains(friendButton)) {
+                event.preventDefault();
+
+                try {
+                    await recommendFriend(friendButton.dataset.recommendFriend);
+                } catch (error) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Action impossible',
+                            text: error.message || 'Impossible de recommander ce groupe.',
+                            confirmButtonColor: '#2563eb'
+                        });
+                    } else {
+                        alert(error.message || 'Impossible de recommander ce groupe.');
+                    }
+                }
+            }
+        }, true);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && recommendModal() && !recommendModal().hidden) {
+                closeModal();
+            }
+        });
+    })();
+</script>
+
+<script type="module">
+    import 'https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js';
+</script>

@@ -1,0 +1,329 @@
+{% set job_nearby_part = job_nearby_part|default('all') %}
+
+{% if job_nearby_part in ['all', 'form'] %}
+<link rel="stylesheet" href="{{ asset('css/job/nearby-search-map.css') }}?v=20260817">
+{% include 'includes/_radius_equal_height.html.twig' %}
+
+<form class="mol-job-nearby__form" id="jobNearbySearchForm" method="get" action="{{ path('liste_jobs') }}" data-turbo="false" data-no-submit-spinner="1" autocomplete="off">
+    <div class="mol-job-nearby__grid">
+        <div class="mol-job-nearby__field" data-smart-search-container>
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <label class="visually-hidden" for="job_nearby_q">{% trans %}Mots-clés{% endtrans %}</label>
+            <input
+                class="mol-job-nearby__input"
+                id="job_nearby_q"
+                name="q"
+                data-smart-keyword
+                data-suggest-type="keyword"
+                data-suggest-url="{{ path('api_search_suggestions') }}"
+                data-numeric-error="{{ 'Saisissez un métier, un poste ou une compétence, pas uniquement des chiffres.'|trans }}"
+                value="{{ filters.q|default('') }}"
+                placeholder="{{ 'Métier, poste ou compétence'|trans }}"
+            >
+        </div>
+        <div class="mol-job-nearby__field" data-smart-search-container>
+            <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+            <label class="visually-hidden" for="job_nearby_city">{% trans %}Ville{% endtrans %}</label>
+            <input
+                class="mol-job-nearby__input"
+                id="job_nearby_city"
+                name="city"
+                data-smart-location
+                data-suggest-type="location"
+                data-suggest-url="{{ path('api_search_suggestions') }}"
+                data-numeric-error="{{ 'Saisissez une ville, une région ou un pays, pas uniquement des chiffres.'|trans }}"
+                value="{{ filters.city|default('') }}"
+                placeholder="{{ 'Ville, région ou pays'|trans }}"
+            >
+        </div>
+        <div class="mol-job-nearby__range">
+            <div class="mol-job-nearby__range-head">
+                <label class="visually-hidden" for="job_nearby_radius">{% trans %}Rayon{% endtrans %}</label>
+                <output id="jobNearbyRadiusValue" for="job_nearby_radius">0 km</output>
+            </div>
+            <input id="job_nearby_radius" name="radius" type="range" min="0" max="100" step="10" value="0" aria-label="{{ 'Rayon'|trans }}" aria-describedby="jobNearbyRadiusScale">
+            <div class="mol-job-nearby__scale" id="jobNearbyRadiusScale">
+                <span>0 km</span><span>25 km</span><span>50 km</span><span>75 km</span><span>100 km</span>
+            </div>
+        </div>
+        <button class="mol-job-nearby__submit" id="jobNearbySearchButton" type="submit">
+            <i class="fa-solid fa-magnifying-glass me-2" aria-hidden="true"></i>
+            <span>{% trans %}Rechercher{% endtrans %}</span>
+        </button>
+    </div>
+    <div class="visually-hidden" id="jobNearbyStatus" role="status" aria-live="polite">
+        <span>{% trans %}Carte prête{% endtrans %}</span>
+    </div>
+</form>
+{% endif %}
+
+{% if job_nearby_part in ['all', 'map'] %}
+<section class="mol-job-nearby" id="jobNearbyMapSection" hidden aria-label="{{ 'Carte des offres d’emploi proches'|trans }}">
+    <div class="container">
+        <div class="mol-job-nearby__shell">
+            <div class="mol-job-nearby__map-head">
+                <div>
+                    <h3>{% trans %}Carte des offres d’emploi{% endtrans %}</h3>
+                    <p id="jobNearbyMapSummary">{% trans %}Recherche des offres proches en cours…{% endtrans %}</p>
+                </div>
+                <div class="mol-job-nearby__map-tools">
+                    <button class="mol-job-nearby__recenter" id="jobNearbyRecenter" type="button" title="{{ 'Recentrer sur ma recherche'|trans }}">
+                        <i class="fa-solid fa-location-crosshairs" aria-hidden="true"></i><span>{% trans %}Recentrer{% endtrans %}</span>
+                    </button>
+                    <button class="mol-job-nearby__map-close" id="jobNearbyMapClose" type="button" aria-label="{{ 'Fermer la carte'|trans }}">
+                        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mol-job-nearby__map" id="jobNearbyMap"
+                 data-search-url="{{ path('api_jobs_nearby_map') }}"
+                 data-all-offers-url="{{ path('liste_jobs') }}"
+                 data-csrf-token="{{ csrf_token('nearby_job_map') }}">
+                <div class="mol-job-nearby__map-message" id="jobNearbyMapMessage">{% trans %}Chargement de la carte…{% endtrans %}</div>
+            </div>
+            <div class="mol-job-nearby__zero-actions" id="jobNearbyZeroActions" hidden>
+                <strong>{% trans %}Aucune offre exacte dans ce rayon.{% endtrans %}</strong>
+                <span>{% trans %}Essayez avec un autre métier ou élargissez le rayon.{% endtrans %}</span>
+                <div>
+                    <button type="button" id="jobNearbyExpand100"><i class="fa-solid fa-arrows-left-right"></i> {% trans %}Élargir à 100 km{% endtrans %}</button>
+                    <a href="{{ path('liste_jobs') }}" data-turbo="false"><i class="fa-solid fa-list"></i> {% trans %}Voir toutes les offres{% endtrans %}</a>
+                    <a href="#offres-alertes"><i class="fa-solid fa-bell"></i> {% trans %}Créer une alerte{% endtrans %}</a>
+                </div>
+            </div>
+            <div class="mol-job-nearby__foot mol-job-nearby__foot--explained">
+                <span><i class="fa-solid fa-shield-halved"></i>{% trans %}Les positions sont approximatives afin de protéger les adresses des utilisateurs.{% endtrans %}</span>
+                <span><i class="fa-regular fa-circle" style="color:#155eef"></i><b id="jobNearbyRadiusLegend">{% trans %}Le cercle bleu représente votre rayon de recherche.{% endtrans %}</b></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .mol-job-nearby__map-tools{display:flex;align-items:center;gap:8px}
+    .mol-job-nearby__recenter{min-height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 11px;border:1px solid #d7e1ee;border-radius:12px;background:#fff;color:#36526f;font-size:10px;font-weight:850;cursor:pointer}
+    .mol-job-nearby__zero-actions{padding:14px 16px;border-top:1px solid #e6edf6;background:#f8fbff;color:#52677e;font-size:11px;line-height:1.5}
+    .mol-job-nearby__zero-actions strong,.mol-job-nearby__zero-actions>span{display:block}.mol-job-nearby__zero-actions strong{color:#173d69;font-size:12px}.mol-job-nearby__zero-actions>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .mol-job-nearby__zero-actions button,.mol-job-nearby__zero-actions a{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 11px;border:1px solid #ccdaea;border-radius:10px;background:#fff;color:#255b91;text-decoration:none;font-size:10px;font-weight:850;cursor:pointer}
+    .mol-job-nearby__zero-actions button{background:#155eef;border-color:#155eef;color:#fff}
+    .mol-job-nearby__foot--explained{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.mol-job-nearby__foot--explained span{display:inline-flex;align-items:center;gap:6px}
+    .mol-job-nearby__range output{font-size:10px;font-weight:900;color:#465b72}
+    @media(max-width:575.98px){.mol-job-nearby__recenter span{display:none}.mol-job-nearby__zero-actions>div{display:grid;grid-template-columns:1fr}.mol-job-nearby__zero-actions button,.mol-job-nearby__zero-actions a{justify-content:center;width:100%}}
+</style>
+
+<script>
+(function () {
+    'use strict';
+
+    const root = document.getElementById('jobNearbyMap');
+    const form = document.getElementById('jobNearbySearchForm');
+    if (!root || !form || root.dataset.bound === '1') return;
+    root.dataset.bound = '1';
+
+    const radius = document.getElementById('job_nearby_radius');
+    const radiusValue = document.getElementById('jobNearbyRadiusValue');
+    const keywordInput = document.getElementById('job_nearby_q');
+    const cityInput = document.getElementById('job_nearby_city');
+    const button = document.getElementById('jobNearbySearchButton');
+    const status = document.getElementById('jobNearbyStatus');
+    const panel = document.getElementById('jobNearbyMapSection');
+    const closeButton = document.getElementById('jobNearbyMapClose');
+    const recenterButton = document.getElementById('jobNearbyRecenter');
+    const expandButton = document.getElementById('jobNearbyExpand100');
+    const summary = document.getElementById('jobNearbyMapSummary');
+    const message = document.getElementById('jobNearbyMapMessage');
+    const zeroActions = document.getElementById('jobNearbyZeroActions');
+    const radiusLegend = document.getElementById('jobNearbyRadiusLegend');
+
+    let map = null;
+    let resultsLayer = null;
+    let lastOrigin = null;
+    let lastBounds = null;
+    let lastOriginLabel = '';
+
+    const knownCities = {
+        yaounde:[3.8480,11.5021], douala:[4.0511,9.7679], bafoussam:[5.4781,10.4179], bamenda:[5.9631,10.1591],
+        garoua:[9.3014,13.3977], maroua:[10.5910,14.3159], ngaoundere:[7.3277,13.5847], bertoua:[4.5773,13.6846],
+        ebolowa:[2.9000,11.1500], buea:[4.1527,9.2410], limbe:[4.0227,9.1954], kumba:[4.6363,9.4469], kribi:[2.9373,9.9077],
+        edea:[3.7960,10.1330], nkongsamba:[4.9547,9.9404], foumban:[5.7266,10.8987], dschang:[5.4456,10.0493], mbalmayo:[3.5167,11.5000],
+        mfou:[3.7167,11.6333], obala:[4.1667,11.5333], sangmelima:[2.9333,11.9833], mbouda:[5.6261,10.2542], batouri:[4.4333,14.3667]
+    };
+
+    function normalize(value) {
+        return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    }
+
+    function escapeHtml(value) {
+        const node = document.createElement('div'); node.textContent = value == null ? '' : String(value); return node.innerHTML;
+    }
+
+    function escapeAttribute(value) {
+        return String(value == null ? '' : value).replace(/[&<>'"]/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]; });
+    }
+
+    function setStatus(text, isError) {
+        const node = status ? status.querySelector('span') : null;
+        if (node) node.textContent = text;
+        if (status) { status.style.background = isError ? '#fff0f2' : '#eef6ff'; status.style.color = isError ? '#b52d43' : '#355477'; }
+    }
+
+    function setLoading(loading) {
+        if (!button) return;
+        if (loading) {
+            if (!button.dataset.originalHtml) button.dataset.originalHtml = button.innerHTML;
+            button.innerHTML = '<span class="mol-submit-spinner" aria-hidden="true"></span><span>Traitement…</span>';
+            button.disabled = true; button.setAttribute('aria-busy','true');
+        } else {
+            if (button.dataset.originalHtml) button.innerHTML = button.dataset.originalHtml;
+            button.disabled = false; button.removeAttribute('aria-busy');
+        }
+    }
+
+    function ensureLeaflet() {
+        if (window.L) return Promise.resolve(window.L);
+        if (window.__molLeafletPromise) return window.__molLeafletPromise;
+        window.__molLeafletPromise = new Promise(function (resolve, reject) {
+            if (!document.querySelector('link[data-mol-leaflet]')) {
+                const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'; css.dataset.molLeaflet = '1'; document.head.appendChild(css);
+            }
+            const existing = document.querySelector('script[data-mol-leaflet]');
+            if (existing) { existing.addEventListener('load', function(){resolve(window.L);},{once:true}); existing.addEventListener('error',reject,{once:true}); return; }
+            const script = document.createElement('script'); script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'; script.defer=true; script.dataset.molLeaflet='1'; script.onload=function(){resolve(window.L)}; script.onerror=reject; document.head.appendChild(script);
+        });
+        return window.__molLeafletPromise;
+    }
+
+    function initMap() {
+        if (map || !window.L) return;
+        map = window.L.map(root,{preferCanvas:true,zoomControl:true}).setView([7.3697,12.3547],6);
+        window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap'}).addTo(map);
+        resultsLayer = window.L.layerGroup().addTo(map);
+        if ('ResizeObserver' in window) new ResizeObserver(function(){ if(map) map.invalidateSize(false); }).observe(root);
+    }
+
+    function showPanel() {
+        panel.hidden = false; panel.setAttribute('aria-hidden','false');
+        requestAnimationFrame(function(){ if(map) map.invalidateSize(false); panel.scrollIntoView({behavior:'smooth',block:'start'}); });
+    }
+
+    function locateUser() {
+        return new Promise(function(resolve,reject){
+            if (!navigator.geolocation || !window.isSecureContext) return reject(new Error('Saisissez une ville ou autorisez la localisation pour lancer la recherche.'));
+            navigator.geolocation.getCurrentPosition(function(pos){resolve([pos.coords.latitude,pos.coords.longitude])}, function(){reject(new Error('Votre position est indisponible. Saisissez une ville pour continuer.'))},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});
+        });
+    }
+
+    function cacheKey(city) { return 'mol-job-city:' + normalize(city); }
+    function getCachedCity(city) { try { const p=JSON.parse(localStorage.getItem(cacheKey(city))||'null'); return Array.isArray(p)&&p.length===2?p:null; } catch(e){ return null; } }
+    function cacheCity(city, point) { try { localStorage.setItem(cacheKey(city),JSON.stringify(point)); } catch(e){} }
+
+    async function geocodeCity(city) {
+        const n = normalize(city);
+        const knownKey = Object.keys(knownCities).find(function(name){ return n===name || n.startsWith(name+' ') || n.startsWith(name+','); });
+        if (knownKey) return knownCities[knownKey];
+        const cached = getCachedCity(city); if (cached) return cached;
+        const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=cm&q='+encodeURIComponent(city+', Cameroun');
+        const response=await fetch(url,{headers:{Accept:'application/json'}}); if(!response.ok) return null;
+        const rows=await response.json(); if(!Array.isArray(rows)||!rows.length) return null;
+        const point=[Number(rows[0].lat),Number(rows[0].lon)]; if(!Number.isFinite(point[0])||!Number.isFinite(point[1])) return null;
+        cacheCity(city,point); return point;
+    }
+
+    async function resolveOrigin() {
+        const city=(cityInput ? cityInput.value : '').trim();
+        if (city) {
+            setStatus('Centrage sur '+city+'…',false);
+            const point=await geocodeCity(city);
+            if (!point) throw new Error('Ville introuvable. Vérifiez l’orthographe ou choisissez une suggestion.');
+            return {point:point,label:city,isCity:true};
+        }
+        setStatus('Détection de votre position…',false);
+        return {point:await locateUser(),label:'Votre position approximative',isCity:false};
+    }
+
+    function distanceKm(a,b) {
+        const rad=function(v){return v*Math.PI/180}; const dLat=rad(b[0]-a[0]); const dLon=rad(b[1]-a[1]);
+        const x=Math.sin(dLat/2)**2+Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dLon/2)**2;
+        return 6371*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));
+    }
+
+    async function resolveJobCoordinates(jobs, origin) {
+        const resolved=[]; const cache=new Map(); const maximum=Number(radius.value);
+        for (const job of jobs) {
+            let point=null;
+            if (job.mapLatitude !== null && job.mapLongitude !== null) point=[Number(job.mapLatitude),Number(job.mapLongitude)];
+            else if (job.city) { const key=normalize(job.city); if(!cache.has(key)) cache.set(key,await geocodeCity(job.city)); point=cache.get(key); }
+            if (!point || !Number.isFinite(point[0]) || !Number.isFinite(point[1])) continue;
+            const d=job.distanceKm !== null ? Number(job.distanceKm) : distanceKm(origin,point);
+            if (Number.isFinite(d) && d <= maximum + 0.5) resolved.push(Object.assign({},job,{mapLatitude:point[0],mapLongitude:point[1],distanceKm:Math.round(d*100)/100}));
+        }
+        return resolved;
+    }
+
+    function salaryText(job) {
+        const f=new Intl.NumberFormat('fr-FR');
+        if(job.salaryMin!==null&&job.salaryMax!==null) return f.format(job.salaryMin)+' – '+f.format(job.salaryMax)+' FCFA';
+        if(job.salaryMin!==null) return 'Dès '+f.format(job.salaryMin)+' FCFA'; if(job.salaryMax!==null) return 'Jusqu’à '+f.format(job.salaryMax)+' FCFA'; return 'Salaire à convenir';
+    }
+
+    async function fetchJobs(origin, q, city) {
+        const response=await fetch(root.dataset.searchUrl,{method:'POST',headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},credentials:'same-origin',body:JSON.stringify({_token:root.dataset.csrfToken,latitude:origin[0],longitude:origin[1],radius:Number(radius.value),q:q,city:city})});
+        const payload=await response.json().catch(function(){return {ok:false,message:'Réponse serveur invalide.'}});
+        if(!response.ok||!payload.ok) throw new Error(payload.message||'La recherche a échoué.');
+        return payload;
+    }
+
+    function render(jobs, originInfo, suggested) {
+        resultsLayer.clearLayers();
+        const origin=originInfo.point; lastOrigin=origin; lastOriginLabel=originInfo.label;
+        const radiusKm=Number(radius.value); const bounds=window.L.latLngBounds([origin]);
+        window.L.circle(origin,{radius:radiusKm*1000,color:'#155eef',weight:2,fillColor:'#155eef',fillOpacity:.07}).addTo(resultsLayer);
+        window.L.circleMarker(origin,{radius:7,color:'#fff',weight:3,fillColor:'#155eef',fillOpacity:1}).addTo(resultsLayer).bindPopup(originInfo.isCity ? 'Centre de votre recherche : '+escapeHtml(originInfo.label) : 'Votre position approximative');
+        jobs.forEach(function(job){
+            const point=[Number(job.mapLatitude),Number(job.mapLongitude)]; bounds.extend(point);
+            const popup='<div class="mol-job-popup"><h4>'+escapeHtml(job.title)+'</h4><p><strong>'+escapeHtml(job.profession)+'</strong> · '+escapeHtml(job.city)+'</p><p>'+escapeHtml(salaryText(job))+' · '+escapeHtml(job.distanceKm)+' km</p><a href="'+escapeAttribute(job.url)+'">Voir l’offre</a></div>';
+            window.L.marker(point).addTo(resultsLayer).bindPopup(popup);
+        });
+        lastBounds=bounds;
+        if(jobs.length) map.fitBounds(bounds.pad(.18),{maxZoom:14}); else map.setView(origin,radiusKm<=20?11:(radiusKm<=50?9:8));
+        message.hidden=true;
+        zeroActions.hidden=jobs.length>0;
+        if (jobs.length) summary.textContent=(suggested?'Aucune correspondance exacte. Suggestions proches : ':'')+jobs.length+' offre(s) dans un rayon de '+radiusKm+' km autour de '+originInfo.label+'.';
+        else summary.textContent='Aucune offre trouvée dans un rayon de '+radiusKm+' km autour de '+originInfo.label+'.';
+        radiusLegend.textContent='Le cercle bleu représente votre rayon de recherche de '+radiusKm+' km.';
+        setStatus(jobs.length ? jobs.length+' offre(s) affichée(s)' : 'Aucune offre dans ce rayon', false);
+        setTimeout(function(){map.invalidateSize(false)},100);
+    }
+
+    async function runSearch() {
+        showPanel(); setLoading(true); zeroActions.hidden=true; message.hidden=false; message.textContent='Chargement de la carte…'; summary.textContent='Préparation de la recherche…';
+        try {
+            await ensureLeaflet(); initMap(); map.invalidateSize(false);
+            const originInfo=await resolveOrigin();
+            const q=(keywordInput?keywordInput.value:'').trim(); const city=(cityInput?cityInput.value:'').trim();
+            setStatus('Recherche des offres…',false);
+            let payload=await fetchJobs(originInfo.point,q,city);
+            let jobs=await resolveJobCoordinates(payload.jobs||[],originInfo.point); let suggested=false;
+            if (!jobs.length && q) {
+                setStatus('Recherche de suggestions dans la même zone…',false);
+                const relaxed=await fetchJobs(originInfo.point,'',city);
+                jobs=await resolveJobCoordinates(relaxed.jobs||[],originInfo.point); suggested=jobs.length>0;
+            }
+            render(jobs,originInfo,suggested);
+        } catch(error) {
+            const text=error&&error.message?error.message:'Impossible d’afficher la carte pour le moment.';
+            setStatus(text,true); summary.textContent=text; message.textContent=text; message.hidden=false; zeroActions.hidden=false;
+            if(map) setTimeout(function(){map.invalidateSize(false)},100);
+        } finally { setLoading(false); }
+    }
+
+    if (radius) {
+        const syncRadius=function(){ if(radiusValue) radiusValue.value=radius.value+' km'; if(radiusLegend) radiusLegend.textContent='Le cercle bleu représente votre rayon de recherche de '+radius.value+' km.'; };
+        radius.addEventListener('input',syncRadius); syncRadius();
+    }
+    closeButton.addEventListener('click',function(){panel.hidden=true;panel.setAttribute('aria-hidden','true')});
+    recenterButton.addEventListener('click',function(){ if(!map||!lastOrigin)return; if(lastBounds&&lastBounds.isValid()&&lastBounds.getNorthEast().distanceTo(lastBounds.getSouthWest())>50) map.fitBounds(lastBounds.pad(.18),{maxZoom:14}); else map.setView(lastOrigin,Number(radius.value)<=20?11:9); });
+    expandButton.addEventListener('click',function(){ radius.value='100'; if(radiusValue) radiusValue.value='100 km'; runSearch(); });
+    form.addEventListener('submit',function(event){event.preventDefault();runSearch();});
+})();
+</script>
+{% endif %}

@@ -1,0 +1,170 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Mes signalements{% endtrans %}{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/report/my-reports.css') }}?v=20260805">
+{% endblock %}
+
+{% block body %}
+
+  {% include "report/_vip_ui_my_reports.html.twig" %}
+
+
+  {% set STATUS_OPEN = 'open' %}
+  {% set STATUS_CANCELED = 'canceled' %}
+  {% set STATUS_RESOLVED = 'resolved' %}
+
+  <section class="vip-fullbleed">
+    <div class="vip-wrap">
+      <div class="vip-head mb-3">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div>
+            <h2 class="mb-1">{% trans %}Mes signalements{% endtrans %}</h2>
+            <div class="vip-meta">
+              {% trans %}Annuler = passe en{% endtrans %} <b>{% trans %}annulé{% endtrans %}</b> •
+              {% trans %}Supprimer ={% endtrans %} <b>{% trans %}suppression logique{% endtrans %}</b> (supprimer=1)
+            </div>
+          </div>
+
+          <a href="{{ path('accueil') }}" class="btn btn-light vip-btn">
+            <i class="fa fa-home"></i> {% trans %}Accueil{% endtrans %}
+          </a>
+        </div>
+      </div>
+
+      <div class="vip-card">
+        <div class="vip-card-b">
+          {% if reports is empty %}
+            <div class="text-center py-5">
+              <div class="h5 mb-2">{% trans %}Aucun signalement{% endtrans %}</div>
+              <div class="vip-meta">{% trans %}Quand vous signalez un compte, il apparaîtra ici.{% endtrans %}</div>
+            </div>
+          {% else %}
+            <div class="d-grid gap-3">
+              {% for r in reports %}
+                {% set st = r.status %}
+
+                <div class="vip-row">
+                  <div class="w-100">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                      <div class="fw-bold">
+                        {{ r.categorie.label }}
+                        <span class="vip-meta">— {% trans %}Cible{% endtrans %} : {{ r.targetUser.personalProfile.fullName }}</span>
+                      </div>
+
+                      {% if st == STATUS_OPEN %}
+                        <span class="vip-pill bg-primary text-white">{% trans %}OUVERT{% endtrans %}</span>
+                      {% elseif st == STATUS_CANCELED %}
+                        <span class="vip-pill bg-secondary text-white">{% trans %}ANNULÉ{% endtrans %}</span>
+                      {% else %}
+                        <span class="vip-pill bg-success text-white">{% trans %}RÉSOLU{% endtrans %}</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="vip-soft mt-2">
+                      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="vip-meta">
+                          <i class="fa fa-clock-o me-1"></i> {{ r.createdAt|date('d/m/Y H:i') }}
+                        </div>
+
+                        {% if r.canceledAt %}
+                          <div class="vip-meta"><i class="fa fa-ban me-1"></i> {% trans %}Annulé{% endtrans %} : {{ r.canceledAt|date('d/m/Y H:i') }}</div>
+                        {% endif %}
+                        {% if r.handledAt %}
+                          <div class="vip-meta"><i class="fa fa-check me-1"></i> {% trans %}Traité{% endtrans %} : {{ r.handledAt|date('d/m/Y H:i') }}</div>
+                        {% endif %}
+                      </div>
+
+                      <div class="mt-2">
+                        <div class="vip-meta fw-bold mb-1">{% trans %}Raison{% endtrans %}</div>
+                        <div class="vip-reason">{{ r.reason }}</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="vip-actions">
+                    <form class="js-swal-confirm"
+                          data-title="{% trans %}Annuler ce signalement ?{% endtrans %}"
+                          data-text="{% trans %}Ce signalement passera en ANNULÉ.{% endtrans %}"
+                          data-icon="warning"
+                          data-confirm="{% trans %}Oui, annuler{% endtrans %}"
+                          data-confirm-color="#f59e0b"
+                          method="post"
+                          action="{{ path('report_cancel', {id: r.id}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('cancel_report_' ~ r.id) }}">
+                      <button class="btn btn-outline-warning vip-btn w-100" type="submit"
+                              {% if st != STATUS_OPEN %}disabled class="is-control-disabled"{% endif %}>
+                        <i class="fa fa-ban"></i> {% trans %}Annuler{% endtrans %}
+                      </button>
+                    </form>
+
+                    <form class="js-swal-confirm"
+                          data-title="{% trans %}Supprimer le signalement ?{% endtrans %}"
+                          data-text="{% trans %}Suppression logique : supprimer=1.{% endtrans %}"
+                          data-icon="question"
+                          data-confirm="{% trans %}Oui, supprimer{% endtrans %}"
+                          data-confirm-color="#dc2626"
+                          method="post"
+                          action="{{ path('report_soft_delete', {id: r.id}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('delete_report_' ~ r.id) }}">
+                      <button class="btn btn-outline-danger vip-btn w-100" type="submit">
+                        <i class="fa fa-trash"></i> {% trans %}Supprimer{% endtrans %}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+
+            {% if pagination.pages > 1 %}
+
+<div class="vip-pager">
+                <div class="vip-pager-left">
+                  {% trans %}Total{% endtrans %} : <b>{{ pagination.total }}</b> •
+                  {% trans %}Page{% endtrans %} <b>{{ pagination.page }}</b> / <b>{{ pagination.pages }}</b> •
+                  <span class="vip-meta">{% trans %}5 par page{% endtrans %}</span>
+                </div>
+
+                <div class="vip-pager-nav">
+                  <a class="vip-page-btn {{ not pagination.hasPrev ? 'is-disabled' : '' }}"
+                     href="{{ path('report_my_list', {page: pagination.prev}) }}">‹</a>
+
+                  {% set start = pagination.page - 2 %}
+                  {% set end = pagination.page + 2 %}
+                  {% if start < 1 %}{% set start = 1 %}{% endif %}
+                  {% if end > pagination.pages %}{% set end = pagination.pages %}{% endif %}
+
+                  {% if start > 1 %}
+                    <a class="vip-page-btn" href="{{ path('report_my_list', {page: 1}) }}">1</a>
+                    {% if start > 2 %}<span class="vip-meta px-1">…</span>{% endif %}
+                  {% endif %}
+
+                  {% for p in start..end %}
+                    <a class="vip-page-btn {{ p == pagination.page ? 'is-active' : '' }}"
+                       href="{{ path('report_my_list', {page: p}) }}">{{ p }}</a>
+                  {% endfor %}
+
+                  {% if end < pagination.pages %}
+                    {% if end < pagination.pages - 1 %}<span class="vip-meta px-1">…</span>{% endif %}
+                    <a class="vip-page-btn" href="{{ path('report_my_list', {page: pagination.pages}) }}">{{ pagination.pages }}</a>
+                  {% endif %}
+
+                  <a class="vip-page-btn {{ not pagination.hasNext ? 'is-disabled' : '' }}"
+                     href="{{ path('report_my_list', {page: pagination.next}) }}">›</a>
+                </div>
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="{{ asset('js/report/my-reports.js') }}?v=20260805" defer></script>
+{% endblock %}

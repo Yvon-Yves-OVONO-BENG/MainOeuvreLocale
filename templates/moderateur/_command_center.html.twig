@@ -1,0 +1,205 @@
+{# ✅ COMMAND CENTER - Module réutilisable #}
+
+<style>
+  :root{
+    --mod-bg0:#F7F9FF;
+    --mod-bg1:#EEF2FF;
+    --mod-ink:rgba(15,23,42,.92);
+    --mod-muted:rgba(15,23,42,.62);
+    --mod-line:rgba(15,23,42,.12);
+    --mod-card:rgba(255,255,255,.70);
+    --mod-card2:rgba(255,255,255,.92);
+    --mod-shadow:0 22px 70px rgba(15,23,42,.10);
+    --mod-shadow2:0 14px 45px rgba(15,23,42,.08);
+    --mod-r:22px;
+  }
+
+  .mod-card{
+    border:1px solid var(--mod-line);
+    background: linear-gradient(180deg, var(--mod-card), var(--mod-card2));
+    box-shadow: var(--mod-shadow);
+    border-radius: var(--mod-r);
+    overflow:hidden;
+  }
+  .mod-card > .hd{
+    padding: 16px 18px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    border-bottom:1px solid rgba(15,23,42,.08);
+    background: linear-gradient(90deg, rgba(99,102,241,.12), rgba(16,185,129,.10), rgba(255,255,255,.0));
+  }
+  .mod-card > .bd{ padding: 16px 18px; }
+  .mod-card > .ft{
+    padding: 14px 18px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:flex-end;
+    border-top:1px solid rgba(15,23,42,.08);
+    background: rgba(255,255,255,.65);
+  }
+  .hint{ color: var(--mod-muted); font-size:.86rem; line-height:1.35; }
+
+  .mod-btn{
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding: 10px 14px;
+    border-radius: 16px;
+    border:1px solid rgba(15,23,42,.12);
+    background: rgba(255,255,255,.90);
+    color: rgba(15,23,42,.92);
+    font-weight: 800;
+    text-decoration:none;
+    box-shadow: var(--mod-shadow2);
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+    white-space:nowrap;
+  }
+  .mod-btn:hover{
+    transform: translateY(-1px);
+    background: rgba(255,255,255,.98);
+    box-shadow: 0 18px 55px rgba(15,23,42,.12);
+  }
+  .mod-btn-primary{
+    border-color: rgba(99,102,241,.35);
+    background: linear-gradient(180deg, rgba(99,102,241,.18), rgba(255,255,255,.92));
+  }
+  .mod-btn-green{
+    border-color: rgba(16,185,129,.35);
+    background: linear-gradient(180deg, rgba(16,185,129,.14), rgba(255,255,255,.92));
+  }
+
+  .mod-input{
+    border-radius: 16px !important;
+    border: 1px solid rgba(15,23,42,.14) !important;
+    background: rgba(255,255,255,.94) !important;
+    color: rgba(15,23,42,.92) !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 10px 30px rgba(15,23,42,.06);
+  }
+
+  /* Suggest dropdown */
+  .mod-suggest{
+    position:relative;
+  }
+  .mod-suggest-list{
+    position:absolute; left:0; right:0; top: calc(100% + 8px);
+    z-index: 9999;
+    border-radius: 18px;
+    border:1px solid rgba(15,23,42,.12);
+    background: rgba(255,255,255,.98);
+    box-shadow: 0 22px 70px rgba(15,23,42,.14);
+    overflow:hidden;
+    display:none;
+  }
+  .mod-suggest-item{
+    padding: 10px 12px;
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    border-bottom: 1px solid rgba(15,23,42,.06);
+    text-decoration:none;
+    color: rgba(15,23,42,.92);
+    font-weight: 750;
+  }
+  .mod-suggest-item small{ color: rgba(15,23,42,.55); font-weight: 700; }
+  .mod-suggest-item:hover{ background: rgba(99,102,241,.06); }
+  .mod-suggest-list .mod-suggest-item:last-child{ border-bottom:0; }
+</style>
+
+<div class="mod-card mt-3" id="modCommandCenter"
+     data-suggest-url="{{ path('moderateur_search_suggest') }}">
+  <div class="hd">
+    <div>
+      <div class="fw-bold">🧠 {% trans %}Centre de commandes (Modération){% endtrans %}</div>
+      <div class="hint">{% trans %}Outils avancés : recherche globale, exports, règles, modèles de réponse, vérifications.{% endtrans %}</div>
+    </div>
+  </div>
+
+  <div class="bd">
+    <div class="row g-3">
+
+      <div class="col-12 col-lg-4">
+        <div class="mod-card" style="border-radius: 18px;">
+          <div class="hd">
+            <div class="fw-bold">🔎 {% trans %}Recherche globale{% endtrans %}</div>
+            <div class="hint">{% trans %}User / Talent / Company / Report / Message{% endtrans %}</div>
+          </div>
+          <div class="bd">
+            <form method="get" action="{{ path('moderateur_search') }}" class="mod-suggest">
+              <input id="modGlobalSearch"
+                     name="q"
+                     class="form-control mod-input"
+                     autocomplete="off"
+                     placeholder="{{ 'Rechercher (email, téléphone, ID, mot-clé)…'|trans }}">
+              <div class="mod-suggest-list" id="modSuggestList"></div>
+
+              <div class="d-flex gap-2 flex-wrap mt-2">
+                <button class="mod-btn mod-btn-primary" type="submit">{% trans %}Rechercher{% endtrans %}</button>
+                <a class="mod-btn" href="{{ path('moderateur_search_advanced') }}">{% trans %}Recherche avancée{% endtrans %}</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="mod-card" style="border-radius: 18px;">
+          <div class="hd">
+            <div class="fw-bold">📤 {% trans %}Exports & preuves{% endtrans %}</div>
+            <div class="hint">{% trans %}Télécharger des rapports (audit){% endtrans %}</div>
+          </div>
+          <div class="bd">
+            <div class="d-flex flex-wrap gap-2">
+              <a class="mod-btn" href="{{ path('moderateur_export_reports') }}">📄 {% trans %}Exports reports{% endtrans %}</a>
+              <a class="mod-btn" href="{{ path('moderateur_export_users') }}">👤 {% trans %}Exports users{% endtrans %}</a>
+              <a class="mod-btn" href="{{ path('moderateur_export_companies') }}">🏢 {% trans %}Exports companies{% endtrans %}</a>
+            </div>
+            <div class="hint mt-2">{% trans %}Conservez une trace avant toute décision sensible.{% endtrans %}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="mod-card" style="border-radius: 18px;">
+          <div class="hd">
+            <div class="fw-bold">🗣️ {% trans %}Modèles de réponses{% endtrans %}</div>
+            <div class="hint">{% trans %}Messages standards pour modération{% endtrans %}</div>
+          </div>
+          <div class="bd">
+            <div class="d-flex flex-wrap gap-2">
+              <a class="mod-btn" href="{{ path('moderateur_template_show', {slug:'warning'}) }}">⚠️ {% trans %}Avertissement{% endtrans %}</a>
+              <a class="mod-btn" href="{{ path('moderateur_template_show', {slug:'review'}) }}">🔍 {% trans %}Demande infos{% endtrans %}</a>
+              <a class="mod-btn" href="{{ path('moderateur_template_show', {slug:'closure'}) }}">✅ {% trans %}Clôture{% endtrans %}</a>
+            </div>
+            <div class="hint mt-2">{% trans %}Accélère la modération, garde le ton cohérent.{% endtrans %}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="ft">
+    <a class="mod-btn" href="{{ path('moderateur_settings') }}">⚙️ {% trans %}Paramètres modération{% endtrans %}</a>
+    <a class="mod-btn mod-btn-green" href="{{ path('moderateur_rules') }}">🛡️ {% trans %}Règles & policies{% endtrans %}</a>
+    <button class="mod-btn mod-btn-primary" type="button" onclick="MOLChatOpen()">💬 {% trans %}Ouvrir messages{% endtrans %}</button>
+  </div>
+</div>
+
+{# Offcanvas Chat (Bootstrap) #}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="molChatOffcanvas" aria-labelledby="molChatOffcanvasLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title fw-black" id="molChatOffcanvasLabel">💬 {% trans %}Messages (Modération){% endtrans %}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="{{ 'Fermer'|trans }}"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="p-3 rounded-4 border" style="border-color: rgba(15,23,42,.12); background: rgba(255,255,255,.9);">
+      <div class="fw-bold">{% trans %}Boîte modération{% endtrans %}</div>
+      <div class="text-muted small mt-1">{% trans %}À connecter à ton système de messagerie (threads, signalements, etc.).{% endtrans %}</div>
+      <hr>
+      <div class="text-muted small">✅ {% trans %}UI prête. Branche tes données ici.{% endtrans %}</div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ asset('js/moderateur/command-center.js') }}"></script>

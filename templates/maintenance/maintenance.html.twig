@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+
+{% include "maintenance/_vip_ui.html.twig" %}
+
+<div class="m-shell">
+  <div class="m-card">
+    <div class="m-grid">
+      <div class="m-left">
+        <div class="m-badge">
+          <span>⚙️</span>
+          <span>{% trans %}Maintenance planifiée{% endtrans %}</span>
+        </div>
+
+        <h1 class="m-title">{{ title }}</h1>
+
+        <div class="m-text">
+          {{ message }}
+          <br><br>
+          {% trans %}Nos équipes interviennent actuellement pour améliorer la stabilité, la sécurité et les performances de la plateforme.{% endtrans %}
+        </div>
+
+        <div class="m-status">
+          <div class="m-pill">🛡️ {% trans %}Sécurité renforcée{% endtrans %}</div>
+          <div class="m-pill">⚡ {% trans %}Optimisation en cours{% endtrans %}</div>
+          <div class="m-pill">🔧 {% trans %}Service temporairement indisponible{% endtrans %}</div>
+        </div>
+
+        <div class="m-footer">
+          {% trans %}Merci pour votre patience. La plateforme sera à nouveau disponible dès la fin de l’intervention.{% endtrans %}
+        </div>
+      </div>
+
+      <div class="m-right">
+        <div class="m-illustration">
+          <div class="m-ring"></div>
+          <div class="m-ring-2"></div>
+          <div class="m-core">⛔</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

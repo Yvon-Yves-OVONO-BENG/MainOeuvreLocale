@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Mes offres publiées'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "job/_vip_ui_mes_jobs.html.twig" %}
+
+<div class="pub-page">
+  <div class="container-fluid py-4">
+    <div class="pub-shell">
+      <div class="pub-wrap">
+        <div class="pub-head">
+          <div>
+            <div class="pub-title">{% trans %}Mes offres publiées{% endtrans %}</div>
+            <div class="pub-sub">{% trans %}Total postulants + restants (non vus) • Cliquez pour gérer{% endtrans %}</div>
+          </div>
+          <a href="{{ path('tableau_de_bord') }}" class="btn btn-sm btn-outline-dark rounded-pill">{% trans %}← Retour{% endtrans %}</a>
+        </div>
+
+        <div class="pub-list">
+          {% if rows is defined and rows|length > 0 %}
+            {% for r in rows %}
+              {% set j = r.job %}
+              {% set total = r.applicantsTotal ?? 0 %}
+              {% set remaining = r.applicantsRemaining ?? 0 %}
+
+              <div class="pub-item">
+                <div class="d-flex align-items-start justify-content-between gap-3">
+                  <div>
+                    <div class="fw-bold">
+                      {{ j.title ?? ('Offre #'|trans ~ j.id) }}
+                      {% if remaining|default(0) > 0 %}
+                        <span class="badge text-bg-danger rounded-pill ms-2">{% trans %}Nouveau{% endtrans %}</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="text-muted small">
+                      📍 {{ j.city ?? '—' }} • {{ j.createdAt ? j.createdAt|date('d/m/Y') : '—' }}
+                    </div>
+
+                    <div class="mt-3 d-flex gap-2 flex-wrap">
+                      <span class="pill">👥 {% trans %}Total :{% endtrans %} {{ total }}</span>
+                      <span class="pill">🕒 {% trans %}Restants :{% endtrans %} {{ remaining }}</span>
+                    </div>
+                  </div>
+
+                  <div class="text-end">
+                    <a href="{{ path('job_edit', {slug: j.slug}) }}"
+                       class="btn btn-primary btn-sm rounded-pill px-3">
+                      {% trans %}Optimiser{% endtrans %}
+                    </a>
+                    <a href="{{ path('talent_job_applications', {slug: j.slug}) }}"
+                       class="btn btn-primary btn-sm rounded-pill px-3">
+                      {% trans %}Voir plus{% endtrans %}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="empty-state">
+              <div class="empty-icon">📂</div>
+              <div class="fw-semibold mb-1">{% trans %}Aucune offre publiée{% endtrans %}</div>
+              <div class="soft-muted small">{% trans %}Publiez une offre pour recevoir des candidatures.{% endtrans %}</div>
+              <div class="mt-3">
+                <a href="{{ path('job_new') }}" class="btn btn-primary rounded-pill">➕ {% trans %}Publier une offre{% endtrans %}</a>
+                <a href="{{ path('brief_templates_index') }}" class="btn btn-primary rounded-pill">🧩 {% trans %}Utiliser un modele{% endtrans %}</a>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

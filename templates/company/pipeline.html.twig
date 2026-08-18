@@ -1,0 +1,285 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Pipeline • Candidatures'|trans }}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% include "company/_vip_ui_pipeline.html.twig" %}
+
+<div class="vip-wrap">
+  <div class="mx-auto max-w-7xl px-4">
+
+    <div class="vip-card overflow-hidden">
+      <div class="p-6 sm:p-8">
+
+        {# ===== Header ===== #}
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div class="vip-chip">
+              <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+              {% trans %}🧭 Pipeline • Candidatures{% endtrans %}
+            </div>
+            <h1 class="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              {% trans %}Suivi des Candidatures{% endtrans %}
+            </h1>
+            <p class="mt-1 text-sm text-slate-600">
+              {% trans %}Fais avancer les candidatures par étape — drag & drop ou actions rapides.{% endtrans %}
+            </p>
+          </div>
+
+          <div class="flex gap-2 flex-wrap">
+            <a href="{{ path('tableau_de_bord') }}" class="btnx" data-turbo="false">{% trans %}Tableau de bord{% endtrans %}</a>
+          </div>
+        </div>
+
+        {# ===== Filters ===== #}
+        <form method="get" class="mt-6 vip-soft p-4">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+            <div class="md:col-span-3">
+              <label class="text-xs font-extrabold text-slate-700">{% trans %}Période{% endtrans %}</label>
+              <select name="period" class="mt-1 w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm">
+                <option value="7"  {{ filters.period == '7'  ? 'selected' : '' }}>{% trans %}7 jours{% endtrans %}</option>
+                <option value="30" {{ filters.period == '30' ? 'selected' : '' }}>{% trans %}30 jours{% endtrans %}</option>
+                <option value="90" {{ filters.period == '90' ? 'selected' : '' }}>{% trans %}90 jours{% endtrans %}</option>
+                <option value="custom" {{ filters.period == 'custom' ? 'selected' : '' }}>{% trans %}Personnalisée{% endtrans %}</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-4">
+              <label class="text-xs font-extrabold text-slate-700">{% trans %}Offre{% endtrans %}</label>
+              <select name="job" class="mt-1 w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm">
+                <option value="0">{% trans %}Toutes les offres{% endtrans %}</option>
+                {% for j in jobsForSelect %}
+                  <option value="{{ j.id }}" {{ (filters.jobId == j.id) ? 'selected' : '' }}>
+                    #{{ j.id }} — {{ j.title }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="text-xs font-extrabold text-slate-700">{% trans %}Du{% endtrans %}</label>
+              <input type="date" name="from" value="{{ filters.from }}"
+                     class="mt-1 w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm"/>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="text-xs font-extrabold text-slate-700">{% trans %}Au{% endtrans %}</label>
+              <input type="date" name="to" value="{{ filters.to }}"
+                     class="mt-1 w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm"/>
+            </div>
+
+            <div class="md:col-span-1">
+              <button class="w-full rounded-2xl bg-slate-900 px-4 py-2 text-sm font-extrabold text-white hover:bg-slate-800">
+                {% trans %}Filtrer{% endtrans %}
+              </button>
+            </div>
+
+            <div class="md:col-span-12">
+              <label class="text-xs font-extrabold text-slate-700">{% trans %}Recherche{% endtrans %}</label>
+              <input type="text" name="q" value="{{ filters.q }}"
+                     placeholder="{{ 'Email ou nom candidat...'|trans }}"
+                     class="mt-1 w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm"/>
+              <p class="mt-2 text-xs text-slate-500">{% trans %}Si “Personnalisée”, Du/Au sont pris en compte.{% endtrans %}</p>
+            </div>
+          </div>
+        </form>
+
+        {# ===== KPIs ===== #}
+        <div class="mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div class="kpi"><div class="t">{% trans %}Total{% endtrans %}</div><div class="v">{{ counts._total ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Nouvelles{% endtrans %}</div><div class="v">{{ counts.NEW ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Consultées{% endtrans %}</div><div class="v">{{ counts.REVIEWED ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Shortlist{% endtrans %}</div><div class="v">{{ counts.SHORTLIST ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Acceptées{% endtrans %}</div><div class="v">{{ counts.ACCEPTED ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Rejetées{% endtrans %}</div><div class="v">{{ counts.REJECTED ?? 0 }}</div></div>
+        </div>
+
+        {# ===== Board ===== #}
+        <div class="mt-6 board">
+
+          {% set meta = {
+            'NEW':       {'title':'🆕 Nouvelles',     'hint':'À traiter vite'},
+            'REVIEWED':  {'title':'👀 Consultées',   'hint':'À qualifier'},
+            'SHORTLIST': {'title':'⭐ Shortlist',    'hint':'Top candidats'},
+            'ACCEPTED':  {'title':'✅ Acceptées',    'hint':'OK recrutement'},
+            'REJECTED':  {'title':'⛔ Rejetées',     'hint':'À archiver'}
+          } %}
+
+          {% for status, cfg in meta %}
+            {% set list = columns[status] ?? [] %}
+            <div class="col" data-dropzone="{{ status }}">
+              <div class="col-head">
+                <div>
+                  <div class="col-title">{{ cfg.title|trans }}</div>
+                  <div class="text-xs muted">{{ cfg.hint|trans }}</div>
+                </div>
+                <span class="badge" data-count="{{ status }}">{{ list|length }}</span>
+              </div>
+
+              <div class="col-body" data-list="{{ status }}">
+                {% for a in list %}
+                  {% set jobTitle = a.job ? (a.job.title ?? ('Offre #'|trans ~ a.job.id)) : 'Offre'|trans %}
+                  {% set candidateName = (a.user and a.user.personalProfile and a.user.personalProfile.fullName) ? a.user.personalProfile.fullName : (a.user ? a.user.email : 'Candidat'|trans) %}
+                  {% set isViewed = a.viewedAt ? true : false %}
+
+                  <div class="card"
+                       draggable="true"
+                       data-app="{{ a.id }}"
+                       data-status="{{ a.status }}"
+                       data-job="{{ jobTitle|e('html_attr') }}"
+                       data-candidate="{{ candidateName|e('html_attr') }}"
+                       data-created="{{ a.createdAt ? a.createdAt|date('d/m/Y H:i') : '-' }}">
+                    <div class="flex items-start justify-between gap-2">
+                      <div class="min-w-0">
+                        <div class="font-extrabold text-slate-900 truncate">{{ jobTitle }}</div>
+                        <div class="text-xs muted mt-0.5 truncate">🧑‍💼 {{ candidateName }}</div>
+                      </div>
+
+                      <div class="flex flex-col items-end gap-1">
+                        <span class="pill {{ isViewed ? 'ok' : 'warn' }}">
+                          {{ isViewed ? 'Vu'|trans : 'Non vu'|trans }}
+                        </span>
+                        <span class="text-[11px] muted">
+                          {{ a.createdAt ? a.createdAt|date('d/m H:i') : '-' }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 flex items-center justify-between gap-2">
+                      <select class="statusSelect text-xs rounded-xl border-slate-200 bg-white px-2 py-1"
+                              data-app="{{ a.id }}">
+                        {% for s in ['NEW','REVIEWED','SHORTLIST','ACCEPTED','REJECTED'] %}
+                          <option value="{{ s }}" {{ a.status == s ? 'selected' : '' }}>{{ s }}</option>
+                        {% endfor %}
+                      </select>
+
+                      <a href="{{ path('talent_job_applications', { slug: a.job.slug }) }}" class="btnx" style="padding:6px 9px;font-size:11px;">
+                        {% trans %}Ouvrir →{% endtrans %}
+                      </a>
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="text-xs muted" style="padding: 6px 6px 10px;">
+                    {% trans %}Rien ici pour l’instant.{% endtrans %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  const moveUrlTpl = {{ moveUrlTpl|json_encode|raw }};
+
+  function toast(msg){
+    const el = document.getElementById('toast');
+    if(!el) return;
+    el.textContent = msg;
+    el.style.display = 'block';
+    clearTimeout(window.__t);
+    window.__t = setTimeout(()=> el.style.display='none', 2200);
+  }
+
+  async function moveApplication(appId, newStatus){
+    const url = moveUrlTpl.replace('__ID__', encodeURIComponent(appId));
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({status: newStatus})
+    });
+    const data = await res.json().catch(()=>null);
+    if(!data || !data.ok) {
+      toast((data && data.message) ? data.message : '{{ "Erreur"|trans|e("js") }}');
+      return false;
+    }
+    return true;
+  }
+
+  function updateCounts(){
+    document.querySelectorAll('[data-dropzone]').forEach(col=>{
+      const st = col.getAttribute('data-dropzone');
+      const count = col.querySelectorAll('.card[data-status]').length;
+      const badge = document.querySelector(`[data-count="${st}"]`);
+      if (badge) badge.textContent = count;
+    });
+  }
+
+  // ===== Dropdown change =====
+  document.querySelectorAll('.statusSelect').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      const appId = sel.dataset.app;
+      const newStatus = sel.value;
+      const card = document.querySelector(`.card[data-app="${CSS.escape(appId)}"]`);
+      const targetList = document.querySelector(`[data-list="${CSS.escape(newStatus)}"]`);
+      if(!card || !targetList) return;
+
+      const ok = await moveApplication(appId, newStatus);
+      if(!ok) { sel.value = card.dataset.status; return; }
+
+      card.dataset.status = newStatus;
+      targetList.prepend(card);
+      updateCounts();
+      toast('{{ "Statut mis à jour ✅"|trans|e("js") }}');
+    });
+  });
+
+  // ===== Drag & Drop =====
+  let dragged = null;
+
+  document.querySelectorAll('.card[draggable="true"]').forEach(card=>{
+    card.addEventListener('dragstart', (e)=>{
+      dragged = card;
+      e.dataTransfer.setData('text/plain', card.dataset.app);
+      setTimeout(()=> card.style.opacity = '0.6', 0);
+    });
+    card.addEventListener('dragend', ()=>{
+      if (dragged) dragged.style.opacity = '1';
+      dragged = null;
+    });
+  });
+
+  document.querySelectorAll('[data-dropzone]').forEach(zone=>{
+    const status = zone.getAttribute('data-dropzone');
+    const list = zone.querySelector('[data-list]');
+    if(!list) return;
+
+    zone.addEventListener('dragover', (e)=>{ e.preventDefault(); zone.classList.add('drop-hover'); });
+    zone.addEventListener('dragleave', ()=> zone.classList.remove('drop-hover'));
+    zone.addEventListener('drop', async (e)=>{
+      e.preventDefault();
+      zone.classList.remove('drop-hover');
+      const appId = e.dataTransfer.getData('text/plain');
+      const card = document.querySelector(`.card[data-app="${CSS.escape(appId)}"]`);
+      if(!card) return;
+
+      const oldStatus = card.dataset.status;
+      if(oldStatus === status) return;
+
+      const ok = await moveApplication(appId, status);
+      if(!ok) return;
+
+      card.dataset.status = status;
+      list.prepend(card);
+
+      // Sync dropdown
+      const sel = card.querySelector('.statusSelect');
+      if (sel) sel.value = status;
+
+      updateCounts();
+      toast('{{ "Déplacé ✅"|trans|e("js") }}');
+    });
+  });
+
+  updateCounts();
+</script>
+{% endblock %}

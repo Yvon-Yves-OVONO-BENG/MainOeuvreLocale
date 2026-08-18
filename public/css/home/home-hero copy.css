@@ -1,0 +1,884 @@
+/* =========================================================
+   HERO COLLAGE
+   Premium, aéré, pas plein écran
+========================================================= */
+
+.ph-hero-v4 {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #071421;
+}
+
+.ph-hero-v4 > .container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.ph-hero-shell {
+    position: relative;
+    width: 100%;
+    height: clamp(500px, 68vh, 660px);
+    overflow: hidden;
+    background: #0b1724;
+}
+
+/* ===== Collage ===== */
+.ph-hero-collage-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 4px;
+    z-index: 1;
+}
+
+.ph-hero-tile {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.01);
+}
+
+.ph-hero-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .10);
+}
+
+/* Disposition façon collage */
+.ph-tile-1 { grid-column: 1 / 5;  grid-row: 1 / 4; }
+.ph-tile-2 { grid-column: 5 / 8;  grid-row: 1 / 4; }
+.ph-tile-3 { grid-column: 8 / 13; grid-row: 1 / 4; }
+
+.ph-tile-4 { grid-column: 1 / 4;  grid-row: 4 / 7; }
+.ph-tile-5 { grid-column: 4 / 7;  grid-row: 4 / 7; }
+.ph-tile-6 { grid-column: 7 / 10; grid-row: 4 / 7; }
+.ph-tile-7 { grid-column: 10 / 13; grid-row: 4 / 7; }
+
+/* ===== Overlay ===== */
+.ph-hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+        linear-gradient(180deg, rgba(6, 15, 24, .18) 0%, rgba(6, 15, 24, .32) 34%, rgba(6, 15, 24, .54) 100%),
+        linear-gradient(90deg, rgba(6, 15, 24, .10) 0%, rgba(6, 15, 24, .18) 50%, rgba(6, 15, 24, .18) 100%);
+}
+
+/* ===== Content ===== */
+.ph-hero-content {
+    position: relative;
+    z-index: 3;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 54px 14px 28px;
+}
+
+.ph-hero-main {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.ph-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: rgba(255,255,255,.92);
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ph-hero-badge span {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #22c55e;
+}
+
+.ph-hero-title {
+    margin: 0 auto 20px;
+    max-width: 980px;
+    color: #fff;
+    font-size: clamp(1rem, 3.2vw, 3.2rem);
+    line-height: 1.04;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    text-shadow: 0 12px 30px rgba(0,0,0,.30);
+}
+
+/* ===== Tabs ===== */
+.ph-hero-tabs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto 18px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.16);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.ph-hero-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.ph-hero-tab {
+    min-height: 38px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: rgba(255,255,255,.88);
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: .2s ease;
+}
+
+.ph-hero-tab:hover,
+.ph-hero-tab.active {
+    color: #0f172a;
+    background: #fff;
+}
+
+/* ===== Search ===== */
+.ph-hero-search {
+    width: min(920px, 100%);
+    min-height: 62px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.96);
+    border: 1px solid rgba(255,255,255,.7);
+    box-shadow: 0 12px 36px rgba(0,0,0,.18);
+}
+
+.ph-hero-search-icon {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: #475569;
+    background: #f8fafc;
+    font-size: 16px;
+}
+
+.ph-hero-search-input {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.ph-hero-search-input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.ph-hero-search-btn {
+    min-height: 48px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 12px;
+    color: #5b5b12;
+    background: #eef2a6;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.ph-hero-search-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ===== Professions chips ===== */
+.ph-hero-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.ph-hero-chip {
+    min-height: 34px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.18);
+    text-decoration: none !important;
+    font-size: 12px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ===== Bottom actions ===== */
+.ph-hero-bottom-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ph-hero-mini-btn {
+    min-height: 38px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(7, 20, 33, .55);
+    border: 1px solid rgba(255,255,255,.18);
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.ph-hero-mini-btn-accent {
+    color: #554b00;
+    background: #f3e98e;
+    border-color: rgba(255,255,255,.38);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 991.98px) {
+    .ph-hero-shell {
+        height: 560px;
+    }
+
+    .ph-hero-title {
+        font-size: clamp(1.9rem, 5vw, 3.2rem);
+    }
+
+    .ph-hero-search {
+        min-height: auto;
+        flex-wrap: wrap;
+    }
+
+    .ph-hero-search-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-shell {
+        height: auto;
+        min-height: 520px;
+    }
+
+    .ph-hero-collage-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(4, 140px);
+    }
+
+    .ph-tile-1 { grid-column: 1 / 2; grid-row: 1 / 3; }
+    .ph-tile-2 { grid-column: 2 / 3; grid-row: 1 / 2; }
+    .ph-tile-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
+    .ph-tile-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
+    .ph-tile-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
+    .ph-tile-6 { grid-column: 1 / 2; grid-row: 4 / 5; }
+    .ph-tile-7 { grid-column: 2 / 3; grid-row: 4 / 5; }
+
+    .ph-hero-content {
+        padding: 42px 12px 22px;
+    }
+
+    .ph-hero-title {
+        font-size: clamp(1.8rem, 8vw, 2.6rem);
+        line-height: 1.05;
+    }
+
+    .ph-hero-tabs {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .ph-hero-bottom-actions {
+        gap: 8px;
+    }
+
+    .ph-hero-mini-btn {
+        width: 100%;
+    }
+}
+
+
+/* Défilement horizontal des professions dans le hero */
+.ph-hero-tags-scroll {
+    position: relative;
+    width: min(920px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ph-hero-tags-scroller {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 2px 0;
+}
+
+.ph-hero-tags-scroller::-webkit-scrollbar {
+    display: none;
+}
+
+.ph-hero-tags-scroller .ph-hero-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.ph-hero-tags-nav {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgba(7, 20, 33, .62);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: .2s ease;
+    z-index: 2;
+}
+
+.ph-hero-tags-nav:hover {
+    background: rgba(255,255,255,.92);
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+
+.ph-hero-tags-nav.is-disabled {
+    opacity: .35;
+    pointer-events: none;
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-tags-scroll {
+        width: 100%;
+        gap: 6px;
+    }
+
+    .ph-hero-tags-nav {
+        flex-basis: 30px;
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* =========================================================
+   HERO BACKGROUND SLIDER - doux, premium, sans casser le code
+========================================================= */
+
+.ph-hero-v4,
+.ph-hero-shell {
+    margin-top: 0 !important;
+}
+
+.ph-hero-bg-slider {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    background: #020617;
+}
+
+.ph-hero-bg-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.04);
+    filter: saturate(1.08) contrast(1.01) brightness(.96);
+    transition:
+        opacity 1800ms ease-in-out,
+        visibility 1800ms ease-in-out,
+        transform 9000ms ease;
+    will-change: opacity, transform;
+}
+
+.ph-hero-bg-slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* Overlay plus propre pour laisser voir les images */
+.ph-hero-v4 .ph-hero-overlay {
+    z-index: 2;
+    background:
+        linear-gradient(180deg,
+            rgba(2, 6, 23, .05) 0%,
+            rgba(2, 6, 23, .14) 42%,
+            rgba(2, 6, 23, .34) 100%
+        ),
+        linear-gradient(90deg,
+            rgba(2, 6, 23, .18) 0%,
+            rgba(2, 6, 23, .06) 48%,
+            rgba(2, 6, 23, .18) 100%
+        ) !important;
+}
+
+/* Le contenu reste au-dessus */
+.ph-hero-v4 .ph-hero-content {
+    position: relative;
+    z-index: 5;
+}
+
+/* Titre en blanc malgré les styles globaux .ph-home h1 */
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    color: #ffffff !important;
+    text-shadow: 0 18px 46px rgba(0, 0, 0, .55) !important;
+}
+
+/* Badge et boutons bien visibles */
+.ph-hero-v4 .ph-hero-badge,
+.ph-hero-v4 .ph-hero-mini-btn,
+.ph-hero-v4 .ph-hero-chip {
+    color: #ffffff !important;
+}
+
+/* Bouton inscription garde sa couleur */
+.ph-hero-v4 .ph-hero-mini-btn-accent {
+    color: #554b00 !important;
+}
+
+
+/* =========================================================
+   HERO FINAL PREMIUM — images plus claires + slider doux
+   À coller tout en bas de home-hero.css
+========================================================= */
+
+/* Enlève l'espace juste après le menu */
+.ph-home,
+.ph-home > section:first-child,
+.ph-home > .ph-hero-v4:first-child,
+.ph-hero-v4,
+.ph-hero-shell {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Hauteur hero propre : pas plein écran, pas trop petit */
+.ph-hero-v4 .ph-hero-shell {
+    position: relative;
+    width: 100%;
+    height: clamp(500px, 68vh, 640px);
+    min-height: 500px;
+    overflow: hidden;
+    background: #020617;
+}
+
+/* Slider arrière-plan */
+.ph-hero-bg-slider {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    background: #020617;
+}
+
+.ph-hero-bg-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.045);
+    filter: saturate(1.08) contrast(1.03) brightness(.97);
+    transition:
+        opacity 1800ms ease-in-out,
+        visibility 1800ms ease-in-out,
+        transform 9000ms ease;
+    will-change: opacity, transform;
+}
+
+.ph-hero-bg-slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* Overlay plus clair : on voit mieux les photos */
+.ph-hero-v4 .ph-hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(2, 6, 23, .10) 0%,
+            rgba(2, 6, 23, .22) 44%,
+            rgba(2, 6, 23, .50) 100%
+        ),
+        linear-gradient(
+            90deg,
+            rgba(2, 6, 23, .30) 0%,
+            rgba(2, 6, 23, .10) 48%,
+            rgba(2, 6, 23, .30) 100%
+        ) !important;
+}
+
+/* Contenu toujours au-dessus */
+.ph-hero-v4 .ph-hero-content {
+    position: relative;
+    z-index: 5;
+}
+
+/* Titre blanc, net, lisible */
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    color: #ffffff !important;
+    font-weight: 850 !important;
+    text-shadow:
+        0 4px 14px rgba(0, 0, 0, .45),
+        0 18px 50px rgba(0, 0, 0, .45) !important;
+}
+
+/* Badge visible mais léger */
+.ph-hero-v4 .ph-hero-badge {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .48) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Boutons Missions / Connexion */
+.ph-hero-v4 .ph-hero-mini-btn {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .52) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Bouton Inscription reste jaune */
+.ph-hero-v4 .ph-hero-mini-btn-accent {
+    color: #4b3f00 !important;
+    background: #f4e98d !important;
+    border-color: rgba(255, 255, 255, .35) !important;
+}
+
+/* Recherche plus propre au-dessus des photos */
+.ph-hero-v4 .vip-search {
+    /* background: rgba(255, 255, 255, .86) !important;*/
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255, 255, 255, .58) !important;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .20) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Chips métiers */
+.ph-hero-v4 .ph-hero-chip {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .52) !important;
+    border: 1px solid rgba(255, 255, 255, .22) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.ph-hero-v4 .ph-hero-chip:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, .95) !important;
+}
+
+/* Chevrons des professions */
+.ph-hero-v4 .ph-hero-tags-nav {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .58) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+}
+
+.ph-hero-v4 .ph-hero-tags-nav:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, .94) !important;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .ph-hero-v4 .ph-hero-shell {
+        height: auto;
+        min-height: 560px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-v4 .ph-hero-shell {
+        min-height: 560px;
+    }
+
+    .ph-hero-v4 .ph-hero-title {
+        font-size: clamp(1.9rem, 8vw, 2.8rem) !important;
+        line-height: 1.05 !important;
+    }
+}
+
+/* =========================================================
+   FIX TITRE HERO SUR UNE LIGNE
+========================================================= */
+
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+
+    width: min(100%, 1180px) !important;
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    text-align: center !important;
+    color: #ffffff !important;
+    white-space: normal !important;
+    line-height: 1.05 !important;
+    text-shadow:
+        0 4px 14px rgba(0, 0, 0, .50),
+        0 18px 50px rgba(0, 0, 0, .45) !important;
+}
+
+.ph-hero-title-main {
+    display: block !important;
+    font-size: clamp(2.3rem, 4vw, 4.3rem) !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.055em !important;
+    line-height: .95 !important;
+    color: #ffffff !important;
+}
+
+.ph-hero-title-sub {
+    display: block !important;
+    font-size: clamp(1.25rem, 2.1vw, 2.25rem) !important;
+    font-weight: 500 !important;
+    font-style: italic !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1.15 !important;
+    color: rgba(255, 255, 255, .92) !important;
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-title-main {
+        font-size: clamp(2rem, 9vw, 3rem) !important;
+    }
+
+    .ph-hero-title-sub {
+        font-size: clamp(1.05rem, 5vw, 1.45rem) !important;
+        max-width: 92% !important;
+    }
+}
+
+/* =========================================================
+   HERO TABS RESPONSIVE MOBILE
+   Les boutons se réorganisent proprement selon l'écran
+========================================================= */
+
+.ph-hero-tabs {
+    max-width: 100%;
+}
+
+/* Tablette / petit écran : les boutons passent à la ligne si besoin */
+@media (max-width: 767.98px) {
+    .ph-hero-tabs {
+        width: min(100%, 360px) !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding: 6px !important;
+        border-radius: 24px !important;
+        overflow: visible !important;
+    }
+
+    .ph-hero-tabs .ph-hero-mini-btn {
+        flex: 1 1 calc(50% - 8px) !important;
+        min-width: 135px !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+
+    .ph-hero-tabs .ph-hero-mini-btn-accent {
+        flex: 1 1 100% !important;
+    }
+}
+
+/* Très petit mobile : chaque bouton prend une ligne */
+@media (max-width: 420px) {
+    .ph-hero-tabs {
+        width: min(100%, 300px) !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        border-radius: 26px !important;
+    }
+
+    .ph-hero-tabs .ph-hero-mini-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 0 0 auto !important;
+        justify-content: center !important;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   HERO TITLE STYLE — Main-d’œuvre Locale façon premium
+========================================================= */
+
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+
+    width: min(100%, 1180px) !important;
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    text-align: center !important;
+    white-space: normal !important;
+    line-height: 1 !important;
+
+    color: #ffffff !important;
+    text-shadow:
+        0 4px 14px rgba(0, 0, 0, .55),
+        0 18px 46px rgba(0, 0, 0, .45) !important;
+}
+
+.ph-hero-title-main {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    flex-wrap: wrap !important;
+
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: clamp(2.4rem, 5vw, 5rem) !important;
+    font-weight: 900 !important;
+    line-height: .92 !important;
+    letter-spacing: -0.045em !important;
+}
+
+.ph-title-white {
+    font-family: "Times New Roman", Times, serif !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+.ph-title-gold {
+    font-family: "Times New Roman", Times, serif !important;
+    color: #ffd400 !important;
+    font-weight: 900 !important;
+    font-style: italic !important;
+    text-shadow:
+        0 2px 0 rgba(120, 82, 0, .45),
+        0 8px 24px rgba(255, 212, 0, .35) !important;
+}
+
+.ph-hero-title-sub {
+    display: block !important;
+    max-width: 760px !important;
+
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: clamp(1.15rem, 2vw, 2rem) !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.15 !important;
+
+    color: rgba(255, 255, 255, .94) !important;
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-title-main {
+        gap: 8px !important;
+        font-size: clamp(2.2rem, 11vw, 3.2rem) !important;
+        line-height: .9 !important;
+    }
+
+    .ph-hero-title-sub {
+        max-width: 92% !important;
+        font-size: clamp(1.05rem, 5vw, 1.45rem) !important;
+    }
+}

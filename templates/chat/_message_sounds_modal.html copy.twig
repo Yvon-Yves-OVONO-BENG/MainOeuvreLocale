@@ -1,0 +1,1032 @@
+<div
+    id="molMessageSoundsModal"
+    class="mol-sound-modal"
+    hidden
+    data-status-url="{{ path('app_message_sounds_status') }}"
+    data-save-url="{{ path('app_message_sounds_save') }}"
+    data-csrf="{{ csrf_token('message_sound_preference') }}"
+>
+    <div class="mol-sound-modal__backdrop" data-mol-sound-close></div>
+
+    <section class="mol-sound-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="molMessageSoundsTitle">
+        <header class="mol-sound-modal__header">
+            <div>
+                <div class="mol-sound-modal__badge">
+                    <i class="bi bi-soundwave"></i>
+                    Expérience audio
+                </div>
+
+                <h2 id="molMessageSoundsTitle" class="mol-sound-modal__title">
+                    Sons des messages
+                </h2>
+
+                <p class="mol-sound-modal__subtitle">
+                    Choisis le son joué quand un nouveau message arrive. Tu peux préécouter avant d’enregistrer.
+                </p>
+            </div>
+
+            <button type="button" class="mol-sound-modal__close" data-mol-sound-close aria-label="Fermer">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <div class="mol-sound-modal__hero">
+            <div class="mol-sound-modal__hero-icon">
+                <i class="bi bi-volume-up-fill"></i>
+            </div>
+
+            <div>
+                <strong>Signature sonore active</strong>
+                <span id="molSoundCurrentLabel">Crystal</span>
+            </div>
+
+            <button type="button" class="mol-sound-modal__hero-play" data-mol-preview-current>
+                <i class="bi bi-play-fill"></i>
+                Tester
+            </button>
+        </div>
+
+        <div class="mol-sound-grid">
+            <label class="mol-sound-card" data-sound-card>
+                <input type="radio" name="mol_message_sound" value="crystal">
+                <div class="mol-sound-card__top">
+                    <div class="mol-sound-card__icon">
+                        <i class="bi bi-gem"></i>
+                    </div>
+                    <button type="button" class="mol-sound-card__play" data-mol-preview-sound="crystal">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+                <div class="mol-sound-card__name">Crystal</div>
+                <div class="mol-sound-card__text">Son clair, premium, propre et discret.</div>
+                <div class="mol-sound-card__check"></div>
+            </label>
+
+            <label class="mol-sound-card" data-sound-card>
+                <input type="radio" name="mol_message_sound" value="pop">
+                <div class="mol-sound-card__top">
+                    <div class="mol-sound-card__icon">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <button type="button" class="mol-sound-card__play" data-mol-preview-sound="pop">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+                <div class="mol-sound-card__name">Pop</div>
+                <div class="mol-sound-card__text">Court, léger, rapide, parfait pour un chat actif.</div>
+                <div class="mol-sound-card__check"></div>
+            </label>
+
+            <label class="mol-sound-card" data-sound-card>
+                <input type="radio" name="mol_message_sound" value="pulse">
+                <div class="mol-sound-card__top">
+                    <div class="mol-sound-card__icon">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <button type="button" class="mol-sound-card__play" data-mol-preview-sound="pulse">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+                <div class="mol-sound-card__name">Pulse</div>
+                <div class="mol-sound-card__text">Plus dynamique, moderne, avec une sensation SaaS.</div>
+                <div class="mol-sound-card__check"></div>
+            </label>
+
+            <label class="mol-sound-card" data-sound-card>
+                <input type="radio" name="mol_message_sound" value="soft_bell">
+                <div class="mol-sound-card__top">
+                    <div class="mol-sound-card__icon">
+                        <i class="bi bi-bell"></i>
+                    </div>
+                    <button type="button" class="mol-sound-card__play" data-mol-preview-sound="soft_bell">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+                <div class="mol-sound-card__name">Soft Bell</div>
+                <div class="mol-sound-card__text">Une cloche douce, élégante et peu intrusive.</div>
+                <div class="mol-sound-card__check"></div>
+            </label>
+
+            <label class="mol-sound-card" data-sound-card>
+                <input type="radio" name="mol_message_sound" value="digital_drop">
+                <div class="mol-sound-card__top">
+                    <div class="mol-sound-card__icon">
+                        <i class="bi bi-droplet-half"></i>
+                    </div>
+                    <button type="button" class="mol-sound-card__play" data-mol-preview-sound="digital_drop">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+                <div class="mol-sound-card__name">Digital Drop</div>
+                <div class="mol-sound-card__text">Tech, fluide, légèrement futuriste.</div>
+                <div class="mol-sound-card__check"></div>
+            </label>
+
+            <label class="mol-sound-card mol-sound-card--silent" data-sound-card>
+                <input type="radio" name="mol_message_sound" value="silent">
+                <div class="mol-sound-card__top">
+                    <div class="mol-sound-card__icon">
+                        <i class="bi bi-volume-mute"></i>
+                    </div>
+                    <button type="button" class="mol-sound-card__play" data-mol-preview-sound="silent">
+                        <i class="bi bi-slash-lg"></i>
+                    </button>
+                </div>
+                <div class="mol-sound-card__name">Silencieux</div>
+                <div class="mol-sound-card__text">Aucun son ne sera joué à l’arrivée d’un message.</div>
+                <div class="mol-sound-card__check"></div>
+            </label>
+        </div>
+
+        <footer class="mol-sound-modal__footer">
+            <button type="button" class="mol-sound-btn mol-sound-btn--ghost" data-mol-sound-close>
+                Annuler
+            </button>
+
+            <button type="button" class="mol-sound-btn mol-sound-btn--primary" data-mol-sound-save>
+                <i class="bi bi-check2-circle"></i>
+                Enregistrer le son
+            </button>
+        </footer>
+    </section>
+</div>
+
+<style id="mol-message-sounds-premium-style">
+    .mol-sound-modal[hidden] {
+        display: none !important;
+    }
+
+    .mol-sound-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+    }
+
+    .mol-sound-modal__backdrop {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at top right, rgba(37, 99, 235, .28), transparent 34%),
+            rgba(15, 23, 42, .62);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    .mol-sound-modal__dialog {
+        position: relative;
+        width: min(940px, 100%);
+        max-height: min(860px, calc(100vh - 28px));
+        overflow: auto;
+        border-radius: 30px;
+        padding: 28px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.96)),
+            radial-gradient(circle at top left, rgba(37,99,235,.08), transparent 38%);
+        border: 1px solid rgba(226, 232, 240, .95);
+        box-shadow:
+            0 34px 110px rgba(15, 23, 42, .34),
+            0 8px 28px rgba(15, 23, 42, .10);
+        transform: translateY(16px) scale(.975);
+        opacity: 0;
+        transition: transform .22s ease, opacity .22s ease;
+    }
+
+    .mol-sound-modal.is-open .mol-sound-modal__dialog {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .mol-sound-modal__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 18px;
+    }
+
+    .mol-sound-modal__badge {
+        width: fit-content;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .02em;
+        margin-bottom: 12px;
+        box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .10);
+    }
+
+    .mol-sound-modal__title {
+        margin: 0;
+        font-size: clamp(25px, 4vw, 36px);
+        line-height: 1.05;
+        font-weight: 950;
+        color: #0f172a;
+        letter-spacing: -.04em;
+    }
+
+    .mol-sound-modal__subtitle {
+        margin: 10px 0 0;
+        max-width: 620px;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .mol-sound-modal__close {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border: 0;
+        border-radius: 16px;
+        background: #f8fafc;
+        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow:
+            inset 0 0 0 1px rgba(148, 163, 184, .22),
+            0 10px 22px rgba(15, 23, 42, .06);
+        transition: transform .16s ease, background .16s ease;
+    }
+
+    .mol-sound-modal__close:hover {
+        background: #eef4ff;
+        color: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .mol-sound-modal__hero {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px;
+        border-radius: 24px;
+        margin-bottom: 18px;
+        background:
+            linear-gradient(135deg, rgba(37, 99, 235, .10), rgba(56, 189, 248, .08)),
+            #ffffff;
+        border: 1px solid rgba(37, 99, 235, .12);
+        box-shadow: 0 14px 35px rgba(37, 99, 235, .08);
+    }
+
+    .mol-sound-modal__hero-icon {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        box-shadow: 0 16px 30px rgba(37, 99, 235, .25);
+        font-size: 22px;
+    }
+
+    .mol-sound-modal__hero strong {
+        display: block;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .mol-sound-modal__hero span {
+        display: block;
+        color: #64748b;
+        font-size: 13px;
+        margin-top: 3px;
+    }
+
+    .mol-sound-modal__hero-play {
+        margin-left: auto;
+        height: 42px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 14px;
+        background: #0f172a;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: transform .16s ease, opacity .16s ease;
+    }
+
+    .mol-sound-modal__hero-play:hover {
+        transform: translateY(-1px);
+        opacity: .94;
+    }
+
+    .mol-sound-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .mol-sound-card {
+        position: relative;
+        min-height: 176px;
+        display: flex;
+        flex-direction: column;
+        padding: 18px;
+        border-radius: 24px;
+        background:
+            linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid rgba(148, 163, 184, .22);
+        box-shadow: 0 14px 32px rgba(15, 23, 42, .045);
+        cursor: pointer;
+        overflow: hidden;
+        transition:
+            transform .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease,
+            background .18s ease;
+    }
+
+    .mol-sound-card::before {
+        content: "";
+        position: absolute;
+        inset: -40% -20% auto auto;
+        width: 120px;
+        height: 120px;
+        border-radius: 999px;
+        background: rgba(37, 99, 235, .08);
+        opacity: 0;
+        transition: opacity .18s ease;
+    }
+
+    .mol-sound-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(37, 99, 235, .30);
+        box-shadow: 0 22px 44px rgba(15, 23, 42, .08);
+    }
+
+    .mol-sound-card:hover::before {
+        opacity: 1;
+    }
+
+    .mol-sound-card.is-selected {
+        background:
+            linear-gradient(180deg, #eff6ff, #ffffff);
+        border-color: rgba(37, 99, 235, .50);
+        box-shadow:
+            0 22px 46px rgba(37, 99, 235, .12),
+            inset 0 0 0 1px rgba(37, 99, 235, .10);
+    }
+
+    .mol-sound-card input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .mol-sound-card__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .mol-sound-card__icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 17px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #2563eb;
+        background: #eef4ff;
+        font-size: 21px;
+        box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .10);
+    }
+
+    .mol-sound-card.is-selected .mol-sound-card__icon {
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(37, 99, 235, .24);
+    }
+
+    .mol-sound-card__play {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border: 0;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #0f172a;
+        color: #fff;
+        cursor: pointer;
+        transition: transform .16s ease, opacity .16s ease;
+    }
+
+    .mol-sound-card__play:hover {
+        transform: scale(1.05);
+        opacity: .94;
+    }
+
+    .mol-sound-card__name {
+        position: relative;
+        z-index: 1;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 950;
+        margin-bottom: 6px;
+    }
+
+    .mol-sound-card__text {
+        position: relative;
+        z-index: 1;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.45;
+        padding-right: 18px;
+    }
+
+    .mol-sound-card__check {
+        position: absolute;
+        right: 16px;
+        bottom: 16px;
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        border: 2px solid #cbd5e1;
+        background: #fff;
+    }
+
+    .mol-sound-card.is-selected .mol-sound-card__check {
+        border-color: #2563eb;
+        background: #2563eb;
+    }
+
+    .mol-sound-card.is-selected .mol-sound-card__check::after {
+        content: "";
+        position: absolute;
+        left: 7px;
+        top: 4px;
+        width: 7px;
+        height: 12px;
+        border: solid #fff;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .mol-sound-card--silent .mol-sound-card__icon {
+        color: #64748b;
+        background: #f1f5f9;
+    }
+
+    .mol-sound-card--silent.is-selected .mol-sound-card__icon {
+        color: #fff;
+        background: linear-gradient(135deg, #475569, #0f172a);
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .18);
+    }
+
+    .mol-sound-modal__footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(148, 163, 184, .18);
+    }
+
+    .mol-sound-btn {
+        height: 46px;
+        border: 0;
+        border-radius: 16px;
+        padding: 0 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 900;
+        transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    .mol-sound-btn--ghost {
+        background: #f8fafc;
+        color: #334155;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .24);
+    }
+
+    .mol-sound-btn--ghost:hover {
+        background: #f1f5f9;
+    }
+
+    .mol-sound-btn--primary {
+        color: #fff;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 14px 28px rgba(37, 99, 235, .24);
+    }
+
+    .mol-sound-btn--primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 34px rgba(37, 99, 235, .30);
+    }
+
+    .mol-sound-btn.is-loading {
+        pointer-events: none;
+        opacity: .75;
+    }
+
+    @media (max-width: 860px) {
+        .mol-sound-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 620px) {
+        .mol-sound-modal {
+            padding: 10px;
+            align-items: flex-end;
+        }
+
+        .mol-sound-modal__dialog {
+            border-radius: 26px 26px 18px 18px;
+            padding: 20px;
+            max-height: calc(100vh - 20px);
+        }
+
+        .mol-sound-modal__header {
+            gap: 10px;
+        }
+
+        .mol-sound-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .mol-sound-modal__hero {
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .mol-sound-modal__hero-play {
+            width: 100%;
+            margin-left: 0;
+            justify-content: center;
+        }
+
+        .mol-sound-modal__footer {
+            flex-direction: column-reverse;
+        }
+
+        .mol-sound-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script id="mol-message-sounds-premium-script">
+(() => {
+    if (window.__MOL_MESSAGE_SOUNDS_PREMIUM__) return;
+    window.__MOL_MESSAGE_SOUNDS_PREMIUM__ = true;
+
+    const SOUND_LABELS = {
+        crystal: 'Crystal',
+        pop: 'Pop',
+        pulse: 'Pulse',
+        soft_bell: 'Soft Bell',
+        digital_drop: 'Digital Drop',
+        silent: 'Silencieux'
+    };
+
+    const STORAGE_SOUND = 'mol_message_sound';
+    const STORAGE_ENABLED = 'mol_chat_sounds_enabled';
+
+    let audioContext = null;
+    let oldPanelAction = window.MOLChatPanelAction || null;
+
+    function qs(selector, root = document) {
+        return root.querySelector(selector);
+    }
+
+    function qsa(selector, root = document) {
+        return Array.from(root.querySelectorAll(selector));
+    }
+
+    function modal() {
+        return document.getElementById('molMessageSoundsModal');
+    }
+
+    function getSelectedSound() {
+        const currentModal = modal();
+        const checked = currentModal?.querySelector('input[name="mol_message_sound"]:checked');
+
+        return checked?.value || localStorage.getItem(STORAGE_SOUND) || 'crystal';
+    }
+
+    function setSelectedSound(sound) {
+        const currentModal = modal();
+        if (!currentModal) return;
+
+        const safeSound = SOUND_LABELS[sound] ? sound : 'crystal';
+        const radio = currentModal.querySelector(`input[name="mol_message_sound"][value="${safeSound}"]`);
+
+        if (radio) {
+            radio.checked = true;
+        }
+
+        localStorage.setItem(STORAGE_SOUND, safeSound);
+        localStorage.setItem(STORAGE_ENABLED, safeSound === 'silent' ? '0' : '1');
+
+        refreshSelectedUi();
+    }
+
+    function refreshSelectedUi() {
+        const currentModal = modal();
+        if (!currentModal) return;
+
+        qsa('[data-sound-card]', currentModal).forEach((card) => {
+            const input = card.querySelector('input[type="radio"]');
+            card.classList.toggle('is-selected', !!input?.checked);
+        });
+
+        const sound = getSelectedSound();
+        const label = document.getElementById('molSoundCurrentLabel');
+
+        if (label) {
+            label.textContent = SOUND_LABELS[sound] || 'Crystal';
+        }
+
+        updateMenuSoundButton(sound);
+    }
+
+    function updateMenuSoundButton(sound = null) {
+        const selectedSound = sound || localStorage.getItem(STORAGE_SOUND) || 'crystal';
+        const enabled = selectedSound !== 'silent' && localStorage.getItem(STORAGE_ENABLED) !== '0';
+
+        qsa('[data-action="message_sounds"], [data-mol-panel-action="sounds"]').forEach((button) => {
+            const icon = button.querySelector('i');
+            const label = button.querySelector('span');
+
+            if (icon) {
+                icon.className = enabled ? 'bi bi-volume-up' : 'bi bi-volume-mute';
+            }
+
+            if (label) {
+                label.textContent = enabled
+                    ? `Sons des messages`
+                    : 'Sons désactivés';
+            }
+
+            button.dataset.sound = selectedSound;
+            button.dataset.enabled = enabled ? '1' : '0';
+        });
+    }
+
+    async function loadStatus() {
+        const currentModal = modal();
+        if (!currentModal) return;
+
+        const statusUrl = currentModal.dataset.statusUrl;
+
+        if (!statusUrl) {
+            setSelectedSound(localStorage.getItem(STORAGE_SOUND) || 'crystal');
+            return;
+        }
+
+        try {
+            const response = await fetch(statusUrl, {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.success !== true) {
+                setSelectedSound(localStorage.getItem(STORAGE_SOUND) || 'crystal');
+                return;
+            }
+
+            const sound = data.enabled === false ? 'silent' : (data.sound || 'crystal');
+            setSelectedSound(sound);
+        } catch (error) {
+            console.error('[MOL MESSAGE SOUNDS] status error', error);
+            setSelectedSound(localStorage.getItem(STORAGE_SOUND) || 'crystal');
+        }
+    }
+
+    function openModal() {
+        const currentModal = modal();
+        if (!currentModal) return;
+
+        currentModal.hidden = false;
+
+        requestAnimationFrame(() => {
+            currentModal.classList.add('is-open');
+        });
+
+        loadStatus();
+    }
+
+    function closeModal() {
+        const currentModal = modal();
+        if (!currentModal) return;
+
+        currentModal.classList.remove('is-open');
+
+        setTimeout(() => {
+            currentModal.hidden = true;
+        }, 180);
+    }
+
+    function ensureAudioContext() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) {
+            return null;
+        }
+
+        if (!audioContext) {
+            audioContext = new AudioContextClass();
+        }
+
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().catch(() => {});
+        }
+
+        return audioContext;
+    }
+
+    function playTone(ctx, frequency, start, duration, type = 'sine', gainValue = 0.045) {
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, start);
+
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(gainValue, start + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+
+        oscillator.start(start);
+        oscillator.stop(start + duration);
+    }
+
+    function playSound(sound) {
+        if (!sound || sound === 'silent') {
+            return;
+        }
+
+        const ctx = ensureAudioContext();
+
+        if (!ctx) {
+            return;
+        }
+
+        const now = ctx.currentTime + 0.025;
+
+        if (sound === 'crystal') {
+            playTone(ctx, 1046.5, now, .16, 'sine', .040);
+            playTone(ctx, 1318.5, now + .10, .22, 'triangle', .036);
+            return;
+        }
+
+        if (sound === 'pop') {
+            playTone(ctx, 880, now, .10, 'square', .030);
+            playTone(ctx, 1174.66, now + .075, .11, 'triangle', .026);
+            return;
+        }
+
+        if (sound === 'pulse') {
+            playTone(ctx, 622.25, now, .09, 'sawtooth', .026);
+            playTone(ctx, 739.99, now + .12, .09, 'sawtooth', .026);
+            playTone(ctx, 932.33, now + .24, .12, 'triangle', .030);
+            return;
+        }
+
+        if (sound === 'soft_bell') {
+            playTone(ctx, 783.99, now, .20, 'sine', .030);
+            playTone(ctx, 987.77, now + .16, .24, 'sine', .026);
+            return;
+        }
+
+        if (sound === 'digital_drop') {
+            playTone(ctx, 1244.51, now, .075, 'square', .026);
+            playTone(ctx, 932.33, now + .085, .085, 'triangle', .025);
+            playTone(ctx, 698.46, now + .18, .12, 'sine', .026);
+        }
+    }
+
+    async function saveSound() {
+        const currentModal = modal();
+        if (!currentModal) return;
+
+        const saveButton = currentModal.querySelector('[data-mol-sound-save]');
+        const saveUrl = currentModal.dataset.saveUrl;
+        const csrf = currentModal.dataset.csrf;
+        const sound = getSelectedSound();
+        const enabled = sound !== 'silent';
+
+        if (!saveUrl) {
+            setSelectedSound(sound);
+            closeModal();
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('_token', csrf || '');
+        formData.append('sound', sound);
+        formData.append('enabled', enabled ? '1' : '0');
+
+        try {
+            saveButton?.classList.add('is-loading');
+            if (saveButton) saveButton.disabled = true;
+
+            const response = await fetch(saveUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.success !== true) {
+                throw new Error(data.message || 'Impossible d’enregistrer le son.');
+            }
+
+            const savedSound = data.enabled === false ? 'silent' : (data.sound || sound);
+
+            setSelectedSound(savedSound);
+            updateMenuSoundButton(savedSound);
+
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Son enregistré',
+                    text: data.message || 'Le son des messages a été mis à jour.',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    confirmButtonColor: '#2563eb'
+                });
+            }
+
+            closeModal();
+        } catch (error) {
+            console.error('[MOL MESSAGE SOUNDS] save error', error);
+
+            if (window.Swal) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Erreur',
+                    text: error.message || 'Impossible d’enregistrer le son.',
+                    confirmButtonColor: '#2563eb'
+                });
+            } else {
+                alert(error.message || 'Impossible d’enregistrer le son.');
+            }
+        } finally {
+            saveButton?.classList.remove('is-loading');
+            if (saveButton) saveButton.disabled = false;
+        }
+    }
+
+    function closeAnyPanelMenu() {
+        document.querySelectorAll('#molChatPanelMenuFinal, #molChatPanelMenu, #molChatPanelMenuRescue').forEach((menu) => {
+            menu.classList.remove('is-open', 'show');
+            menu.style.removeProperty('left');
+            menu.style.removeProperty('top');
+        });
+
+        document.querySelectorAll('#molChatPanelOptionsBtnFinal, #molChatPanelOptionsBtn, #molChatPanelOptionsBtnRescue').forEach((button) => {
+            button.setAttribute('aria-expanded', 'false');
+        });
+    }
+
+    function bindUiEvents() {
+        document.addEventListener('change', (event) => {
+            const input = event.target.closest('input[name="mol_message_sound"]');
+
+            if (!input || !modal()?.contains(input)) {
+                return;
+            }
+
+            setSelectedSound(input.value);
+        });
+
+        document.addEventListener('click', async (event) => {
+            const currentModal = modal();
+
+            const closeButton = event.target.closest('[data-mol-sound-close]');
+            if (closeButton && currentModal?.contains(closeButton)) {
+                event.preventDefault();
+                closeModal();
+                return;
+            }
+
+            const previewButton = event.target.closest('[data-mol-preview-sound]');
+            if (previewButton && currentModal?.contains(previewButton)) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const sound = previewButton.dataset.molPreviewSound || 'crystal';
+                setSelectedSound(sound);
+                playSound(sound);
+                return;
+            }
+
+            const previewCurrent = event.target.closest('[data-mol-preview-current]');
+            if (previewCurrent && currentModal?.contains(previewCurrent)) {
+                event.preventDefault();
+                playSound(getSelectedSound());
+                return;
+            }
+
+            const saveButton = event.target.closest('[data-mol-sound-save]');
+            if (saveButton && currentModal?.contains(saveButton)) {
+                event.preventDefault();
+                await saveSound();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal() && !modal().hidden) {
+                closeModal();
+            }
+        });
+    }
+
+    function installPanelActionBridge() {
+        oldPanelAction = window.MOLChatPanelAction || oldPanelAction;
+
+        window.MOLChatPanelAction = async function(action, payload = {}) {
+            if (action === 'message_sounds' || action === 'sounds') {
+                closeAnyPanelMenu();
+                openModal();
+                return true;
+            }
+
+            if (typeof oldPanelAction === 'function' && oldPanelAction !== window.MOLChatPanelAction) {
+                return await oldPanelAction(action, payload);
+            }
+
+            return null;
+        };
+    }
+
+    function boot() {
+        bindUiEvents();
+        installPanelActionBridge();
+        loadStatus();
+        updateMenuSoundButton(localStorage.getItem(STORAGE_SOUND) || 'crystal');
+    }
+
+    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('turbo:load', () => {
+        installPanelActionBridge();
+        loadStatus();
+        updateMenuSoundButton(localStorage.getItem(STORAGE_SOUND) || 'crystal');
+    });
+
+    if (document.readyState !== 'loading') {
+        boot();
+    }
+
+    window.MolMessageSounds = {
+        open: openModal,
+        close: closeModal,
+        play(sound) {
+            playSound(sound || getSelectedSound());
+        },
+        playSelected() {
+            const sound = localStorage.getItem(STORAGE_SOUND) || getSelectedSound();
+
+            if (localStorage.getItem(STORAGE_ENABLED) === '0' || sound === 'silent') {
+                return;
+            }
+
+            playSound(sound);
+        },
+        getCurrent() {
+            return localStorage.getItem(STORAGE_SOUND) || getSelectedSound();
+        }
+    };
+})();
+</script>

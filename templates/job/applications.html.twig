@@ -1,0 +1,123 @@
+{# templates/talent/publisher/applications.html.twig #}
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Candidatures'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "job/_vip_ui_applications.html.twig" %}
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container-fluid py-4">
+  <div class="app-wrap">
+    <div class="app-head">
+      <div>
+        <div class="app-title">📥 {% trans %}Candidatures{% endtrans %} • {{ job.title ?? ('Offre #'|trans ~ job.id) }}</div>
+        <div class="app-sub">{% trans %}En ouvrant cette page, les candidatures passent en “vues”.{% endtrans %}</div>
+      </div>
+      <a href="{{ path('talent_publisher_jobs') }}" class="btn btn-sm btn-outline-dark rounded-pill">{% trans %}← Retour{% endtrans %}</a>
+    </div>
+
+    <div class="p-3 p-md-4">
+      {% if apps is defined and apps|length > 0 %}
+        {% for a in apps %}
+          <div class="row-item">
+            <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+              <div>
+                <div class="fw-bold">
+                  {{ a.user ? (a.user.personalProfile.fullName ?? a.user.email) : 'Candidat'|trans }}
+                  {% if a.viewedAt %}
+                    <span class="badge text-bg-secondary rounded-pill ms-2">{% trans %}Vu{% endtrans %}</span>
+                  {% else %}
+                    <span class="badge text-bg-danger rounded-pill ms-2">{% trans %}Nouveau{% endtrans %}</span>
+                  {% endif %}
+                </div>
+                <div class="text-muted small">
+                  {{ a.createdAt ? a.createdAt|date('d/m/Y H:i') : '—' }}
+                  • {% trans %}Statut :{% endtrans %} <span class="fw-semibold">{{ a.status ?? '—' }}</span>
+                </div>
+              </div>
+
+              <div class="d-flex gap-2">
+                <a
+                    class="btn btn-success btn-sm rounded-pill px-3 toggle-btn"
+                    href="{{ path('profil_talent', {slug: a.user.personalProfile.slug}) }}"
+                  >
+                    {% trans %}👀 Voir le profil{% endtrans %}
+                </a>
+                {# 🔁 Toggle réservé : Accepter / Rejeter #}
+                {# <button
+                  class="btn btn-success btn-sm rounded-pill px-3 toggle-btn"
+                  data-url="{{ path('talent_app_toggle', {id: a.id}) }}"
+                  data-next="ACCEPTED"
+                  data-token="{{ csrf_token('app_toggle_' ~ a.id) }}"
+                >
+                  {% trans %}✅ Accepter{% endtrans %}
+                </button>
+
+                <button
+                  class="btn btn-danger btn-sm rounded-pill px-3 toggle-btn"
+                  data-url="{{ path('talent_app_toggle', {id: a.id}) }}"
+                  data-next="REJECTED"
+                  data-token="{{ csrf_token('app_toggle_' ~ a.id) }}"
+                >
+                  {% trans %}❌ Rejeter{% endtrans %}
+                </button> #}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="fw-semibold mb-1">{% trans %}Aucune candidature{% endtrans %}</div>
+          <div class="soft-muted small">{% trans %}Dès que quelqu’un postule, il apparaîtra ici.{% endtrans %}</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  function molToast(message, type='success'){
+    const c = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = 'mol-toast mol-toast-' + (type === 'success' ? 'success' : 'danger');
+    el.textContent = message;
+    c.appendChild(el);
+    setTimeout(() => el.remove(), 4300);
+  }
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-url][data-next]');
+    if(!btn) return;
+
+    btn.disabled = true;
+
+    try{
+      const res = await fetch(btn.dataset.url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+        body: JSON.stringify({
+          next: btn.dataset.next,
+          _token: btn.dataset.token
+        })
+      });
+
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || !data.ok){
+        molToast(data.message || '{{ "Action impossible."|trans|e("js") }}', 'danger');
+        return;
+      }
+
+      molToast(data.message || '{{ "OK"|trans|e("js") }}', 'success');
+
+      // Optionnel: tu peux rafraîchir le statut affiché sans reload si tu veux.
+      // Ici, on laisse simple et robuste.
+    }catch(err){
+      molToast('{{ "Erreur réseau. Réessayez."|trans|e("js") }}', 'danger');
+    }finally{
+      btn.disabled = false;
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'support/layout.html.twig' %}
+{% set seo_description = 'Centre d’aide Main d’Œuvre Locale : réponses, guides pratiques, sécurité, annonces, missions, profils et assistance.' %}
+
+{% block title %}{% trans %}Centre d’aide — Main d’Œuvre Locale{% endtrans %}{% endblock %}
+
+{% block support_hero %}
+    <section class="mol-support-hero">
+        <div class="mol-support-hero__inner">
+            <span class="mol-support-eyebrow">
+                <i class="fa-solid fa-life-ring" aria-hidden="true"></i>
+                {% trans %}Assistance Main d’Œuvre Locale{% endtrans %}
+            </span>
+    
+            <h1>{% trans %}Comment pouvons-nous vous aider ?{% endtrans %}</h1>
+            <p>{% trans %}Retrouvez rapidement les réponses essentielles pour gérer votre compte, publier, rechercher un talent, utiliser la messagerie et améliorer la visibilité de vos annonces.{% endtrans %}</p>
+    
+            <div class="mol-support-search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input id="molHelpSearch" type="search" placeholder="{% trans %}Rechercher dans les rubriques d’aide…{% endtrans %}" autocomplete="off">
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block support_content %}
+
+    <section class="mol-support-section">
+        <div class="mol-support-section-head">
+            <div>
+                <h2>{% trans %}Rubriques principales{% endtrans %}</h2>
+                <p>{% trans %}Choisissez une rubrique pour accéder directement aux informations qui vous concernent.{% endtrans %}</p>
+            </div>
+        </div>
+
+        <div class="mol-support-grid" id="molHelpCards">
+            <article class="mol-support-card" data-help-card="compte inscription connexion profil mot de passe sécurité">
+                <span class="mol-support-card__icon"><i class="fa-solid fa-user-shield" aria-hidden="true"></i></span>
+                <h3>{% trans %}Compte et sécurité{% endtrans %}</h3>
+                <p>{% trans %}Créer un compte, modifier votre profil, sécuriser vos accès et gérer vos paramètres personnels.{% endtrans %}</p>
+                <a href="{{ path('support_faq') }}" data-turbo="false">{% trans %}Voir les réponses{% endtrans %} <i class="fa-solid fa-arrow-right"></i></a>
+            </article>
+
+            <article class="mol-support-card" data-help-card="annonce publier modifier supprimer visibilité boost">
+                <span class="mol-support-card__icon"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i></span>
+                <h3>{% trans %}Annonces{% endtrans %}</h3>
+                <p>{% trans %}Publier une annonce claire, la gérer depuis votre espace et augmenter sa visibilité au bon moment.{% endtrans %}</p>
+                <a href="{{ path('support_boost_announcement') }}" data-turbo="false">{% trans %}Découvrir le boost{% endtrans %} <i class="fa-solid fa-arrow-right"></i></a>
+            </article>
+
+            <article class="mol-support-card" data-help-card="mission offre emploi recruteur candidature publication">
+                <span class="mol-support-card__icon"><i class="fa-solid fa-briefcase" aria-hidden="true"></i></span>
+                <h3>{% trans %}Missions et offres{% endtrans %}</h3>
+                <p>{% trans %}Comprendre la publication d’une mission, les candidatures et le suivi depuis votre tableau de bord.{% endtrans %}</p>
+                <a href="{{ path('support_how_it_works') }}" data-turbo="false">{% trans %}Voir le fonctionnement{% endtrans %} <i class="fa-solid fa-arrow-right"></i></a>
+            </article>
+
+            <article class="mol-support-card" data-help-card="talent prestataire artisan profession localisation recherche rayon">
+                <span class="mol-support-card__icon"><i class="fa-solid fa-people-group" aria-hidden="true"></i></span>
+                <h3>{% trans %}Trouver un talent{% endtrans %}</h3>
+                <p>{% trans %}Utiliser la recherche, les professions et la localisation pour identifier le bon profil près de chez vous.{% endtrans %}</p>
+                <a href="{{ path('liste_talents') }}" data-turbo="false">{% trans %}Explorer les talents{% endtrans %} <i class="fa-solid fa-arrow-right"></i></a>
+            </article>
+
+            <article class="mol-support-card" data-help-card="messagerie colombe contact conversation fichier appel">
+                <span class="mol-support-card__icon"><i class="fa-solid fa-comments" aria-hidden="true"></i></span>
+                <h3>{% trans %}Messagerie Colombe{% endtrans %}</h3>
+                <p>{% trans %}Retrouver vos conversations, contacter un utilisateur et rester informé des nouveaux échanges.{% endtrans %}</p>
+                <a href="{{ path('support_faq') }}" data-turbo="false">{% trans %}Consulter la FAQ{% endtrans %} <i class="fa-solid fa-arrow-right"></i></a>
+            </article>
+
+            <article class="mol-support-card" data-help-card="signalement modération arnaque comportement aide support contact">
+                <span class="mol-support-card__icon"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                <h3>{% trans %}Confiance et modération{% endtrans %}</h3>
+                <p>{% trans %}Signaler un contenu, adopter les bons réflexes et contacter l’équipe en cas de difficulté.{% endtrans %}</p>
+                <a href="{{ path('contact_page') }}" data-turbo="false">{% trans %}Contacter le support{% endtrans %} <i class="fa-solid fa-arrow-right"></i></a>
+            </article>
+        </div>
+    </section>
+
+    <section class="mol-support-band">
+        <div>
+            <h2>{% trans %}Vous ne trouvez pas la réponse ?{% endtrans %}</h2>
+            <p>{% trans %}Décrivez précisément votre difficulté. Notre équipe pourra mieux vous orienter avec le contexte, la page concernée et le message affiché.{% endtrans %}</p>
+        </div>
+        <a href="{{ path('contact_page') }}" class="mol-support-btn" data-turbo="false">
+            <i class="fa-solid fa-headset" aria-hidden="true"></i>
+            {% trans %}Contacter le support{% endtrans %}
+        </a>
+    </section>
+
+    <script>
+        (function () {
+            const input = document.getElementById('molHelpSearch');
+            const cards = Array.from(document.querySelectorAll('[data-help-card]'));
+
+            if (!input || cards.length === 0) return;
+
+            input.addEventListener('input', function () {
+                const query = input.value.toLocaleLowerCase().trim();
+
+                cards.forEach(function (card) {
+                    const content = (card.dataset.helpCard + ' ' + card.textContent).toLocaleLowerCase();
+                    card.hidden = query !== '' && !content.includes(query);
+                });
+            });
+        })();
+    </script>
+{% endblock %}

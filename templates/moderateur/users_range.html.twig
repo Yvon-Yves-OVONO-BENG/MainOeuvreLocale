@@ -1,0 +1,93 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Utilisateurs{% endtrans %} • {{ range ?: 'Tous'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_users_range.html.twig" %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">👥 {% trans %}Utilisateurs{% endtrans %} ({{ range ?: 'tous'|trans }})</div>
+        <div class="hint">{% trans %}Filtre :{% endtrans %} {{ role ?: 'tous rôles'|trans }} • {% trans %}Total :{% endtrans %} {{ total }}</div>
+      </div>
+
+      <form class="filters" method="get">
+        <input type="hidden" name="range" value="{{ range }}">
+        <input type="hidden" name="role" value="{{ role }}">
+        <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Rechercher (email, nom, ville…)'|trans }}">
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit==n?'selected':'' }}>{{ n }}/page</option>
+          {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+        <a class="btn" href="/moderateur/users?range={{ range }}{% if role %}&role={{ role }}{% endif %}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Utilisateur{% endtrans %}</th>
+              <th>{% trans %}Rôle{% endtrans %}</th>
+              <th>{% trans %}Adresse{% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+              <th style="text-align:right;">{% trans %}Action{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in items %}
+              {% set pp = u.personalProfile ?? null %}
+              {% set roles = u.roles ?? [] %}
+              {% set isTalent = 'ROLE_TALENT' in roles %}
+              {% set isComp = 'ROLE_COMPANY' in roles %}
+              {% set roleLabel = isTalent ? ('Talent'|trans) : (isComp ? ('Company'|trans) : ('Particulier'|trans)) %}
+              {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+              <tr>
+                <td>#{{ u.id }}</td>
+                <td>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <img class="avatar" src="{{ photo }}" alt="photo">
+                    <div>
+                      <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : u.email }}</div>
+                      <div class="muted" style="font-size:12px;">{{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip">{{ roleLabel }}</span></td>
+                <td class="muted" style="font-size:12px;">
+                  {{ pp and pp.adress ? pp.adress : '—' }}{% if pp and pp.city %} • {{ pp.city }}{% endif %}
+                </td>
+                <td class="muted" style="font-size:12px;">{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                <td style="text-align:right;">
+                    {% if u.personalProfile and u.personalProfile.slug %}
+                        <a class="btn primary" href="{{ path('moderateur_verifications_show_slug', {slug: u.personalProfile.slug}) }}">{% trans %}Vérifier{% endtrans %}</a>
+                        {% else %}
+                        <span class="muted">{% trans %}Aucune action{% endtrans %}</span>
+                    {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted" style="padding:18px;text-align:center;">{% trans %}Aucun utilisateur{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p==page?'primary':'' }}"
+               href="{{ path('moderateur_users_range', {page:p, limit:limit, q:q, range:range, role:role}) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

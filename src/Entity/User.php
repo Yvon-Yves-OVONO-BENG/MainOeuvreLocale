@@ -2,19 +2,41 @@
 
 namespace App\Entity;
 
+use App\Entity\Conversation;
+use App\Entity\Country;
+use App\Entity\EmailVerifications;
+use App\Entity\Favorite;
+use App\Entity\Friendship;
+use App\Entity\Invoices;
+use App\Entity\Job;
+use App\Entity\Message;
+use App\Entity\Notification;
+use App\Entity\Payment;
+use App\Entity\PersonalProfile;
+use App\Entity\ProfessionalProfile;
+use App\Entity\Rating;
+use App\Entity\Report;
+use App\Entity\Review;
+use App\Entity\StatusJob;
+use App\Entity\Subscription;
+use App\Entity\TypeCompte;
+use App\Entity\UserLog;
+use App\Entity\View;
+use App\Entity\UserTwoFactor;
+use App\Util\HashedSlugGenerator;
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Validator\Constraints as Assert;
+use App\Entity\MessageReaction;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
-#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_USERNAME', fields: ['username'])]
-#[UniqueEntity(fields: ['username'], message: 'Un compte existant utilise déjà ce nom de connexion')]
+#[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
+#[ORM\UniqueConstraint(name: 'uniq_user_slug', fields: ['slug'])]
+#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -22,17 +44,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 64)]
+    private ?string $slug = null;
+
     #[ORM\Column(length: 180)]
-    private ?string $username = null;
+    private ?string $email = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
     private array $roles = [];
-
-    #[Assert\IdenticalTo(propertyPath:'password', message:'Les mots de passe doivent être identiques')]
-    private $confirmPassword;
 
     /**
      * @var string The hashed password
@@ -41,119 +63,222 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $nom = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $contact = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $slug = null;
-
-    #[ORM\OneToMany(targetEntity: Facture::class, mappedBy: 'caissiere')]
-    private Collection $factures;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $photo = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?bool $etat = null;
-
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?TypeUtilisateur $typeUtilisateur = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $email = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $adresse = null;
-
-    #[ORM\OneToMany(targetEntity: Produit::class, mappedBy: 'enregistrePar')]
-    private Collection $produits;
-
-    #[ORM\OneToMany(targetEntity: Lot::class, mappedBy: 'enregistrePar')]
-    private Collection $lots;
-
-    #[ORM\OneToMany(targetEntity: Commande::class, mappedBy: 'secretaire')]
-    private Collection $commandes;
-
-    #[ORM\OneToMany(targetEntity: ReponseQuestion::class, mappedBy: 'user')]
-    private Collection $reponseQuestions;
-
-    #[ORM\OneToMany(targetEntity: HistoriquePaiement::class, mappedBy: 'recuPar')]
-    private Collection $historiquePaiements;
-
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?Genre $genre = null;
-
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?CategoriePermisDeConduire $categoriePermisDeconduire = null;
-
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $numeroPermisDeConduire = null;
-
-    #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?Specialite $specialite = null;
+    private ?string $phone = null;
 
     #[ORM\Column]
-    private ?bool $supprime = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?float $salaireBrute = null;
-
-    #[ORM\OneToMany(targetEntity: BulletinSalaire::class, mappedBy: 'personnel')]
-    private Collection $bulletinSalaires;
-
-    #[ORM\OneToMany(targetEntity: BulletinSalaire::class, mappedBy: 'caissiere')]
-    private Collection $caissiereBulletinDePaie;
-
-    #[ORM\OneToMany(targetEntity: PrimeSpeciale::class, mappedBy: 'personnel')]
-    private Collection $primeSpeciales;
+    private ?bool $isActive = null;
 
     #[ORM\Column]
-    private ?bool $statut = null;
+    private ?bool $isEmailVerified = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $emailVerificationToken = null;
+
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $emailVerificationExpiresAt = null;
+
+    #[ORM\Column]
+    private ?\DateTime $createdAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $updatedAt = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?\DateTime $lastLoginAt = null;
+
+    /**
+     * @var Collection<int, EmailVerifications>
+     */
+    #[ORM\OneToMany(targetEntity: EmailVerifications::class, mappedBy: 'user')]
+    private Collection $emailVerifications;
+
+    #[ORM\Column(nullable: true)]
+    private ?string $resetPasswordToken = null;
+
+    /**
+     * @var Collection<int, Subscription>
+     */
+    #[ORM\OneToMany(targetEntity: Subscription::class, mappedBy: 'user')]
+    private Collection $subscriptions;
+
+    /**
+     * @var Collection<int, Payment>
+     */
+    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'user')]
+    private Collection $payments;
+
+    /**
+     * @var Collection<int, StatusJob>
+     */
+    #[ORM\OneToMany(targetEntity: StatusJob::class, mappedBy: 'user')]
+    private Collection $statusJobs;
+
+    /**
+     * @var Collection<int, Invoices>
+     */
+    #[ORM\OneToMany(targetEntity: Invoices::class, mappedBy: 'user')]
+    private Collection $invoices;
+
+    /**
+     * @var Collection<int, UserLog>
+     */
+    #[ORM\OneToMany(targetEntity: UserLog::class, mappedBy: 'user')]
+    private Collection $userLogs;
+
+    /**
+     * @var Collection<int, Notification>
+     */
+    #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
+    private Collection $notifications;
+
+    /**
+     * @var Collection<int, Review>
+     */
+    #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'client')]
+    private Collection $reviews;
+
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: PersonalProfile::class)]
+    private ?PersonalProfile $personalProfile = null;
+
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: ProfessionalProfile::class)]
+    private ?ProfessionalProfile $professionalProfile = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resetPasswordExpiresAt = null;
+
+    #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'user')]
+    private Collection $reports;
+
+    #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'user')]
+    private Collection $targetUsers;
+
+    #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'user')]
+    private Collection $handledBys;
+
+    #[ORM\OneToMany(targetEntity: Favorite::class, mappedBy: 'user')]
+    private Collection $favorites;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
-    private ?StatutPersonnel $statutPersonnel = null;
+    #[ORM\JoinColumn(nullable: true)]
+    private ?TypeCompte $typeCompte = null;
 
-    #[ORM\OneToMany(targetEntity: ParametresVitaux::class, mappedBy: 'infirmier')]
-    private Collection $parametresVitauxes;
+    #[ORM\OneToMany(targetEntity: Rating::class, mappedBy: 'user')]
+    private Collection $ratings;
 
-    #[ORM\OneToMany(targetEntity: Consultation::class, mappedBy: 'medecin')]
-    private Collection $consultations;
+    #[ORM\OneToMany(targetEntity: View::class, mappedBy: 'viewer')]
+    private Collection $views;
 
-    #[ORM\OneToMany(targetEntity: ResultatExamen::class, mappedBy: 'laborantin')]
-    private Collection $resultatExamens;
+    #[ORM\OneToMany(mappedBy: 'participantA', targetEntity: Conversation::class)]
+    private Collection $conversationsAsA;
 
-    #[ORM\OneToMany(targetEntity: BilletDeSession::class, mappedBy: 'caissiere')]
-    private Collection $billetDeSessions;
+    #[ORM\OneToMany(mappedBy: 'participantB', targetEntity: Conversation::class)]
+    private Collection $conversationsAsB;
 
-    #[ORM\OneToMany(targetEntity: Facture::class, mappedBy: 'prescripteur')]
-    private Collection $prescripteurs;
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class)]
+    private Collection $messages;
 
-    #[ORM\OneToMany(targetEntity: Hospitalisation::class, mappedBy: 'enregistrePar')]
-    private Collection $hospitalisations;
+    #[ORM\OneToMany(mappedBy: 'requester', targetEntity: Friendship::class)]
+    private Collection $sentFriendships;
 
-    #[ORM\OneToMany(targetEntity: Patient::class, mappedBy: 'enregistrePar')]
-    private Collection $patients;
+    #[ORM\OneToMany(mappedBy: 'addressee', targetEntity: Friendship::class)]
+    private Collection $receivedFriendships;
+
+    #[ORM\OneToMany(mappedBy: 'reporter', targetEntity: Report::class, orphanRemoval: true)]
+    private Collection $reportsSent;
+
+    #[ORM\OneToMany(mappedBy: 'targetUser', targetEntity: Report::class, orphanRemoval: true)]
+    private Collection $reportsReceived;
+
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Country $country = null;
+
+    #[ORM\OneToMany(targetEntity: Job::class, mappedBy: 'createdBy')]
+    private Collection $jobs;
+
+    /**
+     * @var Collection<int, FavoriJob>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: FavoriJob::class, orphanRemoval: true)]
+    private Collection $favoriteJobs;
+
+    /**
+     * @var Collection<int, JobView>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: JobView::class, orphanRemoval: true)]
+    private Collection $jobViews;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $profileViewsPrivate = false;
+
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserTwoFactor::class, cascade: ['persist', 'remove'])]
+    private ?UserTwoFactor $userTwoFactor = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isOnline = false;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $lastSeenAt = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $lastDisconnectedAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: MessageReaction::class, orphanRemoval: true)]
+    private Collection $messageReactions;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $googleId = null;
+
+    #[ORM\Column(length: 191, nullable: true, unique: true)]
+    private ?string $facebookId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $tiktokId = null;
+
+    #[ORM\Column(length: 30, nullable: true)]
+    private ?string $registrationProvider = null;
+
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $avatarUrl = null;
+
+    #[ORM\Column(length: 191, nullable: true, unique: true)]
+    private ?string $appleId = null;
+
+    #[ORM\Column(length: 191, nullable: true, unique: true)]
+    private ?string $microsoftId = null;
+
+    #[ORM\Column(type: 'string', length: 20, nullable: true)]
+    private ?string $profileType = null;
 
     public function __construct()
     {
-        $this->factures = new ArrayCollection();
-        $this->produits = new ArrayCollection();
-        $this->lots = new ArrayCollection();
-        $this->commandes = new ArrayCollection();
-        $this->reponseQuestions = new ArrayCollection();
-        $this->historiquePaiements = new ArrayCollection();
-        $this->bulletinSalaires = new ArrayCollection();
-        $this->caissiereBulletinDePaie = new ArrayCollection();
-        $this->primeSpeciales = new ArrayCollection();
-        $this->parametresVitauxes = new ArrayCollection();
-        $this->consultations = new ArrayCollection();
-        $this->resultatExamens = new ArrayCollection();
-        $this->billetDeSessions = new ArrayCollection();
-        $this->prescripteurs = new ArrayCollection();
-        $this->hospitalisations = new ArrayCollection();
-        $this->patients = new ArrayCollection();
+        $this->slug = HashedSlugGenerator::generate();
+        $this->emailVerifications = new ArrayCollection();
+        $this->subscriptions = new ArrayCollection();
+        $this->payments = new ArrayCollection();
+        $this->statusJobs = new ArrayCollection();
+        $this->messages = new ArrayCollection();
+        $this->invoices = new ArrayCollection();
+        $this->userLogs = new ArrayCollection();
+        $this->notifications = new ArrayCollection();
+        $this->reviews = new ArrayCollection();
+        $this->reports = new ArrayCollection();
+        $this->targetUsers = new ArrayCollection();
+        $this->handledBys = new ArrayCollection();
+        $this->favorites = new ArrayCollection();
+        $this->ratings = new ArrayCollection();
+        $this->views = new ArrayCollection();
+        $this->conversationsAsA = new ArrayCollection();
+        $this->conversationsAsB = new ArrayCollection();
+        $this->sentFriendships = new ArrayCollection();
+        $this->receivedFriendships = new ArrayCollection(); 
+        $this->reportsSent = new ArrayCollection();
+        $this->reportsReceived = new ArrayCollection();
+        $this->jobs = new ArrayCollection();
+        $this->favoriteJobs = new ArrayCollection();
+        $this->jobViews = new ArrayCollection();
+        $this->messageReactions = new ArrayCollection();
+
     }
 
     public function getId(): ?int
@@ -161,14 +286,89 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->id;
     }
 
-    public function getUsername(): ?string
+    public function getSlug(): ?string
     {
-        return $this->username;
+        return $this->slug;
     }
 
-    public function setUsername(string $username): static
+    public function setSlug(string $slug): static
     {
-        $this->username = $username;
+        $this->slug = trim($slug);
+
+        return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function ensureSlug(): void
+    {
+        if ($this->slug === null || trim($this->slug) === '') {
+            $this->slug = HashedSlugGenerator::generate();
+        }
+    }
+
+    /**
+     * Retourne le nom public sûr correspondant au type de compte.
+     *
+     * Une compagnie est présentée avec son nom commercial ou sa raison sociale.
+     * Les autres comptes utilisent leur nom complet. Une adresse e-mail ou une
+     * valeur technique ne doit jamais être exposée comme identité publique.
+     */
+    public function getPublicDisplayName(): string
+    {
+        $profile = $this->personalProfile;
+        $candidates = [];
+
+        if (
+            in_array('ROLE_COMPANY', $this->getRoles(), true)
+            || in_array('ROLE_ENTREPRISE', $this->getRoles(), true)
+        ) {
+            $candidates[] = $profile?->getCompanyTradeName();
+            $candidates[] = $profile?->getCompanyLegalName();
+        }
+
+        $candidates[] = $profile?->getFullName();
+
+        foreach ($candidates as $candidate) {
+            if ($this->isValidPublicName($candidate)) {
+                return trim((string) $candidate);
+            }
+        }
+
+        return 'Profil sans nom';
+    }
+
+    /**
+     * Indique si l'utilisateur possède une identité exploitable publiquement.
+     */
+    public function hasPublicDisplayName(): bool
+    {
+        return $this->getPublicDisplayName() !== 'Profil sans nom';
+    }
+
+    /**
+     * Valide un nom public et refuse les espaces, placeholders et e-mails.
+     */
+    private function isValidPublicName(?string $candidate): bool
+    {
+        $name = trim((string) $candidate);
+        $email = trim((string) ($this->email ?? ''));
+
+        if ($name === '' || in_array(mb_strtolower($name), ['-', '—', 'profil sans nom'], true)) {
+            return false;
+        }
+
+        return filter_var($name, FILTER_VALIDATE_EMAIL) === false
+            && ($email === '' || strcasecmp($name, $email) !== 0);
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
 
         return $this;
     }
@@ -180,13 +380,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->username;
+        return (string) $this->email;
     }
 
     /**
      * @see UserInterface
-     *
-     * @return list<string>
      */
     public function getRoles(): array
     {
@@ -207,22 +405,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getConfirmPassword(): string
-    {
-        return (string) $this->confirmPassword;
-    }
-
-    public function setConfirmPassword(string $confirmPassword): self
-    {
-        $this->confirmPassword = $confirmPassword;
-
-        return $this;
-    }
-
     /**
      * @see PasswordAuthenticatedUserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }
@@ -235,176 +421,123 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @see UserInterface
+     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
      */
+
+    #[\Deprecated]
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        // @deprecated, to be removed when upgrading to Symfony 8
     }
 
-    public function getNom(): ?string
+    public function getPhone(): ?string
     {
-        return $this->nom;
+        return $this->phone;
     }
 
-    public function setNom(string $nom): static
+    public function setPhone(?string $phone): static
     {
-        $this->nom = $nom;
+        $this->phone = $phone;
 
         return $this;
     }
 
-    public function getContact(): ?string
+    public function isActive(): ?bool
     {
-        return $this->contact;
+        return $this->isActive;
     }
 
-    public function setContact(string $contact): static
+    public function setIsActive(bool $isActive): static
     {
-        $this->contact = $contact;
+        $this->isActive = $isActive;
 
         return $this;
     }
 
-
-    public function getSlug(): ?string
+    public function isEmailVerified(): ?bool
     {
-        return $this->slug;
+        return $this->isEmailVerified;
     }
 
-    public function setSlug(string $slug): static
+    public function setIsEmailVerified(bool $isEmailVerified): static
     {
-        $this->slug = $slug;
+        $this->isEmailVerified = $isEmailVerified;
+
+        return $this;
+    }
+
+    public function getEmailVerificationToken(): ?string
+    {
+        return $this->emailVerificationToken;
+    }
+
+    public function setEmailVerificationToken(?string $emailVerificationToken): static
+    {
+        $this->emailVerificationToken = $emailVerificationToken;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTime $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTime
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTime $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getLastLoginAt(): ?\DateTime
+    {
+        return $this->lastLoginAt;
+    }
+
+    public function setLastLoginAt(?\DateTime $lastLoginAt): static
+    {
+        $this->lastLoginAt = $lastLoginAt;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, Facture>
+     * @return Collection<int, EmailVerifications>
      */
-    public function getFactures(): Collection
+    public function getEmailVerifications(): Collection
     {
-        return $this->factures;
+        return $this->emailVerifications;
     }
 
-    public function addFacture(Facture $facture): static
+    public function addEmailVerification(EmailVerifications $emailVerification): static
     {
-        if (!$this->factures->contains($facture)) {
-            $this->factures->add($facture);
-            $facture->setCaissiere($this);
+        if (!$this->emailVerifications->contains($emailVerification)) {
+            $this->emailVerifications->add($emailVerification);
+            $emailVerification->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeFacture(Facture $facture): static
+    public function removeEmailVerification(EmailVerifications $emailVerification): static
     {
-        if ($this->factures->removeElement($facture)) {
+        if ($this->emailVerifications->removeElement($emailVerification)) {
             // set the owning side to null (unless already changed)
-            if ($facture->getCaissiere() === $this) {
-                $facture->setCaissiere(null);
-            }
-        }
-
-        return $this;
-    }
-    
-    public function getPhoto(): ?string
-    {
-        return $this->photo;
-    }
-
-    public function setPhoto(?string $photo): static
-    {
-        $this->photo = $photo;
-
-        return $this;
-    }
-
-    public function isEtat(): ?bool
-    {
-        return $this->etat;
-    }
-
-    public function setEtat(?bool $etat): static
-    {
-        $this->etat = $etat;
-
-        return $this;
-    }
-
-    public function getTypeUtilisateur(): ?TypeUtilisateur
-    {
-        return $this->typeUtilisateur;
-    }
-
-    public function setTypeUtilisateur(?TypeUtilisateur $typeUtilisateur): static
-    {
-        $this->typeUtilisateur = $typeUtilisateur;
-
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(?string $email): static
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function getAdresse(): ?string
-    {
-        return $this->adresse;
-    }
-
-    public function setAdresse(?string $adresse): static
-    {
-        $this->adresse = $adresse;
-
-        return $this;
-    }
-
-    public function serialize()
-    {
-        $this->photo = base64_encode($this->photo);
-    }
-
-    public function unserialize($serialized)
-    {
-        $this->photo = base64_decode($this->photo);
-
-    }
-
-    /**
-     * @return Collection<int, Produit>
-     */
-    public function getProduits(): Collection
-    {
-        return $this->produits;
-    }
-
-    public function addProduit(Produit $produit): static
-    {
-        if (!$this->produits->contains($produit)) {
-            $this->produits->add($produit);
-            $produit->setEnregistrePar($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProduit(Produit $produit): static
-    {
-        if ($this->produits->removeElement($produit)) {
-            // set the owning side to null (unless already changed)
-            if ($produit->getEnregistrePar() === $this) {
-                $produit->setEnregistrePar(null);
+            if ($emailVerification->getUser() === $this) {
+                $emailVerification->setUser(null);
             }
         }
 
@@ -412,29 +545,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Lot>
+     * @return Collection<int, Subscription>
      */
-    public function getLots(): Collection
+    public function getSubscriptions(): Collection
     {
-        return $this->lots;
+        return $this->subscriptions;
     }
 
-    public function addLot(Lot $lot): static
+    public function addSubscription(Subscription $subscription): static
     {
-        if (!$this->lots->contains($lot)) {
-            $this->lots->add($lot);
-            $lot->setEnregistrePar($this);
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions->add($subscription);
+            $subscription->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeLot(Lot $lot): static
+    public function removeSubscription(Subscription $subscription): static
     {
-        if ($this->lots->removeElement($lot)) {
+        if ($this->subscriptions->removeElement($subscription)) {
             // set the owning side to null (unless already changed)
-            if ($lot->getEnregistrePar() === $this) {
-                $lot->setEnregistrePar(null);
+            if ($subscription->getUser() === $this) {
+                $subscription->setUser(null);
             }
         }
 
@@ -442,29 +575,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Commande>
+     * @return Collection<int, Payment>
      */
-    public function getCommandes(): Collection
+    public function getPayments(): Collection
     {
-        return $this->commandes;
+        return $this->payments;
     }
 
-    public function addCommande(Commande $commande): static
+    public function addPayment(Payment $payment): static
     {
-        if (!$this->commandes->contains($commande)) {
-            $this->commandes->add($commande);
-            $commande->setSecretaire($this);
+        if (!$this->payments->contains($payment)) {
+            $this->payments->add($payment);
+            $payment->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeCommande(Commande $commande): static
+    public function removePayment(Payment $payment): static
     {
-        if ($this->commandes->removeElement($commande)) {
+        if ($this->payments->removeElement($payment)) {
             // set the owning side to null (unless already changed)
-            if ($commande->getSecretaire() === $this) {
-                $commande->setSecretaire(null);
+            if ($payment->getUser() === $this) {
+                $payment->setUser(null);
             }
         }
 
@@ -472,29 +605,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, ReponseQuestion>
+     * @return Collection<int, StatusJob>
      */
-    public function getReponseQuestions(): Collection
+    public function getStatusJobs(): Collection
     {
-        return $this->reponseQuestions;
+        return $this->statusJobs;
     }
 
-    public function addReponseQuestion(ReponseQuestion $reponseQuestion): static
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
     {
-        if (!$this->reponseQuestions->contains($reponseQuestion)) {
-            $this->reponseQuestions->add($reponseQuestion);
-            $reponseQuestion->setUser($this);
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): static
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setSender($this);
         }
 
         return $this;
     }
 
-    public function removeReponseQuestion(ReponseQuestion $reponseQuestion): static
+    public function removeMessage(Message $message): static
     {
-        if ($this->reponseQuestions->removeElement($reponseQuestion)) {
+        if ($this->messages->removeElement($message)) {
             // set the owning side to null (unless already changed)
-            if ($reponseQuestion->getUser() === $this) {
-                $reponseQuestion->setUser(null);
+            if ($message->getSender() === $this) {
+                $message->setSender(null);
             }
         }
 
@@ -502,131 +643,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, HistoriquePaiement>
+     * @return Collection<int, Invoices>
      */
-    public function getHistoriquePaiements(): Collection
+    public function getInvoices(): Collection
     {
-        return $this->historiquePaiements;
+        return $this->invoices;
     }
 
-    public function addHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
+    public function addInvoice(Invoices $invoice): static
     {
-        if (!$this->historiquePaiements->contains($historiquePaiement)) {
-            $this->historiquePaiements->add($historiquePaiement);
-            $historiquePaiement->setRecuPar($this);
+        if (!$this->invoices->contains($invoice)) {
+            $this->invoices->add($invoice);
+            $invoice->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeHistoriquePaiement(HistoriquePaiement $historiquePaiement): static
+    public function removeInvoice(Invoices $invoice): static
     {
-        if ($this->historiquePaiements->removeElement($historiquePaiement)) {
+        if ($this->invoices->removeElement($invoice)) {
             // set the owning side to null (unless already changed)
-            if ($historiquePaiement->getRecuPar() === $this) {
-                $historiquePaiement->setRecuPar(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function getGenre(): ?Genre
-    {
-        return $this->genre;
-    }
-
-    public function setGenre(?Genre $genre): static
-    {
-        $this->genre = $genre;
-
-        return $this;
-    }
-
-    public function getCategoriePermisDeconduire(): ?CategoriePermisDeConduire
-    {
-        return $this->categoriePermisDeconduire;
-    }
-
-    public function setCategoriePermisDeconduire(?CategoriePermisDeConduire $categoriePermisDeconduire): static
-    {
-        $this->categoriePermisDeconduire = $categoriePermisDeconduire;
-
-        return $this;
-    }
-
-    public function getNumeroPermisDeConduire(): ?string
-    {
-        return $this->numeroPermisDeConduire;
-    }
-
-    public function setNumeroPermisDeConduire(string $numeroPermisDeConduire): static
-    {
-        $this->numeroPermisDeConduire = $numeroPermisDeConduire;
-
-        return $this;
-    }
-
-    public function getSpecialite(): ?Specialite
-    {
-        return $this->specialite;
-    }
-
-    public function setSpecialite(?Specialite $specialite): static
-    {
-        $this->specialite = $specialite;
-
-        return $this;
-    }
-
-    public function isSupprime(): ?bool
-    {
-        return $this->supprime;
-    }
-
-    public function setSupprime(bool $supprime): static
-    {
-        $this->supprime = $supprime;
-
-        return $this;
-    }
-
-    public function getSalaireBrute(): ?float
-    {
-        return $this->salaireBrute;
-    }
-
-    public function setSalaireBrute(?float $salaireBrute): static
-    {
-        $this->salaireBrute = $salaireBrute;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, BulletinSalaire>
-     */
-    public function getBulletinSalaires(): Collection
-    {
-        return $this->bulletinSalaires;
-    }
-
-    public function addBulletinSalaire(BulletinSalaire $bulletinSalaire): static
-    {
-        if (!$this->bulletinSalaires->contains($bulletinSalaire)) {
-            $this->bulletinSalaires->add($bulletinSalaire);
-            $bulletinSalaire->setPersonnel($this);
-        }
-
-        return $this;
-    }
-
-    public function removeBulletinSalaire(BulletinSalaire $bulletinSalaire): static
-    {
-        if ($this->bulletinSalaires->removeElement($bulletinSalaire)) {
-            // set the owning side to null (unless already changed)
-            if ($bulletinSalaire->getPersonnel() === $this) {
-                $bulletinSalaire->setPersonnel(null);
+            if ($invoice->getUser() === $this) {
+                $invoice->setUser(null);
             }
         }
 
@@ -634,29 +673,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, BulletinSalaire>
+     * @return Collection<int, UserLog>
      */
-    public function getCaissiereBulletinDePaie(): Collection
+    public function getUserLogs(): Collection
     {
-        return $this->caissiereBulletinDePaie;
+        return $this->userLogs;
     }
 
-    public function addCaissiereBulletinDePaie(BulletinSalaire $caissiereBulletinDePaie): static
+    public function addUserLog(UserLog $userLog): static
     {
-        if (!$this->caissiereBulletinDePaie->contains($caissiereBulletinDePaie)) {
-            $this->caissiereBulletinDePaie->add($caissiereBulletinDePaie);
-            $caissiereBulletinDePaie->setCaissiere($this);
+        if (!$this->userLogs->contains($userLog)) {
+            $this->userLogs->add($userLog);
+            $userLog->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeCaissiereBulletinDePaie(BulletinSalaire $caissiereBulletinDePaie): static
+    public function removeUserLog(UserLog $userLog): static
     {
-        if ($this->caissiereBulletinDePaie->removeElement($caissiereBulletinDePaie)) {
+        if ($this->userLogs->removeElement($userLog)) {
             // set the owning side to null (unless already changed)
-            if ($caissiereBulletinDePaie->getCaissiere() === $this) {
-                $caissiereBulletinDePaie->setCaissiere(null);
+            if ($userLog->getUser() === $this) {
+                $userLog->setUser(null);
             }
         }
 
@@ -664,83 +703,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, PrimeSpeciale>
+     * @return Collection<int, Notification>
      */
-    public function getPrimeSpeciales(): Collection
+    public function getNotifications(): Collection
     {
-        return $this->primeSpeciales;
+        return $this->notifications;
     }
 
-    public function addPrimeSpeciale(PrimeSpeciale $primeSpeciale): static
+    public function addNotification(Notification $notification): static
     {
-        if (!$this->primeSpeciales->contains($primeSpeciale)) {
-            $this->primeSpeciales->add($primeSpeciale);
-            $primeSpeciale->setPersonnel($this);
+        if (!$this->notifications->contains($notification)) {
+            $this->notifications->add($notification);
+            $notification->setUser($this);
         }
 
         return $this;
     }
 
-    public function removePrimeSpeciale(PrimeSpeciale $primeSpeciale): static
+    public function removeNotification(Notification $notification): static
     {
-        if ($this->primeSpeciales->removeElement($primeSpeciale)) {
+        if ($this->notifications->removeElement($notification)) {
             // set the owning side to null (unless already changed)
-            if ($primeSpeciale->getPersonnel() === $this) {
-                $primeSpeciale->setPersonnel(null);
-            }
-        }
-
-        return $this;
-    }
-
-    public function isStatut(): ?bool
-    {
-        return $this->statut;
-    }
-
-    public function setStatut(bool $statut): static
-    {
-        $this->statut = $statut;
-
-        return $this;
-    }
-
-    public function getStatutPersonnel(): ?StatutPersonnel
-    {
-        return $this->statutPersonnel;
-    }
-
-    public function setStatutPersonnel(?StatutPersonnel $statutPersonnel): static
-    {
-        $this->statutPersonnel = $statutPersonnel;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, ParametresVitaux>
-     */
-    public function getParametresVitauxes(): Collection
-    {
-        return $this->parametresVitauxes;
-    }
-
-    public function addParametresVitaux(ParametresVitaux $parametresVitaux): static
-    {
-        if (!$this->parametresVitauxes->contains($parametresVitaux)) {
-            $this->parametresVitauxes->add($parametresVitaux);
-            $parametresVitaux->setInfirmier($this);
-        }
-
-        return $this;
-    }
-
-    public function removeParametresVitaux(ParametresVitaux $parametresVitaux): static
-    {
-        if ($this->parametresVitauxes->removeElement($parametresVitaux)) {
-            // set the owning side to null (unless already changed)
-            if ($parametresVitaux->getInfirmier() === $this) {
-                $parametresVitaux->setInfirmier(null);
+            if ($notification->getUser() === $this) {
+                $notification->setUser(null);
             }
         }
 
@@ -748,29 +733,151 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Consultation>
+     * @return Collection<int, Review>
      */
-    public function getConsultations(): Collection
+    public function getReviews(): Collection
     {
-        return $this->consultations;
+        return $this->reviews;
     }
 
-    public function addConsultation(Consultation $consultation): static
+    public function getPersonalProfile(): ?PersonalProfile
     {
-        if (!$this->consultations->contains($consultation)) {
-            $this->consultations->add($consultation);
-            $consultation->setMedecin($this);
+        return $this->personalProfile;
+    }
+
+    public function setPersonalProfile(?PersonalProfile $personalProfile): self
+    {
+        $this->personalProfile = $personalProfile;
+
+        // Assure que le côté propriétaire est également mis à jour
+        if ($personalProfile !== null && $personalProfile->getUser() !== $this) {
+            $personalProfile->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeConsultation(Consultation $consultation): static
+    public function getProfessionalProfile(): ?ProfessionalProfile
     {
-        if ($this->consultations->removeElement($consultation)) {
+        return $this->professionalProfile;
+    }
+
+    public function setProfessionalProfile(?ProfessionalProfile $professionalProfile): self
+    {
+        $this->professionalProfile = $professionalProfile;
+
+        // Assure que le côté propriétaire est également mis à jour
+        if ($professionalProfile !== null && $professionalProfile->getUser() !== $this) {
+            $professionalProfile->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function getEmailVerificationExpiresAt(): ?\DateTime
+    {
+        return $this->emailVerificationExpiresAt;
+    }
+
+    public function setEmailVerificationExpiresAt(?\DateTime $date): static
+    {
+        $this->emailVerificationExpiresAt = $date;
+        return $this;
+    }
+
+    public function getResetPasswordToken(): ?string
+    {
+        return $this->resetPasswordToken;
+    }
+
+    public function setResetPasswordToken(?string $token): self
+    {
+        $this->resetPasswordToken = $token;
+        return $this;
+    }
+
+    public function getResetPasswordExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->resetPasswordExpiresAt;
+    }
+
+    public function setResetPasswordExpiresAt(?\DateTimeInterface $resetPasswordExpiresAt): static
+    {
+        $this->resetPasswordExpiresAt = $resetPasswordExpiresAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Report>
+     */
+    public function getReports(): Collection
+    {
+        return $this->reports;
+    }
+
+    public function addReport(Report $report): static
+    {
+        if (!$this->reports->contains($report)) {
+            $this->reports->add($report);
+            $report->setReporter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReport(Report $report): static
+    {
+        if ($this->reports->removeElement($report)) {
             // set the owning side to null (unless already changed)
-            if ($consultation->getMedecin() === $this) {
-                $consultation->setMedecin(null);
+            if ($report->getReporter() === $this) {
+                $report->setReporter(null);
+            }
+        }
+
+        return $this;
+    }
+
+    ////////////////////////////
+    public function addTargetUser(Report $targetUser): static
+    {
+        if (!$this->targetUsers->contains($targetUser)) {
+            $this->targetUsers->add($targetUser);
+            $targetUser->setTargetUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTargetUser(Report $targetUser): static
+    {
+        if ($this->targetUsers->removeElement($targetUser)) {
+            // set the owning side to null (unless already changed)
+            if ($targetUser->getTargetUser() === $this) {
+                $targetUser->setTargetUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    ////////////////////////////
+    public function addHandledBy(Report $handledBy): static
+    {
+        if (!$this->handledBys->contains($handledBy)) {
+            $this->handledBys->add($handledBy);
+            $handledBy->setHandledBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHandledBy(Report $handledBy): static
+    {
+        if ($this->handledBys->removeElement($handledBy)) {
+            // set the owning side to null (unless already changed)
+            if ($handledBy->getHandledBy() === $this) {
+                $handledBy->setHandledBy(null);
             }
         }
 
@@ -778,29 +885,71 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, ResultatExamen>
+     * @return Collection<int, Favorite>
      */
-    public function getResultatExamens(): Collection
+    public function getFavorites(): Collection
     {
-        return $this->resultatExamens;
+        return $this->favorites;
     }
 
-    public function addResultatExamen(ResultatExamen $resultatExamen): static
+    public function addFavorite(Favorite $favorite): static
     {
-        if (!$this->resultatExamens->contains($resultatExamen)) {
-            $this->resultatExamens->add($resultatExamen);
-            $resultatExamen->setLaborantin($this);
+        if (!$this->favorites->contains($favorite)) {
+            $this->favorites->add($favorite);
+            $favorite->setUser($this);
         }
 
         return $this;
     }
 
-    public function removeResultatExamen(ResultatExamen $resultatExamen): static
+    public function removeFavorite(Favorite $favorite): static
     {
-        if ($this->resultatExamens->removeElement($resultatExamen)) {
+        if ($this->favorites->removeElement($favorite)) {
             // set the owning side to null (unless already changed)
-            if ($resultatExamen->getLaborantin() === $this) {
-                $resultatExamen->setLaborantin(null);
+            if ($favorite->getUser() === $this) {
+                $favorite->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getTypeCompte(): ?TypeCompte
+    {
+        return $this->typeCompte;
+    }
+
+    public function setTypeCompte(?TypeCompte $typeCompte): static
+    {
+        $this->typeCompte = $typeCompte;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Rating>
+     */
+    public function getRatings(): Collection
+    {
+        return $this->ratings;
+    }
+
+    public function addRating(Rating $rating): static
+    {
+        if (!$this->ratings->contains($rating)) {
+            $this->ratings->add($rating);
+            $rating->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRating(Rating $rating): static
+    {
+        if ($this->ratings->removeElement($rating)) {
+            // set the owning side to null (unless already changed)
+            if ($rating->getUser() === $this) {
+                $rating->setUser(null);
             }
         }
 
@@ -808,29 +957,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, BilletDeSession>
+     * @return Collection<int, View>
      */
-    public function getBilletDeSessions(): Collection
+    public function getViews(): Collection
     {
-        return $this->billetDeSessions;
+        return $this->views;
     }
 
-    public function addBilletDeSession(BilletDeSession $billetDeSession): static
+    public function addView(View $view): static
     {
-        if (!$this->billetDeSessions->contains($billetDeSession)) {
-            $this->billetDeSessions->add($billetDeSession);
-            $billetDeSession->setCaissiere($this);
+        if (!$this->views->contains($view)) {
+            $this->views->add($view);
+            $view->setViewer($this);
         }
 
         return $this;
     }
 
-    public function removeBilletDeSession(BilletDeSession $billetDeSession): static
+    public function removeView(View $view): static
     {
-        if ($this->billetDeSessions->removeElement($billetDeSession)) {
+        if ($this->views->removeElement($view)) {
             // set the owning side to null (unless already changed)
-            if ($billetDeSession->getCaissiere() === $this) {
-                $billetDeSession->setCaissiere(null);
+            if ($view->getViewer() === $this) {
+                $view->setViewer(null);
             }
         }
 
@@ -838,29 +987,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Facture>
+     * @return Collection<int, Conversation>
      */
-    public function getPrescripteurs(): Collection
+    public function getConversationsAsA(): Collection
     {
-        return $this->prescripteurs;
+        return $this->conversationsAsA;
     }
 
-    public function addPrescripteur(Facture $prescripteur): static
+    public function addConversationAsA(Conversation $conversation): static
     {
-        if (!$this->prescripteurs->contains($prescripteur)) {
-            $this->prescripteurs->add($prescripteur);
-            $prescripteur->setPrescripteur($this);
+        if (!$this->conversationsAsA->contains($conversation)) {
+            $this->conversationsAsA->add($conversation);
+            $conversation->setParticipantA($this);
         }
 
         return $this;
     }
 
-    public function removePrescripteur(Facture $prescripteur): static
+    public function removeConversationAsA(Conversation $conversation): static
     {
-        if ($this->prescripteurs->removeElement($prescripteur)) {
-            // set the owning side to null (unless already changed)
-            if ($prescripteur->getPrescripteur() === $this) {
-                $prescripteur->setPrescripteur(null);
+        if ($this->conversationsAsA->removeElement($conversation)) {
+            if ($conversation->getParticipantA() === $this) {
+                $conversation->setParticipantA(null);
             }
         }
 
@@ -868,29 +1016,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Hospitalisation>
+     * @return Collection<int, Conversation>
      */
-    public function getHospitalisations(): Collection
+    public function getConversationsAsB(): Collection
     {
-        return $this->hospitalisations;
+        return $this->conversationsAsB;
     }
 
-    public function addHospitalisation(Hospitalisation $hospitalisation): static
+    public function addConversationAsB(Conversation $conversation): static
     {
-        if (!$this->hospitalisations->contains($hospitalisation)) {
-            $this->hospitalisations->add($hospitalisation);
-            $hospitalisation->setEnregistrePar($this);
+        if (!$this->conversationsAsB->contains($conversation)) {
+            $this->conversationsAsB->add($conversation);
+            $conversation->setParticipantB($this);
         }
 
         return $this;
     }
 
-    public function removeHospitalisation(Hospitalisation $hospitalisation): static
+    public function removeConversationAsB(Conversation $conversation): static
     {
-        if ($this->hospitalisations->removeElement($hospitalisation)) {
-            // set the owning side to null (unless already changed)
-            if ($hospitalisation->getEnregistrePar() === $this) {
-                $hospitalisation->setEnregistrePar(null);
+        if ($this->conversationsAsB->removeElement($conversation)) {
+            if ($conversation->getParticipantB() === $this) {
+                $conversation->setParticipantB(null);
             }
         }
 
@@ -898,32 +1045,377 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Patient>
+     * @return Collection<int, Conversation>
      */
-    public function getPatients(): Collection
+    public function getAllConversations(): Collection
     {
-        return $this->patients;
+        return new ArrayCollection(
+            array_merge(
+                $this->conversationsAsA->toArray(),
+                $this->conversationsAsB->toArray()
+            )
+        );
     }
 
-    public function addPatient(Patient $patient): static
+    public function getSentFriendships(): Collection
     {
-        if (!$this->patients->contains($patient)) {
-            $this->patients->add($patient);
-            $patient->setEnregistrePar($this);
+        return $this->sentFriendships;
+    }
+
+    public function getReceivedFriendships(): Collection
+    {
+        return $this->receivedFriendships;
+    }
+
+
+    public function addSentFriendship(Friendship $friendship): self
+    {
+        if (!$this->sentFriendships->contains($friendship)) {
+            $this->sentFriendships[] = $friendship;
+            $friendship->setRequester($this);
+        }
+        return $this;
+    }
+
+    public function addReceivedFriendship(Friendship $friendship): self
+    {
+        if (!$this->receivedFriendships->contains($friendship)) {
+            $this->receivedFriendships[] = $friendship;
+            $friendship->setAddressee($this);
+        }
+        return $this;
+    }
+
+
+    /**
+     * @return Collection<int, Report>
+     */
+    public function getReportsSent(): Collection
+    {
+        return $this->reportsSent;
+    }
+
+    public function addReportSent(Report $report): self
+    {
+        if (!$this->reportsSent->contains($report)) {
+            $this->reportsSent->add($report);
+            $report->setReporter($this);
+        }
+        return $this;
+    }
+
+    public function removeReportSent(Report $report): self
+    {
+        if ($this->reportsSent->removeElement($report)) {
+            // met à null seulement si c'est bien moi
+            if ($report->getReporter() === $this) {
+                $report->setReporter(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Report>
+     */
+    public function getReportsReceived(): Collection
+    {
+        return $this->reportsReceived;
+    }
+
+    public function addReportReceived(Report $report): self
+    {
+        if (!$this->reportsReceived->contains($report)) {
+            $this->reportsReceived->add($report);
+            $report->setTargetUser($this);
+        }
+        return $this;
+    }
+
+    public function removeReportReceived(Report $report): self
+    {
+        if ($this->reportsReceived->removeElement($report)) {
+            if ($report->getTargetUser() === $this) {
+                $report->setTargetUser(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getCountry(): ?Country
+    {
+        return $this->country;
+    }
+
+    public function setCountry(?Country $country): static
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Job>
+     */
+    public function getJobs(): Collection
+    {
+        return $this->jobs;
+    }
+
+    public function addJob(Job $job): static
+    {
+        if (!$this->jobs->contains($job)) {
+            $this->jobs->add($job);
+            $job->setCreatedBy($this);
         }
 
         return $this;
     }
 
-    public function removePatient(Patient $patient): static
+    public function removeJob(Job $job): static
     {
-        if ($this->patients->removeElement($patient)) {
+        if ($this->jobs->removeElement($job)) {
             // set the owning side to null (unless already changed)
-            if ($patient->getEnregistrePar() === $this) {
-                $patient->setEnregistrePar(null);
+            if ($job->getCreatedBy() === $this) {
+                $job->setCreatedBy(null);
             }
         }
 
+        return $this;
+    }
+
+
+    public function getFavoriteJobs(): Collection
+    {
+        return $this->favoriteJobs;
+    }
+
+    public function getJobViews(): Collection
+    {
+        return $this->jobViews;
+    }
+
+    public function isProfileViewsPrivate(): bool
+    {
+        return $this->profileViewsPrivate;
+    }
+
+    public function setProfileViewsPrivate(bool $profileViewsPrivate): self
+    {
+        $this->profileViewsPrivate = $profileViewsPrivate;
+        return $this;
+    }
+
+    public function getUserTwoFactor(): ?UserTwoFactor
+    {
+        return $this->userTwoFactor;
+    }
+
+    public function setUserTwoFactor(?UserTwoFactor $userTwoFactor): static
+    {
+        $this->userTwoFactor = $userTwoFactor;
+
+        if ($userTwoFactor !== null && $userTwoFactor->getUser() !== $this) {
+            $userTwoFactor->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function getLastSeenAt(): ?\DateTimeImmutable
+    {
+        return $this->lastSeenAt;
+    }
+
+    public function setLastSeenAt(?\DateTimeImmutable $lastSeenAt): self
+    {
+        $this->lastSeenAt = $lastSeenAt;
+        return $this;
+    }
+
+    public function getLastDisconnectedAt(): ?\DateTimeImmutable
+    {
+        return $this->lastDisconnectedAt;
+    }
+
+    public function setLastDisconnectedAt(?\DateTimeImmutable $lastDisconnectedAt): self
+    {
+        $this->lastDisconnectedAt = $lastDisconnectedAt;
+        return $this;
+    }
+
+    public function isOnline(): bool
+    {
+        $lastSeenAt = $this->getLastSeenAt();
+
+        if (!$lastSeenAt instanceof \DateTimeInterface) {
+            return false;
+        }
+
+        $diff = time() - $lastSeenAt->getTimestamp();
+
+        return $diff >= 0 && $diff <= 70;
+    }
+
+    public function getIsOnline(): bool
+    {
+        return $this->isOnline();
+    }
+
+    public function setIsOnline(bool $isOnline): self
+    {
+        $this->isOnline = $isOnline;
+        return $this;
+    }
+
+    public function getPresenceStatus(): string
+    {
+        $lastSeenAt = $this->getLastSeenAt();
+        $now = time();
+
+        if ($lastSeenAt instanceof \DateTimeImmutable) {
+            $diffSeen = $now - $lastSeenAt->getTimestamp();
+
+            if ($diffSeen >= 0 && $diffSeen <= 70) {
+                return 'online';
+            }
+        }
+
+        $lastDisconnectedAt = $this->getLastDisconnectedAt();
+
+        if ($lastDisconnectedAt instanceof \DateTimeImmutable) {
+            $diffDisconnected = $now - $lastDisconnectedAt->getTimestamp();
+
+            if ($diffDisconnected >= 0 && $diffDisconnected <= 120) {
+                return 'recently_offline';
+            }
+        }
+
+        return 'offline';
+    }
+
+    /**
+     * @return Collection<int, MessageReaction>
+     */
+    public function getMessageReactions(): Collection
+    {
+        return $this->messageReactions;
+    }
+
+    public function addMessageReaction(MessageReaction $messageReaction): static
+    {
+        if (!$this->messageReactions->contains($messageReaction)) {
+            $this->messageReactions->add($messageReaction);
+            $messageReaction->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessageReaction(MessageReaction $messageReaction): static
+    {
+        if ($this->messageReactions->removeElement($messageReaction)) {
+            if ($messageReaction->getUser() === $this) {
+                $messageReaction->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getGoogleId(): ?string
+    {
+        return $this->googleId;
+    }
+
+    public function setGoogleId(?string $googleId): static
+    {
+        $this->googleId = $googleId;
+
+        return $this;
+    }
+
+    public function getFacebookId(): ?string
+    {
+        return $this->facebookId;
+    }
+
+    public function setFacebookId(?string $facebookId): static
+    {
+        $this->facebookId = $facebookId;
+
+        return $this;
+    }
+
+    public function getTiktokId(): ?string
+    {
+        return $this->tiktokId;
+    }
+
+    public function setTiktokId(?string $tiktokId): static
+    {
+        $this->tiktokId = $tiktokId;
+
+        return $this;
+    }
+
+    public function getRegistrationProvider(): ?string
+    {
+        return $this->registrationProvider;
+    }
+
+    public function setRegistrationProvider(?string $registrationProvider): static
+    {
+        $this->registrationProvider = $registrationProvider;
+
+        return $this;
+    }
+
+    public function getAvatarUrl(): ?string
+    {
+        return $this->avatarUrl;
+    }
+
+    public function setAvatarUrl(?string $avatarUrl): static
+    {
+        $this->avatarUrl = $avatarUrl;
+
+        return $this;
+    }
+
+    public function getAppleId(): ?string
+    {
+        return $this->appleId;
+    }
+
+    public function setAppleId(?string $appleId): static
+    {
+        $this->appleId = $appleId;
+
+        return $this;
+    }
+
+    public function getMicrosoftId(): ?string
+    {
+        return $this->microsoftId;
+    }
+
+    public function setMicrosoftId(?string $microsoftId): static
+    {
+        $this->microsoftId = $microsoftId;
+
+        return $this;
+    }
+
+
+    public function getProfileType(): ?string
+    {
+        return $this->profileType;
+    }
+
+    public function setProfileType(?string $profileType): self
+    {
+        $this->profileType = $profileType;
         return $this;
     }
 }

@@ -1,0 +1,25 @@
+<div class="kpis">
+  <div class="kpi">
+    <div class="t">{% trans %}Nouveaux inscrits (7j){% endtrans %}</div>
+    <div class="v">{{ analytics.totalNew7d ?? (analytics.total7d ?? 0) }}</div>
+    <div class="a"><a href="/moderateur/users?range=7d">{% trans %}Ouvrir la liste{% endtrans %}</a></div>
+  </div>
+
+  <div class="kpi">
+    <div class="t">{% trans %}Talents (7j){% endtrans %}</div>
+    <div class="v">{{ roles7d.ROLE_TALENT ?? 0 }}</div>
+    <div class="a"><a href="/moderateur/users?role=ROLE_TALENT&range=7d">{% trans %}Voir talents{% endtrans %}</a></div>
+  </div>
+
+  <div class="kpi">
+    <div class="t">{% trans %}Particuliers (7j){% endtrans %}</div>
+    <div class="v">{{ roles7d.ROLE_PARTICULIER ?? 0 }}</div>
+    <div class="a"><a href="/moderateur/users?role=ROLE_PARTICULIER&range=7d">{% trans %}Voir particuliers{% endtrans %}</a></div>
+  </div>
+
+  <div class="kpi">
+    <div class="t">{% trans %}Compagnies (7j){% endtrans %}</div>
+    <div class="v">{{ roles7d.ROLE_COMPANY ?? 0 }}</div>
+    <div class="a"><a href="/moderateur/users?role=ROLE_COMPANY&range=7d">{% trans %}Voir compagnies{% endtrans %}</a></div>
+  </div>
+</div>

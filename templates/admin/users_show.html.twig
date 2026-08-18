@@ -1,0 +1,263 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}
+	{% trans %}Détails de l'utilisateur{% endtrans %}
+{% endblock %}
+
+{% block body %}
+	<script src="https://cdn.tailwindcss.com"></script>
+
+	{% set roles = u.roles|default([]) %}
+	{% set mainRole = roles|first|default('ROLE_USER') %}
+	{% set profile = u.personalProfile|default(null) %}
+	{% set photo = profile ? profile.photo|default('default.png') : 'default.png' %}
+
+	<main class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1100px_circle_at_12%_10%,rgba(99,102,241,.12),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.10),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+		<div class="mx-auto max-w-6xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
+
+			<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div>
+					
+					<h1 class="mt-1 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+						{% trans %}Détails de l'utilisateur{% endtrans %}
+					</h1>
+				</div>
+
+				<div class="flex flex-wrap gap-2">
+					<a href="{{ path('admin_users_index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50">
+						<span aria-hidden="true">←</span>
+						{% trans %}Retour aux utilisateurs{% endtrans %}
+					</a>
+
+					<a href="{{ path('tableau_de_bord') }}" class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-sm transition hover:-translate-y-0.5 hover:opacity-95">
+						{% trans %}Tableau de bord{% endtrans %}
+					</a>
+				</div>
+			</div>
+
+			<section class="overflow-hidden rounded-3xl border border-white/70 bg-white/80 shadow-[0_22px_65px_rgba(15,23,42,.12)] backdrop-blur-xl">
+				<div class="relative overflow-hidden bg-gradient-to-br from-slate-950 via-indigo-950 to-indigo-700 px-5 py-7 sm:px-8 sm:py-9">
+					<div class="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-cyan-400/20 blur-3xl"></div>
+					<div class="absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-indigo-400/30 blur-3xl"></div>
+
+					<div class="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+						<div class="flex min-w-0 items-center gap-4">
+							<img src="{{ asset('uploads/profiles/' ~ photo) }}" alt="{{ 'Photo de profil'|trans }}" class="h-20 w-20 shrink-0 rounded-3xl border-4 border-white/25 bg-white object-cover shadow-xl sm:h-24 sm:w-24">
+
+							<div class="min-w-0">
+								<p class="truncate text-xl font-black text-white sm:text-2xl">{{ u.email }}</p>
+								
+
+								<div class="mt-3 flex flex-wrap items-center gap-2">
+									{% if u.isActive %}
+										<span id="statusBadge" class="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-400/15 px-3 py-1.5 text-xs font-extrabold text-emerald-100">
+											<span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+											<span id="statusText">{% trans %}Compte actif{% endtrans %}</span>
+										</span>
+									{% else %}
+										<span id="statusBadge" class="inline-flex items-center gap-2 rounded-full border border-rose-300/30 bg-rose-400/15 px-3 py-1.5 text-xs font-extrabold text-rose-100">
+											<span class="h-2 w-2 rounded-full bg-rose-400"></span>
+											<span id="statusText">{% trans %}Compte bloqué{% endtrans %}</span>
+										</span>
+									{% endif %}
+								</div>
+							</div>
+						</div>
+
+						<button id="toggleAccountButton" type="button" data-url="{{ path('admin_users_toggle_active', {slug: u.slug}) }}" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 {{ u.isActive ? 'bg-rose-500 hover:bg-rose-600' : 'bg-emerald-500 hover:bg-emerald-600' }}">
+							<span id="toggleIcon" aria-hidden="true">{{ u.isActive ? '⛔' : '✅' }}</span>
+							<span id="toggleLabel">
+								{% if u.isActive %}
+									{% trans %}Bloquer le compte{% endtrans %}
+								{% else %}
+									{% trans %}Débloquer le compte{% endtrans %}
+								{% endif %}
+							</span>
+						</button>
+					</div>
+				</div>
+
+				<div class="grid gap-5 p-5 sm:p-8 lg:grid-cols-3">
+					<div class="space-y-5 lg:col-span-2">
+						<section class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+							<div class="mb-5 flex items-center gap-3">
+								<span class="grid h-10 w-10 place-items-center rounded-2xl bg-indigo-50 text-lg">👤</span>
+								<div>
+									<h2 class="text-base font-black text-slate-900">{% trans %}Informations du compte{% endtrans %}</h2>
+									<p class="text-xs font-semibold text-slate-500">{% trans %}Identité et accès de l'utilisateur{% endtrans %}</p>
+								</div>
+							</div>
+
+							<dl class="grid gap-3 sm:grid-cols-2">
+								<div class="rounded-2xl bg-slate-50 p-4">
+									<dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">{% trans %}Adresse e-mail{% endtrans %}</dt>
+									<dd class="mt-1 break-all text-sm font-bold text-slate-900">{{ u.email }}</dd>
+								</div>
+
+								<div class="rounded-2xl bg-slate-50 p-4">
+									<dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">{% trans %}Date de création{% endtrans %}</dt>
+									<dd class="mt-1 text-sm font-bold text-slate-900">
+										{{ u.createdAt ? u.createdAt|date('d/m/Y à H:i') : '—' }}
+									</dd>
+								</div>
+
+								<div class="rounded-2xl bg-slate-50 p-4">
+									<dt class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">{% trans %}État du compte{% endtrans %}</dt>
+									<dd id="accountState" class="mt-1 text-sm font-bold {{ u.isActive ? 'text-emerald-700' : 'text-rose-700' }}">
+										{% if u.isActive %}
+											{% trans %}Actif{% endtrans %}
+										{% else %}
+											{% trans %}Bloqué{% endtrans %}
+										{% endif %}
+									</dd>
+								</div>
+							</dl>
+						</section>
+
+						<section class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+							<div class="mb-5 flex items-center gap-3">
+								<span class="grid h-10 w-10 place-items-center rounded-2xl bg-cyan-50 text-lg">🛡️</span>
+								<div>
+									<h2 class="text-base font-black text-slate-900">{% trans %}Rôles et autorisations{% endtrans %}</h2>
+									<p class="text-xs font-semibold text-slate-500">{% trans %}Niveaux d'accès attribués à cet utilisateur{% endtrans %}</p>
+								</div>
+							</div>
+
+							<div class="flex flex-wrap gap-2">
+								{% for role in roles %}
+									<span class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-3 py-2 text-xs font-extrabold text-indigo-700">
+										<span class="h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+										{{ role }}
+									</span>
+								{% else %}
+									<span class="text-sm font-semibold text-slate-500">{% trans %}Aucun rôle attribué{% endtrans %}</span>
+								{% endfor %}
+							</div>
+						</section>
+					</div>
+
+					<aside class="space-y-5">
+						<section class="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+							<h2 class="text-base font-black text-slate-900">{% trans %}Résumé{% endtrans %}</h2>
+
+							<div class="mt-4 space-y-3">
+								<div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+									<span class="text-xs font-bold text-slate-500">{% trans %}Rôle principal{% endtrans %}</span>
+									<span class="text-right text-xs font-black text-slate-900">{{ mainRole }}</span>
+								</div>
+
+								<div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+									<span class="text-xs font-bold text-slate-500">{% trans %}Nombre de rôles{% endtrans %}</span>
+									<span class="text-xs font-black text-slate-900">{{ roles|length }}</span>
+								</div>
+
+								<div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 px-4 py-3">
+									<span class="text-xs font-bold text-slate-500">{% trans %}Profil personnel{% endtrans %}</span>
+									{% if profile %}
+										<span class="text-xs font-black text-emerald-700">{% trans %}Disponible{% endtrans %}</span>
+									{% else %}
+										<span class="text-xs font-black text-slate-500">{% trans %}Non renseigné{% endtrans %}</span>
+									{% endif %}
+								</div>
+							</div>
+						</section>
+
+						<div class="rounded-3xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900 shadow-sm">
+							<p class="font-black">{% trans %}Action sensible{% endtrans %}</p>
+							<p class="mt-1 text-xs font-semibold leading-5 text-amber-800">
+								{% trans %}Le blocage empêche l'utilisateur d'accéder à son compte jusqu'à sa réactivation.{% endtrans %}
+							</p>
+						</div>
+					</aside>
+				</div>
+			</section>
+		</div>
+
+		<div id="toastHost" class="fixed right-4 top-4 z-[9999] space-y-2" aria-live="polite"></div>
+	</main>
+
+	<script>
+		(() => {
+const button = document.getElementById('toggleAccountButton');
+const toastHost = document.getElementById('toastHost');
+if (! button || ! toastHost) 
+return;
+
+
+const csrf = {{ csrf_token('admin_users')|json_encode|raw }};
+const messages = {
+active: {{ 'Compte actif'|trans|json_encode|raw }},
+blocked: {{ 'Compte bloqué'|trans|json_encode|raw }},
+activeShort: {{ 'Actif'|trans|json_encode|raw }},
+blockedShort: {{ 'Bloqué'|trans|json_encode|raw }},
+block: {{ 'Bloquer le compte'|trans|json_encode|raw }},
+unblock: {{ 'Débloquer le compte'|trans|json_encode|raw }},
+success: {{ 'Statut mis à jour avec succès.'|trans|json_encode|raw }},
+error: {{ 'Une erreur est survenue.'|trans|json_encode|raw }}
+};
+
+function toast(message, isError = false) {
+const element = document.createElement('div');
+element.className = `rounded-2xl border bg-white/95 px-4 py-3 text-sm font-semibold shadow-xl backdrop-blur ${
+isError ? 'border-rose-200 text-rose-700' : 'border-emerald-200 text-emerald-700'
+}`;
+element.textContent = message;
+toastHost.appendChild(element);
+window.setTimeout(() => element.remove(), 3000);
+}
+
+function refreshStatus(isActive) {
+const badge = document.getElementById('statusBadge');
+const statusText = document.getElementById('statusText');
+const state = document.getElementById('accountState');
+const label = document.getElementById('toggleLabel');
+const icon = document.getElementById('toggleIcon');
+
+statusText.textContent = isActive ? messages.active : messages.blocked;
+state.textContent = isActive ? messages.activeShort : messages.blockedShort;
+label.textContent = isActive ? messages.block : messages.unblock;
+icon.textContent = isActive ? '⛔' : '✅';
+
+badge.className = `inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-extrabold ${
+isActive ? 'border-emerald-300/30 bg-emerald-400/15 text-emerald-100' : 'border-rose-300/30 bg-rose-400/15 text-rose-100'
+}`;
+badge.querySelector('span:first-child').className = `h-2 w-2 rounded-full ${
+isActive ? 'bg-emerald-400' : 'bg-rose-400'
+}`;
+state.className = `mt-1 text-sm font-bold ${
+isActive ? 'text-emerald-700' : 'text-rose-700'
+}`;
+button.className = `inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-extrabold text-white shadow-lg transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-60 ${
+isActive ? 'bg-rose-500 hover:bg-rose-600' : 'bg-emerald-500 hover:bg-emerald-600'
+}`;
+}
+
+button.addEventListener('click', async () => {
+button.disabled = true;
+
+try {
+const response = await fetch(button.dataset.url, {
+method: 'POST',
+headers: {
+'X-Requested-With': 'XMLHttpRequest',
+'X-CSRF-TOKEN': csrf
+}
+});
+
+const data = await response.json().catch(() => ({}));
+if (! response.ok || data.ok === false) {
+throw new Error(data.error || messages.error);
+}
+
+refreshStatus(Boolean(data.isActive));
+toast(messages.success);
+} catch (error) {
+toast(error.message || messages.error, true);
+} finally {
+button.disabled = false;
+}
+});
+})();
+	</script>
+{% endblock %}

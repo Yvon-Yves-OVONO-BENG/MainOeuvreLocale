@@ -1,0 +1,592 @@
+{% extends 'base.html.twig' %}
+
+{% set seo_description = ((job.description ?? 'Découvrez cette offre d’emploi ou mission locale')|striptags|trim|slice(0, 155)) ~ '…' %}
+{% set seo_og_type = 'article' %}
+{% block title %}{{ job.title ?? 'Offre d’emploi' }} | Main d’Œuvre Locale{% endblock %}
+
+{% block page_structured_data %}
+  {% set seo_job_description = ((job.description ?? '') ~ ' ' ~ (job.mission ?? '') ~ ' ' ~ (job.profil ?? ''))|striptags|trim %}
+  {% set seo_author = job.createdBy and job.createdBy.personalProfile is defined and job.createdBy.personalProfile
+    ? (job.createdBy.personalProfile.fullName|default('Main d’Œuvre Locale'))
+    : 'Main d’Œuvre Locale'
+  %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "JobPosting",
+    "title": {{ (job.title ?? 'Offre d’emploi')|json_encode|raw }},
+    "description": {{ seo_job_description|json_encode|raw }},
+    "url": {{ mol_canonical_url|json_encode|raw }},
+    "datePosted": {{ (job.createdAt ? job.createdAt|date('c') : 'now'|date('c'))|json_encode|raw }},
+    "hiringOrganization": {
+      "@type": "Organization",
+      "name": {{ seo_author|json_encode|raw }},
+      "sameAs": {{ mol_site_url|json_encode|raw }}
+    }{% if job.city %},
+    "jobLocation": {
+      "@type": "Place",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": {{ job.city|json_encode|raw }},
+        "addressCountry": "CM"
+      }
+    }{% endif %}{% if job.typeJob %},
+    "employmentType": {{ job.typeJob.typeJob|json_encode|raw }}{% endif %},
+    "directApply": true
+  }
+  </script>
+{% endblock %}
+
+{% block body %}
+
+{% include "job/_vip_ui_detail.html.twig" %}
+
+<div class="job-page-top">
+  <div class="container">
+    <div class="job-top-banner mt-3">
+      <div class="job-top-grid">
+        <div class="job-top-left">
+
+          <h1 class="job-main-title">
+            {{ job.title ?? ('Job'|trans) }}
+          </h1>
+
+          <ul class="job-hero-pills">
+            <li><i class="si si-location-pin"></i>{{ job.city ?? '—' }}</li>
+            <li><i class="si si-briefcase"></i>{{ job.typeJob ? job.typeJob.typeJob : '—' }}</li>
+            <li><i class="si si-briefcase"></i>{{ job.profession ? job.profession.profession : '—' }}</li>
+            <li><i class="si si-calendar"></i>{{ job.createdAt ? job.createdAt|ago : ('récemment'|trans) }}</li>
+            <li><i class="si si-money"></i>{{ job.salaireMin ?? '—' }} - {{ job.salaireMax ?? '—' }}</li>
+          </ul>
+        </div>
+        
+        <div class="job-actions">
+            {% if app.user and job.createdBy and app.user.id != job.createdBy.id %}
+              <button
+                type="button"
+                class="btn btn-light"
+                id="btnFavJob"
+                data-url="{{ path('ajax_job_favorite_toggle', {slug: job.slug}) }}"
+                data-state="{{ isFav ? '1' : '0' }}"
+              >
+                <i class="fa {{ isFav ? 'fa-heart text-danger' : 'fa-heart-o' }} me-1"></i>
+                <span id="favText">{{ isFav ? ('Retirer des favoris'|trans) : ('Ajouter aux favoris'|trans) }}</span>
+                <span class="ms-2 badge bg-dark" id="favCount">{{ favsCount ?? 0 }}</span>
+              </button>
+    
+              <a href="#"
+                 class="js-apply-toggle btn {{ hasApplied ? 'btn-danger' : 'btn-info' }}"
+                 data-apply-url="{{ path('ajax_job_apply', {slug: job.slug}) }}"
+                 data-cancel-url="{{ path('ajax_job_apply_cancel', {slug: job.slug}) }}"
+                 data-state="{{ hasApplied ? 'applied' : 'not_applied' }}">
+                <i class="fa {{ hasApplied ? 'fa-times' : 'fa-check' }} me-1"></i>
+                <span class="btn-text">{{ hasApplied ? ('Annuler la demande'|trans) : ('Postuler'|trans) }}</span>
+              </a>
+            {% endif %}
+    
+            
+         </div>
+
+        
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<section class="sptb">
+  <div class="container">
+    <div class="row g-4">
+
+      {% set author = job.createdBy ?? null %}
+      {% set profile = author and author.personalProfile is defined ? author.personalProfile : null %}
+
+      <div class="col-xl-12 col-lg-12 col-md-12">
+        <div id="printJobArea">
+          <div class="card job-main-card overflow-hidden">
+            
+
+            
+
+            <div class="card-body border-top">
+
+                <div class="job-stack">
+                  <div class="job-section">
+                    <h4 class="job-section-title">{% trans %}Description{% endtrans %}</h4>
+                    <div class="job-section-box">
+                      <p>{{ job.description ?? '' }}</p>
+                    </div>
+                  </div>
+
+                  <div class="job-section">
+                    <h4 class="job-section-title">{% trans %}Mission{% endtrans %}</h4>
+                    <div class="job-section-box">
+                      <p>{{ job.mission ?? '' }}</p>
+                    </div>
+                  </div>
+
+                  <div class="job-section">
+                    <h4 class="job-section-title">{% trans %}Profil{% endtrans %}</h4>
+                    <div class="job-section-box">
+                      <p>{{ job.profil ?? '' }}</p>
+                    </div>
+                  </div>
+                </div>
+
+            </div>
+
+            <div class="card-body">
+              <div class="job-bottom-info">
+                <div class="row align-items-center">
+                  <div class="col-md-6">
+                    <a class="mb-0">{% trans %}Référence de l'annonce :{% endtrans %} {{ job.reference }}</a>
+                  </div>
+                  <div class="col-md-6 text-md-end">
+                    {% trans %}Posté par{% endtrans %}
+                    <a class="mb-0 fw-bold">{{ profile and profile.fullName ? profile.fullName : ('Auteur'|trans) }}</a>
+                    / {{ job.createdAt ? job.createdAt|date('d/m/Y') : '—' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer bg-light-50">
+              <div class="job-actions">
+                {% if app.user and job.createdBy and app.user.id != job.createdBy.id %}
+                  <a href="#"
+                     class="js-apply-toggle btn {{ hasApplied ? 'btn-danger' : 'btn-info' }}"
+                     data-apply-url="{{ path('ajax_job_apply', {slug: job.slug}) }}"
+                     data-cancel-url="{{ path('ajax_job_apply_cancel', {slug: job.slug}) }}"
+                     data-state="{{ hasApplied ? 'applied' : 'not_applied' }}">
+                    <i class="fa {{ hasApplied ? 'fa-times' : 'fa-check' }} me-1"></i>
+                    <span class="btn-text">{{ hasApplied ? ('Annuler la demande'|trans) : ('Postuler'|trans) }}</span>
+                  </a>
+                {% endif %}
+                
+                <a href="{{ path('contact_page') }}" class="btn btn-primary" data-turbo="false">
+                  <i class="si si-phone me-1"></i> {% trans %}Contactez-nous{% endtrans %}
+                </a>
+
+                <a href="#"
+                   class="btn btn-primary"
+                   id="btnShareJob"
+                   data-url="{{ app.request.uri }}"
+                   data-title="{{ job.title ?? ('Offre d’emploi'|trans) }}">
+                  <i class="si si-share me-1"></i> {% trans %}Partager{% endtrans %}
+                </a>
+
+                <a href="#"
+                   class="btn btn-info"
+                   id="btnPrintJob">
+                  <i class="si si-printer me-1"></i> {% trans %}Imprimer{% endtrans %}
+                </a>
+
+                {% if app.user and job.createdBy and app.user.id != job.createdBy.id %}
+                  <a href="#"
+                     class="btn btn-danger"
+                     id="btnReportJob"
+                     data-url="{{ path('ajax_job_report', {slug: job.slug}) }}">
+                    <i class="icon icon-exclamation me-1"></i> {% trans %}Signaler{% endtrans %}
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  (function(){
+    const btn = document.getElementById('btnFavJob');
+    if(!btn) return;
+
+    const url = btn.dataset.url;
+    const favText = document.getElementById('favText');
+    const favCount = document.getElementById('favCount');
+    const icon = btn.querySelector('i');
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+
+        const data = await res.json();
+
+        if(!data.ok){
+          alert(data.message || "Action impossible.");
+          return;
+        }
+
+        favCount.textContent = data.favoritesCount;
+
+        if(data.state === 'added'){
+          favText.textContent = 'Retirer des favoris';
+          icon.className = 'fa fa-heart text-danger me-1';
+        } else {
+          favText.textContent = 'Ajouter aux favoris';
+          icon.className = 'fa fa-heart-o me-1';
+        }
+
+      } catch(e){
+        console.error(e);
+        alert("Erreur réseau.");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  })();
+</script>
+
+<script>
+  (function(){
+    const btn = document.getElementById('btnReportJob');
+    if(!btn) return;
+
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      if(typeof Swal === 'undefined'){
+        alert("SweetAlert2 n'est pas chargé.");
+        return;
+      }
+
+      const { isConfirmed } = await Swal.fire({
+        title: "Signaler ce job ?",
+        text: "Confirme si tu veux vraiment signaler cette annonce.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Oui, signaler",
+        cancelButtonText: "Annuler",
+        confirmButtonColor: "#dc2626",
+        cancelButtonColor: "#64748b",
+        reverseButtons: true,
+        width: 390,
+        padding: '1.15rem',
+        customClass: { popup: 'mol-compact-alert' }
+      });
+
+      if(!isConfirmed) return;
+
+      const resReason = await Swal.fire({
+        title: "Raison du signalement",
+        input: "textarea",
+        inputPlaceholder: "Explique brièvement la raison (ex: arnaque, contenu inapproprié, spam...)",
+        inputAttributes: {
+          "aria-label": "Raison du signalement"
+        },
+        showCancelButton: true,
+        confirmButtonText: "Envoyer",
+        cancelButtonText: "Annuler",
+        confirmButtonColor: "#0ea5e9",
+        cancelButtonColor: "#64748b",
+        inputValidator: (value) => {
+          if(!value || value.trim().length < 5){
+            return "Entre au moins 5 caractères.";
+          }
+        },
+        width: 410,
+        padding: '1.15rem',
+        customClass: { popup: 'mol-compact-alert' }
+      });
+
+      if(!resReason.isConfirmed) return;
+
+      const url = btn.dataset.url;
+      const reason = resReason.value.trim();
+
+      btn.classList.add('disabled');
+
+      try{
+        const r = await fetch(url, {
+          method: "POST",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ reason })
+        });
+
+        const data = await r.json();
+
+        if(!data.ok){
+          await Swal.fire({
+            title: "Erreur",
+            text: data.message || "Impossible d'envoyer le signalement.",
+            icon: "error",
+            confirmButtonText: "OK"
+          });
+          return;
+        }
+
+        await Swal.fire({
+          title: "Envoyé",
+          text: data.message || "Signalement envoyé.",
+          icon: "success",
+          confirmButtonText: "OK"
+        });
+
+      }catch(err){
+        console.error(err);
+        await Swal.fire({
+          title: "Erreur réseau",
+          text: "Vérifie ta connexion puis réessaie.",
+          icon: "error",
+          confirmButtonText: "OK"
+        });
+      }finally{
+        btn.classList.remove('disabled');
+      }
+
+    });
+  })();
+</script>
+
+<script>
+  (function(){
+    const btn = document.getElementById('btnPrintJob');
+    if(!btn) return;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.print();
+    });
+  })();
+</script>
+
+<script>
+  (function(){
+    const btn = document.getElementById('btnShareJob');
+    if(!btn) return;
+
+    const url = btn.dataset.url;
+    const title = btn.dataset.title || document.title;
+
+    function isSecureContextOk(){
+      return window.isSecureContext || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    }
+
+    function openPopup(u){
+      window.open(u, '_blank', 'noopener,noreferrer');
+    }
+
+    async function copyToClipboard(text){
+      try{
+        await navigator.clipboard.writeText(text);
+        return true;
+      }catch(e){
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly','');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return ok;
+      }
+    }
+
+    async function showFallbackMenu(){
+      const encodedUrl = encodeURIComponent(url);
+      const encodedTitle = encodeURIComponent(title);
+
+      const wa = `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`;
+      const tg = `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`;
+      const mail = `mailto:?subject=${encodedTitle}&body=${encodedTitle}%0A${encodedUrl}`;
+
+      if (typeof Swal !== 'undefined') {
+        await Swal.fire({
+          title: 'Partager',
+          html: `
+            <div style="display:grid;gap:10px;text-align:left">
+              <button type="button" class="swal2-confirm swal2-styled" id="shareWA" style="background:#22c55e"><i class="fa-brands fa-whatsapp" style="margin-right:8px"></i>WhatsApp</button>
+              <button type="button" class="swal2-confirm swal2-styled" id="shareTG" style="background:#0ea5e9"><i class="fa-brands fa-telegram" style="margin-right:8px"></i>Telegram</button>
+              <button type="button" class="swal2-confirm swal2-styled" id="shareMAIL" style="background:#334155"><i class="fa-regular fa-envelope" style="margin-right:8px"></i>Email</button>
+              <button type="button" class="swal2-confirm swal2-styled" id="shareCOPY" style="background:#1d4ed8"><i class="fa-regular fa-copy" style="margin-right:8px"></i>Copier le lien</button>
+            </div>
+            <small style="display:block;margin-top:10px;color:#64748b">
+              Astuce : pour voir le menu natif, ouvre le site en HTTPS.
+            </small>
+          `,
+          showConfirmButton: false,
+          showCloseButton: true,
+          didOpen: () => {
+            document.getElementById('shareWA')?.addEventListener('click', () => openPopup(wa));
+            document.getElementById('shareTG')?.addEventListener('click', () => openPopup(tg));
+            document.getElementById('shareMAIL')?.addEventListener('click', () => { window.location.href = mail; });
+            document.getElementById('shareCOPY')?.addEventListener('click', async () => {
+              const ok = await copyToClipboard(url);
+              Swal.fire({
+                icon: ok ? 'success' : 'error',
+                title: ok ? 'Lien copié' : 'Échec',
+                text: ok ? 'Tu peux le coller dans WhatsApp, SMS, etc.' : 'Impossible de copier le lien.',
+                timer: 1600,
+                showConfirmButton: false
+              });
+            });
+          }
+        });
+        return;
+      }
+
+      const ok = await copyToClipboard(url);
+      alert(ok ? `Lien copié : ${url}` : `Copie échouée. Lien : ${url}`);
+    }
+
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+
+      if (navigator.share && isSecureContextOk()) {
+        try{
+          await navigator.share({ title, text: title, url });
+          return;
+        }catch(err){}
+      }
+
+      await showFallbackMenu();
+    });
+
+  })();
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const btns = document.querySelectorAll('.js-apply-toggle');
+    if(!btns.length){
+      console.warn('[ApplyToggle] aucun bouton .js-apply-toggle trouvé');
+      return;
+    }
+
+    function showToast(type, message){
+      let container = document.querySelector('.toast-container');
+      if(!container){
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      const el = document.createElement('div');
+      el.className = `mol-toast mol-toast-${type}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+
+    function setState(btn, state){
+      btn.dataset.state = state;
+
+      const textEl = btn.querySelector('.btn-text');
+      const iconEl = btn.querySelector('i');
+
+      if(state === 'applied'){
+        btn.classList.remove('btn-info');
+        btn.classList.add('btn-danger');
+        if(textEl) textEl.textContent = 'Annuler la demande';
+        if(iconEl) iconEl.className = 'fa fa-times me-1';
+      } else {
+        btn.classList.remove('btn-danger');
+        btn.classList.add('btn-info');
+        if(textEl) textEl.textContent = 'Postuler';
+        if(iconEl) iconEl.className = 'fa fa-check me-1';
+      }
+    }
+
+    async function post(url){
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 10000);
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          credentials: 'same-origin',
+          signal: controller.signal,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+
+        if (res.redirected) {
+          window.location.assign(res.url);
+          return {ok:false, redirected:true};
+        }
+
+        const raw = await res.text();
+        let data = {};
+        try { data = raw ? JSON.parse(raw) : {}; } catch (_) {}
+
+        if (!res.ok) {
+          const error = new Error(data.message || data.error || 'Action momentanément indisponible.');
+          error.status = res.status;
+          throw error;
+        }
+        if (!raw || typeof data !== 'object') throw new Error('Réponse serveur invalide.');
+        return data;
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    }
+
+    btns.forEach((btn) => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        if(btn.classList.contains('disabled')) return;
+
+        const state = btn.dataset.state;
+        const url = (state === 'applied') ? btn.dataset.cancelUrl : btn.dataset.applyUrl;
+
+        if(!url){
+          console.error('[ApplyToggle] URL manquante', btn.dataset);
+          showToast('danger', "Erreur: URL manquante.");
+          return;
+        }
+
+        btn.classList.add('disabled');
+
+        try{
+          const data = await post(url);
+          if (data.redirected) return;
+
+          if(!data.ok){
+            showToast('danger', data.message || "Action impossible.");
+            return;
+          }
+
+          if(state === 'not_applied'){
+            btns.forEach(b => setState(b, 'applied'));
+            showToast(data.already ? 'warning' : 'success', data.message || "Vous avez postulé avec succès.");
+          } else {
+            btns.forEach(b => setState(b, 'not_applied'));
+            showToast(data.already ? 'warning' : 'success', data.message || "Candidature annulée avec succès.");
+          }
+
+        }catch(err){
+          console.error(err);
+          showToast('danger', err && err.name === 'AbortError' ? 'Le serveur met trop de temps à répondre. Réessayez.' : (err.message || 'Action impossible pour le moment. Réessayez.'));
+        }finally{
+          btn.classList.remove('disabled');
+        }
+      });
+    });
+  });
+</script>
+<style>
+.mol-compact-alert{max-width:92vw!important;border-radius:18px!important}
+.mol-compact-alert .swal2-title{font-size:1.28rem!important;line-height:1.25!important}
+.mol-compact-alert .swal2-html-container{font-size:.92rem!important;line-height:1.5!important}
+</style>
+{% endblock %}

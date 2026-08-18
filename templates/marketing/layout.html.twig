@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Marketing'|trans }}{% endblock %}
+{% block body %}
+  {% include 'marketing/_ui.html.twig' %}
+  <div class="mol-bg min-h-screen">
+    <main class="mol-marketing-main">
+      <div class="mol-page-content">
+        {% block marketing_content %}{% endblock %}
+      </div>
+    </main>
+  </div>
+{% endblock %}

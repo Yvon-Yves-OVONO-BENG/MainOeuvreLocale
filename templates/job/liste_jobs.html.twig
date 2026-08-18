@@ -1,0 +1,322 @@
+{% extends 'base.html.twig' %}
+
+{% set seo_description = 'Consultez les offres d’emploi, jobs et missions disponibles près de chez vous au Cameroun. Recherchez par métier, ville et rayon sur Main d’Œuvre Locale.' %}
+{% block title %}Offres d’emploi et missions au Cameroun | Main d’Œuvre Locale{% endblock %}
+
+{% block body %}
+
+{% include "job/_vip_ui_liste_jobs.html.twig" %}
+
+
+<div class="vip-page">
+
+  <!-- HERO -->
+  <!-- HERO JOBS - IMAGES DOUCES EN FOND -->
+<section class="vip-hero vip-jobs-slider-hero">
+  <div class="vip-jobs-bg-slider" id="vipJobsBgSlider">
+    <div class="vip-jobs-bg-slide active" style="background-image:url('{{ asset('images/jobs/hero1.png') }}');"></div>
+    <div class="vip-jobs-bg-slide" style="background-image:url('{{ asset('images/jobs/hero2.png') }}');"></div>
+    <div class="vip-jobs-bg-slide" style="background-image:url('{{ asset('images/jobs/hero3.png') }}');"></div>
+    <div class="vip-jobs-bg-slide" style="background-image:url('{{ asset('images/jobs/hero4.png') }}');"></div>
+    <div class="vip-jobs-bg-slide" style="background-image:url('{{ asset('images/jobs/hero5.png') }}');"></div>
+    <div class="vip-jobs-bg-slide" style="background-image:url('{{ asset('images/jobs/hero6.png') }}');"></div>
+    <div class="vip-jobs-bg-slide" style="background-image:url('{{ asset('images/jobs/hero7.png') }}');"></div>
+    <div class="vip-jobs-bg-slide" style="background-image:url('{{ asset('images/jobs/hero8.png') }}');"></div>
+  </div>
+
+  <div class="vip-jobs-slider-overlay"></div>
+
+  <div class="container vip-hero-inner vip-jobs-hero-inner">
+    <div class="text-center vip-jobs-hero-content">
+
+      <div class="vip-jobs-hero-badge">
+        <i class="fa fa-bolt"></i>
+        <span>{% trans %}Opportunités locales qui bougent vite{% endtrans %}</span>
+      </div>
+
+      <h1 class="vip-title vip-jobs-hero-title">
+        <span>{{ total }}</span> {% trans %}offres disponibles{% endtrans %}
+      </h1>
+
+      <p class="vip-sub vip-jobs-hero-sub">
+        {% trans %}Trouvez rapidement une mission près de vous, postulez simplement et avancez sans perdre de temps.{% endtrans %}
+      </p>
+
+      <div class="vip-pillrow justify-content-center vip-jobs-hero-pills">
+        <span class="vip-pill"><i class="fa fa-shield"></i> {% trans %}Profils vérifiés{% endtrans %}</span>
+        <span class="vip-pill"><i class="fa fa-map-marker"></i> {% trans %}Jobs près de vous{% endtrans %}</span>
+        <span class="vip-pill"><i class="fa fa-bolt"></i> {% trans %}Accès rapide{% endtrans %}</span>
+      </div>
+    </div>
+
+    {% include "job/_nearby_search_map.html.twig" with {job_nearby_part: 'form'} %}
+
+  </div>
+</section>
+
+  {% include "job/_nearby_search_map.html.twig" with {job_nearby_part: 'map'} %}
+
+  {% include "includes/_content_jobs.html.twig" %}
+
+</div>
+
+<script>
+  (function(){
+    const root = document.getElementById('vipSalarySlider');
+    if(!root) return;
+
+    const minEl = document.getElementById('vipSalaryMin');
+    const maxEl = document.getElementById('vipSalaryMax');
+    const text  = document.getElementById('vipSalaryText');
+    const range = document.getElementById('vipSalaryRange');
+    const tFrom = document.getElementById('vipThumbFrom');
+    const tTo   = document.getElementById('vipThumbTo');
+
+    const MIN = parseInt(root.dataset.min || '0', 10);
+    const MAX = parseInt(root.dataset.max || '1000000', 10);
+
+    let from = clamp(parseInt(root.dataset.from || MIN, 10), MIN, MAX);
+    let to   = clamp(parseInt(root.dataset.to   || MAX, 10), MIN, MAX);
+    if(from > to){ const tmp=from; from=to; to=tmp; }
+
+    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+    function pct(v){ return ( (v - MIN) / (MAX - MIN) ) * 100; }
+
+    function render(){
+      const p1 = pct(from);
+      const p2 = pct(to);
+
+      tFrom.style.left = p1 + '%';
+      tTo.style.left   = p2 + '%';
+
+      const left = Math.min(p1,p2);
+      const right = Math.max(p1,p2);
+      range.style.left = left + '%';
+      range.style.width = (right - left) + '%';
+
+      minEl.value = from;
+      maxEl.value = to;
+      text.value = `${from} - ${to}`;
+    }
+
+    function valueFromClientX(clientX){
+      const rect = root.getBoundingClientRect();
+      const x = clamp(clientX - rect.left, 0, rect.width);
+      const ratio = x / rect.width;
+      return Math.round(MIN + ratio * (MAX - MIN));
+    }
+
+    function drag(which, clientX){
+      const v = valueFromClientX(clientX);
+      if(which === 'from'){
+        from = clamp(v, MIN, to);
+      }else{
+        to = clamp(v, from, MAX);
+      }
+      render();
+    }
+
+    function bindThumb(thumb, which){
+      let dragging = false;
+
+      const start = (e)=>{
+        dragging = true;
+        thumb.setPointerCapture?.(e.pointerId);
+        drag(which, e.clientX);
+      };
+      const move = (e)=>{
+        if(!dragging) return;
+        drag(which, e.clientX);
+      };
+      const end = ()=>{
+        dragging = false;
+      };
+
+      thumb.addEventListener('pointerdown', start);
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', end);
+    }
+
+    // click on track => move closest thumb
+    root.addEventListener('pointerdown', (e)=>{
+      if(e.target === tFrom || e.target === tTo) return;
+      const v = valueFromClientX(e.clientX);
+      const distFrom = Math.abs(v - from);
+      const distTo   = Math.abs(v - to);
+      if(distFrom <= distTo) from = clamp(v, MIN, to);
+      else to = clamp(v, from, MAX);
+      render();
+    });
+
+    bindThumb(tFrom, 'from');
+    bindThumb(tTo, 'to');
+    render();
+  })();
+</script>
+
+<script>
+  function initVipToggles(){
+    document.querySelectorAll('.vip-toggle').forEach((btn) => {
+      // évite de binder 2 fois si Turbo recharge
+      if (btn.dataset.bound === "1") return;
+      btn.dataset.bound = "1";
+
+      const id = btn.getAttribute('data-target');
+      const panel = id ? document.getElementById(id) : null;
+      if(!panel) return;
+
+      const text = btn.querySelector('.vip-toggle-text');
+      const icon = btn.querySelector('i');
+
+      const expandText   = btn.getAttribute('data-expand')   || 'Tout afficher';
+      const collapseText = btn.getAttribute('data-collapse') || 'Réduire';
+
+      const setState = (open) => {
+        panel.hidden = !open;
+        if(text) text.textContent = open ? collapseText : expandText;
+        if(icon) icon.className = open ? 'fa fa-minus' : 'fa fa-list';
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      };
+
+      // état initial
+      setState(false);
+
+      btn.addEventListener('click', () => {
+        setState(panel.hidden); // hidden => ouvrir, sinon fermer
+      });
+    });
+  }
+
+  function runInit(){
+    // attendre 1 tick pour être sûr que Turbo a fini d’injecter le DOM
+    requestAnimationFrame(initVipToggles);
+  }
+
+  // ✅ 1) Si la page est déjà chargée (cas Turbo), on init direct
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runInit);
+  } else {
+    runInit();
+  }
+
+  // ✅ 2) Events Turbo (Symfony UX Turbo)
+  document.addEventListener('turbo:load', runInit);
+  document.addEventListener('turbo:render', runInit);
+  document.addEventListener('turbo:frame-load', runInit);
+
+  // ✅ 3) Back/forward cache
+  window.addEventListener('pageshow', runInit);
+</script>
+
+
+<script>
+  (function () {
+    function fixTopbarAfterRefresh() {
+      // supprimer backdrops (offcanvas / modal) qui traînent
+      document.querySelectorAll('.offcanvas-backdrop, .modal-backdrop').forEach(e => e.remove());
+
+      // nettoyer body
+      document.body.classList.remove('modal-open');
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('padding-right');
+
+      // fermer tout offcanvas/collapse ouvert
+      document.querySelectorAll('.offcanvas.show').forEach(el => el.classList.remove('show'));
+      document.querySelectorAll('.collapse.show').forEach(el => el.classList.remove('show'));
+
+      // fermer dropdowns ouverts
+      document.querySelectorAll('.dropdown-menu.show').forEach(el => el.classList.remove('show'));
+    }
+
+    // 1) sur refresh normal
+    document.addEventListener('DOMContentLoaded', fixTopbarAfterRefresh);
+
+    // 2) quand le navigateur restaure la page (F5 / back-forward cache)
+    window.addEventListener('pageshow', fixTopbarAfterRefresh);
+  })();
+</script>
+
+
+<script>
+  (function () {
+    const form = document.getElementById('vipLiveSearchForm');
+    if (!form) return;
+
+    const qInput = document.getElementById('vipLiveQ');
+    const cityInput = document.getElementById('vipLiveCity');
+    const professionSelect = document.getElementById('vipLiveProfession');
+    const pageInput = form.querySelector('input[name="page"]');
+
+    let timer = null;
+
+    const submitLive = () => {
+      if (pageInput) pageInput.value = '1';
+      form.requestSubmit();
+    };
+
+    const debounceSubmit = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(submitLive, 250);
+    };
+
+    if (qInput) {
+      qInput.addEventListener('input', debounceSubmit);
+    }
+
+    if (cityInput) {
+      cityInput.addEventListener('input', debounceSubmit);
+    }
+
+    if (professionSelect) {
+      professionSelect.addEventListener('change', submitLive);
+    }
+  })();
+</script>
+
+<script>
+  (function () {
+    function initVipJobsBgSlider() {
+      const slider = document.getElementById('vipJobsBgSlider');
+
+      if (!slider || slider.dataset.bound === '1') {
+        return;
+      }
+
+      slider.dataset.bound = '1';
+
+      const slides = Array.from(slider.querySelectorAll('.vip-jobs-bg-slide'));
+      if (!slides.length) {
+        return;
+      }
+
+      let current = 0;
+      const delay = 5200;
+
+      function showSlide(index) {
+        current = (index + slides.length) % slides.length;
+
+        slides.forEach(function (slide, i) {
+          slide.classList.toggle('active', i === current);
+        });
+      }
+
+      function nextSlide() {
+        showSlide(current + 1);
+      }
+
+      showSlide(0);
+      window.setInterval(nextSlide, delay);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initVipJobsBgSlider);
+    } else {
+      initVipJobsBgSlider();
+    }
+
+    document.addEventListener('turbo:load', initVipJobsBgSlider);
+  })();
+</script>
+
+{% include 'includes/_view_announcement_spinner.html.twig' %}
+{% endblock %}

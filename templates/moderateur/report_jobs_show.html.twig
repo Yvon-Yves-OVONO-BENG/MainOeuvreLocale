@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'ReportJob'|trans }} #{{ r.id }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_report_jobs_show.html.twig" %}
+
+{% set job = r.job ?? null %}
+{% set author = (job and job.createdBy is defined) ? job.createdBy : null %}
+{% set pp = (author and author.personalProfile is defined) ? author.personalProfile : null %}
+{% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+
+<div class="page">
+  <div class="wrap">
+
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="title">📦 {% trans %}Signalement Job{% endtrans %} #{{ r.id }}</div>
+          <div class="sub">
+            {% trans %}Créé le{% endtrans %} {{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '—' }}
+            • {% trans %}Statut actuel :{% endtrans %} <b>{{ r.status }}</b>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a class="btn" href="{{ path('moderateur_report_jobs_index') }}">{% trans %}← Retour{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="grid">
+
+          {# LEFT #}
+          <div class="box">
+            <div class="label">{% trans %}Job{% endtrans %}</div>
+            <div class="value">
+              {{ job ? (job.title ?? ('Job #' ~ job.id)) : '—' }}
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="label">{% trans %}Auteur du job{% endtrans %}</div>
+              <div style="margin-top:8px;">
+                {% if author %}
+                  <span class="chip">
+                    <img class="avatar" src="{{ photo }}" alt="{{ 'photo auteur'|trans }}">
+                    {{ author.email ?? ('#' ~ author.id) }}
+                  </span>
+                {% else %}
+                  <span class="muted">—</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="label">{% trans %}Signalé par{% endtrans %}</div>
+              <div class="value muted">
+                {{ r.user ? (r.user.email ?? ('#' ~ r.user.id)) : 'Anonyme'|trans }}
+              </div>
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="label">{% trans %}Raison{% endtrans %}</div>
+              <div class="reason">{{ r.reason }}</div>
+            </div>
+          </div>
+
+          {# RIGHT #}
+          <div class="box">
+            <div class="label">{% trans %}Actions de modération{% endtrans %}</div>
+            <div class="muted" style="font-size:12px; margin-top:6px;">
+              {% trans %}Choisis un statut : pending / reviewed / rejected / resolved{% endtrans %}
+            </div>
+
+            {% set map = {
+              'pending':  {'label':'En attente', 'icon':'⏳', 'cls':'btn-pending'},
+              'reviewed': {'label':'En revue',   'icon':'👀', 'cls':'btn-reviewed'},
+              'rejected': {'label':'Rejeté',     'icon':'⛔', 'cls':'btn-rejected'},
+              'resolved': {'label':'Résolu',     'icon':'✅', 'cls':'btn-resolved'},
+            } %}
+
+            <div class="actions">
+            {% for st in ['pending','reviewed','rejected','resolved'] %}
+                {% set meta = map[st] %}
+                {% set active = (r.status ?? '') == st %}
+
+                <form method="post" action="{{ path('moderateur_report_jobs_set_status', {id:r.id, status: st}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('repjob_action_' ~ r.id) }}">
+                <button class="btn-status {{ meta.cls }} {{ active ? 'is-active' : '' }}" type="submit">
+                    <span class="ico">{{ meta.icon }}</span>
+                    {{ meta.label|trans }}
+                    {% if active %}
+                    <span class="tag">{% trans %}ACTIF{% endtrans %}</span>
+                    {% endif %}
+                </button>
+                </form>
+            {% endfor %}
+            </div>
+
+            <div style="margin-top:14px;">
+              <div class="label">{% trans %}Infos{% endtrans %}</div>
+              <div class="muted" style="font-size:12px; margin-top:6px;">
+                {% trans %}ID report :{% endtrans %} <b>#{{ r.id }}</b><br>
+                {% trans %}ID job :{% endtrans %} <b>{{ job ? job.id : '—' }}</b><br>
+                {% trans %}Auteur :{% endtrans %} <b>{{ author ? (author.id ?? '—') : '—' }}</b>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

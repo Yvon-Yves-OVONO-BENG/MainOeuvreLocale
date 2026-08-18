@@ -1,0 +1,54 @@
+
+/* Main d'Oeuvre Locale — couche responsive non destructive */
+html,body{max-width:100%;overflow-x:hidden}
+img,svg,video,canvas{max-width:100%}
+.table-responsive{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* Navbar mobile et profil */
+.pm-navbar-pro,.pm-navbar-inner{width:100%;max-width:100%}
+.pm-navbar-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.pm-navbar-pro .pm-brand,.pm-navbar-pro .pm-brand-mobile{flex:0 0 auto}
+.pm-user-dropdown,.pm-user-dropdown-menu{max-width:calc(100vw - 24px)}
+.pm-mobile-menu{position:fixed!important;top:0!important;right:-100%!important;width:min(390px,92vw)!important;height:100dvh!important;max-height:100dvh!important;overflow:hidden!important;z-index:10050!important}
+.pm-mobile-menu.open{right:0!important}
+.pm-mobile-body{height:calc(100dvh - 72px)!important;overflow-y:auto!important;overscroll-behavior:contain;padding-bottom:max(24px,env(safe-area-inset-bottom))!important}
+.pm-mobile-user{width:100%;min-width:0}.pm-mobile-user-info{min-width:0}.pm-mobile-user-name,.pm-mobile-user-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+body.pm-mobile-open{overflow:hidden!important;touch-action:none}
+@media(max-width:991.98px){
+ .pm-navbar-pro .pm-menu,.pm-navbar-pro .pm-user-dropdown,.pm-navbar-pro .pm-lang-selector{display:none!important}
+ .pm-navbar-pro .pm-mobile-toggle{display:inline-flex!important;margin-left:auto!important}
+ .pm-brand-desktop{display:none!important}.pm-brand-mobile{display:flex!important}
+}
+@media(min-width:992px){.pm-brand-mobile{display:none!important}.pm-brand-desktop{display:flex!important}}
+
+/* Dashboards */
+.cmp-page,.mol-bg,.sa-page,.tableau-de-bord-page .container-fluid{width:100%;max-width:100%;overflow-x:clip}
+.cmp-topbar-inner,.cmp-brand,.cmp-top-actions{min-width:0}
+.cmp-title{min-width:0}.cmp-title h1,.cmp-title .sub{overflow:hidden;text-overflow:ellipsis}
+.cmp-top-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}
+.cmp-btn,.sa-btn{min-height:42px;white-space:nowrap}
+@media(max-width:767.98px){
+ .cmp-topbar-inner{flex-direction:column!important;align-items:stretch!important;gap:14px!important}
+ .cmp-brand{width:100%}.cmp-title h1{font-size:1.15rem!important;white-space:normal}
+ .cmp-top-actions{justify-content:stretch!important}.cmp-top-actions>*{flex:1 1 calc(50% - 8px);justify-content:center}
+ .dash-hero>div,.dash-hero .d-flex{min-width:0}.dash-hero h4{overflow-wrap:anywhere}
+ .sa-card,.kpi-card,.mol-card{border-radius:16px!important}
+}
+@media(max-width:480px){.cmp-top-actions>*{flex-basis:100%}.container-fluid{padding-left:12px!important;padding-right:12px!important}}
+
+/* Chat plus visible et dynamique */
+.mol-chat-fab{position:fixed;isolation:isolate;box-shadow:0 16px 40px rgba(37,99,235,.35)!important}
+.mol-chat-fab::before{content:"";position:absolute;inset:-6px;border-radius:inherit;border:2px solid rgba(37,99,235,.34);animation:molChatPulse 2s ease-out infinite;z-index:-1}
+.mol-chat-fab i{font-size:1.35rem;animation:molChatWiggle 4s ease-in-out infinite}
+.cmp-msg,[onclick*="MOLChatOpen"],[data-mol-chat-open]{position:relative}
+@keyframes molChatPulse{0%{transform:scale(.88);opacity:.8}75%,100%{transform:scale(1.35);opacity:0}}
+@keyframes molChatWiggle{0%,88%,100%{transform:rotate(0)}91%{transform:rotate(-10deg)}94%{transform:rotate(10deg)}97%{transform:rotate(-5deg)}}
+@media(prefers-reduced-motion:reduce){.mol-chat-fab::before,.mol-chat-fab i{animation:none!important}}
+
+/* Hero ticker : une seule animation continue, pause accessible */
+.vip-jobs-ticker-mask{overflow:hidden}
+.vip-jobs-ticker-track{display:flex;width:max-content;will-change:transform;animation:molTicker 32s linear infinite}
+.vip-jobs-ticker-track:hover{animation-play-state:paused}
+.vip-jobs-ticker-content{display:flex;align-items:center;flex:none;gap:12px;padding-right:12px}
+@keyframes molTicker{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+@media(prefers-reduced-motion:reduce){.vip-jobs-ticker-track{animation:none;transform:none}.vip-jobs-ticker-mask{overflow-x:auto}}

@@ -1,0 +1,147 @@
+
+
+<style>
+  :root{
+    --bg0:#F7F9FF; --bg1:#EEF2FF;
+    --card:rgba(255,255,255,.80); --card2:rgba(255,255,255,.95);
+    --line:rgba(15,23,42,.10);
+    --text:rgba(15,23,42,.92);
+    --muted:rgba(15,23,42,.62);
+    --shadow:0 18px 55px rgba(15,23,42,.12);
+    --r:24px;
+  }
+  .page{
+    min-height: calc(100vh - 80px);
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    overflow-x: clip;
+    background:
+      radial-gradient(900px circle at 12% 10%, rgba(56,189,248,.18), transparent 55%),
+      radial-gradient(900px circle at 90% 15%, rgba(34,197,94,.14), transparent 55%),
+      radial-gradient(1200px circle at 40% 110%, rgba(168,85,247,.12), transparent 52%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    color: var(--text);
+    padding: 18px 16px 56px;
+  }
+  @media(max-width:640px){ .page{ padding: 14px 10px 46px; } }
+
+  .wrap{ max-width: 1200px; margin: 0 auto; }
+  .card{
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--line);
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    backdrop-filter: blur(10px);
+  }
+  .hd{
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(15,23,42,.08);
+    background: linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,.72));
+    display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:flex-start;
+  }
+  .bd{ padding: 16px; }
+
+  .h1{ font-weight:950; letter-spacing:-.02em; margin:0; font-size:18px; }
+  .hint{ font-size:12px; color: var(--muted); margin-top: 4px; }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:10px 12px; border-radius:14px;
+    border:1px solid rgba(15,23,42,.12);
+    background: rgba(255,255,255,.90);
+    font-weight:900; color:#0f172a; text-decoration:none; cursor:pointer;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    white-space: nowrap;
+  }
+  .btn:hover{ transform: translateY(-1px); background:#fff; border-color: rgba(15,23,42,.22); }
+  .btn.primary{ border-color: rgba(56,189,248,.45); background: linear-gradient(180deg, rgba(56,189,248,.18), rgba(255,255,255,.90)); }
+  .btn.good{ border-color: rgba(34,197,94,.45); background: linear-gradient(180deg, rgba(34,197,94,.16), rgba(255,255,255,.90)); }
+  .btn.warn{ border-color: rgba(245,158,11,.45); background: linear-gradient(180deg, rgba(245,158,11,.16), rgba(255,255,255,.90)); }
+  .btn.danger{ border-color: rgba(239,68,68,.45); background: linear-gradient(180deg, rgba(239,68,68,.14), rgba(255,255,255,.90)); }
+
+  .grid{ display:grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
+  @media(max-width: 992px){ .grid{ grid-template-columns: 1fr; } }
+
+  .box{ padding: 12px; border-radius: 18px; border:1px solid rgba(15,23,42,.10); background: rgba(255,255,255,.86); }
+  .label{ font-weight:950; font-size:12px; color: rgba(15,23,42,.72); text-transform: uppercase; letter-spacing: .08em; }
+  .muted{ color: var(--muted); }
+
+  .userline{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .avatar{ width: 44px; height: 44px; border-radius: 999px; object-fit: cover; border:1px solid rgba(15,23,42,.12); background: rgba(255,255,255,.9); }
+  .chip{ display:inline-flex; gap:6px; align-items:center; padding: 6px 10px; border-radius: 999px; border:1px solid rgba(15,23,42,.12); background: rgba(255,255,255,.88); font-weight:950; font-size:12px; }
+
+  .chip.p{ border-color: rgba(245,158,11,.30); background: rgba(245,158,11,.14); }
+  .chip.v{ border-color: rgba(34,197,94,.26); background: rgba(34,197,94,.12); }
+  .chip.r{ border-color: rgba(239,68,68,.26); background: rgba(239,68,68,.12); }
+
+  .actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
+  .docrow{ display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px; }
+
+  /* ===========================
+   ✅ FULL WIDTH REAL (ne casse rien)
+   =========================== */
+
+  /* 1) wrap prend toute la largeur */
+  .page .wrap{
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+  }
+
+  /* 2) option “container interne” : garde un padding confortable */
+  .page .card{
+    width: 100% !important;
+  }
+
+  /* 3) Si tu veux un rendu vraiment large sur desktop (sans être collé) */
+  @media (min-width: 1200px){
+    .page{
+      padding-left: 22px !important;
+      padding-right: 22px !important;
+    }
+    .bd{
+      padding: 18px !important;
+    }
+  }
+
+  /* 4) Grille plus large (plus de place à gauche/droite) */
+  @media (min-width: 1200px){
+    .grid{
+      grid-template-columns: 1.35fr .65fr !important;
+    }
+  }
+
+  /* ===========================
+   ✅ FIX ESPACE AVEC MENU (navbar)
+   (sans toucher base.html.twig)
+   =========================== */
+
+  /* 1) Enlève le margin/padding top du conteneur principal si Bootstrap */
+  main, .main-content, .content, .container, .container-fluid{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  /* 2) Si ton thème a un wrapper type .app-content / .page-main / etc. */
+  .app-content, .page-main, .main, .content-wrapper{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  /* 3) Réduit le padding haut de ta page */
+  .page{
+    padding-top: 8px !important; /* au lieu de 18px */
+  }
+
+  /* 4) Option : si ton menu est sticky/fixed et “pousse” avec un spacer */
+  .navbar + .page,
+  .header + .page,
+  .topbar + .page{
+    margin-top: 0 !important;
+  }
+</style>

@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Intégrations{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/center/_vip_ui.html.twig' %}
+
+  <div class="ctr-shell" data-center-page="integrations">
+    <div class="ctr-container ctr-grid">
+
+      <section class="ctr-card ctr-head">
+        <div class="ctr-card-inner">
+          <div class="ctr-head-top">
+            <div>
+              <div class="ctr-kicker">{% trans %}Centre d’administration • Intégrations{% endtrans %}</div>
+              <h1 class="ctr-title">{% trans %}Connecteurs & services externes{% endtrans %}</h1>
+              <p class="ctr-text">
+                {% trans %}Surveille l’état des providers de paiement, email, temps réel et API partenaires.{% endtrans %}
+              </p>
+            </div>
+          </div>
+
+          {% include 'admin/center/_nav.html.twig' %}
+        </div>
+      </section>
+
+      <section class="ctr-grid ctr-grid-3">
+        <article class="ctr-card ctr-kpi"><div class="ctr-card-inner"><div class="label">{% trans %}Connectées{% endtrans %}</div><div class="value">{{ stats.connected }}</div><div class="hint">{% trans %}Services opérationnels{% endtrans %}</div></div></article>
+        <article class="ctr-card ctr-kpi"><div class="ctr-card-inner"><div class="label">{% trans %}Alerte{% endtrans %}</div><div class="value">{{ stats.warning }}</div><div class="hint">{% trans %}À surveiller{% endtrans %}</div></div></article>
+        <article class="ctr-card ctr-kpi"><div class="ctr-card-inner"><div class="label">{% trans %}Désactivées{% endtrans %}</div><div class="value">{{ stats.disabled }}</div><div class="hint">{% trans %}Hors service{% endtrans %}</div></div></article>
+      </section>
+
+      <section class="ctr-card">
+        <div class="ctr-card-inner">
+          <div>
+            <input type="search" class="ctr-input" placeholder="{% trans %}Rechercher une intégration, catégorie, statut...{% endtrans %}" data-center-search="integrations">
+          </div>
+
+          <div class="ctr-separator"></div>
+
+          <div class="ctr-table-wrap">
+            <table class="ctr-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Nom{% endtrans %}</th>
+                  <th>{% trans %}Catégorie{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Environnement{% endtrans %}</th>
+                  <th>{% trans %}Dernier sync{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for integration in integrations %}
+                  <tr class="js-center-integration"
+                      data-center-text="{{ (integration.name ~ ' ' ~ integration.category ~ ' ' ~ integration.status ~ ' ' ~ integration.env)|lower }}">
+                    <td><div class="ctr-row-title">{{ integration.name }}</div></td>
+                    <td>{{ integration.category }}</td>
+                    <td><span class="ctr-badge {{ integration.status }}">{{ integration.status|capitalize }}</span></td>
+                    <td>{{ integration.env }}</td>
+                    <td>{{ integration.lastSync ? integration.lastSync|date('d/m/Y H:i') : '—' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="5">{% trans %}Aucune intégration trouvée.{% endtrans %}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-center.js') }}"></script>
+{% endblock %}

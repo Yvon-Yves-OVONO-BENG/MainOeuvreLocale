@@ -1,0 +1,1874 @@
+/* =========================================================
+   HERO COLLAGE
+   Premium, aéré, pas plein écran
+========================================================= */
+
+.ph-hero-v4 {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #071421;
+}
+
+.ph-hero-v4 > .container-fluid {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.ph-hero-shell {
+    position: relative;
+    width: 100%;
+    height: clamp(500px, 68vh, 660px);
+    overflow: hidden;
+    background: #0b1724;
+}
+
+/* ===== Collage ===== */
+.ph-hero-collage-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 4px;
+    z-index: 1;
+}
+
+.ph-hero-tile {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.01);
+}
+
+.ph-hero-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, .10);
+}
+
+/* Disposition façon collage */
+.ph-tile-1 { grid-column: 1 / 5;  grid-row: 1 / 4; }
+.ph-tile-2 { grid-column: 5 / 8;  grid-row: 1 / 4; }
+.ph-tile-3 { grid-column: 8 / 13; grid-row: 1 / 4; }
+
+.ph-tile-4 { grid-column: 1 / 4;  grid-row: 4 / 7; }
+.ph-tile-5 { grid-column: 4 / 7;  grid-row: 4 / 7; }
+.ph-tile-6 { grid-column: 7 / 10; grid-row: 4 / 7; }
+.ph-tile-7 { grid-column: 10 / 13; grid-row: 4 / 7; }
+
+/* ===== Overlay ===== */
+.ph-hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+        linear-gradient(180deg, rgba(6, 15, 24, .18) 0%, rgba(6, 15, 24, .32) 34%, rgba(6, 15, 24, .54) 100%),
+        linear-gradient(90deg, rgba(6, 15, 24, .10) 0%, rgba(6, 15, 24, .18) 50%, rgba(6, 15, 24, .18) 100%);
+}
+
+/* ===== Content ===== */
+.ph-hero-content {
+    position: relative;
+    z-index: 3;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 54px 14px 28px;
+}
+
+.ph-hero-main {
+    max-width: 980px;
+    margin: 0 auto;
+}
+
+.ph-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: rgba(255,255,255,.92);
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ph-hero-badge span {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #22c55e;
+}
+
+.ph-hero-title {
+    margin: 0 auto 20px;
+    max-width: 980px;
+    color: #fff;
+    font-size: clamp(1rem, 3.2vw, 3.2rem);
+    line-height: 1.04;
+    font-weight: 900;
+    letter-spacing: -.05em;
+    text-shadow: 0 12px 30px rgba(0,0,0,.30);
+}
+
+/* ===== Tabs ===== */
+.ph-hero-tabs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto 18px;
+    padding: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255,255,255,.16);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.ph-hero-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.ph-hero-tab {
+    min-height: 38px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: rgba(255,255,255,.88);
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: .2s ease;
+}
+
+.ph-hero-tab:hover,
+.ph-hero-tab.active {
+    color: #0f172a;
+    background: #fff;
+}
+
+/* ===== Search ===== */
+.ph-hero-search {
+    width: min(920px, 100%);
+    min-height: 62px;
+    margin: 0 auto 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px;
+    border-radius: 18px;
+    background: rgba(255,255,255,.96);
+    border: 1px solid rgba(255,255,255,.7);
+    box-shadow: 0 12px 36px rgba(0,0,0,.18);
+}
+
+.ph-hero-search-icon {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    color: #475569;
+    background: #f8fafc;
+    font-size: 16px;
+}
+
+.ph-hero-search-input {
+    flex: 1;
+    min-width: 0;
+    height: 44px;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.ph-hero-search-input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.ph-hero-search-btn {
+    min-height: 48px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 12px;
+    color: #5b5b12;
+    background: #eef2a6;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.ph-hero-search-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* ===== Professions chips ===== */
+.ph-hero-tags {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.ph-hero-chip {
+    min-height: 34px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.18);
+    text-decoration: none !important;
+    font-size: 12px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* ===== Bottom actions ===== */
+.ph-hero-bottom-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ph-hero-mini-btn {
+    min-height: 38px;
+    padding: 0 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    color: #fff;
+    background: rgba(7, 20, 33, .55);
+    border: 1px solid rgba(255,255,255,.18);
+    text-decoration: none !important;
+    font-size: 13px;
+    font-weight: 700;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.ph-hero-mini-btn-accent {
+    color: #554b00;
+    background: #f3e98e;
+    border-color: rgba(255,255,255,.38);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 991.98px) {
+    .ph-hero-shell {
+        height: 560px;
+    }
+
+    .ph-hero-title {
+        font-size: clamp(1.9rem, 5vw, 3.2rem);
+    }
+
+    .ph-hero-search {
+        min-height: auto;
+        flex-wrap: wrap;
+    }
+
+    .ph-hero-search-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-shell {
+        height: auto;
+        min-height: 520px;
+    }
+
+    .ph-hero-collage-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(4, 140px);
+    }
+
+    .ph-tile-1 { grid-column: 1 / 2; grid-row: 1 / 3; }
+    .ph-tile-2 { grid-column: 2 / 3; grid-row: 1 / 2; }
+    .ph-tile-3 { grid-column: 2 / 3; grid-row: 2 / 3; }
+    .ph-tile-4 { grid-column: 1 / 2; grid-row: 3 / 4; }
+    .ph-tile-5 { grid-column: 2 / 3; grid-row: 3 / 4; }
+    .ph-tile-6 { grid-column: 1 / 2; grid-row: 4 / 5; }
+    .ph-tile-7 { grid-column: 2 / 3; grid-row: 4 / 5; }
+
+    .ph-hero-content {
+        padding: 42px 12px 22px;
+    }
+
+    .ph-hero-title {
+        font-size: clamp(1.8rem, 8vw, 2.6rem);
+        line-height: 1.05;
+    }
+
+    .ph-hero-tabs {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .ph-hero-bottom-actions {
+        gap: 8px;
+    }
+
+    .ph-hero-mini-btn {
+        width: 100%;
+    }
+}
+
+
+/* Défilement horizontal des professions dans le hero */
+.ph-hero-tags-scroll {
+    position: relative;
+    width: min(920px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ph-hero-tags-scroller {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding: 2px 0;
+}
+
+.ph-hero-tags-scroller::-webkit-scrollbar {
+    display: none;
+}
+
+.ph-hero-tags-scroller .ph-hero-chip {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+.ph-hero-tags-nav {
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255,255,255,.24);
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: rgba(7, 20, 33, .62);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    cursor: pointer;
+    transition: .2s ease;
+    z-index: 2;
+}
+
+.ph-hero-tags-nav:hover {
+    background: rgba(255,255,255,.92);
+    color: #0f172a;
+    transform: translateY(-1px);
+}
+
+.ph-hero-tags-nav.is-disabled {
+    opacity: .35;
+    pointer-events: none;
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-tags-scroll {
+        width: 100%;
+        gap: 6px;
+    }
+
+    .ph-hero-tags-nav {
+        flex-basis: 30px;
+        width: 30px;
+        height: 30px;
+    }
+}
+
+/* =========================================================
+   HERO BACKGROUND SLIDER - doux, premium, sans casser le code
+========================================================= */
+
+.ph-hero-v4,
+.ph-hero-shell {
+    margin-top: 0 !important;
+}
+
+.ph-hero-bg-slider {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    background: #020617;
+}
+
+.ph-hero-bg-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.04);
+    filter: saturate(1.08) contrast(1.01) brightness(.96);
+    transition:
+        opacity 1800ms ease-in-out,
+        visibility 1800ms ease-in-out,
+        transform 9000ms ease;
+    will-change: opacity, transform;
+}
+
+.ph-hero-bg-slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* Overlay plus propre pour laisser voir les images */
+.ph-hero-v4 .ph-hero-overlay {
+    z-index: 2;
+    background:
+        linear-gradient(180deg,
+            rgba(2, 6, 23, .05) 0%,
+            rgba(2, 6, 23, .14) 42%,
+            rgba(2, 6, 23, .34) 100%
+        ),
+        linear-gradient(90deg,
+            rgba(2, 6, 23, .18) 0%,
+            rgba(2, 6, 23, .06) 48%,
+            rgba(2, 6, 23, .18) 100%
+        ) !important;
+}
+
+/* Le contenu reste au-dessus */
+.ph-hero-v4 .ph-hero-content {
+    position: relative;
+    z-index: 5;
+}
+
+/* Titre en blanc malgré les styles globaux .ph-home h1 */
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    color: #ffffff !important;
+    text-shadow: 0 18px 46px rgba(0, 0, 0, .55) !important;
+}
+
+/* Badge et boutons bien visibles */
+.ph-hero-v4 .ph-hero-badge,
+.ph-hero-v4 .ph-hero-mini-btn,
+.ph-hero-v4 .ph-hero-chip {
+    color: #ffffff !important;
+}
+
+/* Bouton inscription garde sa couleur */
+.ph-hero-v4 .ph-hero-mini-btn-accent {
+    color: #554b00 !important;
+}
+
+
+/* =========================================================
+   HERO FINAL PREMIUM — images plus claires + slider doux
+   À coller tout en bas de home-hero.css
+========================================================= */
+
+/* Enlève l'espace juste après le menu */
+.ph-home,
+.ph-home > section:first-child,
+.ph-home > .ph-hero-v4:first-child,
+.ph-hero-v4,
+.ph-hero-shell {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Hauteur hero propre : pas plein écran, pas trop petit */
+.ph-hero-v4 .ph-hero-shell {
+    position: relative;
+    width: 100%;
+    height: clamp(500px, 68vh, 640px);
+    min-height: 500px;
+    overflow: hidden;
+    background: #020617;
+}
+
+/* Slider arrière-plan */
+.ph-hero-bg-slider {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    background: #020617;
+}
+
+.ph-hero-bg-slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transform: scale(1.045);
+    filter: saturate(1.08) contrast(1.03) brightness(.97);
+    transition:
+        opacity 1800ms ease-in-out,
+        visibility 1800ms ease-in-out,
+        transform 9000ms ease;
+    will-change: opacity, transform;
+}
+
+.ph-hero-bg-slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+
+/* Overlay plus clair : on voit mieux les photos */
+.ph-hero-v4 .ph-hero-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(2, 6, 23, .10) 0%,
+            rgba(2, 6, 23, .22) 44%,
+            rgba(2, 6, 23, .50) 100%
+        ),
+        linear-gradient(
+            90deg,
+            rgba(2, 6, 23, .30) 0%,
+            rgba(2, 6, 23, .10) 48%,
+            rgba(2, 6, 23, .30) 100%
+        ) !important;
+}
+
+/* Contenu toujours au-dessus */
+.ph-hero-v4 .ph-hero-content {
+    position: relative;
+    z-index: 5;
+}
+
+/* Titre blanc, net, lisible */
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    color: #ffffff !important;
+    font-weight: 850 !important;
+    text-shadow:
+        0 4px 14px rgba(0, 0, 0, .45),
+        0 18px 50px rgba(0, 0, 0, .45) !important;
+}
+
+/* Badge visible mais léger */
+.ph-hero-v4 .ph-hero-badge {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .48) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Boutons Missions / Connexion */
+.ph-hero-v4 .ph-hero-mini-btn {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .52) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Bouton Inscription reste jaune */
+.ph-hero-v4 .ph-hero-mini-btn-accent {
+    color: #4b3f00 !important;
+    background: #f4e98d !important;
+    border-color: rgba(255, 255, 255, .35) !important;
+}
+
+/* Recherche plus propre au-dessus des photos */
+.ph-hero-v4 .vip-search {
+    /* background: rgba(255, 255, 255, .86) !important;*/
+    background: rgba(255,255,255,.10);
+    border: 1px solid rgba(255, 255, 255, .58) !important;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .20) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Chips métiers */
+.ph-hero-v4 .ph-hero-chip {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .52) !important;
+    border: 1px solid rgba(255, 255, 255, .22) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.ph-hero-v4 .ph-hero-chip:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, .95) !important;
+}
+
+/* Chevrons des professions */
+.ph-hero-v4 .ph-hero-tags-nav {
+    color: #ffffff !important;
+    background: rgba(15, 23, 42, .58) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+}
+
+.ph-hero-v4 .ph-hero-tags-nav:hover {
+    color: #0f172a !important;
+    background: rgba(255, 255, 255, .94) !important;
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .ph-hero-v4 .ph-hero-shell {
+        height: auto;
+        min-height: 560px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-v4 .ph-hero-shell {
+        min-height: 560px;
+    }
+
+    .ph-hero-v4 .ph-hero-title {
+        font-size: clamp(1.9rem, 8vw, 2.8rem) !important;
+        line-height: 1.05 !important;
+    }
+}
+
+/* =========================================================
+   FIX TITRE HERO SUR UNE LIGNE
+========================================================= */
+
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+
+    width: min(100%, 1180px) !important;
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    text-align: center !important;
+    color: #ffffff !important;
+    white-space: normal !important;
+    line-height: 1.05 !important;
+    text-shadow:
+        0 4px 14px rgba(0, 0, 0, .50),
+        0 18px 50px rgba(0, 0, 0, .45) !important;
+}
+
+.ph-hero-title-main {
+    display: block !important;
+    font-size: clamp(2.3rem, 4vw, 4.3rem) !important;
+    font-weight: 900 !important;
+    letter-spacing: -0.055em !important;
+    line-height: .95 !important;
+    color: #ffffff !important;
+}
+
+.ph-hero-title-sub {
+    display: block !important;
+    font-size: clamp(1.25rem, 2.1vw, 2.25rem) !important;
+    font-weight: 500 !important;
+    font-style: italic !important;
+    letter-spacing: -0.025em !important;
+    line-height: 1.15 !important;
+    color: rgba(255, 255, 255, .92) !important;
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-title-main {
+        font-size: clamp(2rem, 9vw, 3rem) !important;
+    }
+
+    .ph-hero-title-sub {
+        font-size: clamp(1.05rem, 5vw, 1.45rem) !important;
+        max-width: 92% !important;
+    }
+}
+
+/* =========================================================
+   HERO TABS RESPONSIVE MOBILE
+   Les boutons se réorganisent proprement selon l'écran
+========================================================= */
+
+.ph-hero-tabs {
+    max-width: 100%;
+}
+
+/* Tablette / petit écran : les boutons passent à la ligne si besoin */
+@media (max-width: 767.98px) {
+    .ph-hero-tabs {
+        width: min(100%, 360px) !important;
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding: 6px !important;
+        border-radius: 24px !important;
+        overflow: visible !important;
+    }
+
+    .ph-hero-tabs .ph-hero-mini-btn {
+        flex: 1 1 calc(50% - 8px) !important;
+        min-width: 135px !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+
+    .ph-hero-tabs .ph-hero-mini-btn-accent {
+        flex: 1 1 100% !important;
+    }
+}
+
+/* Très petit mobile : chaque bouton prend une ligne */
+@media (max-width: 420px) {
+    .ph-hero-tabs {
+        width: min(100%, 300px) !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        border-radius: 26px !important;
+    }
+
+    .ph-hero-tabs .ph-hero-mini-btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 0 0 auto !important;
+        justify-content: center !important;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* =========================================================
+   HERO TITLE STYLE — Main-d’œuvre Locale façon premium
+========================================================= */
+
+.ph-home .ph-hero-v4 .ph-hero-title,
+.ph-hero-v4 .ph-hero-title {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+
+    width: min(100%, 1180px) !important;
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+
+    text-align: center !important;
+    white-space: normal !important;
+    line-height: 1 !important;
+
+    color: #ffffff !important;
+    text-shadow:
+        0 4px 14px rgba(0, 0, 0, .55),
+        0 18px 46px rgba(0, 0, 0, .45) !important;
+}
+
+.ph-hero-title-main {
+    display: inline-flex !important;
+    align-items: baseline !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    flex-wrap: wrap !important;
+
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: clamp(2.4rem, 5vw, 5rem) !important;
+    font-weight: 900 !important;
+    line-height: .92 !important;
+    letter-spacing: -0.045em !important;
+}
+
+.ph-title-white {
+    font-family: "Times New Roman", Times, serif !important;
+    color: #ffffff !important;
+    font-weight: 900 !important;
+}
+
+.ph-title-gold {
+    font-family: "Times New Roman", Times, serif !important;
+    color: #ffd400 !important;
+    font-weight: 900 !important;
+    font-style: italic !important;
+    text-shadow:
+        0 2px 0 rgba(120, 82, 0, .45),
+        0 8px 24px rgba(255, 212, 0, .35) !important;
+}
+
+.ph-hero-title-sub {
+    display: block !important;
+    max-width: 760px !important;
+
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: clamp(1.15rem, 2vw, 2rem) !important;
+    font-weight: 400 !important;
+    font-style: italic !important;
+    letter-spacing: -0.015em !important;
+    line-height: 1.15 !important;
+
+    color: rgba(255, 255, 255, .94) !important;
+}
+
+@media (max-width: 767.98px) {
+    .ph-hero-title-main {
+        gap: 0px !important;
+        font-size: clamp(2.2rem, 11vw, 3.2rem) !important;
+        line-height: .9 !important;
+    }
+
+    .ph-hero-title-sub {
+        max-width: 92% !important;
+        font-size: clamp(1.05rem, 5vw, 1.45rem) !important;
+    }
+}
+
+
+/* =========================================================
+   HERO MOBILE CLEAN
+   Mobile : garder seulement Inscription
+   Desktop : garder Missions / Connexion / Inscription
+========================================================= */
+
+@media (max-width: 767.98px) {
+    .ph-hero-tabs {
+        width: auto !important;
+        max-width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 auto 14px !important;
+        padding: 0 !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        overflow: visible !important;
+    }
+
+    .ph-hero-tabs .ph-mobile-hide {
+        display: none !important;
+    }
+
+    .ph-hero-tabs .ph-hero-mini-btn-accent {
+        width: auto !important;
+        min-width: 150px !important;
+        flex: 0 0 auto !important;
+        padding: 0 22px !important;
+        min-height: 42px !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+}
+
+/* =========================================================
+   HERO SEARCH FORM TRANSPARENT
+   Champs transparents sur le background du hero
+========================================================= */
+
+.ph-hero-v4 .vip-search {
+    background: rgba(255, 255, 255, .08) !important;
+    border: 1px solid rgba(255, 255, 255, .26) !important;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, .18) !important;
+    backdrop-filter: blur(14px) saturate(1.2);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+
+/* Bloc de chaque champ */
+.ph-hero-v4 .vip-field {
+    background: rgba(255, 255, 255, .02) !important;
+    border: 1px solid rgba(255, 255, 255, .24) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Inputs transparents */
+.ph-hero-v4 .vip-input,
+.ph-hero-v4 .vip-select {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Placeholder en blanc doux */
+.ph-hero-v4 .vip-input::placeholder {
+    color: rgba(255, 255, 255, .78) !important;
+}
+
+/* Icônes dans les champs */
+.ph-hero-v4 .vip-field i {
+    color: rgba(255, 255, 255, .86) !important;
+}
+
+/* Select fermé */
+.ph-hero-v4 .vip-select {
+    color: rgba(255, 255, 255, .92) !important;
+}
+
+/* Options du select quand la liste s'ouvre */
+.ph-hero-v4 .vip-select option {
+    color: #0f172a !important;
+    background: #ffffff !important;
+}
+
+/* Focus premium */
+.ph-hero-v4 .vip-field:focus-within {
+    background: rgba(255, 255, 255, .16) !important;
+    border-color: rgba(255, 212, 0, .72) !important;
+    box-shadow:
+        0 0 0 3px rgba(255, 212, 0, .16),
+        inset 0 1px 0 rgba(255, 255, 255, .16) !important;
+}
+
+/* =========================================================
+   HERO SEARCH FORM - coins plus arrondis
+========================================================= */
+
+.ph-hero-v4 .vip-search {
+    border-radius: 28px !important;
+}
+
+.ph-hero-v4 .vip-field {
+    border-radius: 22px !important;
+}
+
+.ph-hero-v4 .vip-input,
+.ph-hero-v4 .vip-select {
+    border-radius: 22px !important;
+}
+
+.ph-hero-v4 .vip-btn {
+    border-radius: 22px !important;
+}
+
+/* =========================================================
+   HERO JOBS TICKER - VERSION JOYEUSE + DEFILEMENT PLUS LENT
+========================================================= */
+
+.vip-jobs-ticker-hero {
+    padding: 14px 0 !important;
+    min-height: auto !important;
+    overflow: hidden;
+
+    background:
+        radial-gradient(circle at 8% 50%, rgba(255, 212, 0, .30), transparent 32%),
+        radial-gradient(circle at 85% 40%, rgba(34, 197, 94, .20), transparent 34%),
+        linear-gradient(135deg, #fff7c2 0%, #fffdf3 38%, #e8fff3 72%, #fef3c7 100%) !important;
+
+    border-top: 1px solid rgba(255, 212, 0, .35);
+    border-bottom: 1px solid rgba(34, 197, 94, .20);
+}
+
+/* Conteneur de la bande */
+.vip-jobs-ticker-wrap {
+    width: min(1180px, calc(100% - 24px));
+    margin: 0 auto;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-radius: 999px;
+    padding: 8px;
+
+    background: rgba(255, 255, 255, .74);
+    border: 1px solid rgba(255, 212, 0, .38);
+    box-shadow:
+        0 16px 38px rgba(15, 23, 42, .08),
+        inset 0 1px 0 rgba(255, 255, 255, .85);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* Badge nombre d'offres */
+.vip-jobs-ticker-label {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border-radius: 999px;
+
+    color: #172033;
+    background: linear-gradient(135deg, #ffd400 0%, #fff3a3 48%, #22c55e 130%);
+    font-size: 14px;
+    font-weight: 950;
+    white-space: nowrap;
+
+    box-shadow:
+        0 10px 24px rgba(255, 212, 0, .32),
+        inset 0 1px 0 rgba(255, 255, 255, .72);
+}
+
+.vip-jobs-ticker-label i {
+    color: #0f766e;
+}
+
+/* Zone de défilement */
+.vip-jobs-ticker-mask {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Fondus adaptés au fond clair */
+.vip-jobs-ticker-mask::before,
+.vip-jobs-ticker-mask::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 70px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.vip-jobs-ticker-mask::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(255, 253, 243, .96), transparent);
+}
+
+.vip-jobs-ticker-mask::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(255, 253, 243, .96), transparent);
+}
+
+
+/* Textes */
+.vip-jobs-ticker-content span {
+    position: relative;
+    color: #334155;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+}
+
+.vip-jobs-ticker-content span::after {
+    content: "•";
+    position: absolute;
+    right: -18px;
+    color: #22c55e;
+    font-weight: 950;
+}
+
+.vip-jobs-ticker-content .vip-ticker-highlight {
+    color: #b88600;
+    font-weight: 950;
+    text-shadow: 0 4px 18px rgba(255, 212, 0, .22);
+}
+
+/* Pause au survol */
+.vip-jobs-ticker-wrap:hover .vip-jobs-ticker-track {
+    animation-play-state: paused;
+}
+
+/* Mobile */
+@media (max-width: 767.98px) {
+    .vip-jobs-ticker-hero {
+        padding: 10px 0 !important;
+    }
+
+    .vip-jobs-ticker-wrap {
+        width: calc(100% - 20px);
+        min-height: 48px;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 22px;
+    }
+
+    .vip-jobs-ticker-label {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .vip-jobs-ticker-track {
+        animation-duration: 68s !important;
+    }
+
+    .vip-jobs-ticker-content span {
+        font-size: 13px;
+    }
+
+    .vip-jobs-ticker-mask::before,
+    .vip-jobs-ticker-mask::after {
+        width: 35px;
+    }
+}
+
+/* =========================================================
+   HERO JOBS TICKER - VERSION JOYEUSE + DEFILEMENT PLUS LENT
+========================================================= */
+
+.vip-jobs-ticker-hero {
+    padding: 14px 0 !important;
+    min-height: auto !important;
+    overflow: hidden;
+
+    background:
+        radial-gradient(circle at 8% 50%, rgba(255, 212, 0, .30), transparent 32%),
+        radial-gradient(circle at 85% 40%, rgba(34, 197, 94, .20), transparent 34%),
+        linear-gradient(135deg, #fff7c2 0%, #fffdf3 38%, #e8fff3 72%, #fef3c7 100%) !important;
+
+    border-top: 1px solid rgba(255, 212, 0, .35);
+    border-bottom: 1px solid rgba(34, 197, 94, .20);
+}
+
+/* Conteneur de la bande */
+.vip-jobs-ticker-wrap {
+    width: min(1180px, calc(100% - 24px));
+    margin: 0 auto;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-radius: 999px;
+    padding: 8px;
+
+    background: rgba(255, 255, 255, .74);
+    border: 1px solid rgba(255, 212, 0, .38);
+    box-shadow:
+        0 16px 38px rgba(15, 23, 42, .08),
+        inset 0 1px 0 rgba(255, 255, 255, .85);
+
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+/* Badge nombre d'offres */
+.vip-jobs-ticker-label {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border-radius: 999px;
+
+    color: #172033;
+    background: linear-gradient(135deg, #ffd400 0%, #fff3a3 48%, #22c55e 130%);
+    font-size: 14px;
+    font-weight: 950;
+    white-space: nowrap;
+
+    box-shadow:
+        0 10px 24px rgba(255, 212, 0, .32),
+        inset 0 1px 0 rgba(255, 255, 255, .72);
+}
+
+.vip-jobs-ticker-label i {
+    color: #0f766e;
+}
+
+/* Zone de défilement */
+.vip-jobs-ticker-mask {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Fondus adaptés au fond clair */
+.vip-jobs-ticker-mask::before,
+.vip-jobs-ticker-mask::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 70px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.vip-jobs-ticker-mask::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(255, 253, 243, .96), transparent);
+}
+
+.vip-jobs-ticker-mask::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(255, 253, 243, .96), transparent);
+}
+
+
+/* Textes */
+.vip-jobs-ticker-content span {
+    position: relative;
+    color: #334155;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+}
+
+.vip-jobs-ticker-content span::after {
+    content: "•";
+    position: absolute;
+    right: -18px;
+    color: #22c55e;
+    font-weight: 950;
+}
+
+.vip-jobs-ticker-content .vip-ticker-highlight {
+    color: #b88600;
+    font-weight: 950;
+    text-shadow: 0 4px 18px rgba(255, 212, 0, .22);
+}
+
+/* Pause au survol */
+.vip-jobs-ticker-wrap:hover .vip-jobs-ticker-track {
+    animation-play-state: paused;
+}
+
+/* Mobile */
+@media (max-width: 767.98px) {
+    .vip-jobs-ticker-hero {
+        padding: 10px 0 !important;
+    }
+
+    .vip-jobs-ticker-wrap {
+        width: calc(100% - 20px);
+        min-height: 48px;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 22px;
+    }
+
+    .vip-jobs-ticker-label {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .vip-jobs-ticker-track {
+        animation-duration: 68s !important;
+    }
+
+    .vip-jobs-ticker-content span {
+        font-size: 13px;
+    }
+
+    .vip-jobs-ticker-mask::before,
+    .vip-jobs-ticker-mask::after {
+        width: 35px;
+    }
+}
+
+/* =========================================================
+   FIX HERO JOBS TICKER - FORCER LE DÉFILEMENT
+========================================================= */
+
+.vip-jobs-ticker-mask {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+.vip-jobs-ticker-track {
+    display: flex !important;
+    align-items: center !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    animation: vipJobsTickerMove 240s linear infinite !important;
+    will-change: transform;
+}
+
+.vip-jobs-ticker-content {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 28px !important;
+    padding-right: 28px !important;
+    white-space: nowrap !important;
+}
+
+.vip-jobs-ticker-content span {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+}
+
+@keyframes vipJobsTickerMove {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+/* Pause au survol */
+.vip-jobs-ticker-wrap:hover .vip-jobs-ticker-track {
+    animation-play-state: paused !important;
+}
+
+/* Mobile : encore plus lent */
+@media (max-width: 767.98px) {
+    .vip-jobs-ticker-track {
+        animation-duration: 240s !important;
+    }
+}
+
+
+.vip-ticker-profession{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-right:40px;
+    color:#1f2937;
+    text-decoration:none;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.vip-ticker-profession strong{
+    color:#f59e0b;
+    font-weight:700;
+}
+
+.vip-ticker-profession:hover{
+    color:#f59e0b;
+}
+
+/* Etat normal */
+.vip-field {
+    position: relative;
+}
+
+.vip-field i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffffff;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.vip-input,
+.vip-select {
+    transition: all 0.3s ease;
+}
+
+/* Lorsque le champ est survolé ou actif */
+.vip-field:hover .vip-input,
+.vip-field:hover .vip-select,
+.vip-input:focus,
+.vip-select:focus {
+    background: #ffffff !important;
+    color: #000000 !important;
+    border-color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+    outline: none;
+}
+
+/* Icône noire lorsque le champ est actif */
+.vip-field:hover i,
+.vip-field:focus-within i {
+    color: #000000 !important;
+}
+
+/* Texte et placeholder noirs lorsque le champ est actif */
+.vip-input:focus,
+.vip-select:focus {
+    color: #000000 !important;
+}
+
+.vip-input:focus::placeholder {
+    color: #666666 !important;
+}
+
+@media (max-width:576px){
+
+    .hero-title,
+    .banner-title,
+    .main-title,
+    h1{
+        margin-top:55px !important;
+    }
+
+}
+
+
+/* =========================================================
+   HERO JOBS TICKER - BOUCLE CONTINUE
+========================================================= */
+
+.vip-jobs-ticker-hero {
+    padding: 14px 0 !important;
+    min-height: auto !important;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 8% 50%, rgba(255, 212, 0, .30), transparent 32%),
+        radial-gradient(circle at 85% 40%, rgba(34, 197, 94, .20), transparent 34%),
+        linear-gradient(135deg, #fff7c2 0%, #fffdf3 38%, #e8fff3 72%, #fef3c7 100%) !important;
+    border-top: 1px solid rgba(255, 212, 0, .35);
+    border-bottom: 1px solid rgba(34, 197, 94, .20);
+}
+
+.vip-jobs-ticker-wrap {
+    width: min(1180px, calc(100% - 24px));
+    margin: 0 auto;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-radius: 999px;
+    padding: 8px;
+    background: rgba(255, 255, 255, .74);
+    border: 1px solid rgba(255, 212, 0, .38);
+    box-shadow: 0 16px 38px rgba(15, 23, 42, .08), inset 0 1px 0 rgba(255, 255, 255, .85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.vip-jobs-ticker-label {
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border-radius: 999px;
+    color: #172033;
+    background: linear-gradient(135deg, #ffd400 0%, #fff3a3 48%, #22c55e 130%);
+    font-size: 14px;
+    font-weight: 950;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px rgba(255, 212, 0, .32), inset 0 1px 0 rgba(255, 255, 255, .72);
+    z-index: 3;
+    position: relative;
+}
+
+.vip-jobs-ticker-label i {
+    color: #0f766e;
+}
+
+.vip-jobs-ticker-mask {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.vip-jobs-ticker-mask::before,
+.vip-jobs-ticker-mask::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 70px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.vip-jobs-ticker-mask::before {
+    left: 0;
+    background: linear-gradient(90deg, rgba(255, 253, 243, .96), transparent);
+}
+
+.vip-jobs-ticker-mask::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(255, 253, 243, .96), transparent);
+}
+
+/* BOUCLE CONTINUE - infinite */
+.vip-jobs-ticker-track {
+    display: flex !important;
+    align-items: center !important;
+    width: max-content !important;
+    min-width: max-content !important;
+    animation: scrollTicker 15s linear infinite !important;
+    will-change: transform;
+}
+
+/* Le contenu en ligne */
+.vip-jobs-ticker-content {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 40px !important;
+    padding-right: 40px !important;
+    white-space: nowrap !important;
+}
+
+.vip-ticker-profession {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    color: #1f2937 !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    white-space: nowrap !important;
+    flex: 0 0 auto !important;
+    transition: color 0.3s ease;
+}
+
+.vip-ticker-profession strong {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.vip-ticker-profession:hover {
+    color: #f59e0b !important;
+}
+
+/* Animation en boucle continue */
+@keyframes scrollTicker {
+    0% {
+        transform: translate3d(0, 0, 0);
+    }
+    100% {
+        transform: translate3d(-50%, 0, 0);
+    }
+}
+
+/* Pause au survol - mais garde la boucle */
+.vip-jobs-ticker-wrap:hover .vip-jobs-ticker-track {
+    animation-play-state: paused !important;
+}
+
+/* Ne jamais arrêter la boucle - désactiver les transitions qui pourraient couper */
+.vip-jobs-ticker-track {
+    animation-iteration-count: infinite !important;
+}
+
+/* Mobile */
+@media (max-width: 767.98px) {
+    .vip-jobs-ticker-hero {
+        padding: 10px 0 !important;
+    }
+
+    .vip-jobs-ticker-wrap {
+        width: calc(100% - 20px);
+        min-height: 48px;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 22px;
+    }
+
+    .vip-jobs-ticker-label {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .vip-jobs-ticker-content {
+        gap: 20px !important;
+        padding-right: 20px !important;
+    }
+
+    .vip-ticker-profession {
+        font-size: 13px !important;
+    }
+
+    .vip-jobs-ticker-track {
+        animation-duration: 18s !important;
+        animation-iteration-count: infinite !important;
+    }
+
+    .vip-jobs-ticker-mask::before,
+    .vip-jobs-ticker-mask::after {
+        width: 35px;
+    }
+}
+
+
+@media (max-width: 767px) {
+    .ph-mobile-hero-search .row {
+        display: block;
+        border-color: #d4a017 !important;
+    }
+
+    .ph-mobile-search-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 18px 12px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, .22);
+        text-align: left;
+    }
+
+    .ph-mobile-search-group label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #8b8b8b;
+        text-transform: uppercase;
+    }
+
+    .ph-mobile-search-card .vip-field {
+        height: auto;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .ph-mobile-search-card .vip-field i {
+        color: #1f2937;
+        font-size: 18px;
+        margin-right: 8px;
+    }
+
+    .ph-mobile-search-card .vip-input {
+        height: auto;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        font-weight: 800;
+        color: #000;
+    }
+
+    .ph-mobile-search-card .vip-input::placeholder {
+        color: #000;
+        opacity: 1;
+        font-weight: 800;
+    }
+
+    .ph-mobile-search-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .ph-mobile-search-row .ph-mobile-search-group {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .ph-search-gold {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 9px;
+        padding: 0 !important;
+        background: #ffd400 !important;
+        border-color: #ffd400 !important;
+        color: #fff !important;
+    }
+
+    .ph-search-gold span {
+        display: none;
+    }
+
+    .ph-search-gold i {
+        margin: 0 !important;
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 767px) {
+    #vipLiveSearchForm.ph-mobile-hero-search {
+        border-radius: 8px;
+        border-color: #d4a017 !important;
+        padding: 18px 12px;
+        box-shadow: 0 15px 35px rgba(0,0,0,.22);
+    }
+
+    #vipLiveSearchForm .ph-mobile-search-layout {
+        display: grid !important;
+        grid-template-columns: 1fr 58px;
+        grid-template-areas:
+            "q q"
+            "city btn";
+        gap: 2px 10px;
+        align-items: center;
+    }
+
+    #vipLiveSearchForm .ph-mobile-search-q {
+        grid-area: q;
+    }
+
+    #vipLiveSearchForm .ph-mobile-search-city {
+        grid-area: city;
+        min-width: 0;
+    }
+
+    #vipLiveSearchForm .ph-mobile-search-btn-wrap {
+        grid-area: btn;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    #vipLiveSearchForm .ph-mobile-search-q,
+    #vipLiveSearchForm .ph-mobile-search-city,
+    #vipLiveSearchForm .ph-mobile-search-btn-wrap {
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    #vipLiveSearchForm .vip-btn-mobile-search {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        padding: 0 !important;
+        border-radius: 9px;
+        background: #ffd400 !important;
+        border-color: #d4a017 !important;
+        color: #fff !important;
+    }
+
+    #vipLiveSearchForm .vip-btn-mobile-search span {
+        display: none;
+    }
+
+    #vipLiveSearchForm .vip-btn-mobile-search i {
+        margin: 0 !important;
+    }
+}
+
+/* =========================================================
+   CONTENEUR DU FORMULAIRE HERO
+========================================================= */
+
+.ph-search-form-wrapper {
+    width: 100%;
+}
+
+/* Mobile uniquement */
+@media (max-width: 767px) {
+
+    .ph-search-form-wrapper {
+        width: 100%;
+        padding: 8px;
+
+        border: 1px solid #d4a017 !important;
+        border-radius: 14px;
+
+        background: rgba(15, 23, 42, .30);
+        box-shadow: 0 14px 35px rgba(0, 0, 0, .20);
+
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .ph-search-form-wrapper #vipLiveSearchForm {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .ph-search-form-wrapper .ph-mobile-search-layout {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
+
+/* =========================================================
+   POSITION DU TITRE ET DU FORMULAIRE SUR MOBILE
+========================================================= */
+
+@media (max-width: 767.98px) {
+
+    .ph-hero-v4 .ph-hero-shell {
+        height: calc(100svh - 60px) !important;
+        min-height: 600px !important;
+        max-height: none !important;
+    }
+
+    .ph-hero-v4 .ph-hero-content {
+        height: 100% !important;
+        padding: 78px 12px 24px !important;
+        align-items: stretch !important;
+    }
+
+    .ph-hero-v4 .ph-hero-main {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+    }
+
+    .ph-hero-v4 .ph-hero-title {
+        margin: 95px auto 0 !important;
+        padding-top: 0 !important;
+        flex-shrink: 0 !important;
+        margin-bottom: 60px !important;
+    }
+
+    .ph-hero-v4 .ph-search-form-wrapper {
+        margin-top: 55px !important;
+        margin-bottom: 55px !important;
+        transform: none !important;
+        flex-shrink: 0 !important;
+    }
+}

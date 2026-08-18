@@ -8,6 +8,17 @@ framework:
 
     #esi: true
     #fragments: true
+    
+    router:
+        default_uri: '%env(APP_URL)%'
+
+    trusted_proxies: '127.0.0.1,REMOTE_ADDR'
+    trusted_headers:
+        - x-forwarded-for
+        - x-forwarded-host
+        - x-forwarded-proto
+        - x-forwarded-port
+        - x-forwarded-prefix
 
 when@test:
     framework:

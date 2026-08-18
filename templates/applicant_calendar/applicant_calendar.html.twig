@@ -1,0 +1,299 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Mon calendrier{% endtrans %}{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
+
+{% include 'applicant_calendar/_vip_ui.html.twig' %}
+
+
+<div class="container-fluid appcal-page">
+	<div class="appcal-shell">
+		<div class="appcal-hero">
+			<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+				<div>
+					<h2 class="mb-1 fw-bold">🗓️ {% trans %}Mon calendrier{% endtrans %}</h2>
+					<div class="appcal-soft">
+						{% trans %}Consultez vos rendez-vous, leurs dates, leurs heures, puis approuvez ou refusez les propositions reçues.{% endtrans %}
+					</div>
+				</div>
+
+				<div class="d-flex flex-wrap gap-2">
+					<a href="javascript:history.back()" class="btn btn-outline-dark rounded-pill px-3">
+						← {% trans %}Retour{% endtrans %}
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="p-3 p-lg-4">
+			<div class="row g-3 mb-4">
+				<div class="col-12 col-md-4">
+					<div class="appcal-kpi">
+						<div class="appcal-soft small">{% trans %}Proposés{% endtrans %}</div>
+						<div class="fs-3 fw-bold">{{ proposedCount }}</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-4">
+					<div class="appcal-kpi">
+						<div class="appcal-soft small">{% trans %}Approuvés{% endtrans %}</div>
+						<div class="fs-3 fw-bold text-success">{{ confirmedCount }}</div>
+					</div>
+				</div>
+				<div class="col-12 col-md-4">
+					<div class="appcal-kpi">
+						<div class="appcal-soft small">{% trans %}Terminés{% endtrans %}</div>
+						<div class="fs-3 fw-bold text-primary">{{ doneCount }}</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row g-3">
+				<div class="col-12 col-xl-8">
+					<div id="calendar"></div>
+				</div>
+
+				<div class="col-12 col-xl-4">
+					<div class="appcal-side mb-3">
+						<div class="appcal-side-head">
+							{% trans %}Détails du rendez-vous{% endtrans %}
+						</div>
+						<div class="appcal-side-body">
+							<div id="appointmentEmpty" class="appcal-soft">
+								{% trans %}Cliquez sur un rendez-vous dans le calendrier pour afficher les détails ici.{% endtrans %}
+							</div>
+
+							<div id="appointmentDetails" style="display:none;">
+								<div class="fw-bold mb-2" id="detailTitle">—</div>
+
+								<div class="mb-2">
+									<span id="detailStatusBadge" class="badge rounded-pill badge-soft">—</span>
+								</div>
+
+								<div class="small appcal-soft mb-2">
+									<strong>{% trans %}Recruteur{% endtrans %} :</strong>
+									<span id="detailRecruiter">—</span>
+								</div>
+
+								<div class="small appcal-soft mb-2">
+									<strong>{% trans %}Date{% endtrans %} :</strong>
+									<span id="detailDate">—</span>
+								</div>
+
+								<div class="small appcal-soft mb-2">
+									<strong>{% trans %}Heure{% endtrans %} :</strong>
+									<span id="detailTime">—</span>
+								</div>
+
+								<div class="small appcal-soft mb-2">
+									<strong>{% trans %}Durée{% endtrans %} :</strong>
+									<span id="detailDuration">—</span>
+								</div>
+
+								<div class="small appcal-soft mb-2">
+									<strong>{% trans %}Type{% endtrans %} :</strong>
+									<span id="detailType">—</span>
+								</div>
+
+								<div class="small appcal-soft mb-2">
+									<strong>{% trans %}Lieu{% endtrans %} :</strong>
+									<span id="detailLocation">—</span>
+								</div>
+
+								<div class="small appcal-soft mb-3">
+									<strong>{% trans %}Note{% endtrans %} :</strong>
+									<div id="detailNotes">—</div>
+								</div>
+
+								<div id="detailActions" class="d-flex gap-2 flex-wrap" style="display:none;">
+									<button type="button" id="btnAccept" class="btn btn-success rounded-pill px-3">
+										✅ {% trans %}Approuver{% endtrans %}
+									</button>
+									<button type="button" id="btnRefuse" class="btn btn-outline-danger rounded-pill px-3">
+										❌ {% trans %}Refuser{% endtrans %}
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="appcal-side">
+						<div class="appcal-side-head">
+							{% trans %}Mes prochains rendez-vous{% endtrans %}
+						</div>
+						<div class="appcal-side-body">
+							{% if nextAppointments|length > 0 %}
+								{% for a in nextAppointments %}
+									<div class="appcal-item">
+										<div class="fw-semibold">
+											{{ a.job.title ?? ('Rendez-vous #' ~ a.id) }}
+										</div>
+										<div class="small appcal-soft">
+											{{ a.startAt|date('d/m/Y') }} • {{ a.startAt|date('H:i') }}
+										</div>
+									</div>
+								{% endfor %}
+							{% else %}
+								<div class="appcal-soft">
+									{% trans %}Aucun rendez-vous à venir.{% endtrans %}
+								</div>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	const FEED_URL = {{ path('applicant_calendar_feed')|json_encode|raw }};
+	const RESPOND_URL_TEMPLATE = {{ path('appointment_respond', {id: '__ID__'})|json_encode|raw }};
+
+	const TXT_APPROVED = {{ 'Rendez-vous approuvé avec succès.'|trans|json_encode|raw }};
+	const TXT_REFUSED = {{ 'Rendez-vous refusé avec succès.'|trans|json_encode|raw }};
+	const TXT_ERROR = {{ 'Une erreur est survenue.'|trans|json_encode|raw }};
+	const TXT_PROPOSED = {{ 'Proposé'|trans|json_encode|raw }};
+	const TXT_CONFIRMED = {{ 'Approuvé'|trans|json_encode|raw }};
+	const TXT_REFUSED_LABEL = {{ 'Refusé'|trans|json_encode|raw }};
+	const TXT_DONE = {{ 'Terminé'|trans|json_encode|raw }};
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+	const calendarEl = document.getElementById('calendar');
+	if (!calendarEl || !window.FullCalendar) return;
+
+	let selectedEvent = null;
+
+	const appointmentEmpty = document.getElementById('appointmentEmpty');
+	const appointmentDetails = document.getElementById('appointmentDetails');
+	const detailTitle = document.getElementById('detailTitle');
+	const detailStatusBadge = document.getElementById('detailStatusBadge');
+	const detailRecruiter = document.getElementById('detailRecruiter');
+	const detailDate = document.getElementById('detailDate');
+	const detailTime = document.getElementById('detailTime');
+	const detailDuration = document.getElementById('detailDuration');
+	const detailType = document.getElementById('detailType');
+	const detailLocation = document.getElementById('detailLocation');
+	const detailNotes = document.getElementById('detailNotes');
+	const detailActions = document.getElementById('detailActions');
+	const btnAccept = document.getElementById('btnAccept');
+	const btnRefuse = document.getElementById('btnRefuse');
+
+	function respondUrl(id) {
+		return RESPOND_URL_TEMPLATE.replace('__ID__', id);
+	}
+
+	function badgeClass(status) {
+		switch (status) {
+			case 'confirmed': return 'badge rounded-pill badge-confirmed';
+			case 'refused': return 'badge rounded-pill badge-refused';
+			case 'done': return 'badge rounded-pill badge-done';
+			default: return 'badge rounded-pill badge-proposed';
+		}
+	}
+
+	function badgeLabel(status) {
+		switch (status) {
+			case 'confirmed': return TXT_CONFIRMED;
+			case 'refused': return TXT_REFUSED_LABEL;
+			case 'done': return TXT_DONE;
+			default: return TXT_PROPOSED;
+		}
+	}
+
+	function typeLabel(type) {
+		switch (type) {
+			case 'call': return 'Appel';
+			case 'meeting': return 'Meeting';
+			default: return 'Entretien';
+		}
+	}
+
+	function renderDetails(event) {
+		selectedEvent = event;
+
+		const props = event.extendedProps || {};
+		const start = event.start ? new Date(event.start) : null;
+
+		appointmentEmpty.style.display = 'none';
+		appointmentDetails.style.display = 'block';
+
+		detailTitle.textContent = props.jobTitle || event.title || 'Rendez-vous';
+		detailStatusBadge.className = badgeClass(props.status || 'proposed');
+		detailStatusBadge.textContent = badgeLabel(props.status || 'proposed');
+		detailRecruiter.textContent = props.recruiterName || '—';
+		detailDate.textContent = start ? start.toLocaleDateString('fr-FR') : '—';
+		detailTime.textContent = start ? start.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}) : '—';
+		detailDuration.textContent = props.durationMinutes ? `${props.durationMinutes} min` : '—';
+		detailType.textContent = typeLabel(props.type || 'interview');
+		detailLocation.textContent = props.location || '—';
+		detailNotes.textContent = props.notes || '—';
+
+		if ((props.status || 'proposed') === 'proposed') {
+			detailActions.style.display = 'flex';
+		} else {
+			detailActions.style.display = 'none';
+		}
+	}
+
+	async function sendResponse(action) {
+		if (!selectedEvent) return;
+
+		try {
+			const res = await fetch(respondUrl(selectedEvent.id), {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'X-Requested-With': 'XMLHttpRequest'
+				},
+				body: JSON.stringify({ action })
+			});
+
+			const data = await res.json();
+
+			if (!res.ok || !data.ok) {
+				alert(data.message || TXT_ERROR);
+				return;
+			}
+
+			alert(action === 'accept' ? TXT_APPROVED : TXT_REFUSED);
+			calendar.refetchEvents();
+		} catch (e) {
+			alert(TXT_ERROR);
+		}
+	}
+
+	btnAccept?.addEventListener('click', () => sendResponse('accept'));
+	btnRefuse?.addEventListener('click', () => sendResponse('refuse'));
+
+	const calendar = new FullCalendar.Calendar(calendarEl, {
+		locale: 'fr',
+		initialView: 'dayGridMonth',
+		firstDay: 1,
+		height: 'auto',
+		headerToolbar: {
+			left: 'prev,next today',
+			center: 'title',
+			right: 'dayGridMonth,timeGridWeek,timeGridDay'
+		},
+		buttonText: {
+			today: "Aujourd'hui",
+			month: 'Mois',
+			week: 'Semaine',
+			day: 'Jour'
+		},
+		events: FEED_URL,
+		eventClick(info) {
+			info.jsEvent.preventDefault();
+			renderDetails(info.event);
+		}
+	});
+
+	calendar.render();
+});
+</script>
+{% endblock %}

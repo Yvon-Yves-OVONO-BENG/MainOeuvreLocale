@@ -1,0 +1,324 @@
+{# templates/emails/job_modified_by_moderator.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offre modifiée | Job Updated</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06);">
+                    
+                    {# ============================================================ #}
+                    {#                     EN-TÊTE                                #}
+                    {# ============================================================ #}
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 40px 30px; text-align: center;">
+                            <div style="width: 64px; height: 64px; background: rgba(255,255,255,0.2); border-radius: 16px; display: inline-block; line-height: 64px; font-size: 32px; margin-bottom: 15px;">
+                                ✨
+                            </div>
+                            <h1 style="color: #ffffff; font-size: 24px; margin: 0 0 8px; font-weight: 700;">
+                                Votre offre a été optimisée
+                            </h1>
+                            <p style="color: rgba(255,255,255,0.9); font-size: 15px; margin: 0; line-height: 1.5;">
+                                De légers ajustements ont été apportés par notre équipe
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    {# ============================================================ #}
+                    {#              CORPS DU MESSAGE - FRANÇAIS                   #}
+                    {# ============================================================ #}
+                    <tr>
+                        <td style="padding: 35px 40px 0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background: #eff6ff; border-left: 4px solid #667eea; border-radius: 8px; margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 10px 16px;">
+                                        <span style="font-size: 11px; color: #667eea; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">🇫🇷 Français</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            {# Salutation #}
+                            <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                                Bonjour <strong style="color: #667eea;">{{ creator.fullName }}</strong>,
+                            </p>
+                            
+                            {# Message principal #}
+                            <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">
+                                Dans le cadre de notre engagement à maintenir la qualité des offres sur 
+                                <strong>Main d'Œuvre Locale</strong>, notre équipe de modération a apporté 
+                                quelques ajustements à votre offre afin de l'optimiser et de la rendre plus 
+                                attractive pour les talents.
+                            </p>
+                            
+                            {# Détails de l'offre #}
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; border-radius: 12px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding-bottom: 10px;">
+                                                    <span style="font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Offre concernée</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-bottom: 8px;">
+                                                    <span style="font-size: 18px; color: #1e293b; font-weight: 700;">{{ job.title }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-bottom: 5px;">
+                                                    <span style="font-size: 14px; color: #64748b;">
+                                                        📍 {{ job.city }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% if job.reference %}
+                                            <tr>
+                                                <td>
+                                                    <span style="font-size: 12px; color: #94a3b8;">
+                                                        Réf : {{ job.reference }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            {# Note du modérateur #}
+                            {% if modificationNote %}
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background: #fefce8; border-left: 4px solid #f59e0b; border-radius: 8px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 16px 20px;">
+                                        <p style="color: #92400e; font-size: 13px; font-weight: 600; margin: 0 0 8px;">
+                                            💬 Note de l'équipe de modération
+                                        </p>
+                                        <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0; font-style: italic;">
+                                            "{{ modificationNote }}"
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endif %}
+                            
+                            {# Points clés #}
+                            <p style="color: #475569; font-size: 14px; margin: 0 0 15px;">
+                                <strong>Ces ajustements visent à :</strong>
+                            </p>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 6px 0;">
+                                        <span style="color: #10b981; margin-right: 8px;">✅</span>
+                                        <span style="color: #475569; font-size: 14px;">Améliorer la visibilité de votre offre</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;">
+                                        <span style="color: #10b981; margin-right: 8px;">✅</span>
+                                        <span style="color: #475569; font-size: 14px;">Assurer la conformité avec nos standards de qualité</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;">
+                                        <span style="color: #10b981; margin-right: 8px;">✅</span>
+                                        <span style="color: #475569; font-size: 14px;">Faciliter la compréhension par les candidats</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            {# Message de clôture #}
+                            <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0 0 25px;">
+                                Nous restons à votre entière disposition pour toute question ou information 
+                                complémentaire. Votre satisfaction et la qualité de nos offres sont notre priorité.
+                            </p>
+                            
+                            {# Signature #}
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-bottom: 30px;">
+                                <tr>
+                                    <td>
+                                        <p style="color: #1e293b; font-size: 15px; font-weight: 600; margin: 0 0 4px;">
+                                            Cordialement,
+                                        </p>
+                                        <p style="color: #667eea; font-size: 14px; font-weight: 600; margin: 0 0 8px;">
+                                            L'équipe de Modération
+                                        </p>
+                                        <p style="color: #94a3b8; font-size: 13px; margin: 0;">
+                                            Main d'Œuvre Locale — La plateforme qui connecte les talents
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    {# ============================================================ #}
+                    {#                    SÉPARATEUR                              #}
+                    {# ============================================================ #}
+                    <tr>
+                        <td style="padding: 0 40px;">
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td style="border-top: 2px dashed #e2e8f0; padding: 20px 0 0;"></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    {# ============================================================ #}
+                    {#              CORPS DU MESSAGE - ENGLISH                    #}
+                    {# ============================================================ #}
+                    <tr>
+                        <td style="padding: 0 40px 35px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 8px; margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 10px 16px;">
+                                        <span style="font-size: 11px; color: #10b981; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">🇬🇧 English</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            {# Salutation EN #}
+                            <p style="color: #1e293b; font-size: 16px; line-height: 1.6; margin: 0 0 20px;">
+                                Hello <strong style="color: #667eea;">{{ creator.fullName }}</strong>,
+                            </p>
+                            
+                            {# Message principal EN #}
+                            <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0 0 20px;">
+                                As part of our commitment to maintaining the quality of listings on 
+                                <strong>Main d'Œuvre Locale</strong>, our moderation team has made 
+                                some adjustments to your job posting to optimize it and make it more 
+                                attractive to talents.
+                            </p>
+                            
+                            {# Détails de l'offre EN #}
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background: #f8fafc; border-radius: 12px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td style="padding-bottom: 10px;">
+                                                    <span style="font-size: 12px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600;">Concerned Job</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-bottom: 8px;">
+                                                    <span style="font-size: 18px; color: #1e293b; font-weight: 700;">{{ job.title }}</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding-bottom: 5px;">
+                                                    <span style="font-size: 14px; color: #64748b;">
+                                                        📍 {{ job.city }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% if job.reference %}
+                                            <tr>
+                                                <td>
+                                                    <span style="font-size: 12px; color: #94a3b8;">
+                                                        Ref: {{ job.reference }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                            {% endif %}
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            {# Note du modérateur EN #}
+                            {% if modificationNote %}
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background: #fefce8; border-left: 4px solid #f59e0b; border-radius: 8px; margin-bottom: 20px;">
+                                <tr>
+                                    <td style="padding: 16px 20px;">
+                                        <p style="color: #92400e; font-size: 13px; font-weight: 600; margin: 0 0 8px;">
+                                            💬 Note from the Moderation Team
+                                        </p>
+                                        <p style="color: #475569; font-size: 14px; line-height: 1.6; margin: 0; font-style: italic;">
+                                            "{{ modificationNote }}"
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                            {% endif %}
+                            
+                            {# Points clés EN #}
+                            <p style="color: #475569; font-size: 14px; margin: 0 0 15px;">
+                                <strong>These adjustments aim to:</strong>
+                            </p>
+                            
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 25px;">
+                                <tr>
+                                    <td style="padding: 6px 0;">
+                                        <span style="color: #10b981; margin-right: 8px;">✅</span>
+                                        <span style="color: #475569; font-size: 14px;">Improve the visibility of your job posting</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;">
+                                        <span style="color: #10b981; margin-right: 8px;">✅</span>
+                                        <span style="color: #475569; font-size: 14px;">Ensure compliance with our quality standards</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 0;">
+                                        <span style="color: #10b981; margin-right: 8px;">✅</span>
+                                        <span style="color: #475569; font-size: 14px;">Make it easier for candidates to understand</span>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            {# Message de clôture EN #}
+                            <p style="color: #475569; font-size: 15px; line-height: 1.7; margin: 0 0 25px;">
+                                We remain at your entire disposal for any questions or further information. 
+                                Your satisfaction and the quality of our listings are our priority.
+                            </p>
+                            
+                            {# Signature EN #}
+                            <table width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                                <tr>
+                                    <td>
+                                        <p style="color: #1e293b; font-size: 15px; font-weight: 600; margin: 0 0 4px;">
+                                            Best regards,
+                                        </p>
+                                        <p style="color: #667eea; font-size: 14px; font-weight: 600; margin: 0 0 8px;">
+                                            The Moderation Team
+                                        </p>
+                                        <p style="color: #94a3b8; font-size: 13px; margin: 0;">
+                                            Main d'Œuvre Locale — The platform that connects talents
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    {# ============================================================ #}
+                    {#                       FOOTER                               #}
+                    {# ============================================================ #}
+                    <tr>
+                        <td style="background: #f8fafc; padding: 20px 40px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="color: #94a3b8; font-size: 12px; margin: 0 0 4px;">
+                                🇫🇷 Cet email a été envoyé par Main d'Œuvre Locale car vous avez publié une offre sur notre plateforme.
+                            </p>
+                            <p style="color: #94a3b8; font-size: 12px; margin: 0 0 8px;">
+                                🇬🇧 This email was sent by Main d'Œuvre Locale because you posted a job on our platform.
+                            </p>
+                            <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                                © {{ "now"|date("Y") }} Main d'Œuvre Locale. {% trans %}Tous droits réservés.{% endtrans %} | {% trans %}All rights reserved.{% endtrans %}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

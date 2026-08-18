@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Ticket{% endtrans %} #{{ ticket.id }}{% endblock %}
+
+{% block body %}
+  {% include 'admin/support/_vip_ui.html.twig' %}
+
+  <div class="vip-shell">
+    <div class="vip-container vip-grid">
+
+      <section class="vip-card vip-page-head">
+        <div class="vip-card-inner">
+          <div class="vip-page-head-top">
+            <div class="vip-page-head-main">
+              <div class="vip-page-kicker">{% trans %}Support • Détail{% endtrans %}</div>
+              <h1 class="vip-page-head-title">{% trans %}Ticket{% endtrans %} #{{ ticket.id }}</h1>
+              <p class="vip-page-head-text">
+                {% trans %}Vue rapide du ticket, de son statut, de sa priorité et des informations essentielles de traitement.{% endtrans %}
+              </p>
+            </div>
+
+            <div class="vip-page-head-side">
+              <span class="vip-badge {{ ticket.status }}">
+                {% if ticket.status == 'open' %}
+                  {% trans %}Ouvert{% endtrans %}
+                {% elseif ticket.status == 'pending' %}
+                  {% trans %}En attente{% endtrans %}
+                {% elseif ticket.status == 'resolved' %}
+                  {% trans %}Résolu{% endtrans %}
+                {% elseif ticket.status == 'closed' %}
+                  {% trans %}Fermé{% endtrans %}
+                {% else %}
+                  {{ ticket.status|capitalize }}
+                {% endif %}
+              </span>
+
+              <span class="vip-badge {{ ticket.priority }}">
+                {{ ticket.priority ? ticket.priority|upper : '—' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="vip-page-head-actions">
+            <div class="vip-actions">
+              <a href="{{ path('admin_support_new') }}" class="vip-btn vip-btn-primary">➕ {% trans %}Nouveau ticket{% endtrans %}</a>
+              <a href="{{ path('admin_support_index') }}" class="vip-btn vip-btn-soft">{% trans %}Boîte support{% endtrans %}</a>
+              <a href="{{ path('admin_support_edit', {id: ticket.id}) }}" class="vip-btn vip-btn-soft">{% trans %}Modifier{% endtrans %}</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="vip-alert vip-alert-{{ label }}">
+            <strong>{{ label|capitalize }}</strong>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <section class="vip-grid vip-grid-main">
+        <article class="vip-card">
+          <div class="vip-card-inner">
+            <div class="vip-toolbar">
+              <div>
+                <h2 class="vip-section-title">{% trans %}Détail du ticket{% endtrans %}</h2>
+                <p class="vip-section-subtitle">{% trans %}Vue complète du ticket sélectionné.{% endtrans %}</p>
+              </div>
+
+              <div class="vip-row-actions">
+                <a href="{{ path('admin_support_edit', {id: ticket.id}) }}" class="vip-btn vip-btn-primary vip-btn-xs">{% trans %}Modifier{% endtrans %}</a>
+                <a href="{{ path('admin_support_index') }}" class="vip-btn vip-btn-soft vip-btn-xs">{% trans %}Retour{% endtrans %}</a>
+              </div>
+            </div>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-detail-grid">
+              <div class="vip-detail-item vip-detail-item-full">
+                <div class="vip-detail-label">{% trans %}Sujet{% endtrans %}</div>
+                <div class="vip-detail-value vip-detail-title">{{ ticket.subject ?: '—' }}</div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Client{% endtrans %}</div>
+                <div class="vip-detail-value">{{ ticket.customerName ?: '—' }}</div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Email{% endtrans %}</div>
+                <div class="vip-detail-value">{{ ticket.customerEmail ?: '—' }}</div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Canal{% endtrans %}</div>
+                <div class="vip-detail-value">
+                  <span class="vip-badge vip-badge-neutral">{{ ticket.channel ? ticket.channel|upper : '—' }}</span>
+                </div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Assigné à{% endtrans %}</div>
+                <div class="vip-detail-value">{{ ticket.ownerName ?: '—' }}</div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Statut{% endtrans %}</div>
+                <div class="vip-detail-value">
+                  <span class="vip-badge {{ ticket.status }}">
+                    {% if ticket.status == 'open' %}
+                      {% trans %}Ouvert{% endtrans %}
+                    {% elseif ticket.status == 'pending' %}
+                      {% trans %}En attente{% endtrans %}
+                    {% elseif ticket.status == 'resolved' %}
+                      {% trans %}Résolu{% endtrans %}
+                    {% elseif ticket.status == 'closed' %}
+                      {% trans %}Fermé{% endtrans %}
+                    {% else %}
+                      {{ ticket.status|capitalize }}
+                    {% endif %}
+                  </span>
+                </div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Priorité{% endtrans %}</div>
+                <div class="vip-detail-value">
+                  <span class="vip-badge {{ ticket.priority }}">
+                    {{ ticket.priority ? ticket.priority|upper : '—' }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Créé le{% endtrans %}</div>
+                <div class="vip-detail-value">{{ ticket.createdAt ? ticket.createdAt|date('d/m/Y H:i') : '—' }}</div>
+              </div>
+
+              <div class="vip-detail-item">
+                <div class="vip-detail-label">{% trans %}Mis à jour le{% endtrans %}</div>
+                <div class="vip-detail-value">{{ ticket.updatedAt ? ticket.updatedAt|date('d/m/Y H:i') : '—' }}</div>
+              </div>
+
+              <div class="vip-detail-item vip-detail-item-full">
+                <div class="vip-detail-label">{% trans %}Description{% endtrans %}</div>
+                <div class="vip-detail-description">
+                  {{ ticket.message ?: 'Aucune description fournie.'|trans }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <aside class="vip-card">
+          <div class="vip-card-inner">
+            <h2 class="vip-section-title">{% trans %}Actions rapides{% endtrans %}</h2>
+            <p class="vip-section-subtitle">{% trans %}Gère ce ticket rapidement depuis cette fiche.{% endtrans %}</p>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-actions" style="margin-top:0;">
+              <a href="{{ path('admin_support_edit', {id: ticket.id}) }}" class="vip-btn vip-btn-primary">{% trans %}Modifier le ticket{% endtrans %}</a>
+              <a href="{{ path('admin_support_index') }}" class="vip-btn vip-btn-soft">{% trans %}Retour à la liste{% endtrans %}</a>
+            </div>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-mini-card">
+              <div style="font-weight:900;">{% trans %}Résumé{% endtrans %}</div>
+              <div class="vip-help" style="margin-top:10px;line-height:1.75;">
+                <div><strong>{% trans %}ID :{% endtrans %}</strong> #{{ ticket.id }}</div>
+                <div><strong>{% trans %}Client :{% endtrans %}</strong> {{ ticket.customerName ?: '—' }}</div>
+                <div><strong>{% trans %}Email :{% endtrans %}</strong> {{ ticket.customerEmail ?: '—' }}</div>
+                <div><strong>{% trans %}Assigné à :{% endtrans %}</strong> {{ ticket.ownerName ?: '—' }}</div>
+                <div><strong>{% trans %}Résolu le :{% endtrans %}</strong> {{ ticket.resolvedAt ? ticket.resolvedAt|date('d/m/Y H:i') : '—' }}</div>
+              </div>
+            </div>
+
+            <div class="vip-separator"></div>
+
+            <form method="post"
+                  action="{{ path('admin_support_delete', {id: ticket.id}) }}"
+                  onsubmit="return confirm('{{ 'Supprimer ce ticket ?'|trans }}');">
+              <input type="hidden" name="_token" value="{{ csrf_token('delete_support_ticket_' ~ ticket.id) }}">
+              <button type="submit" class="vip-btn vip-btn-danger">{% trans %}Supprimer ce ticket{% endtrans %}</button>
+            </form>
+          </div>
+        </aside>
+      </section>
+
+    </div>
+  </div>
+{% endblock %}

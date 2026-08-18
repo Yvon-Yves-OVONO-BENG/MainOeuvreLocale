@@ -1,0 +1,294 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+{% block title %}{% trans %}Admin • Sanctions{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1100px_circle_at_12%_10%,rgba(244,63,94,.10),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.10),transparent_52%),linear-gradient(180deg,#f8fafc,#fff7ed_45%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 space-y-4">
+
+    <div class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)]">
+      <div class="border-b border-slate-200/70 bg-white/60 p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Administration{% endtrans %}</div>
+            <div class="text-2xl font-black tracking-tight text-slate-900">🧾 {% trans %}Sanctions{% endtrans %}</div>
+            <div class="mt-1 text-sm font-medium text-slate-600">{% trans %}Lister, modifier, renoncer et masquer les sanctions.{% endtrans %}</div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('admin_sanction_new') }}"
+               class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2.5 text-xs font-extrabold text-white hover:opacity-95">
+              ➕ {% trans %}Nouvelle sanction{% endtrans %}
+            </a>
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              ← {% trans %}Tableau de bord{% endtrans %}
+            </a>
+          </div>
+        </div>
+
+        <form method="get" class="mt-4 grid gap-3 lg:grid-cols-12">
+          <div class="lg:col-span-4">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Recherche{% endtrans %}</label>
+            <input name="q" value="{{ filters.q|default('') }}"
+                   class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none"
+                   placeholder="{% trans %}email, motif, type, statut...{% endtrans %}">
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Type{% endtrans %}</label>
+            <select name="type" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="">{% trans %}Tous{% endtrans %}</option>
+              <option value="warning" {{ filters.type|default('') == 'warning' ? 'selected' : '' }}>{% trans %}Avertissement{% endtrans %}</option>
+              <option value="suspend" {{ filters.type|default('') == 'suspend' ? 'selected' : '' }}>{% trans %}Suspension{% endtrans %}</option>
+              <option value="ban" {{ filters.type|default('') == 'ban' ? 'selected' : '' }}>{% trans %}Bannissement{% endtrans %}</option>
+              <option value="restrict" {{ filters.type|default('') == 'restrict' ? 'selected' : '' }}>{% trans %}Restriction{% endtrans %}</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Statut{% endtrans %}</label>
+            <select name="status" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="">{% trans %}Tous{% endtrans %}</option>
+              <option value="active" {{ filters.status|default('') == 'active' ? 'selected' : '' }}>{% trans %}Active{% endtrans %}</option>
+              <option value="expired" {{ filters.status|default('') == 'expired' ? 'selected' : '' }}>{% trans %}Expirée{% endtrans %}</option>
+              <option value="canceled" {{ filters.status|default('') == 'canceled' ? 'selected' : '' }}>{% trans %}Annulée{% endtrans %}</option>
+              <option value="revoked" {{ filters.status|default('') == 'revoked' ? 'selected' : '' }}>{% trans %}Renoncée{% endtrans %}</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Visibilité user{% endtrans %}</label>
+            <select name="hidden" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="">{% trans %}Toutes{% endtrans %}</option>
+              <option value="0" {{ filters.hidden|default('') == '0' ? 'selected' : '' }}>{% trans %}Visible{% endtrans %}</option>
+              <option value="1" {{ filters.hidden|default('') == '1' ? 'selected' : '' }}>{% trans %}Masquée{% endtrans %}</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2 flex items-end">
+            <button class="w-full rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 px-4 py-2.5 text-xs font-extrabold text-white hover:opacity-95">
+              🔎 {% trans %}Filtrer{% endtrans %}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50/60">
+            <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-extrabold">{% trans %}Utilisateur{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Type{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Motif{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Visible user{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Créée{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Actions{% endtrans %}</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-200/70">
+            {% for s in items %}
+                {% set typeClass =
+                    s.type == 'warning'
+                        ? 'border-amber-200/70 bg-amber-50 text-amber-700'
+                        : (s.type == 'suspend'
+                        ? 'border-orange-200/70 bg-orange-50 text-orange-700'
+                        : (s.type == 'ban'
+                            ? 'border-rose-200/70 bg-rose-50 text-rose-700'
+                            : (s.type == 'restrict'
+                            ? 'border-indigo-200/70 bg-indigo-50 text-indigo-700'
+                            : 'border-slate-200 bg-white text-slate-700')))
+                %}
+
+              <tr class="hover:bg-indigo-50/20"
+                  data-revoke-url="{{ path('admin_sanction_revoke', {id: s.id}) }}"
+                  data-toggle-url="{{ path('admin_sanction_toggle_hidden', {id: s.id}) }}"
+                  data-revoke-token="{{ csrf_token('revoke_sanction_' ~ s.id) }}"
+                  data-toggle-token="{{ csrf_token('toggle_hidden_sanction_' ~ s.id) }}">
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">{{ s.user ? s.user.email : '—' }}</div>
+                  <div class="text-xs font-semibold text-slate-500">
+                    {{ s.createdBy ? ('Par '|trans ~ s.createdBy.email) : '—' }}
+                  </div>
+                </td>
+
+                <td class="px-5 py-3">
+                    <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold {{ typeClass }}">
+                        {% if s.type == 'warning' %}
+                          {% trans %}Avertissement{% endtrans %}
+                        {% elseif s.type == 'suspend' %}
+                          {% trans %}Suspension{% endtrans %}
+                        {% elseif s.type == 'ban' %}
+                          {% trans %}Bannissement{% endtrans %}
+                        {% elseif s.type == 'restrict' %}
+                          {% trans %}Restriction{% endtrans %}
+                        {% else %}
+                          {{ s.type }}
+                        {% endif %}
+                    </span>
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="max-w-[360px] truncate font-semibold text-slate-700" title="{{ s.reason }}">
+                    {{ s.reason }}
+                  </div>
+                </td>
+
+                <td class="px-5 py-3">
+                  <span class="js-hidden inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold
+                    {{ s.supprimer ? 'border-rose-200/70 bg-rose-50 text-rose-700' : 'border-emerald-200/70 bg-emerald-50 text-emerald-700' }}">
+                    {{ s.supprimer ? 'Masquée'|trans : 'Visible'|trans }}
+                  </span>
+                </td>
+
+                <td class="px-5 py-3 text-xs font-semibold text-slate-500">
+                  {{ s.createdAt ? s.createdAt|date('d/m/Y H:i') : '—' }}
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="flex flex-wrap gap-2">
+                    <a href="{{ path('admin_sanction_edit', {id: s.id}) }}"
+                       class="inline-flex items-center gap-2 rounded-2xl border border-indigo-200/70 bg-indigo-50 px-3 py-2 text-xs font-extrabold text-indigo-700 hover:bg-indigo-100/60">
+                      ✏️ {% trans %}Modifier{% endtrans %}
+                    </a>
+
+                    <button type="button"
+                            data-action="revoke"
+                            class="inline-flex items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 hover:bg-rose-100/60">
+                      ↩️ {% trans %}Renoncer{% endtrans %}
+                    </button>
+
+                    <button type="button"
+                            data-action="toggle-hidden"
+                            class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+                      👁️ {% trans %}Visibilité{% endtrans %}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7" class="px-5 py-10 text-center text-sm font-semibold text-slate-500">
+                  {% trans %}Aucune sanction trouvée.{% endtrans %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 border-t border-slate-200/70 bg-white/60 px-5 py-4">
+        <div class="text-xs font-semibold text-slate-500">
+          {% trans %}Total :{% endtrans %} <span class="font-black text-slate-900">{{ total }}</span>
+        </div>
+
+        {% set prev = page > 1 ? page - 1 : 1 %}
+        {% set next = page < pages ? page + 1 : pages %}
+
+        <div class="flex gap-2">
+          <a class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ page <= 1 ? 'pointer-events-none opacity-40' : '' }}"
+             href="{{ path('admin_sanction_index', filters|merge({'page': prev, 'perPage': perPage})) }}">
+            ← {% trans %}Préc{% endtrans %}
+          </a>
+          <a class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ page >= pages ? 'pointer-events-none opacity-40' : '' }}"
+             href="{{ path('admin_sanction_index', filters|merge({'page': next, 'perPage': perPage})) }}">
+            {% trans %}Suiv{% endtrans %} →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div id="toastHost" class="fixed right-4 top-4 z-[9999] space-y-2"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const toastHost = document.getElementById('toastHost');
+
+  const toast = (message, kind = 'info') => {
+    const el = document.createElement('div');
+    el.className =
+      'rounded-2xl border bg-white/90 px-4 py-3 text-sm font-semibold shadow-[0_18px_55px_rgba(2,6,23,.12)] backdrop-blur ' +
+      (kind === 'error'
+        ? 'border-rose-200 text-rose-700'
+        : kind === 'ok'
+          ? 'border-emerald-200 text-emerald-700'
+          : 'border-slate-200 text-slate-700');
+
+    el.textContent = message;
+    toastHost.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  };
+
+  async function postForm(url, token) {
+    const body = new URLSearchParams();
+    body.append('_token', token);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || {{ 'Erreur'|trans|json_encode|raw }});
+    }
+
+    return data;
+  }
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+
+    const tr = btn.closest('tr');
+    if (!tr) return;
+
+    btn.disabled = true;
+
+    try {
+      if (btn.dataset.action === 'revoke') {
+        const data = await postForm(tr.dataset.revokeUrl, tr.dataset.revokeToken);
+        const badge = tr.querySelector('.js-status');
+        if (badge) {
+          badge.textContent = data.status;
+          badge.className = 'js-status inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold border-rose-200/70 bg-rose-50 text-rose-700';
+        }
+        toast({{ 'Sanction renoncée.'|trans|json_encode|raw }}, 'ok');
+      }
+
+      if (btn.dataset.action === 'toggle-hidden') {
+        const data = await postForm(tr.dataset.toggleUrl, tr.dataset.toggleToken);
+        const badge = tr.querySelector('.js-hidden');
+        if (badge) {
+          badge.textContent = data.hidden ? {{ 'Masquée'|trans|json_encode|raw }} : {{ 'Visible'|trans|json_encode|raw }};
+          badge.className = 'js-hidden inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold ' +
+            (data.hidden
+              ? 'border-rose-200/70 bg-rose-50 text-rose-700'
+              : 'border-emerald-200/70 bg-emerald-50 text-emerald-700');
+        }
+        toast(
+          data.hidden
+            ? {{ 'Sanction masquée au user.'|trans|json_encode|raw }}
+            : {{ 'Sanction rendue visible au user.'|trans|json_encode|raw }},
+          'ok'
+        );
+      }
+    } catch (err) {
+      toast(err.message || {{ 'Erreur'|trans|json_encode|raw }}, 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+{% endblock %}

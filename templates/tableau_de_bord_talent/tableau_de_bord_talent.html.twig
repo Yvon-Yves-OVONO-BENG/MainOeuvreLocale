@@ -1,0 +1,844 @@
+{% extends 'base.html.twig' %}
+{% block title %}
+	{% trans %}Mon tableau de bord{% endtrans %}
+{% endblock %}
+
+{% block body_class %}tableau-de-bord-page{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+	<link rel="stylesheet" href="{{ asset('css/dashboard/talent-dashboard-header.css') }}?v={{ random() }}">
+	<link rel="stylesheet" href="{{ asset('css/dashboard/talent-dashboard-main.css') }}?v={{ random() }}">
+	<link rel="stylesheet" href="{{ asset('css/dashboard/talent-dashboard-availability.css') }}?v={{ random() }}">
+	<link rel="stylesheet" href="{{ asset('css/dashboard/talent-dashboard-page.css') }}">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+{% endblock %}
+
+{% block body %}
+
+	<div
+		class="container-fluid py-4">
+			{# HERO / HEADER - Version Compacte #}
+        <div class="dash-hero p-3 p-lg-4 mb-2 mt-2">
+            <div class="d-flex align-items-center gap-2 gap-sm-3">
+                {% if profilePersonnal.photo %}
+                    <img src="{{ asset('uploads/profiles/' ~ profilePersonnal.photo) }}" alt="{{ ('Photo de ' ~ profile.user.email)|trans }}" class="rounded-circle shadow-sm dashboard-profile-avatar">
+                {% else %}
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white shadow-sm dashboard-profile-avatar dashboard-profile-avatar--placeholder">
+                        {{ profilePersonnal.fullName|slice(0,1)|upper }}
+                    </div>
+                {% endif %}
+
+                <div class="min-w-0">
+                    <h4 class="mb-0 fw-bold dashboard-profile-name">
+                        {{ profilePersonnal.fullName ?? profile.user.email }}
+                    </h4>
+                    <div class="text-muted small dashboard-profile-role">
+                        🧑‍💼 {% trans %}Talent{% endtrans %}
+                    </div>
+                    <div class="soft-muted small dashboard-profile-subtitle">
+                        {% trans %}Valorisation personnelle & opportunités • Suivez vos performances et répondez vite aux recruteurs.{% endtrans %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# BARRE D'ACTIONS : volontairement hors du hero, juste au-dessus des KPI #}
+        <nav class="dashboard-publish-actions dashboard-publish-actions--below-hero" aria-label="{{ 'Actions du tableau de bord'|trans }}">
+            <div class="dashboard-standard-actions">
+                <a class="btn btn-sm dashboard-publish-btn dashboard-publish-btn--job dashboard-action-link" href="{{ path('job_new') }}" data-turbo="false">
+                    <span class="dashboard-publish-icon" aria-hidden="true">＋</span>
+                    <span>{% trans %}Publier une offre{% endtrans %}</span>
+                </a>
+                <a class="btn btn-sm dashboard-publish-btn dashboard-publish-btn--announcement dashboard-action-link" href="{{ path('annonce_new') }}" data-turbo="false">
+                    <span class="dashboard-publish-icon" aria-hidden="true">📣</span>
+                    <span>{% trans %}Publier une annonce{% endtrans %}</span>
+                </a>
+                <a class="btn btn-sm dashboard-publish-btn dashboard-publish-btn--manage dashboard-action-link" href="{{ path('annonce_manage') }}" data-turbo="false">
+                    <span class="dashboard-publish-icon" aria-hidden="true">▤</span>
+                    <span>{% trans %}Mes annonces{% endtrans %}</span>
+                </a>
+            </div>
+
+            <div class="dashboard-boost-actions" aria-label="{{ 'Actions de boost'|trans }}">
+                <a class="dashboard-boost-btn dashboard-boost-btn--profile dashboard-action-link" href="{{ path('subscription_plans') }}" data-turbo="false">
+                    <span class="dashboard-boost-icon" aria-hidden="true">🚀</span>
+                    <span>{% trans %}Booster mon profil{% endtrans %}</span>
+                </a>
+                <a class="dashboard-boost-btn dashboard-boost-btn--announcements dashboard-action-link" href="{{ path('annonce_boost') }}" data-turbo="false">
+                    <span class="dashboard-boost-icon" aria-hidden="true">🚀</span>
+                    <span>{% trans %}Booster mes annonces{% endtrans %}</span>
+                </a>
+            </div>
+        </nav>
+
+        
+
+		{# KPI #}
+		<div class="dashboard-kpi-grid mb-4">
+			{# --- BOX : Mon profil  --- #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item">
+				<div class="kpi-card p-3 h-100">
+					<div class="d-flex align-items-center justify-content-between">
+						<div>
+							<div class="soft-muted small">{% trans %}Profil complété{% endtrans %}</div>
+							<div class="d-flex align-items-baseline gap-2">
+							<div class="fs-3 fw-bold">
+								{{ kpi.completion|default(0) }}%
+							</div>
+
+							{% if kpi.completion|default(0) >= 80 %}
+								<span class="badge bg-success rounded-pill">{% trans %}Complet{% endtrans %}</span>
+							{% else %}
+								<span class="badge badge-soft rounded-pill">{% trans %}Score{% endtrans %}</span>
+							{% endif %}
+							</div>
+						</div>
+						<div class="kpi-icon">✅</div>
+					</div>
+
+					<div class="progress mt-3 dashboard-profile-progress">
+						<div class="progress-bar"
+							role="progressbar"
+							data-progress-value="{{ kpi.completion|default(0) }}"
+							aria-valuenow="{{ kpi.completion|default(0) }}"
+							aria-valuemin="0"
+							aria-valuemax="100">
+						</div>
+					</div>
+
+					<div class="soft-muted small mt-2">
+					{% trans %}Ajoutez vos compétences + portfolio (min 3 photos) pour monter{% endtrans %}
+					</div>
+				</div>
+			</div>
+
+			{# ====== DISPONIBILITÉ & PLANNING ====== #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item availability-grid-item">
+				<div class="kpi-card p-3 h-100 kpi-card-availability">
+
+					{% set statusName = profile.statusProfile ? profile.statusProfile.status : null %}
+					{% set statusLabel = statusName ?: ('Non défini'|trans) %}
+					{% set badgeClass = 'text-bg-secondary' %}
+
+					{% if statusName %}
+						{% set s = statusName|lower %}
+						{% if 'indispon' in s %}
+							{% set badgeClass = 'text-bg-danger' %}
+						{% elseif 'dispon' in s %}
+							{% set badgeClass = 'text-bg-success' %}
+						{% endif %}
+					{% endif %}
+
+					<div class="d-flex align-items-center justify-content-between mb-2">
+						<div class="fw-bold mb-0">📆 {% trans %}Disponibilité{% endtrans %}</div>
+
+						<button
+							type="button"
+							class="btn btn-sm btn-light availability-collapse-toggle"
+							id="availabilityCollapseBtn"
+							aria-expanded="false"
+							aria-controls="availabilityCalendarCollapse"
+						>
+							<i class="fa fa-chevron-down"></i>
+						</button>
+					</div>
+
+					<span id="availabilityBadge" class="badge rounded-pill px-3 py-2 {{ badgeClass }}">
+						{{ statusLabel }}
+					</span>
+
+					<div class="small text-muted mt-2 mb-3">
+						{% trans %}Cliquez sur les jours où vous êtes disponible, puis enregistrez.{% endtrans %}
+					</div>
+
+					<div class="collapse" id="availabilityCalendarCollapse">
+						<div class="availability-calendar-card"
+							id="availabilityCalendarApp"
+							data-load-url="{{ path('talent_availability_calendar_list') }}"
+							data-save-url="{{ path('talent_availability_calendar_save') }}"
+							data-csrf="{{ csrf_token('save_availability_calendar') }}">
+
+							<div class="availability-calendar-header d-flex align-items-center justify-content-between mb-3">
+								<button type="button" class="btn btn-sm btn-light" id="calendarPrevMonth">
+									<i class="fa fa-chevron-left"></i>
+								</button>
+
+								<div class="fw-semibold" id="calendarMonthLabel"></div>
+
+								<button type="button" class="btn btn-sm btn-light" id="calendarNextMonth">
+									<i class="fa fa-chevron-right"></i>
+								</button>
+							</div>
+
+							<div class="availability-weekdays">
+								<span>Lun</span>
+								<span>Mar</span>
+								<span>Mer</span>
+								<span>Jeu</span>
+								<span>Ven</span>
+								<span>Sam</span>
+								<span>Dim</span>
+							</div>
+
+							<div id="availabilityCalendarGrid" class="availability-calendar-grid"></div>
+
+							<div class="d-flex align-items-center justify-content-between mt-3 flex-wrap gap-2 availability-calendar-footer">
+								<div class="small text-muted">
+									<span id="availabilitySelectedCount">0</span>
+									{% trans %}jour(s) sélectionné(s){% endtrans %}
+								</div>
+
+								<button type="button" class="btn btn-primary btn-sm" id="saveAvailabilityCalendar">
+									<i class="fa fa-save me-1"></i> {% trans %}Enregistrer{% endtrans %}
+								</button>
+							</div>
+						</div>
+
+						<div id="availabilityMsg" class="small mt-3 dashboard-availability-message" hidden></div>
+					</div>
+
+				</div>
+			</div>
+			{# --- BOX : Qui a vu mon profil ? --- #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item">
+				<div class="kpi-card p-3 h-100">
+					<div class="d-flex align-items-center justify-content-between">
+						<div>
+							<div class="soft-muted small">{% trans %}Qui a vu mon profil ?{% endtrans %}</div>
+							<div class="d-flex align-items-baseline gap-2">
+								<div class="fs-3 fw-bold">
+									{{ totalViews ?? '—' }}
+								</div>
+								<span class="badge badge-soft rounded-pill">{% trans %}vues{% endtrans %}</span>
+							</div>
+						</div>
+						<div class="kpi-icon">👀</div>
+					</div>
+
+					<div class="soft-muted small mt-2">
+						{% trans %}Voir les derniers visiteurs (et quand){% endtrans %}
+					</div>
+
+					<div class="mt-3 d-flex gap-2 flex-wrap">
+						<a href="{{ path('talent_profile_views') }}" class="btn btn-soft btn-sm rounded-pill px-3">
+							{% trans %}Voir les visiteurs{% endtrans %}
+						</a>
+						<a href="{{ path('talent_profile_views_privacy') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3" data-turbo="false">
+							{% trans %}Confidentialité{% endtrans %}
+						</a>
+					</div>
+				</div>
+			</div>
+
+			{# Réseau & Amitiés #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item">
+				<div class="kpi-card p-3 h-100 mol-friend-box">
+
+					<div class="d-flex align-items-center justify-content-between">
+						<div>
+							<div class="soft-muted small">{% trans %}Réseau & Amitiés{% endtrans %}</div>
+
+							<div class="d-flex align-items-baseline gap-2">
+								<div class="fs-3 fw-bold">
+									{{ demandeAmities|length|number_format(0, '.', ' ') }}
+								</div>
+								<span class="badge badge-soft rounded-pill">
+									{% trans %}demandes{% endtrans %}
+								</span>
+							</div>
+
+							<div class="soft-muted small mt-1">
+								{{ friends|length|number_format(0, '.', ' ') }}
+								{% trans %}amis{% endtrans %}
+							</div>
+						</div>
+
+						<div class="kpi-icon">🤝</div>
+					</div>
+
+					<div class="mt-3 d-grid">
+						<a href="{{ path('friendship_network') }}" class="btn btn-primary btn-sm rounded-pill" data-turbo="false">
+							{% trans %}Voir mon réseau{% endtrans %}
+						</a>
+					</div>
+
+				</div>
+			</div>
+
+			{# BOX : Mes candidatures #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item">
+				<div class="kpi-card p-3 h-100">
+					<div class="d-flex align-items-center justify-content-between">
+						<div>
+							<div class="soft-muted small">{% trans %}Mes candidatures{% endtrans %}</div>
+							<div class="d-flex align-items-baseline gap-2">
+								<div class="fs-3 fw-bold">{{ applicationsCount ?? 0 }}</div>
+								<span class="badge badge-soft rounded-pill">{% trans %}entreprises{% endtrans %}</span>
+							</div>
+						</div>
+						<div class="kpi-icon">🏢</div>
+					</div>
+
+					<div class="soft-muted small mt-2">
+						{% trans %}Voir les réponses des entreprises{% endtrans %}
+					</div>
+
+					<div class="mt-3">
+						<a href="{{ path('talent_applications') }}" class="btn btn-soft btn-sm rounded-pill px-3" data-turbo="false">
+							{% trans %}Voir mes candidatures{% endtrans %}
+						</a>
+					</div>
+				</div>
+			</div>
+
+		{# KPI + BOOST + FAVORIS #}
+			{# --- BOX FAVORIS --- #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item">
+				<div class="kpi-card p-3 h-100">
+					<div class="d-flex align-items-center justify-content-between">
+						<div>
+							{# Texte plus explicite (long) #}
+							<div class="soft-muted small">{% trans %}Mes favoris enregistrés{% endtrans %}</div>
+
+							<div class="d-flex align-items-baseline gap-2">
+								<div class="fs-3 fw-bold">
+									{{ favoritesCount ?? 0 }}
+								</div>
+
+								{# Badge plus parlant, sans casser le style #}
+								<span class="badge badge-soft rounded-pill">{% trans %}Profils & offres{% endtrans %}</span>
+							</div>
+						</div>
+
+						<div class="kpi-icon">❤️</div>
+					</div>
+
+					{# Description plus longue, “premium”, qui décrit bien les favoris #}
+					<div class="soft-muted small mt-2">
+						{% trans %}Tous les profils et opportunités que vous avez ajoutés à votre liste de favoris pour les retrouver rapidement, comparer, et revenir postuler quand vous le souhaitez.{% endtrans %}
+					</div>
+
+					<div class="mt-3">
+						<a href="{{ path('app_favorites_index') }}" class="btn btn-soft btn-sm rounded-pill px-3" data-turbo="false">
+							{% trans %}Ouvrir ma liste de favoris{% endtrans %}
+						</a>
+					</div>
+				</div>
+			</div>
+
+			{# --- BOX : Je suis le favori de qui ? --- #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item">
+				<div class="kpi-card p-3 h-100">
+					<div class="d-flex align-items-center justify-content-between">
+						<div>
+							{# Titre plus naturel et premium #}
+							<div class="soft-muted small">{% trans %}Profils qui vous ont ajouté en favori{% endtrans %}</div>
+
+							<div class="d-flex align-items-baseline gap-2">
+								<div class="fs-3 fw-bold">
+									{{ favoritedByCount ?? '—' }}
+								</div>
+
+								{# Badge plus élégant et cohérent SaaS #}
+								<span class="badge badge-soft rounded-pill">{% trans %}admirateurs{% endtrans %}</span>
+							</div>
+						</div>
+
+						<div class="kpi-icon">💚</div>
+					</div>
+
+					{# Description plus longue et plus UX-friendly #}
+					<div class="soft-muted small mt-2">
+						{% trans %}Découvrez les utilisateurs qui ont manifesté de l’intérêt pour votre profil en vous ajoutant à leurs favoris. Une excellente façon d’identifier votre visibilité et votre attractivité sur la plateforme.{% endtrans %}
+					</div>
+
+					<div class="mt-3">
+						<a href="{{ path('app_favorites_favorited_by') }}" class="btn btn-soft btn-sm rounded-pill px-3" data-turbo="false">
+							{% trans %}Consulter les profils intéressés{% endtrans %}
+						</a>
+					</div>
+				</div>
+			</div>
+
+			{# --- BOX : Votes étoiles (rating) --- #}
+			<div class="col-12 col-md-6 col-xl-4 dashboard-kpi-item">
+				<div class="kpi-card p-3 h-100">
+					<div class="d-flex align-items-center justify-content-between">
+					<div>
+						<div class="soft-muted small">{% trans %}Votes ⭐{% endtrans %}</div>
+
+						<div class="d-flex align-items-baseline gap-2">
+							<div class="fs-3 fw-bold">
+								<span class="stars">
+								{% set avg = avgRating ?? 0 %}
+								{% for i in 1..5 %}
+									{% if i <= avg %}
+									⭐
+									{% else %}
+									☆
+									{% endif %}
+								{% endfor %}
+								</span>
+							</div>
+
+						<span class="badge badge-soft rounded-pill"> {{ avgRating ?? 0 }}/5 {% trans %}étoiles{% endtrans %}</span>
+						</div>
+					</div>
+
+					<div class="kpi-icon">⭐</div>
+					</div>
+
+					<div class="soft-muted small mt-2">
+					{% trans %}Nombre de votes et note moyenne reçus sur votre profil par les recruteurs après vos candidatures ou contacts. Un bon moyen de savoir ce qui plaît ou déplaît dans votre profil, et d’inspirer confiance aux futurs recruteurs.{% endtrans %}
+					<span class="badge badge-soft rounded-pill">{{ voters ?? 0 }} {% trans %}votes{% endtrans %}</span>
+					</div>
+
+					<div class="mt-3">
+					<a href="{{ path('app_ratings_received') }}" class="btn btn-soft btn-sm rounded-pill px-3" data-turbo="false">
+						{% trans %}Voir les votes{% endtrans %}
+					</a>
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+		{# QUICK ACTIONS (tuiles) #}
+		<div class="row g-3 mb-4">
+			<div class="col-12 col-xl-8">
+				<div class="dash-card card">
+					<div class="card-header d-flex align-items-center justify-content-between px-4 py-3">
+						<div>
+							<div class="fw-bold">{% trans %}Actions rapides{% endtrans %}</div>
+							<div class="soft-muted small">{% trans %}Les étapes les plus utiles pour booster votre profil{% endtrans %}</div>
+						</div>
+						<a href="{{ path('profile_edit') }}" class="btn btn-sm btn-soft">{% trans %}Optimiser{% endtrans %}</a>
+					</div>
+					<div class="card-body p-4">
+							<div class="row g-3">
+							
+							<div class="col-12 col-md-6">
+								<a class="action-tile d-flex align-items-center gap-3 p-3" href="{{ path('talent_portfolio') }}" data-turbo="false">
+									<div class="action-emoji">📂</div>
+									<div>
+										<div class="fw-semibold">{% trans %}Ajouter portfolio / médias{% endtrans %}</div>
+										<div class="soft-muted small">{% trans %}Images, PDF, liens, réalisations{% endtrans %}</div>
+									</div>
+								</a>
+							</div>
+							
+							<div class="col-12 col-md-6">
+								<a class="action-tile d-flex align-items-center gap-3 p-3"
+									href="{{ path('review_my_list') }}" data-turbo="false">
+									<div class="action-emoji">📝</div>
+									<div>
+										<div class="fw-semibold">{% trans %}Avis & réputation{% endtrans %}</div>
+										<div class="soft-muted small">{% trans %}Collectez des avis, inspirez confiance{% endtrans %}</div>
+									</div>
+								</a>
+							</div>
+
+							{% set sanctionsTooltip %}
+								{% if recentActiveSanctions is defined and recentActiveSanctions|length > 0 %}
+									{% for s in recentActiveSanctions %}
+										<div>
+											<strong>
+												{% if s.type == constant('App\\Entity\\Sanction::TYPE_WARNING') %}
+													{% trans %}Avertissement{% endtrans %}
+												{% elseif s.type == constant('App\\Entity\\Sanction::TYPE_SUSPEND') %}
+													{% trans %}Suspension{% endtrans %}
+												{% elseif s.type == constant('App\\Entity\\Sanction::TYPE_BAN') %}
+													{% trans %}Bannissement{% endtrans %}
+												{% elseif s.type == constant('App\\Entity\\Sanction::TYPE_RESTRICT') %}
+													{% trans %}Restriction{% endtrans %}
+												{% else %}
+													{{ s.type }}
+												{% endif %}
+											</strong>
+											<br>
+											<span>{{ s.reason|length > 110 ? s.reason|slice(0, 110) ~ '…' : s.reason }}</span>
+											{% if s.endsAt %}
+												<br>
+												<small>
+													{% trans %}Fin :{% endtrans %} {{ s.endsAt|date('d/m/Y H:i') }}
+												</small>
+											{% endif %}
+										</div>
+										{% if not loop.last %}
+											<hr class="dashboard-sanctions-divider">
+										{% endif %}
+									{% endfor %}
+								{% else %}
+									{% trans %}Aucune sanction active{% endtrans %}
+								{% endif %}
+							{% endset %}
+
+							<div class="col-12 col-md-6">
+								<a
+									href="{{ path('talent_sanctions_index') }}"
+									class="action-tile d-flex align-items-center gap-3 p-3 position-relative"
+									data-bs-toggle="tooltip"
+									data-bs-html="true"
+									data-bs-placement="bottom"
+									data-bs-custom-class="mol-tooltip"
+									title="{{ sanctionsTooltip|e('html_attr') }}"
+									data-turbo="false"
+								>
+									<div class="action-emoji">🛡️</div>
+									<div>
+										<div class="fw-semibold">{% trans %}Sanctions{% endtrans %}</div>
+										<div class="soft-muted small">{% trans %}Consultez vos avertissements et restrictions{% endtrans %}</div>
+									</div>
+
+									{% if activeSanctionsCount|default(0) > 0 %}
+										<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+											{{ activeSanctionsCount }}
+										</span>
+									{% endif %}
+								</a>
+							</div>
+
+							<div class="col-12 col-md-6">
+								<a href="{{ path('calendar_index') }}"
+								data-turbo="false"
+								class="action-tile d-flex align-items-center gap-3 p-3 position-relative">
+									<div class="action-emoji">🗓️</div>
+									<div>
+										<div class="fw-semibold">{% trans %}Planifier RDV{% endtrans %}</div>
+										<div class="soft-muted small">{% trans %}Planifiez vos rendez-vous, inspirez confiance{% endtrans %}</div>
+									</div>
+								</a>
+							</div>
+
+							<div class="col-12 col-md-6">
+								<a href="{{ path('applicant_calendar_index') }}"
+								class="action-tile d-flex align-items-center gap-3 p-3 position-relative" data-turbo="false">
+									<div class="action-emoji">📅</div>
+									<div>
+										<div class="fw-semibold">{% trans %}Mon calendrier{% endtrans %}</div>
+										<div class="soft-muted small">{% trans %}Retrouvez vos rendez-vous et disponibilités{% endtrans %}</div>
+									</div>
+
+									{% if pendingAppointmentsCount|default(0) > 0 %}
+										<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+											{{ pendingAppointmentsCount }}
+										</span>
+									{% endif %}
+								</a>
+							</div>
+
+							<div class="col-12 col-md-6">
+								<a href="{{ path('planning') }}"
+								class="action-tile d-flex align-items-center gap-3 p-3 position-relative" data-turbo="false">
+									<div class="action-emoji">🧭</div>
+									<div>
+										<div class="fw-semibold">{% trans %}Pilotage de mes missions{% endtrans %}</div>
+										<div class="soft-muted small">{% trans %}Suivez l’avancement de vos missions et tâches{% endtrans %}</div>
+									</div>
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{# ✅ BOX : Candidatures reçues (VIP SaaS clair, moderne) #}
+			<div class="col-12 col-xl-4">
+				<div class="kpi-card p-3 h-100 mol-app-box">
+					<div class="d-flex align-items-start justify-content-between gap-3">
+					<div class="flex-grow-1">
+						<div class="d-flex align-items-center gap-2 mb-1">
+						<span class="mol-app-dot"></span>
+						<div class="soft-muted small">{% trans %}Candidatures reçues{% endtrans %}</div>
+						</div>
+
+						<div class="d-flex align-items-end justify-content-between gap-3 flex-wrap">
+						<div class="d-flex align-items-baseline gap-2">
+							<div class="fs-2 fw-bolder mol-app-number">
+							{{ totalApplicantsOnMyJobs ?? 0 }}
+							</div>
+							<span class="badge badge-soft rounded-pill px-3 py-2">{% trans %}Total{% endtrans %}</span>
+						</div>
+
+						<div class="text-end">
+							{% set remaining = remainingApplicantsOnMyJobs ?? 0 %}
+							<span class="badge rounded-pill px-3 py-2 {{ remaining > 0 ? 'text-bg-danger' : 'text-bg-success' }}">
+							{{ remaining > 0 ? ('Non vus : '|trans ~ remaining) : 'Tout vu ✅'|trans }}
+							</span>
+						</div>
+						</div>
+
+						{# mini bar "premium" #}
+						{% set total = totalApplicantsOnMyJobs ?? 0 %}
+						{% set pct = (total > 0) ? ((total - remaining) * 100 / total) : 0 %}
+						<div class="mol-app-progress mt-3" aria-hidden="true">
+						<span data-progress-value="{{ pct|round(0, 'floor') }}"></span>
+						</div>
+
+						<div class="d-flex align-items-center justify-content-between mt-2">
+						<div class="soft-muted small">
+							{% trans %}Restants :{% endtrans %}
+							<span class="fw-semibold">{{ remaining }}</span>
+							{% if total > 0 %}
+							<span class="ms-1">• {% trans %}Vu :{% endtrans %} {{ (total - remaining) }}</span>
+							{% endif %}
+						</div>
+
+						<div class="mol-app-pill soft-muted small">
+							<span class="mol-app-spark">✨</span> {% trans %}Réactivité = plus de matching{% endtrans %}
+						</div>
+						</div>
+
+						<div class="mt-3 d-flex gap-2 flex-wrap">
+						<a href="{{ path('talent_publisher_jobs') }}" class="btn btn-primary btn-sm rounded-pill px-3 mol-app-cta" data-turbo="false">
+							{% trans %}Voir plus{% endtrans %}
+							<span class="ms-1">→</span>
+						</a>
+
+						<span class="btn btn-soft btn-sm rounded-pill px-3 mol-app-static-pill">
+							📌 {% trans %}Non vus :{% endtrans %} {{ remaining }}
+						</span>
+						</div>
+					</div>
+
+					<div class="mol-app-icon-wrap">
+						<div class="kpi-icon mol-app-icon">📥</div>
+					</div>
+					</div>
+				</div>
+			</div>
+
+
+		</div>
+
+		{# Données publiques minimales utilisées par la carte des opportunités. #}
+		{% set dashboardMapJobs = [] %}
+		{% if tables.nearJobs is defined and tables.nearJobs|length > 0 %}
+			{% for job in tables.nearJobs %}
+				{% set publisherGeo = job.createdBy and job.createdBy.professionalProfile ? job.createdBy.professionalProfile : null %}
+				{% set hasPublisherGeo = publisherGeo
+					and publisherGeo.geolocationEnabled
+					and publisherGeo.latitude is not null
+					and publisherGeo.longitude is not null %}
+				{% set dashboardMapJobs = dashboardMapJobs|merge([{
+					'title': job.title ?? ('Offre #' ~ job.id),
+					'city': job.city ?? '',
+					'profession': job.profession ? job.profession.profession : '',
+					'type': job.typeJob ? job.typeJob.typeJob : '',
+					'url': path('job_detail', {slug: job.slug}),
+					'latitude': hasPublisherGeo ? publisherGeo.latitude|round(3) : null,
+					'longitude': hasPublisherGeo ? publisherGeo.longitude|round(3) : null
+				}]) %}
+			{% endfor %}
+		{% endif %}
+
+		<div class="dashboard-bottom-grid mb-4">
+		{# Zone dépliable : PAIEMENTS + FACTURE (dans UN SEUL tableau) #}
+		<div class="collapse show" id="paymentsBox">
+
+
+		<div class="vip-shell">
+			<div class="vip-head">
+				<div>
+					<div class="vip-title">💳 {% trans %}Paiements & Factures{% endtrans %}</div>
+					<div class="vip-sub">{% trans %}Mode • Facture • Montant • Date • Téléchargement{% endtrans %}</div>
+				</div>
+
+				<div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+					<a href="{{ path('talent_payment_dispute_index') }}" class="btn btn-soft rounded-pill px-3 position-relative" data-turbo="false">
+						📋 {% trans %}Mes signalements paiement{% endtrans %}
+						{% if openPaymentDisputesCount|default(0) > 0 %}
+							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+								{{ openPaymentDisputesCount }}
+							</span>
+						{% endif %}
+					</a>
+
+					<span class="vip-badge">
+						<span>📌</span>
+						<span>{{ paymentsCount ?? (payments is defined ? payments|length : 0) }}</span>
+						<span class="vip-muted">{% trans %}paiements{% endtrans %}</span>
+					</span>
+				</div>
+			</div>
+
+			<div class="vip-table-wrap">
+
+			{% if payments is defined and payments|length > 0 %}
+				<div class="vip-scroll">
+					<table class="vip-table">
+						<thead>
+						<tr>
+							<th>{% trans %}Mode{% endtrans %}</th>
+							<th>{% trans %}Facture{% endtrans %}</th>
+							<th>{% trans %}Montant{% endtrans %}</th>
+							<th class="text-end">{% trans %}Télécharger{% endtrans %}</th>
+						</tr>
+						</thead>
+						<tbody>
+						{% for p in payments %}
+						
+							{% set inv = (p.invoices is defined and p.invoices|length > 0) ? p.invoices|first : null %}
+							
+							<tr>
+							<td>
+								<span class="vip-pill">
+								💳
+								{{ p.provider is defined and p.provider ? (p.provider.name ?? '—') : (p.method ?? '—') }}
+								</span>
+							</td>
+
+							<td>
+								{% if inv %}
+								<div class="vip-invoice-number">
+									{{ inv.invoiceNumber ?? ('INV-' ~ inv.id) }}
+								</div>
+								<div class="vip-muted">
+									{{ inv.createdAt is defined and inv.createdAt ? inv.createdAt|date('d/m/Y H:i') : '' }}
+								</div>
+								{% else %}
+								<span class="vip-muted">—</span>
+								{% endif %}
+							</td>
+
+							<td class="vip-amount">
+								{{ p.amount ?? '—' }} {{ p.currency ?? 'FCFA' }}
+							</td>
+
+							<td class="text-end">
+							
+								<a class="vip-btn" href="{{ path('invoice_download', {slug: inv.slug}) }}" target="_blank" data-turbo="false">⬇️ {% trans %}Télécharger{% endtrans %}</a>
+								
+							</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				</div>
+
+			{% else %}
+				<div class="vip-empty">
+				<div class="t1">{% trans %}Aucun paiement{% endtrans %}</div>
+				<div class="t2">{% trans %}Dès que vous effectuez un paiement, il apparaîtra ici avec sa facture.{% endtrans %}</div>
+				</div>
+			{% endif %}
+
+			</div>
+		</div>
+
+		</div>
+
+		<div class="dashboard-bottom-grid__opportunities">
+
+			{# ======================
+			📍 OPPORTUNITÉS PROCHES DE MOI
+			====================== #}
+			<div>
+				<div class="dash-card card dashboard-nearby-card">
+					<div class="card-header px-4 py-3 d-flex align-items-center justify-content-between">
+						<div>
+							<div class="fw-bold">📍 {% trans %}Opportunités proches de moi{% endtrans %}</div>
+							<div class="soft-muted small">{% trans %}Offres autour de votre localisation{% endtrans %}</div>
+						</div>
+
+						<a
+							href="{{ path('jobs_map') }}"
+							class="btn btn-sm btn-outline-dark dashboard-nearby-map-toggle"
+							id="dashboardJobsMapToggle"
+							data-turbo="false"
+							data-open-label="{{ 'Carte'|trans|e('html_attr') }}"
+							data-close-label="{{ 'Masquer la carte'|trans|e('html_attr') }}"
+							data-loading-label="{{ 'Chargement…'|trans|e('html_attr') }}"
+							aria-controls="dashboardJobsMapPanel"
+							aria-expanded="false">
+							<span aria-hidden="true">🗺️</span>
+							<span class="dashboard-nearby-map-toggle-label">{% trans %}Carte{% endtrans %}</span>
+						</a>
+					</div>
+
+					<div
+						class="card-body p-4">
+						{# Optionnel : afficher la ville/zone détectée #}
+						
+
+						<div class="dashboard-nearby-map-panel" id="dashboardJobsMapPanel" hidden>
+							<div
+								id="dashboardJobsMap"
+								data-city="{{ zoneLabel|default(profilePersonnal.city|default(''))|e('html_attr') }}"
+								data-jobs="{{ dashboardMapJobs|json_encode|e('html_attr') }}"
+								aria-label="{% trans %}Carte des opportunités proches{% endtrans %}"></div>
+							<div class="dashboard-nearby-map-status" id="dashboardJobsMapStatus" role="status" aria-live="polite">
+								{% trans %}Ouverture de la carte…{% endtrans %}
+							</div>
+						</div>
+
+						{% if tables.nearJobs is defined and tables.nearJobs|length > 0 %}
+							<ul class="list-unstyled mb-0">
+								{% for job in tables.nearJobs %}
+									<li class="list-item">
+										<div class="d-flex align-items-start justify-content-between gap-2">
+											<div>
+												<div class="fw-semibold">
+													{{ job.title ?? ('Offre #' ~ job.id) }}
+													{% if job.isUrgent is defined and job.isUrgent %}
+														<span class="badge text-bg-danger rounded-pill ms-2">{% trans %}Urgent{% endtrans %}</span>
+													{% endif %}
+												</div>
+
+												<div class="soft-muted small">
+													{{ job.city ?? '—' }}
+													{% if job.distanceKm is defined and job.distanceKm is not null %}
+														•
+														{{ job.distanceKm }}
+														km
+													{% endif %}
+													{% if job.createdAt is defined and job.createdAt %}
+														•
+														{{ job.createdAt|date('d/m') }}
+													{% endif %}
+												</div>
+
+												{% if job.category is defined and job.category %}
+													<span class="badge badge-soft rounded-pill mt-2">{{ job.category }}</span>
+												{% endif %}
+											</div>
+
+											<div class="text-end">
+												<a href="{{ path('job_detail', {slug: job.slug}) }}" class="btn btn-sm btn-soft rounded-pill" data-turbo="false">
+													{% trans %}Voir{% endtrans %}
+												</a>
+
+											</div>
+										</div>
+									</li>
+								{% endfor %}
+							</ul>
+						{% else %}
+							<div class="empty-state">
+								<div class="fw-semibold mb-1">{% trans %}Aucune opportunité à proximité{% endtrans %}</div>
+								<div class="soft-muted small">
+									{% trans %}Activez la localisation ou indiquez votre ville pour voir des offres proches.{% endtrans %}
+								</div>
+								<div class="d-grid mt-3">
+									<a href="{{ path('profile_edit') }}" class="btn btn-soft rounded-pill" data-turbo="false">
+										📍 {% trans %}Ajouter ma localisation{% endtrans %}
+									</a>
+								</div>
+							</div>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+
+		</div>
+		</div>
+	</div>
+
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="" data-turbo-track="reload"></script>
+	<script src="{{ asset('js/dashboard/talent-dashboard.js') }}" defer></script>
+	
+
+
+{% endblock %}

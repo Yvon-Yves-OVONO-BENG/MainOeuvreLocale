@@ -1,0 +1,6 @@
+# À placer dans public/.htaccess, juste après "RewriteEngine On".
+# Conserve le reste du fichier .htaccess Symfony déjà présent.
+
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} !^www\.maindoeuvrelocale\.com$ [NC]
+RewriteRule ^ https://www.maindoeuvrelocale.com%{REQUEST_URI} [R=301,L]

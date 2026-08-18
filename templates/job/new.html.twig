@@ -1,0 +1,279 @@
+{% extends 'base.html.twig' %}
+{% set editing = isEdit|default(slug != '') %}
+
+{% block title %}
+	{% if editing %}
+		{% trans %}Modifier une offre{% endtrans %}
+	{% else %}
+		{% trans %}Créer un job{% endtrans %}
+	{% endif %}
+{% endblock %}
+
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/job/job-form.css') }}?v=20260805">
+{% endblock %}
+
+{% block body %}
+
+
+<div
+	class="container mol-page">
+
+	{# ===== TOASTS TOP RIGHT ===== #}
+	<div class="mol-toast-wrap" id="molToastWrap">
+		{% for m in app.flashes('toast_success') %}
+			<div class="mol-toast" data-autohide="1">
+				<div class="mol-toast-in">
+					<div class="ico">✅</div>
+					<div>
+						<p class="ttl">{% trans %}Succès{% endtrans %}</p>
+						<p class="msg">{{ m }}</p>
+					</div>
+					<button class="x" type="button" aria-label="{{ 'Fermer'|trans }}" data-close="1">×</button>
+				</div>
+			</div>
+		{% endfor %}
+
+		{% for m in app.flashes('toast_error') %}
+			<div class="mol-toast mol-toast--error" data-autohide="1">
+				<div class="mol-toast-in">
+					<div class="ico">⚠️</div>
+					<div>
+						<p class="ttl">{% trans %}Erreur{% endtrans %}</p>
+						<p class="msg">{{ m }}</p>
+					</div>
+					<button class="x" type="button" aria-label="{{ 'Fermer'|trans }}" data-close="1">×</button>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+
+	<div class="mol-hero">
+		<div class="mol-hero-inner">
+			<div>
+				<h2>📌
+					{% if editing %}
+						{% trans %}Modifier une offre{% endtrans %}
+					{% else %}
+						{% trans %}Créer une offre{% endtrans %}
+					{% endif %}
+				</h2>
+				<p>{% trans %}Publie une annonce claire et attractive, optimisée pour recevoir des candidatures.{% endtrans %}</p>
+			</div>
+			<div class="d-flex gap-2 flex-wrap">
+				<span class="mol-pill">⚡
+					{% trans %}Publication rapide{% endtrans %}</span>
+				<span class="mol-pill">🛡️
+					{% trans %}Qualité & confiance{% endtrans %}</span>
+			</div>
+		</div>
+	</div>
+    
+	{% if selectedBrief is defined and selectedBrief %}
+        <div class="mol-brief-banner">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="min-w-0">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <span class="mol-brief-chip">🧩 {% trans %}Modèle de brief{% endtrans %}</span>
+                {% if selectedBrief.category is defined and selectedBrief.category %}
+                    <span class="mol-brief-chip">{{ selectedBrief.category }}</span>
+                {% endif %}
+                {% if selectedBrief.delay_days is defined %}
+                    <span class="mol-brief-chip">⏳ {{ selectedBrief.delay_days }} {% trans %}j{% endtrans %}</span>
+                {% endif %}
+                </div>
+
+                <div class="mol-brief-title">
+                ✅ {% trans %}Modèle appliqué :{% endtrans %} {{ selectedBrief.title }}
+                </div>
+
+                <div class="mol-brief-text mt-1">
+                {% trans %}Je vais modifier librement le titre, la description, le budget et le délai avant publication.{% endtrans %}
+                </div>
+            </div>
+
+            <a href="{{ path('brief_templates_index') }}" class="btn btn-sm btn-outline-primary rounded-3 fw-bold">
+                {% trans %}Changer de modèle{% endtrans %}
+            </a>
+            </div>
+        </div>
+    {% endif %}
+
+	<div class="mol-card">
+		<div class="mol-card-h">
+			<p class="t">{% trans %}Informations du job{% endtrans %}</p>
+			<span class="mol-pill">{% trans %}SaaS • VIP • Premium{% endtrans %}</span>
+		</div>
+
+		<div class="mol-card-b">
+			{{ form_start(form, {'attr': {'data-mol-autosave': '1', 'data-mol-autosave-key': editing ? 'job-edit' : 'job-new'}}) }}
+
+			<div class="row g-3">
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.title) }}
+					{{ form_widget(form.title, {'attr': {'class':'form-control'}}) }}
+					{{ form_errors(form.title) }}
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.city) }}
+					{{ form_widget(form.city, {'attr': {'class':'form-control'}}) }}
+					{{ form_errors(form.city) }}
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.typeJob) }}
+					{{ form_widget(form.typeJob, {'attr': {'class':'form-select'}}) }}
+					{{ form_errors(form.typeJob) }}
+				</div>
+			</div>
+
+			<div class="row g-3 mt-1">
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.profession) }}
+					{{ form_widget(form.profession, {'attr': {'class':'form-select'}}) }}
+					{{ form_errors(form.profession) }}
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.salaireMin) }}
+					{{ form_widget(form.salaireMin, {'attr': {'class':'form-control', 'inputmode':'numeric'}}) }}
+					{{ form_errors(form.salaireMin) }}
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.salaireMax) }}
+					{{ form_widget(form.salaireMax, {'attr': {'class':'form-control', 'inputmode':'numeric'}}) }}
+					{{ form_errors(form.salaireMax) }}
+				</div>
+			</div>
+
+			<div class="row g-3 mt-1">
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.experience) }}
+					{{ form_widget(form.experience, {'attr': {'class':'form-select'}}) }}
+					{{ form_errors(form.experience) }}
+				</div>
+
+				{% if form.status is defined %}
+                    <div class="col-12 col-md-6 col-lg-3">
+                        {{ form_label(form.status) }}
+                        {{ form_widget(form.status, {'attr': {'class':'form-select'}}) }}
+                        {{ form_errors(form.status) }}
+                    </div>
+                {% endif %}
+
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.dateExpirationAt) }}
+					{{ form_widget(form.dateExpirationAt, {'attr': {'class':'form-control'}}) }}
+					{{ form_errors(form.dateExpirationAt) }}
+					<p class="mol-job-field-message" data-job-field-message data-job-date-message hidden>
+						{% trans %}Indique la date et l’heure complètes d’expiration.{% endtrans %}
+					</p>
+				</div>
+			</div>
+
+			<div class="row g-3 mt-1">
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.description) }}
+					{{ form_widget(form.description, {'attr': {'class':'form-control'}}) }}
+					{{ form_errors(form.description) }}
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.mission) }}
+					{{ form_widget(form.mission, {'attr': {'class':'form-control'}}) }}
+					{{ form_errors(form.mission) }}
+					<p class="mol-job-field-message" data-job-field-message hidden>{% trans %}Décrivez les missions avec au moins 20 caractères.{% endtrans %}</p>
+				</div>
+
+				<div class="col-12 col-md-6 col-lg-4">
+					{{ form_label(form.profil) }}
+					{{ form_widget(form.profil, {'attr': {'class':'form-control'}}) }}
+					{{ form_errors(form.profil) }}
+					<p class="mol-job-field-message" data-job-field-message hidden>{% trans %}Décrivez le profil recherché avec au moins 20 caractères.{% endtrans %}</p>
+				</div>
+			</div>
+			
+			{# ✅ Champ "adminModificationNote" : visible uniquement pour admin/modérateur #}
+            {% if form.adminModificationNote is defined %}
+                <div class="row g-3 mt-1">
+                    <div class="col-12">
+                        <div class="admin-note-card">
+                            <div class="admin-note-header">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                Note administrative de modification
+                                <span class="badge bg-warning ms-2">Admin/Modérateur uniquement</span>
+                            </div>
+                            {{ form_label(form.adminModificationNote) }}
+                            {{ form_widget(form.adminModificationNote) }}
+                            {{ form_errors(form.adminModificationNote) }}
+                            <small class="text-muted">
+                                Cette note sera envoyée au créateur de l'offre pour expliquer les modifications apportées.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+			<div class="row mt-4">
+				<div class="col-12 d-flex justify-content-center">
+					{# Le jeton Symfony doit être rendu explicitement, car les champs
+					   restants ne sont volontairement plus injectés après le bouton. #}
+					{% if form._token is defined %}
+						{{ form_widget(form._token) }}
+					{% endif %}
+					<input type="hidden" value="{{ csrfToken }}" name="csrfToken">
+					<button type="submit"
+						class="btn btn-dark mol-btn mol-job-submit-clean"
+						data-job-submit
+						disabled
+						aria-disabled="true">
+                        <span aria-hidden="true">💾</span>
+						<span>{% if editing %}{% trans %}Mettre à jour{% endtrans %}{% else %}{% trans %}Créer{% endtrans %}{% endif %}</span>
+					</button>
+				</div>
+			</div>
+
+			{# Tous les champs autorisés sont rendus explicitement ci-dessus.
+			   Empêche un ancien champ (notamment urgenceJob) d'apparaître sous
+			   le bouton et de bloquer la validation côté navigateur. #}
+			{{ form_end(form, { render_rest: false }) }}
+		</div>
+	</div>
+</div>
+
+<style>
+    .mol-job-form-nav{display:flex;align-items:center;margin:12px 0 14px}
+    .mol-job-back{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 14px;border:1px solid #dbe4f0;border-radius:13px;background:#fff;color:#294e7a;text-decoration:none;font-size:12px;font-weight:800;box-shadow:0 7px 18px rgba(17,39,79,.07)}
+    .mol-job-back:hover{color:#0d6efd;border-color:#b8d3ff}
+    .mol-job-submit-clean{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;min-width:170px;max-width:100%;min-height:48px;padding:12px 20px!important;border-radius:14px!important;line-height:1.2!important;white-space:normal!important}
+    @media(max-width:575.98px){.mol-job-back{width:100%;justify-content:flex-start}.mol-job-submit-clean{width:100%;min-width:0}}
+</style>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+
+
+
+<script src="{{ asset('js/job/job-form.js') }}?v=20260805" defer></script>
+
+{% if swalJob %}
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div id="molJobSubmittedPopup"
+        data-popup-key="mol-job-submitted-{{ swalJob.id }}"
+        data-confirm-text="Compris 👍"
+        data-popup-html="{{ include('job/_sweetalert_job_submitted.html.twig', {job: swalJob})|e('html_attr') }}"
+        hidden></div>
+<script src="{{ asset('js/job/job-submitted-popup.js') }}?v=20260805" defer></script>
+{% endif %}
+
+
+{% endblock %}

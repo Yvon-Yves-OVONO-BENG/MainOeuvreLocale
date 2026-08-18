@@ -1,0 +1,1048 @@
+<style>
+    .mol-support-page,
+    .mol-support-page * {
+        box-sizing: border-box;
+    }
+
+    .mol-support-page {
+        --support-primary: #3155f5;
+        --support-primary-dark: #203cc9;
+        --support-cyan: #0ea5e9;
+        --support-green: #16a34a;
+        --support-ink: #0f172a;
+        --support-muted: #64748b;
+        --support-line: rgba(15, 23, 42, .09);
+        min-height: 100vh;
+        padding: 98px 20px 76px;
+        color: var(--support-ink);
+        background:
+            radial-gradient(760px circle at 7% 4%, rgba(49, 85, 245, .12), transparent 58%),
+            radial-gradient(680px circle at 96% 18%, rgba(14, 165, 233, .10), transparent 54%),
+            linear-gradient(180deg, #f7f9ff 0%, #ffffff 48%, #f8fafc 100%);
+        font-family: Inter, Manrope, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .mol-support-shell {
+        width: min(1180px, 100%);
+        margin: 0 auto;
+    }
+
+    .mol-support-tabs {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        max-width: 100%;
+        margin: 0 auto 22px;
+        padding: 7px;
+        overflow-x: auto;
+        border: 1px solid rgba(148, 163, 184, .20);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, .82);
+        box-shadow: 0 14px 36px rgba(15, 23, 42, .07);
+        backdrop-filter: blur(16px);
+        scrollbar-width: none;
+    }
+
+    .mol-support-tabs::-webkit-scrollbar {
+        display: none;
+    }
+
+    .mol-support-tabs a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 0 15px;
+        border-radius: 12px;
+        color: #475569;
+        font-size: 13px;
+        font-weight: 750;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background .22s ease, color .22s ease, transform .22s ease, box-shadow .22s ease;
+    }
+
+    .mol-support-tabs a:hover {
+        color: var(--support-primary);
+        background: #eef3ff;
+        transform: translateY(-1px);
+    }
+
+    .mol-support-tabs a.is-active {
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--support-primary), #5c49e8);
+        box-shadow: 0 10px 22px rgba(49, 85, 245, .24);
+    }
+
+    .mol-support-hero {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        min-height: 310px;
+        padding: clamp(32px, 6vw, 68px);
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 30px;
+        color: #ffffff;
+        background:
+            radial-gradient(460px circle at 83% 18%, rgba(31, 196, 255, .22), transparent 56%),
+            radial-gradient(380px circle at 10% 95%, rgba(96, 72, 232, .24), transparent 55%),
+            linear-gradient(125deg, #091936 0%, #0c2856 52%, #0d4352 100%);
+        box-shadow: 0 30px 72px rgba(8, 24, 54, .20);
+    }
+
+    .mol-support-hero::before,
+    .mol-support-hero::after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .mol-support-hero::before {
+        width: 260px;
+        height: 260px;
+        right: -80px;
+        top: -100px;
+        box-shadow: 0 0 0 45px rgba(255, 255, 255, .025), 0 0 0 90px rgba(255, 255, 255, .018);
+    }
+
+    .mol-support-hero::after {
+        width: 130px;
+        height: 130px;
+        left: 42%;
+        bottom: -88px;
+    }
+
+    .mol-support-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border: 1px solid rgba(255, 255, 255, .16);
+        border-radius: 999px;
+        color: rgba(255, 255, 255, .88);
+        background: rgba(255, 255, 255, .08);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        backdrop-filter: blur(12px);
+    }
+
+    .mol-support-eyebrow i {
+        color: #67e8f9;
+    }
+
+    .mol-support-hero h1 {
+        max-width: 800px;
+        margin: 20px 0 0;
+        color: #ffffff;
+        font-size: clamp(32px, 5vw, 58px);
+        font-weight: 850;
+        line-height: 1.04;
+        letter-spacing: -.045em;
+        text-wrap: balance;
+    }
+
+    .mol-support-hero p {
+        max-width: 720px;
+        margin: 18px 0 0;
+        color: rgba(226, 232, 240, .85);
+        font-size: clamp(15px, 1.7vw, 18px);
+        line-height: 1.72;
+    }
+
+    .mol-support-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 26px;
+    }
+
+    .mol-support-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 46px;
+        padding: 0 18px;
+        border: 1px solid transparent;
+        border-radius: 13px;
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+        transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+    }
+
+    .mol-support-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .mol-support-btn--white {
+        color: #10204a;
+        background: #ffffff;
+        box-shadow: 0 12px 28px rgba(2, 6, 23, .18);
+    }
+
+    .mol-support-btn--glass {
+        border-color: rgba(255, 255, 255, .18);
+        color: #ffffff;
+        background: rgba(255, 255, 255, .09);
+        backdrop-filter: blur(12px);
+    }
+
+    .mol-support-section {
+        margin-top: 28px;
+    }
+
+    .mol-support-section-head {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 16px;
+    }
+
+    .mol-support-section-head h2 {
+        margin: 0;
+        color: var(--support-ink);
+        font-size: clamp(22px, 3vw, 31px);
+        font-weight: 850;
+        letter-spacing: -.025em;
+    }
+
+    .mol-support-section-head p {
+        max-width: 620px;
+        margin: 7px 0 0;
+        color: var(--support-muted);
+        font-size: 14px;
+        line-height: 1.65;
+    }
+
+    .mol-support-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .mol-support-card {
+        position: relative;
+        overflow: hidden;
+        min-height: 190px;
+        padding: 22px;
+        border: 1px solid var(--support-line);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, .92);
+        box-shadow: 0 16px 42px rgba(15, 23, 42, .065);
+        transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease;
+    }
+
+    .mol-support-card:hover {
+        z-index: 1;
+        border-color: rgba(49, 85, 245, .22);
+        box-shadow: 0 24px 52px rgba(15, 23, 42, .11);
+        transform: translateY(-4px);
+    }
+
+    .mol-support-card__icon {
+        width: 46px;
+        height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        color: var(--support-primary);
+        background: #edf2ff;
+        font-size: 18px;
+    }
+
+    .mol-support-card h3 {
+        margin: 17px 0 0;
+        color: var(--support-ink);
+        font-size: 17px;
+        font-weight: 820;
+    }
+
+    .mol-support-card p {
+        margin: 8px 0 0;
+        color: var(--support-muted);
+        font-size: 13.5px;
+        line-height: 1.62;
+    }
+
+    .mol-support-card a {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 15px;
+        color: var(--support-primary);
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .mol-support-card a i {
+        font-size: 11px;
+        transition: transform .2s ease;
+    }
+
+    .mol-support-card a:hover i {
+        transform: translateX(4px);
+    }
+
+    .mol-support-search {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 720px;
+        min-height: 56px;
+        margin-top: 26px;
+        padding: 0 17px;
+        border: 1px solid rgba(255, 255, 255, .16);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, .10);
+        box-shadow: inset 0 1px rgba(255, 255, 255, .05);
+        backdrop-filter: blur(14px);
+    }
+
+    .mol-support-search i {
+        color: #67e8f9;
+    }
+
+    .mol-support-search input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        color: #ffffff;
+        background: transparent;
+        font-size: 14px;
+    }
+
+    .mol-support-search input::placeholder {
+        color: rgba(226, 232, 240, .68);
+    }
+
+    .mol-support-band {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) auto;
+        align-items: center;
+        gap: 24px;
+        margin-top: 28px;
+        padding: 25px 28px;
+        border: 1px solid rgba(49, 85, 245, .12);
+        border-radius: 23px;
+        background: linear-gradient(135deg, #eef3ff, #f5fbff);
+    }
+
+    .mol-support-band h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 850;
+    }
+
+    .mol-support-band p {
+        margin: 7px 0 0;
+        color: var(--support-muted);
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .mol-support-band .mol-support-btn {
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--support-primary), #5147df);
+        box-shadow: 0 12px 26px rgba(49, 85, 245, .22);
+    }
+
+    .mol-faq-tools {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+        padding: 13px 16px;
+        border: 1px solid rgba(255, 255, 255, .16);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, .10);
+        backdrop-filter: blur(12px);
+    }
+
+    .mol-faq-tools input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        color: #ffffff;
+        background: transparent;
+        font-size: 14px;
+    }
+
+    .mol-faq-tools input::placeholder {
+        color: rgba(226, 232, 240, .70);
+    }
+
+    .mol-faq-count {
+        flex: 0 0 auto;
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #dbeafe;
+        background: rgba(255, 255, 255, .10);
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .mol-faq-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 24px;
+    }
+
+    .mol-faq-item {
+        overflow: hidden;
+        border: 1px solid var(--support-line);
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 12px 34px rgba(15, 23, 42, .05);
+    }
+
+    .mol-faq-item[open] {
+        border-color: rgba(49, 85, 245, .22);
+        box-shadow: 0 18px 42px rgba(49, 85, 245, .09);
+    }
+
+    .mol-faq-item summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 19px 21px;
+        list-style: none;
+        cursor: pointer;
+    }
+
+    .mol-faq-item summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .mol-faq-question {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        color: var(--support-ink);
+        font-size: 15px;
+        font-weight: 820;
+    }
+
+    .mol-faq-badge {
+        flex: 0 0 auto;
+        padding: 5px 8px;
+        border-radius: 999px;
+        color: var(--support-primary);
+        background: #edf2ff;
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: .03em;
+        text-transform: uppercase;
+    }
+
+    .mol-faq-chevron {
+        width: 32px;
+        height: 32px;
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: #64748b;
+        background: #f1f5f9;
+        transition: transform .22s ease, color .22s ease, background .22s ease;
+    }
+
+    .mol-faq-item[open] .mol-faq-chevron {
+        color: #ffffff;
+        background: var(--support-primary);
+        transform: rotate(180deg);
+    }
+
+    .mol-faq-answer {
+        padding: 0 21px 20px 21px;
+        color: #526174;
+        font-size: 14px;
+        line-height: 1.72;
+    }
+
+    .mol-faq-empty {
+        display: none;
+        padding: 28px;
+        border: 1px dashed rgba(148, 163, 184, .45);
+        border-radius: 18px;
+        color: var(--support-muted);
+        background: #ffffff;
+        text-align: center;
+    }
+
+    .mol-process {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 24px;
+    }
+
+    .mol-process-step {
+        position: relative;
+        z-index: 1;
+        min-height: 220px;
+        padding: 21px;
+        border: 1px solid var(--support-line);
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 15px 38px rgba(15, 23, 42, .055);
+    }
+
+    .mol-process-step__number {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--support-primary), #6252e8);
+        box-shadow: 0 10px 22px rgba(49, 85, 245, .22);
+        font-weight: 850;
+    }
+
+    .mol-process-step h3 {
+        margin: 17px 0 0;
+        font-size: 16px;
+        font-weight: 830;
+    }
+
+    .mol-process-step p {
+        margin: 8px 0 0;
+        color: var(--support-muted);
+        font-size: 13px;
+        line-height: 1.62;
+    }
+
+    .mol-role-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 22px;
+    }
+
+    .mol-role-card {
+        padding: 24px;
+        border: 1px solid var(--support-line);
+        border-radius: 22px;
+        background: #ffffff;
+        box-shadow: 0 15px 38px rgba(15, 23, 42, .055);
+    }
+
+    .mol-role-card__top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .mol-role-card__top i {
+        width: 44px;
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        color: var(--support-primary);
+        background: #edf2ff;
+    }
+
+    .mol-role-card h3 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 850;
+    }
+
+    .mol-role-card ul {
+        display: grid;
+        gap: 10px;
+        margin: 18px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .mol-role-card li {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        color: #526174;
+        font-size: 13.5px;
+        line-height: 1.55;
+    }
+
+    .mol-role-card li i {
+        margin-top: 4px;
+        color: #22a06b;
+        font-size: 11px;
+    }
+
+    .mol-boost-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: 17px;
+        margin-top: 25px;
+    }
+
+    .mol-boost-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-height: 390px;
+        padding: 25px;
+        border: 1px solid var(--support-line);
+        border-radius: 24px;
+        background: #ffffff;
+        box-shadow: 0 18px 48px rgba(15, 23, 42, .075);
+    }
+
+    .mol-boost-card.is-featured {
+        border-color: rgba(49, 85, 245, .40);
+        box-shadow: 0 25px 60px rgba(49, 85, 245, .16);
+        transform: translateY(-7px);
+    }
+
+    .mol-boost-popular {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 6px 9px;
+        border-radius: 999px;
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--support-primary), #604fe8);
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    .mol-boost-icon {
+        width: 50px;
+        height: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 15px;
+        font-size: 20px;
+    }
+
+    .mol-boost-card--green .mol-boost-icon {
+        color: #15803d;
+        background: #ecfdf3;
+    }
+
+    .mol-boost-card--blue .mol-boost-icon {
+        color: var(--support-primary);
+        background: #edf2ff;
+    }
+
+    .mol-boost-card--gold .mol-boost-icon {
+        color: #9a6700;
+        background: #fff7d6;
+    }
+
+    .mol-boost-card h2 {
+        margin: 17px 0 0;
+        font-size: 21px;
+        font-weight: 850;
+    }
+
+    .mol-boost-price {
+        display: flex;
+        align-items: baseline;
+        gap: 7px;
+        margin-top: 12px;
+    }
+
+    .mol-boost-price strong {
+        font-size: 34px;
+        font-weight: 880;
+        letter-spacing: -.04em;
+    }
+
+    .mol-boost-price span {
+        color: var(--support-muted);
+        font-size: 12px;
+        font-weight: 750;
+    }
+
+    .mol-boost-duration {
+        margin-top: 4px;
+        color: var(--support-muted);
+        font-size: 13px;
+    }
+
+    .mol-boost-features {
+        display: grid;
+        gap: 11px;
+        margin: 20px 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .mol-boost-features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        color: #526174;
+        font-size: 13.5px;
+        line-height: 1.5;
+    }
+
+    .mol-boost-features i {
+        margin-top: 4px;
+        color: #16a34a;
+        font-size: 11px;
+    }
+
+    .mol-boost-card .mol-support-btn {
+        width: 100%;
+        margin-top: auto;
+        color: #ffffff;
+        background: #0f172a;
+    }
+
+    .mol-boost-card.is-featured .mol-support-btn {
+        background: linear-gradient(135deg, var(--support-primary), #5c49e8);
+        box-shadow: 0 12px 26px rgba(49, 85, 245, .20);
+    }
+
+    .mol-boost-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-top: 22px;
+        padding: 17px 19px;
+        border: 1px solid rgba(14, 165, 233, .18);
+        border-radius: 16px;
+        color: #355064;
+        background: #f0f9ff;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .mol-boost-note i {
+        margin-top: 3px;
+        color: #0284c7;
+    }
+
+    @media (max-width: 1000px) {
+        .mol-support-grid,
+        .mol-role-grid,
+        .mol-boost-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .mol-process {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .mol-boost-card.is-featured {
+            transform: none;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .mol-support-page {
+            padding: 76px 12px 52px;
+        }
+
+        .mol-support-tabs {
+            width: 100%;
+            justify-content: flex-start;
+            margin-bottom: 14px;
+            border-radius: 15px;
+        }
+
+        .mol-support-tabs a {
+            min-height: 40px;
+            padding: 0 12px;
+        }
+
+        .mol-support-hero {
+            min-height: 0;
+            padding: 28px 22px;
+            border-radius: 22px;
+        }
+
+        .mol-support-hero h1 {
+            font-size: clamp(29px, 10vw, 42px);
+        }
+
+        .mol-support-search,
+        .mol-faq-tools {
+            min-height: 52px;
+        }
+
+        .mol-support-grid,
+        .mol-role-grid,
+        .mol-boost-grid,
+        .mol-process {
+            grid-template-columns: 1fr;
+        }
+
+        .mol-support-card,
+        .mol-process-step {
+            min-height: 0;
+        }
+
+        .mol-support-band {
+            grid-template-columns: 1fr;
+            padding: 22px;
+        }
+
+        .mol-support-band .mol-support-btn {
+            width: 100%;
+        }
+
+        .mol-support-section-head {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .mol-faq-item summary {
+            align-items: flex-start;
+            padding: 17px;
+        }
+
+        .mol-faq-question {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        .mol-faq-answer {
+            padding: 0 17px 18px;
+        }
+
+        .mol-boost-card {
+            min-height: 360px;
+        }
+    }
+</style>
+
+<style>
+    /* =========================================================
+       PAGES D'AIDE DÉDIÉES — HERO COMPACT ET PLEINE LARGEUR
+       ========================================================= */
+    /*
+     * La navbar est déjà compensée par .mol-support-page.
+     * On retire donc l'espacement global de .main-content uniquement
+     * sur les quatre pages d'assistance afin que le hero touche le menu.
+     */
+    body.mol-support-body .main-content {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /*
+     * Le hero doit commencer immédiatement sous la navbar.
+     * Aucun espace supérieur n'est ajouté par la page support.
+     */
+    html body.mol-support-body main.main-content {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    html body.mol-support-body main.main-content > .mol-support-page,
+    .mol-support-page {
+        margin-top: 0 !important;
+        padding: 0 0 72px !important;
+        overflow-x: clip;
+    }
+
+    .mol-support-page > .mol-support-hero {
+        margin-top: 0 !important;
+    }
+
+    .mol-support-shell {
+        width: min(1180px, calc(100% - 40px)) !important;
+        margin: 0 auto !important;
+    }
+
+    /* Chaque lien du footer ouvre sa propre page : aucune barre d'onglets commune. */
+    .mol-support-tabs {
+        display: none !important;
+    }
+
+    .mol-support-hero {
+        width: 100% !important;
+        min-height: 196px !important;
+        margin: 0 !important;
+        padding: 24px 0 !important;
+        border-right: 0 !important;
+        border-left: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: 0 18px 48px rgba(8, 24, 54, .16) !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .mol-support-hero__inner {
+        position: relative;
+        z-index: 1;
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+    }
+
+    .mol-support-hero::before {
+        width: 190px !important;
+        height: 190px !important;
+        right: 3% !important;
+        top: -105px !important;
+        box-shadow: 0 0 0 34px rgba(255, 255, 255, .025), 0 0 0 68px rgba(255, 255, 255, .018) !important;
+    }
+
+    .mol-support-hero::after {
+        width: 90px !important;
+        height: 90px !important;
+        left: 58% !important;
+        bottom: -62px !important;
+    }
+
+    .mol-support-eyebrow {
+        padding: 6px 10px !important;
+        font-size: 10.5px !important;
+    }
+
+    .mol-support-hero h1 {
+        max-width: 880px !important;
+        margin-top: 10px !important;
+        font-size: clamp(29px, 3.6vw, 43px) !important;
+        line-height: 1.08 !important;
+        letter-spacing: -.035em !important;
+    }
+
+    .mol-support-hero p {
+        max-width: 860px !important;
+        margin-top: 9px !important;
+        font-size: clamp(13.5px, 1.35vw, 16px) !important;
+        line-height: 1.52 !important;
+    }
+
+    .mol-support-search,
+    .mol-faq-tools {
+        max-width: 680px !important;
+        min-height: 46px !important;
+        margin-top: 14px !important;
+        border-radius: 13px !important;
+    }
+
+    .mol-support-search {
+        padding: 0 15px !important;
+    }
+
+    .mol-faq-tools {
+        padding: 0 14px !important;
+    }
+
+    .mol-support-actions {
+        gap: 9px !important;
+        margin-top: 14px !important;
+    }
+
+    .mol-support-actions .mol-support-btn {
+        min-height: 40px !important;
+        padding: 0 15px !important;
+        border-radius: 11px !important;
+        font-size: 12.5px !important;
+    }
+
+    .mol-support-section:first-child {
+        margin-top: 30px !important;
+    }
+
+    /* Identité visuelle distincte pour chaque page dédiée. */
+    .mol-support-page--center .mol-support-hero {
+        background:
+            radial-gradient(420px circle at 88% 20%, rgba(31, 196, 255, .20), transparent 56%),
+            linear-gradient(118deg, #081a3b 0%, #0d315e 56%, #0b4b58 100%) !important;
+    }
+
+    .mol-support-page--faq .mol-support-hero {
+        background:
+            radial-gradient(420px circle at 86% 18%, rgba(96, 165, 250, .24), transparent 56%),
+            linear-gradient(118deg, #11153c 0%, #273b78 54%, #3155f5 100%) !important;
+    }
+
+    .mol-support-page--how .mol-support-hero {
+        background:
+            radial-gradient(420px circle at 88% 16%, rgba(45, 212, 191, .22), transparent 56%),
+            linear-gradient(118deg, #072f35 0%, #0e5260 54%, #147a77 100%) !important;
+    }
+
+    .mol-support-page--boost .mol-support-hero {
+        background:
+            radial-gradient(420px circle at 87% 18%, rgba(250, 204, 21, .21), transparent 56%),
+            linear-gradient(118deg, #171637 0%, #3b2b73 55%, #5c3d96 100%) !important;
+    }
+
+    @media (max-width: 700px) {
+        body.mol-support-body .main-content {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        html body.mol-support-body main.main-content,
+        html body.mol-support-body main.main-content > .mol-support-page,
+        .mol-support-page {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        .mol-support-page {
+            padding-bottom: 52px !important;
+        }
+
+        .mol-support-shell,
+        .mol-support-hero__inner {
+            width: min(100% - 24px, 1180px) !important;
+        }
+
+        .mol-support-hero {
+            min-height: 0 !important;
+            padding: 21px 0 !important;
+            border-radius: 0 !important;
+        }
+
+        .mol-support-hero h1 {
+            margin-top: 8px !important;
+            font-size: clamp(27px, 9vw, 36px) !important;
+        }
+
+        .mol-support-hero p {
+            margin-top: 7px !important;
+            font-size: 13.5px !important;
+            line-height: 1.48 !important;
+        }
+
+        .mol-support-search,
+        .mol-faq-tools {
+            width: 100% !important;
+            min-height: 44px !important;
+            margin-top: 12px !important;
+        }
+
+        .mol-support-actions {
+            margin-top: 12px !important;
+        }
+
+        .mol-support-actions .mol-support-btn {
+            flex: 1 1 180px;
+        }
+    }
+</style>

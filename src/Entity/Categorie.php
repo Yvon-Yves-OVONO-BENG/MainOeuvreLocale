@@ -3,11 +3,15 @@
 namespace App\Entity;
 
 use App\Repository\CategorieRepository;
+use App\Util\HashedSlugGenerator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CategorieRepository::class)]
+#[ORM\UniqueConstraint(name: 'uniq_categorie_slug', columns: ['slug'])]
+#[ORM\HasLifecycleCallbacks]
 class Categorie
 {
     #[ORM\Id]
@@ -16,17 +20,30 @@ class Categorie
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $categorie = null;
+    private ?string $nom = null;
 
     #[ORM\Column(length: 255)]
+    private ?string $description = null;
+
+    #[ORM\Column(length: 64)]
     private ?string $slug = null;
 
-    #[ORM\OneToMany(targetEntity: SousCategorie::class, mappedBy: 'categorie')]
-    private Collection $sousCategories;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $icon = null;
+
+    #[ORM\Column]
+    private ?bool $isActive = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $createdAt = null;
+
+    #[ORM\OneToMany(targetEntity: Profession::class, mappedBy: 'categorie')]
+    private Collection $professions;
 
     public function __construct()
     {
-        $this->sousCategories = new ArrayCollection();
+        $this->slug = HashedSlugGenerator::generate();
+        $this->professions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -34,14 +51,26 @@ class Categorie
         return $this->id;
     }
 
-    public function getCategorie(): ?string
+    public function getNom(): ?string
     {
-        return $this->categorie;
+        return $this->nom;
     }
 
-    public function setCategorie(string $categorie): static
+    public function setNom(string $nom): static
     {
-        $this->categorie = $categorie;
+        $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): static
+    {
+        $this->description = $description;
 
         return $this;
     }
@@ -58,30 +87,74 @@ class Categorie
         return $this;
     }
 
-    /**
-     * @return Collection<int, SousCategorie>
-     */
-    public function getSousCategories(): Collection
+    #[ORM\PrePersist]
+    public function ensureSlug(): void
     {
-        return $this->sousCategories;
+        if ($this->slug === null || trim($this->slug) === '') {
+            $this->slug = HashedSlugGenerator::generate();
+        }
     }
 
-    public function addSousCategory(SousCategorie $sousCategory): static
+    public function getIcon(): ?string
     {
-        if (!$this->sousCategories->contains($sousCategory)) {
-            $this->sousCategories->add($sousCategory);
-            $sousCategory->setCategorie($this);
+        return $this->icon;
+    }
+
+    public function setIcon(?string $icon): static
+    {
+        $this->icon = $icon;
+
+        return $this;
+    }
+
+    public function isIsActive(): ?bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Profession>
+     */
+    public function getProfessions(): Collection
+    {
+        return $this->professions;
+    }
+
+    public function addProfession(Profession $profession): static
+    {
+        if (!$this->professions->contains($profession)) {
+            $this->professions->add($profession);
+            $profession->setCategorie($this);
         }
 
         return $this;
     }
 
-    public function removeSousCategory(SousCategorie $sousCategory): static
+    public function removeProfession(Profession $profession): static
     {
-        if ($this->sousCategories->removeElement($sousCategory)) {
+        if ($this->professions->removeElement($profession)) {
             // set the owning side to null (unless already changed)
-            if ($sousCategory->getCategorie() === $this) {
-                $sousCategory->setCategorie(null);
+            if ($profession->getCategorie() === $this) {
+                $profession->setCategorie(null);
             }
         }
 

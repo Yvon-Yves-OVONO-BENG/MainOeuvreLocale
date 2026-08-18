@@ -1,0 +1,181 @@
+/* Slider partagé par les recherches Talents et Annonces. */
+.vip-directory-range-field,
+.anpub-range {
+    --mol-range-progress: 0%;
+    width: 100%;
+    min-width: 0;
+    min-height: 62px;
+    padding: 8px 14px 7px !important;
+    overflow: hidden;
+    border: 1px solid #e2e6ed !important;
+    border-radius: 15px !important;
+    background: #fff !important;
+    box-shadow: 0 5px 14px rgba(15, 23, 42, .08) !important;
+}
+
+.vip-directory-range-head,
+.anpub-range-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    min-height: 21px;
+    margin: 0 0 3px !important;
+}
+
+.vip-directory-range-head label,
+.anpub-range-head label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin: 0 !important;
+    color: #172033 !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.vip-directory-range-head label i,
+.anpub-range-head label i {
+    color: #f5b700 !important;
+    font-size: 12px !important;
+}
+
+.vip-directory-range-head output,
+.anpub-range-head output {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    min-height: 25px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #fff3c4;
+    color: #6b5000 !important;
+    font-size: 11px !important;
+    font-weight: 950 !important;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.vip-directory-range,
+.anpub-range input[type="range"] {
+    width: 100% !important;
+    height: 14px !important;
+    margin: 0 !important;
+    padding: 4px 0 !important;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0 !important;
+    outline: 0 !important;
+    border-radius: 999px;
+    background:
+        linear-gradient(
+            90deg,
+            #ffc400 0,
+            #ffc400 var(--mol-range-progress),
+            #dfe3e8 var(--mol-range-progress),
+            #dfe3e8 100%
+        ) content-box !important;
+    box-shadow: none !important;
+    cursor: pointer;
+}
+
+.vip-directory-range::-webkit-slider-runnable-track,
+.anpub-range input[type="range"]::-webkit-slider-runnable-track {
+    height: 6px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+}
+
+.vip-directory-range::-webkit-slider-thumb,
+.anpub-range input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    margin-top: -4px;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: #ffc400;
+    box-shadow: 0 1px 5px rgba(90, 67, 0, .35);
+}
+
+.vip-directory-range::-moz-range-track,
+.anpub-range input[type="range"]::-moz-range-track {
+    height: 6px;
+    border: 0;
+    border-radius: 999px;
+    background: #dfe3e8;
+}
+
+.vip-directory-range::-moz-range-progress,
+.anpub-range input[type="range"]::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: #ffc400;
+}
+
+.vip-directory-range::-moz-range-thumb,
+.anpub-range input[type="range"]::-moz-range-thumb {
+    width: 11px;
+    height: 11px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    background: #ffc400;
+    box-shadow: 0 1px 5px rgba(90, 67, 0, .35);
+}
+
+.vip-directory-range-scale,
+.anpub-range-scale {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    margin: 0 !important;
+    color: #8290a4 !important;
+    font-size: 8px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    pointer-events: none;
+}
+
+.vip-directory-range-scale span,
+.anpub-range-scale span {
+    min-width: 0;
+    padding: 0 !important;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.vip-directory-range-scale span:first-child,
+.anpub-range-scale span:first-child {
+    text-align: left;
+}
+
+.vip-directory-range-scale span:last-child,
+.anpub-range-scale span:last-child {
+    text-align: right;
+}
+
+.vip-directory-search-btn.is-loading,
+.anpub-submit.is-loading {
+    cursor: wait !important;
+    opacity: .86;
+    transform: none !important;
+}
+
+.vip-directory-search-btn:disabled,
+.anpub-submit:disabled {
+    pointer-events: none;
+}
+
+@media (max-width: 767.98px) {
+    .vip-directory-range-field,
+    .anpub-range {
+        min-height: 66px;
+        padding: 9px 14px 8px !important;
+    }
+}

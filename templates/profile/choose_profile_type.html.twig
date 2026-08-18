@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Choisissez votre type de profil{% endtrans %}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/pages/profile-choice.css') }}">
+    <style>
+        .mol-profile-choice-icon{display:grid!important;place-items:center!important;color:#2563eb;font-size:2rem;background:linear-gradient(145deg,#eff6ff,#fff)!important}
+        .profile-choice-form .btn-premium-submit.mol-choice-submit-pending{opacity:.45!important;filter:saturate(.55);box-shadow:none!important;cursor:not-allowed!important;transform:none!important}
+        .profile-choice-form .btn-premium-submit.mol-choice-submit-ready{opacity:1!important;filter:none;cursor:pointer!important}
+    </style>
+{% endblock %}
+
+{% block body_class %}profile-choice-page{% endblock %}
+
+{% block body %}
+<div class="profile-choice-wrapper">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-lg-7 col-md-9 col-11">
+                <div class="card premium-card border-0 rounded-4 overflow-hidden">
+                    
+                    <!-- Décoration de fond -->
+                    <div class="card-bg-decoration">
+                        <div class="circle circle-1"></div>
+                        <div class="circle circle-2"></div>
+                        <div class="circle circle-3"></div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5 position-relative">
+                        
+                        <!-- Badge Premium -->
+                        <div class="premium-badge">
+                            <i class="fas fa-crown"></i>
+                            <span>{% trans %}Nouveau Profil{% endtrans %}</span>
+                        </div>
+
+                        <!-- Logo et titre -->
+                        <div class="text-center mb-4">
+                            <div class="logo-wrapper mb-3">
+                                <div class="logo-ring mol-profile-choice-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-user-check"></i>
+                                </div>
+                                <div class="logo-pulse"></div>
+                            </div>
+                            
+                            <h2 class="fw-bold gradient-text mb-1">
+                                {% trans %}Bienvenue sur Main d'Œuvre Locale !{% endtrans %}
+                            </h2>
+                            <p class="text-muted small">
+                                {% trans %}Choisissez le profil qui vous correspond.{% endtrans %}
+                            </p>
+                        </div>
+
+                        <!-- Formulaire -->
+                        {{ form_start(form, {'attr': {'class': 'profile-choice-form'}}) }}
+                            
+                            <div class="profile-type-cards mb-3">
+                                {{ form_widget(form.profileType) }}
+                            </div>
+
+                            <div class="text-center mt-3">
+                                {{ form_widget(form.submit, {
+                                    'attr': {
+                                        'class': 'btn-premium-submit'
+                                    }
+                                }) }}
+                            </div>
+
+                        {{ form_end(form) }}
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="card-footer bg-transparent border-0 text-center pb-3 pt-0">
+                        <small>
+                            <a href="{{ path('app_logout') }}" class="logout-link">
+                                <i class="fas fa-sign-out-alt"></i> {% trans %}Déconnexion{% endtrans %}
+                            </a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/pages/profile-choice.js') }}"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.profile-choice-form');
+        if (!form) return;
+        const submit = form.querySelector('.btn-premium-submit');
+        const radios = Array.from(form.querySelectorAll('input[type="radio"][name$="[profileType]"]'));
+        if (!submit || !radios.length) return;
+        const refresh = function () {
+          const ready = radios.some(function (radio) { return radio.checked; });
+          submit.disabled = !ready;
+          submit.setAttribute('aria-disabled', ready ? 'false' : 'true');
+          submit.classList.toggle('mol-choice-submit-pending', !ready);
+          submit.classList.toggle('mol-choice-submit-ready', ready);
+        };
+        radios.forEach(function (radio) { radio.addEventListener('change', refresh); });
+        refresh();
+      });
+    </script>
+{% endblock %}

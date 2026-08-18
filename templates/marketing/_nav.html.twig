@@ -1,0 +1,38 @@
+{% set registerRoute = registerRoute|default('app_register') %}
+{% set loginRoute    = loginRoute|default('app_login') %}
+
+<header class="sticky top-0 z-30 px-3 pt-3 sm:px-4">
+	<div class="max-w-6xl mx-auto">
+		<div class="mol-topbar rounded-[24px] px-3 py-3 sm:px-4">
+			<div class="flex items-center justify-between gap-3">
+				<div class="min-w-0 hidden sm:block">
+					<div class="text-[11px] uppercase tracking-[0.24em] text-slate-400 font-bold">
+						{% trans %}À propos{% endtrans %}
+					</div>
+					<div class="text-sm font-extrabold text-slate-900 truncate">
+						Main d’Œuvre Locale
+					</div>
+				</div>
+
+				<nav class="flex-1 overflow-x-auto scrollbar-hide">
+					<div class="flex items-center gap-2 min-w-max md:justify-center">
+						<a class="mol-nav-link {{ page == 'story' ? 'is-active' : '' }}" href="{{ path('marketing_story') }}">
+							<span>✨</span> {% trans %}Notre histoire{% endtrans %}
+						</a>
+						<a class="mol-nav-link {{ page == 'vision' ? 'is-active' : '' }}" href="{{ path('marketing_vision') }}">
+							<span>🔭</span> {% trans %}Vision{% endtrans %}
+						</a>
+						<a class="mol-nav-link {{ page == 'mission' ? 'is-active' : '' }}" href="{{ path('marketing_mission') }}">
+							<span>🎯</span> {% trans %}Mission{% endtrans %}
+						</a>
+						<a class="mol-nav-link {{ page == 'services' ? 'is-active' : '' }}" href="{{ path('marketing_services') }}">
+							<span>🧰</span> {% trans %}Services{% endtrans %}
+						</a>
+					</div>
+				</nav>
+
+				
+			</div>
+		</div>
+	</div>
+</header>

@@ -1,0 +1,1327 @@
+<div
+    id="molGroupChatModal"
+    class="mol-group-modal"
+    hidden
+    aria-hidden="true"
+    data-create-url="{{ path('chat_group_create') }}"
+    data-mine-url="{{ path('chat_group_mine') }}"
+    data-discover-url="{{ path('chat_group_discover') }}"
+    data-recommended-url="{{ path('chat_group_recommended_for_me') }}"
+    data-join-requests-url="{{ path('chat_group_join_requests') }}"
+    data-request-join-url-template="{{ path('chat_group_request_join', { id: 0 }) }}"
+    data-approve-url-template="{{ path('chat_group_approve_join_request', { id: 0 }) }}"
+    data-reject-url-template="{{ path('chat_group_reject_join_request', { id: 0 }) }}"
+    data-detail-url-template="{{ path('chat_group_detail', { id: 0 }) }}"
+    data-messages-url-template="{{ path('chat_group_messages', { id: 0 }) }}"
+    data-send-url-template="{{ path('chat_group_send', { id: 0 }) }}"
+    data-send-file-url-template="{{ path('chat_group_send_file', { id: 0 }) }}"
+    data-delete-message-url-template="{{ path('chat_group_delete_message', { id: 0 }) }}"
+    data-remove-member-url-template="{{ path('chat_group_remove_member', { id: 0, memberId: 0 }) }}"
+    data-invite-url-template="{{ path('chat_group_invite', { id: 0 }) }}"
+    data-recommend-url-template="{{ path('chat_group_recommend', { id: 0 }) }}"
+    data-recommendable-friends-url-template="{{ path('chat_group_recommendable_friends', { id: 0 }) }}"
+    data-toggle-reaction-url-template="{{ path('chat_group_toggle_reaction', { id: 0 }) }}"
+    data-presence-url-template="{{ path('chat_group_presence_ping', { id: 0 }) }}"
+>
+    <div class="mol-group-modal__backdrop" data-group-close></div>
+
+    <section
+        class="mol-group-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="molGroupChatModalTitle"
+    >
+        <header class="mol-group-modal__header">
+            <div>
+                <div class="mol-group-modal__badge">
+                    <i class="bi bi-people-fill"></i>
+                    <span>{% trans %}Groupe premium{% endtrans %}</span>
+                </div>
+
+                <h2 id="molGroupChatModalTitle">
+                    {% trans %}Créer un groupe{% endtrans %}
+                </h2>
+
+                <p>
+                    {% trans %}Créez un groupe, invitez des membres, validez les demandes d’intégration et échangez messages, images, vocaux, PDF, Word et fichiers.{% endtrans %}
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="mol-group-modal__close"
+                data-group-close
+                aria-label="{{ 'Fermer'|trans }}"
+            >
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <nav class="mol-group-tabs" aria-label="{{ 'Navigation des groupes'|trans }}">
+            <button type="button" class="mol-group-tab is-active" data-group-tab="mine">
+                <i class="bi bi-collection"></i>
+                <span>{% trans %}Mes groupes{% endtrans %}</span>
+            </button>
+
+            <button type="button" class="mol-group-tab" data-group-tab="discover">
+                <i class="bi bi-compass"></i>
+                <span>{% trans %}Découvrir{% endtrans %}</span>
+            </button>
+
+            <button type="button" class="mol-group-tab" data-group-tab="requests">
+                <i class="bi bi-person-check"></i>
+                <span>{% trans %}Demandes{% endtrans %}</span>
+            </button>
+
+            <button type="button" class="mol-group-tab" data-group-tab="recommended">
+                <i class="bi bi-stars"></i>
+                <span>{% trans %}Recommandés{% endtrans %}</span>
+            </button>
+
+            <button type="button" class="mol-group-tab" data-group-tab="create">
+                <i class="bi bi-plus-circle"></i>
+                <span>{% trans %}Créer{% endtrans %}</span>
+            </button>
+        </nav>
+
+        <div class="mol-group-section is-active" data-group-section="mine">
+            <div class="mol-group-section-head">
+                <h3>{% trans %}Mes groupes{% endtrans %}</h3>
+                <button type="button" class="mol-group-refresh" data-group-refresh="mine">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>{% trans %}Actualiser{% endtrans %}</span>
+                </button>
+            </div>
+
+            <div id="molMyGroupsList" class="mol-group-list">
+                <div class="mol-group-empty">{% trans %}Chargement de vos groupes...{% endtrans %}</div>
+            </div>
+        </div>
+
+        <div class="mol-group-section" data-group-section="discover">
+            <div class="mol-group-section-head">
+                <h3>{% trans %}Découvrir des groupes{% endtrans %}</h3>
+                <button type="button" class="mol-group-refresh" data-group-refresh="discover">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>{% trans %}Actualiser{% endtrans %}</span>
+                </button>
+            </div>
+
+            <div id="molDiscoverGroupsList" class="mol-group-list">
+                <div class="mol-group-empty">{% trans %}Chargement des groupes disponibles...{% endtrans %}</div>
+            </div>
+        </div>
+
+        <div class="mol-group-section" data-group-section="requests">
+            <div class="mol-group-section-head">
+                <h3>{% trans %}Demandes d’intégration{% endtrans %}</h3>
+                <button type="button" class="mol-group-refresh" data-group-refresh="requests">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>{% trans %}Actualiser{% endtrans %}</span>
+                </button>
+            </div>
+
+            <div id="molGroupRequestsList" class="mol-group-list">
+                <div class="mol-group-empty">{% trans %}Chargement des demandes...{% endtrans %}</div>
+            </div>
+        </div>
+
+        <div class="mol-group-section" data-group-section="recommended">
+            <div class="mol-group-section-head">
+                <h3>{% trans %}Groupes recommandés{% endtrans %}</h3>
+                <button type="button" class="mol-group-refresh" data-group-refresh="recommended">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    <span>{% trans %}Actualiser{% endtrans %}</span>
+                </button>
+            </div>
+
+            <div id="molRecommendedGroupsList" class="mol-group-list">
+                <div class="mol-group-empty">{% trans %}Chargement des recommandations...{% endtrans %}</div>
+            </div>
+        </div>
+
+        <div class="mol-group-section" data-group-section="create">
+            <form id="molCreateGroupForm" class="mol-group-form" autocomplete="off">
+                <div class="mol-group-grid">
+                    <div class="mol-group-field mol-group-field--wide">
+                        <label>{% trans %}Nom du groupe{% endtrans %}</label>
+                        <input type="text" name="name" placeholder="{{ 'Ex : Équipe recrutement Douala'|trans }}" required maxlength="140">
+                    </div>
+
+                    <div class="mol-group-field mol-group-field--wide">
+                        <label>{% trans %}Description{% endtrans %}</label>
+                        <textarea name="description" placeholder="{{ 'Décrivez l’objectif du groupe...'|trans }}"></textarea>
+                    </div>
+
+                    <div class="mol-group-field">
+                        <label>{% trans %}Visibilité{% endtrans %}</label>
+                        <select name="visibility">
+                            <option value="private">{% trans %}Privé{% endtrans %}</option>
+                            <option value="recommended">{% trans %}Recommandable{% endtrans %}</option>
+                            <option value="public">{% trans %}Public avec validation{% endtrans %}</option>
+                        </select>
+                    </div>
+
+                    <div class="mol-group-field">
+                        <label>{% trans %}Inviter des membres{% endtrans %}</label>
+                        <input type="text" name="invitees" placeholder="email1@test.com, email2@test.com">
+                    </div>
+
+                    <label class="mol-group-check">
+                        <input type="checkbox" name="approvalRequired" value="1" checked>
+                        <span></span>
+                        <div>
+                            <strong>{% trans %}Validation obligatoire{% endtrans %}</strong>
+                            <small>{% trans %}Les utilisateurs devront être validés avant d’intégrer le groupe.{% endtrans %}</small>
+                        </div>
+                    </label>
+
+                    <label class="mol-group-check">
+                        <input type="checkbox" name="allowFiles" value="1" checked>
+                        <span></span>
+                        <div>
+                            <strong>{% trans %}Autoriser les fichiers{% endtrans %}</strong>
+                            <small>{% trans %}Les membres peuvent envoyer des pièces jointes.{% endtrans %}</small>
+                        </div>
+                    </label>
+
+                    <label class="mol-group-check">
+                        <input type="checkbox" name="allowVoice" value="1" checked>
+                        <span></span>
+                        <div>
+                            <strong>{% trans %}Autoriser les vocaux{% endtrans %}</strong>
+                            <small>{% trans %}Les membres peuvent envoyer des messages vocaux.{% endtrans %}</small>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="mol-group-premium-row">
+                    <div>
+                        <strong>{% trans %}Espace groupe SaaS premium{% endtrans %}</strong>
+                        <span>{% trans %}Messagerie, fichiers, demandes, recommandations et modération sont centralisés dans une interface propre.{% endtrans %}</span>
+                    </div>
+                    <i class="bi bi-shield-check"></i>
+                </div>
+
+                <footer class="mol-group-modal__footer">
+                    <button type="button" class="mol-group-btn mol-group-btn--ghost" data-group-close>
+                        {% trans %}Annuler{% endtrans %}
+                    </button>
+
+                    <button type="submit" class="mol-group-btn mol-group-btn--primary">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>{% trans %}Créer le groupe{% endtrans %}</span>
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </section>
+</div>
+
+<style id="mol-group-chat-modal-style">
+    .mol-group-modal[hidden] {
+        display: none !important;
+    }
+
+    .mol-group-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .mol-group-modal__backdrop {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at top right, rgba(37, 99, 235, .32), transparent 34%),
+            radial-gradient(circle at bottom left, rgba(14, 165, 233, .22), transparent 30%),
+            rgba(15, 23, 42, .68);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .mol-group-modal__dialog {
+        position: relative;
+        width: min(920px, 100%);
+        max-height: calc(100vh - 32px);
+        overflow: auto;
+        border-radius: 32px;
+        padding: 28px;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.98));
+        border: 1px solid rgba(226, 232, 240, .95);
+        box-shadow: 0 34px 110px rgba(15, 23, 42, .34), 0 10px 30px rgba(15, 23, 42, .10);
+        opacity: 0;
+        transform: translateY(18px) scale(.975);
+        transition: .22s ease;
+    }
+
+    .mol-group-modal.is-open .mol-group-modal__dialog {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    .mol-group-modal__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 18px;
+        margin-bottom: 22px;
+    }
+
+    .mol-group-modal__badge {
+        width: fit-content;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #eef4ff;
+        color: #2563eb;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: .02em;
+        margin-bottom: 12px;
+        box-shadow: inset 0 0 0 1px rgba(37, 99, 235, .10);
+    }
+
+    .mol-group-modal__header h2 {
+        margin: 0;
+        color: #0f172a;
+        font-size: clamp(26px, 4vw, 38px);
+        font-weight: 950;
+        line-height: 1.05;
+        letter-spacing: -.04em;
+    }
+
+    .mol-group-modal__header p {
+        max-width: 620px;
+        margin: 10px 0 0;
+        color: #64748b;
+        font-size: 13px;
+        line-height: 1.6;
+        font-weight: 500;
+    }
+
+    .mol-group-modal__close {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border: 0;
+        border-radius: 16px;
+        background: #f8fafc;
+        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .22);
+    }
+
+    .mol-group-tabs {
+        display: flex;
+        gap: 8px;
+        padding: 6px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        margin-bottom: 18px;
+        overflow-x: auto;
+    }
+
+    .mol-group-tab {
+        border: 0;
+        height: 38px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: transparent;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 850;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .mol-group-tab.is-active {
+        background: #fff;
+        color: #2563eb;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .08);
+    }
+
+    .mol-group-section {
+        display: none;
+    }
+
+    .mol-group-section.is-active {
+        display: block;
+    }
+
+    .mol-group-section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .mol-group-section-head h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 950;
+    }
+
+    .mol-group-refresh {
+        height: 36px;
+        border: 0;
+        border-radius: 12px;
+        padding: 0 12px;
+        background: #eef2ff;
+        color: #1d4ed8;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .mol-group-form {
+        display: grid;
+        gap: 18px;
+    }
+
+    .mol-group-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .mol-group-field--wide,
+    .mol-group-check {
+        grid-column: 1 / -1;
+    }
+
+    .mol-group-field label {
+        display: block;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 850;
+        margin-bottom: 7px;
+    }
+
+    .mol-group-field input,
+    .mol-group-field textarea,
+    .mol-group-field select {
+        width: 100%;
+        border: 1px solid rgba(148, 163, 184, .28);
+        border-radius: 16px;
+        background: #f8fafc;
+        color: #0f172a;
+        outline: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: .16s ease;
+    }
+
+    .mol-group-field input,
+    .mol-group-field select {
+        height: 48px;
+        padding: 0 14px;
+    }
+
+    .mol-group-field textarea {
+        min-height: 108px;
+        resize: vertical;
+        padding: 14px;
+    }
+
+    .mol-group-field input:focus,
+    .mol-group-field textarea:focus,
+    .mol-group-field select:focus {
+        border-color: rgba(37, 99, 235, .48);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, .08);
+    }
+
+    .mol-group-check {
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        padding: 13px;
+        border-radius: 18px;
+        background: #fff;
+        border: 1px solid rgba(148, 163, 184, .18);
+        cursor: pointer;
+    }
+
+    .mol-group-check input {
+        display: none;
+    }
+
+    .mol-group-check > span {
+        width: 42px;
+        height: 25px;
+        border-radius: 999px;
+        background: #cbd5e1;
+        position: relative;
+        transition: .16s ease;
+    }
+
+    .mol-group-check > span::after {
+        content: "";
+        position: absolute;
+        width: 19px;
+        height: 19px;
+        left: 3px;
+        top: 3px;
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, .20);
+        transition: .16s ease;
+    }
+
+    .mol-group-check input:checked + span {
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+    }
+
+    .mol-group-check input:checked + span::after {
+        transform: translateX(17px);
+    }
+
+    .mol-group-check strong {
+        display: block;
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 950;
+    }
+
+    .mol-group-check small {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .mol-group-premium-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(37, 99, 235, .10), rgba(56, 189, 248, .08)), #fff;
+        border: 1px solid rgba(37, 99, 235, .12);
+        box-shadow: 0 14px 35px rgba(37, 99, 235, .08);
+    }
+
+    .mol-group-premium-row strong {
+        display: block;
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 950;
+    }
+
+    .mol-group-premium-row span {
+        display: block;
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 4px;
+        line-height: 1.5;
+    }
+
+    .mol-group-premium-row i {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 17px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        font-size: 22px;
+        box-shadow: 0 16px 30px rgba(37, 99, 235, .25);
+    }
+
+    .mol-group-modal__footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(148, 163, 184, .18);
+    }
+
+    .mol-group-btn,
+    .mol-group-small-btn {
+        border: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 900;
+        transition: .16s ease;
+        white-space: nowrap;
+    }
+
+    .mol-group-btn {
+        height: 46px;
+        border-radius: 16px;
+        padding: 0 18px;
+        font-size: 13px;
+    }
+
+    .mol-group-btn--ghost {
+        background: #f8fafc;
+        color: #334155;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .24);
+    }
+
+    .mol-group-btn--primary {
+        color: #fff;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 14px 28px rgba(37, 99, 235, .24);
+    }
+
+    .mol-group-btn:hover,
+    .mol-group-small-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .mol-group-btn.is-loading,
+    .mol-group-small-btn.is-loading {
+        pointer-events: none;
+        opacity: .72;
+    }
+
+    .mol-group-list {
+        display: grid;
+        gap: 12px;
+        max-height: 430px;
+        overflow: auto;
+        padding-right: 4px;
+    }
+
+    .mol-group-card {
+        display: grid;
+        grid-template-columns: 52px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        padding: 14px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid rgba(148, 163, 184, .20);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .045);
+    }
+
+    .mol-group-card__avatar {
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2563eb, #38bdf8);
+        color: #fff;
+        font-size: 22px;
+        box-shadow: 0 14px 28px rgba(37, 99, 235, .22);
+    }
+
+    .mol-group-card__title {
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 950;
+        line-height: 1.2;
+    }
+
+    .mol-group-card__meta,
+    .mol-group-card__desc {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 4px;
+        line-height: 1.45;
+    }
+
+    .mol-group-card__desc {
+        color: #475569;
+        margin-top: 5px;
+    }
+
+    .mol-group-card__actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .mol-group-small-btn {
+        height: 36px;
+        border-radius: 13px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+
+    .mol-group-small-btn--primary {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .mol-group-small-btn--dark {
+        background: #0f172a;
+        color: #fff;
+    }
+
+    .mol-group-small-btn--ghost {
+        background: #eef2ff;
+        color: #1d4ed8;
+    }
+
+    .mol-group-small-btn--danger {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .mol-group-empty {
+        padding: 22px;
+        text-align: center;
+        border-radius: 20px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 750;
+        border: 1px dashed rgba(148, 163, 184, .35);
+    }
+
+    body.mol-group-modal-open {
+        overflow: hidden !important;
+    }
+
+    @media (max-width: 720px) {
+        .mol-group-modal {
+            padding: 10px;
+            align-items: flex-end;
+        }
+
+        .mol-group-modal__dialog {
+            border-radius: 28px 28px 18px 18px;
+            padding: 20px;
+        }
+
+        .mol-group-grid,
+        .mol-group-card {
+            grid-template-columns: 1fr;
+        }
+
+        .mol-group-card {
+            grid-template-columns: 44px minmax(0, 1fr);
+        }
+
+        .mol-group-card__actions {
+            grid-column: 1 / -1;
+            justify-content: flex-end;
+        }
+
+        .mol-group-card__avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 15px;
+        }
+
+        .mol-group-modal__footer {
+            flex-direction: column-reverse;
+        }
+
+        .mol-group-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script id="mol-group-chat-modal-script">
+(() => {
+    if (window.__MOL_GROUP_CHAT_MODAL_READY__) return;
+    window.__MOL_GROUP_CHAT_MODAL_READY__ = true;
+
+    const STATE = {
+        activeTab: 'mine',
+        loadedTabs: new Set(),
+        lastFocused: null
+    };
+
+    function modal() {
+        return document.getElementById('molGroupChatModal');
+    }
+
+    function form() {
+        return document.getElementById('molCreateGroupForm');
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function closeAnyPanelMenu() {
+        try {
+            window.MOLChatPanelMenu?.close?.();
+        } catch (_) {}
+
+        document
+            .querySelectorAll('#molChatPanelMenuFinal, #molChatPanelMenu, #molChatPanelMenuRescue, .mol-chat-menu, .mol-panel-menu')
+            .forEach((menu) => {
+                menu.classList.remove('is-open', 'show');
+                menu.setAttribute('aria-hidden', 'true');
+                if (menu.id === 'molChatPanelMenuRescue') {
+                    menu.style.display = 'none';
+                }
+            });
+
+        document
+            .querySelectorAll('#molChatPanelOptionsBtnFinal, #molChatPanelOptionsBtn, #molChatPanelOptionsBtnRescue, [aria-expanded="true"]')
+            .forEach((button) => button.setAttribute('aria-expanded', 'false'));
+    }
+
+    function cleanupBootstrapBackdrops() {
+        const hasVisibleBootstrapModal = !!document.querySelector('.modal.show');
+
+        if (!hasVisibleBootstrapModal) {
+            document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        }
+    }
+
+    function notify(type, title, text = '') {
+        if (window.Swal) {
+            Swal.fire({
+                icon: type || 'info',
+                title: title || '',
+                text: text || '',
+                timer: type === 'success' ? 1700 : undefined,
+                showConfirmButton: type !== 'success',
+                confirmButtonColor: '#2563eb',
+                backdrop: 'rgba(15,23,42,.38)'
+            });
+            return;
+        }
+
+        alert([title, text].filter(Boolean).join('\n'));
+    }
+
+    function urlFromTemplate(template, id) {
+        return String(template || '')
+            .replace('/0/', '/' + encodeURIComponent(id) + '/')
+            .replace('/0', '/' + encodeURIComponent(id))
+            .replace('=0', '=' + encodeURIComponent(id));
+    }
+
+    async function fetchJson(url, options = {}) {
+        if (!url) {
+            throw new Error('URL manquante.');
+        }
+
+        const response = await fetch(url, {
+            credentials: 'same-origin',
+            cache: 'no-store',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                ...(options.headers || {})
+            },
+            ...options
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || data.ok === false) {
+            throw new Error(data.message || data.error || 'Erreur serveur.');
+        }
+
+        return data;
+    }
+
+    function setButtonLoading(button, loading, loadingText = 'Chargement...') {
+        if (!button) return;
+
+        if (loading) {
+            button.dataset.oldHtml = button.innerHTML;
+            button.classList.add('is-loading');
+            button.disabled = true;
+            button.innerHTML = `<span class="spinner-border spinner-border-sm"></span><span>${escapeHtml(loadingText)}</span>`;
+            return;
+        }
+
+        button.classList.remove('is-loading');
+        button.disabled = false;
+
+        if (button.dataset.oldHtml) {
+            button.innerHTML = button.dataset.oldHtml;
+            delete button.dataset.oldHtml;
+        }
+    }
+
+    async function openModal(tab = 'mine') {
+        const m = modal();
+        if (!m) return;
+
+        cleanupBootstrapBackdrops();
+        closeAnyPanelMenu();
+
+        STATE.lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        m.hidden = false;
+        m.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('mol-group-modal-open');
+
+        requestAnimationFrame(() => {
+            m.classList.add('is-open');
+        });
+
+        await setActiveTab(tab || 'mine');
+    }
+
+    function closeModal() {
+        const m = modal();
+        if (!m) return;
+
+        m.classList.remove('is-open');
+        m.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('mol-group-modal-open');
+
+        setTimeout(() => {
+            m.hidden = true;
+            cleanupBootstrapBackdrops();
+            try {
+                STATE.lastFocused?.focus?.();
+            } catch (_) {}
+        }, 180);
+    }
+
+    async function setActiveTab(tab) {
+        const m = modal();
+        if (!m) return;
+
+        STATE.activeTab = tab;
+
+        m.querySelectorAll('[data-group-tab]').forEach((button) => {
+            button.classList.toggle('is-active', button.dataset.groupTab === tab);
+        });
+
+        m.querySelectorAll('[data-group-section]').forEach((section) => {
+            section.classList.toggle('is-active', section.dataset.groupSection === tab);
+        });
+
+        if (tab === 'mine') await loadMyGroups();
+        if (tab === 'discover') await loadDiscoverGroups();
+        if (tab === 'requests') await loadJoinRequests();
+        if (tab === 'recommended') await loadRecommendedGroups();
+        if (tab === 'create') setTimeout(() => form()?.querySelector('[name="name"]')?.focus(), 120);
+    }
+
+    function getGroupLabel(group = {}) {
+        return group.name || group.title || 'Groupe';
+    }
+
+    function renderGroups(containerId, groups, mode) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (!groups.length) {
+            container.innerHTML = `<div class="mol-group-empty">Aucun groupe à afficher.</div>`;
+            return;
+        }
+
+        container.innerHTML = groups.map((group) => {
+            const id = Number(group.id || 0);
+            let actions = '';
+
+            if (mode === 'mine') {
+                actions = `
+                    <button type="button" class="mol-group-small-btn mol-group-small-btn--primary" data-open-group="${id}">
+                        <i class="bi bi-chat-dots"></i>
+                        <span>Ouvrir</span>
+                    </button>
+                `;
+            }
+
+            if (mode === 'discover' || mode === 'recommended') {
+                actions = group.requestPending
+                    ? `
+                        <button type="button" class="mol-group-small-btn mol-group-small-btn--ghost" disabled>
+                            <i class="bi bi-hourglass-split"></i>
+                            <span>En attente</span>
+                        </button>
+                    `
+                    : `
+                        <button type="button" class="mol-group-small-btn mol-group-small-btn--dark" data-request-join="${id}">
+                            <i class="bi bi-person-plus"></i>
+                            <span>Intégrer le groupe</span>
+                        </button>
+                    `;
+            }
+
+            return `
+                <article class="mol-group-card">
+                    <div class="mol-group-card__avatar">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+
+                    <div>
+                        <div class="mol-group-card__title">${escapeHtml(getGroupLabel(group))}</div>
+
+                        <div class="mol-group-card__meta">
+                            ${Number(group.memberCount || group.membersCount || 0)} membre(s) · Créateur : ${escapeHtml(group.ownerName || group.owner || 'Utilisateur')}
+                        </div>
+
+                        ${group.description ? `<div class="mol-group-card__desc">${escapeHtml(group.description)}</div>` : ''}
+                        ${group.recommendedBy ? `<div class="mol-group-card__desc">Recommandé par ${escapeHtml(group.recommendedBy)}</div>` : ''}
+                        ${group.note ? `<div class="mol-group-card__desc">“${escapeHtml(group.note)}”</div>` : ''}
+                    </div>
+
+                    <div class="mol-group-card__actions">
+                        ${actions}
+                    </div>
+                </article>
+            `;
+        }).join('');
+    }
+
+    async function loadMyGroups() {
+        const m = modal();
+        const container = document.getElementById('molMyGroupsList');
+        if (!m || !container) return;
+
+        container.innerHTML = `<div class="mol-group-empty">Chargement de vos groupes...</div>`;
+
+        try {
+            const data = await fetchJson(m.dataset.mineUrl);
+            renderGroups('molMyGroupsList', data.items || data.groups || [], 'mine');
+        } catch (error) {
+            console.error('[MOL GROUP] mine error', error);
+            container.innerHTML = `<div class="mol-group-empty">Impossible de charger vos groupes.</div>`;
+        }
+    }
+
+    async function loadDiscoverGroups() {
+        const m = modal();
+        const container = document.getElementById('molDiscoverGroupsList');
+
+        if (!m || !container) return;
+
+        container.innerHTML = `<div class="mol-group-empty">Chargement des groupes disponibles...</div>`;
+
+        try {
+            console.log('[MOL GROUP] discover URL =', m.dataset.discoverUrl);
+
+            const data = await fetchJson(m.dataset.discoverUrl);
+
+            console.log('[MOL GROUP] discover response =', data);
+
+            renderGroups('molDiscoverGroupsList', data.items || data.groups || [], 'discover');
+        } catch (error) {
+            console.error('[MOL GROUP] discover error =', error);
+
+            container.innerHTML = `
+                <div class="mol-group-empty">
+                    Impossible de charger les groupes.<br>
+                    <small>${escapeHtml(error.message || 'Erreur inconnue')}</small>
+                </div>
+            `;
+        }
+    }
+
+    async function loadRecommendedGroups() {
+        const m = modal();
+        const container = document.getElementById('molRecommendedGroupsList');
+        if (!m || !container) return;
+
+        container.innerHTML = `<div class="mol-group-empty">Chargement des recommandations...</div>`;
+
+        try {
+            const data = await fetchJson(m.dataset.recommendedUrl);
+            renderGroups('molRecommendedGroupsList', data.items || data.groups || [], 'recommended');
+        } catch (error) {
+            console.error('[MOL GROUP] recommended error', error);
+            container.innerHTML = `<div class="mol-group-empty">Impossible de charger les recommandations.</div>`;
+        }
+    }
+
+    async function loadJoinRequests() {
+        const m = modal();
+        const container = document.getElementById('molGroupRequestsList');
+        if (!m || !container) return;
+
+        container.innerHTML = `<div class="mol-group-empty">Chargement des demandes...</div>`;
+
+        try {
+            const data = await fetchJson(m.dataset.joinRequestsUrl);
+            const items = data.items || data.requests || [];
+
+            if (!items.length) {
+                container.innerHTML = `<div class="mol-group-empty">Aucune demande en attente.</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map((item) => `
+                <article class="mol-group-card">
+                    <div class="mol-group-card__avatar">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+
+                    <div>
+                        <div class="mol-group-card__title">${escapeHtml(item.requesterName || item.userName || 'Utilisateur')}</div>
+                        <div class="mol-group-card__meta">
+                            Demande pour : ${escapeHtml(item.groupName || 'Groupe')} · ${escapeHtml(item.createdAt || '')}
+                        </div>
+                        ${item.message ? `<div class="mol-group-card__desc">${escapeHtml(item.message)}</div>` : ''}
+                    </div>
+
+                    <div class="mol-group-card__actions">
+                        <button type="button"
+                            class="mol-group-small-btn mol-group-small-btn--primary"
+                            data-approve-request="${Number(item.id)}">
+                        <i class="bi bi-person-check-fill"></i>
+                        <span>Accepter</span>
+                    </button>
+
+                    <button type="button"
+                            class="mol-group-small-btn mol-group-small-btn--danger"
+                            data-reject-request="${Number(item.id)}">
+                        <i class="bi bi-person-x-fill"></i>
+                        <span>Refuser</span>
+                    </button>
+                    </div>
+                </article>
+            `).join('');
+        } catch (error) {
+            console.error('[MOL GROUP] requests error', error);
+            container.innerHTML = `<div class="mol-group-empty">Impossible de charger les demandes.</div>`;
+        }
+    }
+
+    async function createGroup() {
+        const m = modal();
+        const f = form();
+        if (!m || !f) return;
+
+        const submit = f.querySelector('button[type="submit"]');
+        const formData = new FormData(f);
+
+        try {
+            setButtonLoading(submit, true, 'Création...');
+
+            const data = await fetchJson(m.dataset.createUrl, {
+                method: 'POST',
+                body: formData
+            });
+
+            f.reset();
+            notify('success', 'Groupe créé', data.message || 'Le groupe a été créé avec succès.');
+            await setActiveTab('mine');
+        } catch (error) {
+            console.error('[MOL GROUP] create error', error);
+            notify('error', 'Action impossible', error.message || 'Impossible de créer le groupe.');
+        } finally {
+            setButtonLoading(submit, false);
+        }
+    }
+
+    async function requestJoin(groupId) {
+        const m = modal();
+        if (!m) return;
+
+        const url = urlFromTemplate(m.dataset.requestJoinUrlTemplate, groupId);
+
+        await fetchJson(url, {
+            method: 'POST',
+            body: new FormData()
+        });
+
+        await Promise.allSettled([loadDiscoverGroups(), loadRecommendedGroups()]);
+        notify('success', 'Demande envoyée', 'Le créateur devra valider votre intégration.');
+    }
+
+    async function reviewRequest(requestId, type) {
+        const m = modal();
+        if (!m) return;
+
+        const template = type === 'approve'
+            ? m.dataset.approveUrlTemplate
+            : m.dataset.rejectUrlTemplate;
+
+        const url = urlFromTemplate(template, requestId);
+
+        await fetchJson(url, {
+            method: 'POST',
+            body: new FormData()
+        });
+
+        await Promise.allSettled([loadJoinRequests(), loadMyGroups()]);
+        notify('success', type === 'approve' ? 'Demande acceptée' : 'Demande refusée');
+    }
+
+    function installBridge() {
+        const previousPanelAction = window.MOLChatPanelAction;
+
+        window.MOLChatPanelAction = async function(action, payload = {}) {
+            if (
+                action === 'groups' ||
+                action === 'create_group_chat' ||
+                action === 'createGroup' ||
+                action === 'group_chat'
+            ) {
+                await openModal('discover');
+                return true;
+            }
+
+            if (typeof previousPanelAction === 'function' && previousPanelAction !== window.MOLChatPanelAction) {
+                return await previousPanelAction(action, payload);
+            }
+
+            return null;
+        };
+    }
+
+    document.addEventListener('click', async (event) => {
+        const opener = event.target.closest(
+            '[data-mol-group-chat-open], ' +
+            '[data-mol-create-group-trigger], ' +
+            '[data-action="create_group_chat"], ' +
+            '[data-action="groups"], ' +
+            '[data-mol-panel-action="groups"], ' +
+            '[data-mol-panel-action="createGroup"], ' +
+            '[data-mol-panel-action="create_group_chat"]'
+        );
+
+        if (opener) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            await openModal('discover');
+            return;
+        }
+
+        const close = event.target.closest('[data-group-close]');
+        if (close && modal()?.contains(close)) {
+            event.preventDefault();
+            closeModal();
+            return;
+        }
+
+        const tab = event.target.closest('[data-group-tab]');
+        if (tab && modal()?.contains(tab)) {
+            event.preventDefault();
+            await setActiveTab(tab.dataset.groupTab);
+            return;
+        }
+
+        const refresh = event.target.closest('[data-group-refresh]');
+        if (refresh && modal()?.contains(refresh)) {
+            event.preventDefault();
+            await setActiveTab(refresh.dataset.groupRefresh || STATE.activeTab);
+            return;
+        }
+
+        const requestJoinButton = event.target.closest('[data-request-join]');
+        if (requestJoinButton && modal()?.contains(requestJoinButton)) {
+            event.preventDefault();
+            try {
+                await requestJoin(requestJoinButton.dataset.requestJoin);
+            } catch (error) {
+                notify('error', 'Demande impossible', error.message || 'Impossible d’envoyer la demande.');
+            }
+            return;
+        }
+
+        const approveButton = event.target.closest('[data-approve-request]');
+        if (approveButton && modal()?.contains(approveButton)) {
+            event.preventDefault();
+            try {
+                await reviewRequest(approveButton.dataset.approveRequest, 'approve');
+            } catch (error) {
+                notify('error', 'Action impossible', error.message || 'Impossible d’accepter la demande.');
+            }
+            return;
+        }
+
+        const rejectButton = event.target.closest('[data-reject-request]');
+        if (rejectButton && modal()?.contains(rejectButton)) {
+            event.preventDefault();
+            try {
+                await reviewRequest(rejectButton.dataset.rejectRequest, 'reject');
+            } catch (error) {
+                notify('error', 'Action impossible', error.message || 'Impossible de refuser la demande.');
+            }
+            return;
+        }
+
+        const openGroupButton = event.target.closest('[data-open-group]');
+        if (openGroupButton && modal()?.contains(openGroupButton)) {
+            event.preventDefault();
+
+            if (window.MolGroupConversation?.open) {
+                closeModal();
+                window.MolGroupConversation.open(openGroupButton.dataset.openGroup);
+                return;
+            }
+
+            notify('info', 'Groupe sélectionné', 'Branche ici la fenêtre de conversation du groupe.');
+        }
+    }, true);
+
+    document.addEventListener('submit', async (event) => {
+        const f = event.target.closest('#molCreateGroupForm');
+        if (!f || !modal()?.contains(f)) return;
+
+        event.preventDefault();
+        await createGroup();
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal() && !modal().hidden) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('turbo:before-cache', () => {
+        closeModal();
+        cleanupBootstrapBackdrops();
+    });
+
+    document.addEventListener('DOMContentLoaded', installBridge);
+    document.addEventListener('turbo:load', installBridge);
+
+    if (document.readyState !== 'loading') {
+        installBridge();
+    }
+
+    window.MolGroupChat = {
+        open: openModal,
+        close: closeModal,
+        setTab: setActiveTab,
+        reload() {
+            if (STATE.activeTab === 'mine') return loadMyGroups();
+            if (STATE.activeTab === 'discover') return loadDiscoverGroups();
+            if (STATE.activeTab === 'requests') return loadJoinRequests();
+            if (STATE.activeTab === 'recommended') return loadRecommendedGroups();
+            return Promise.resolve();
+        },
+        cleanup: cleanupBootstrapBackdrops
+    };
+})();
+</script>

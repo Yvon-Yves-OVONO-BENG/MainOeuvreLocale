@@ -1,0 +1,441 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Mon portfolio{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "portfolio/_vip_ui_portfolio.html.twig" %}
+
+
+<section class="sptb mol-portfolio-page">
+  <div class="container">
+    <div class="mol-shell">
+
+      <div class="mol-hero">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-8">
+            <div class="mol-kicker">
+              <i class="fa fa-diamond"></i>
+              {% trans %}Portfolio premium{% endtrans %}
+            </div>
+
+            <h2 class="mol-title">
+              <i class="fa fa-photo me-2 text-primary"></i>
+              {% trans %}Mon portfolio{% endtrans %}
+            </h2>
+
+            <div class="mol-subtitle">
+              {% trans %}Expose tes réalisations de manière élégante et professionnelle pour renforcer la crédibilité de ton profil et attirer davantage de recruteurs.{% endtrans %}
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="mol-actions-top">
+              <a href="{{ path('profile_edit') }}" class="mol-btn mol-btn-light">
+                <i class="fa fa-arrow-left"></i>
+                {% trans %}Retour{% endtrans %}
+              </a>
+
+              <a href="#upload" class="mol-btn mol-btn-primary">
+                <i class="fa fa-plus"></i>
+                {% trans %}Ajouter des photos{% endtrans %}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mol-stats">
+        <div class="mol-stat">
+          <div class="mol-stat-top">
+            <div class="mol-stat-label">{% trans %}Photos publiées{% endtrans %}</div>
+            <div class="mol-stat-icon"><i class="fa fa-image"></i></div>
+          </div>
+          <div class="mol-stat-value">{{ pro.professionalMedia|length }}</div>
+        </div>
+
+        <div class="mol-stat">
+          <div class="mol-stat-top">
+            <div class="mol-stat-label">{% trans %}Visibilité profil{% endtrans %}</div>
+            <div class="mol-stat-icon"><i class="fa fa-line-chart"></i></div>
+          </div>
+          <div class="mol-stat-value">{% trans %}Élevée{% endtrans %}</div>
+        </div>
+
+        <div class="mol-stat">
+          <div class="mol-stat-top">
+            <div class="mol-stat-label">{% trans %}Qualité portfolio{% endtrans %}</div>
+            <div class="mol-stat-icon"><i class="fa fa-star"></i></div>
+          </div>
+          <div class="mol-stat-value">{% trans %}Pro{% endtrans %}</div>
+        </div>
+      </div>
+
+      <div id="upload" class="mol-card">
+        <div class="mol-card-body">
+          <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+            <div class="fw-bold">
+              <i class="fa fa-upload text-primary me-2"></i>
+              {% trans %}Ajouter de nouvelles photos{% endtrans %}
+            </div>
+
+            <span class="mol-pill">
+              <i class="fa fa-folder-open text-primary"></i>
+              {{ pro.professionalMedia|length }}
+              {% trans %}photo(s){% endtrans %}
+            </span>
+          </div>
+
+          <div class="mol-upload-box">
+            {{ form_start(form, {'attr': {'enctype':'multipart/form-data'}}) }}
+              <div class="row g-3 align-items-end">
+                <div class="col-lg-9">
+                  {{ form_label(form.files, 'Ajouter des photos'|trans, {'label_attr': {'class':'mol-upload-label'}}) }}
+
+                  <div class="input-group mol-upload-input">
+                    <span class="input-group-text">
+                      <i class="fa fa-image text-primary"></i>
+                    </span>
+
+                    {{ form_widget(form.files, {
+                      'attr': {
+                        'class':'form-control',
+                        'id':'portfolioFiles',
+                        'multiple':'multiple',
+                        'accept':'image/*'
+                      }
+                    }) }}
+                  </div>
+
+                  {{ form_errors(form.files) }}
+
+                  <div class="mol-upload-hint">
+                    <i class="fa fa-info-circle me-1"></i>
+                    {% trans %}Formats acceptés : images • Taille maximale : 2 Mo par photo.{% endtrans %}
+                  </div>
+                </div>
+
+                <div class="col-lg-3 d-grid">
+                  <button type="submit" class="mol-btn mol-btn-primary w-100" style="min-height:54px;">
+                    <i class="fa fa-plus"></i>
+                    {% trans %}Ajouter{% endtrans %}
+                  </button>
+                </div>
+              </div>
+            {{ form_end(form) }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mol-card">
+        <div class="mol-card-body">
+          <div class="mol-gallery-head">
+            <div>
+              <h5 class="mol-card-title">
+                <i class="fa fa-th-large me-2 text-primary"></i>
+                {% trans %}Galerie premium{% endtrans %}
+              </h5>
+              <div class="mol-soft mt-1">
+                {% trans %}Toutes vos réalisations visuelles enregistrées dans votre espace portfolio.{% endtrans %}
+              </div>
+            </div>
+
+            <span class="mol-pill">
+              <i class="fa fa-camera text-primary"></i>
+              {{ pro.professionalMedia|length }}
+              {% trans %}élément(s){% endtrans %}
+            </span>
+          </div>
+
+          {% if pro.professionalMedia|length == 0 %}
+            <div class="mol-empty">
+              <div class="mol-empty-icon">
+                <i class="fa fa-image"></i>
+              </div>
+              <div class="mol-empty-title">
+                {% trans %}Aucune photo pour le moment{% endtrans %}
+              </div>
+              <div class="mol-empty-sub">
+                {% trans %}Ajoute tes premières réalisations pour donner plus de valeur à ton profil et inspirer confiance aux recruteurs.{% endtrans %}
+              </div>
+            </div>
+          {% else %}
+            <div class="mol-grid">
+              {% for media in pro.professionalMedia %}
+                {% set mediaUrl = asset('uploads/portfolio/' ~ media.file) %}
+                <div class="mol-media-card">
+                  <div
+                    class="mol-media-thumb-wrap js-open-slideshow"
+                    data-index="{{ loop.index0 }}"
+                    data-src="{{ mediaUrl }}"
+                    data-name="{{ media.file }}"
+                    data-date="{{ media.createdAt ? media.createdAt|date('d/m/Y') : '—' }}"
+                  >
+                    <img
+                      src="{{ mediaUrl }}"
+                      alt="{{ 'Portfolio'|trans }}"
+                      class="mol-media-thumb"
+                    >
+
+                    <div class="mol-media-overlay"></div>
+
+                    <div class="mol-media-top">
+                      <span class="mol-date-badge">
+                        <i class="fa fa-calendar"></i>
+                        {{ media.createdAt ? media.createdAt|date('d/m/Y') : '—' }}
+                      </span>
+
+                      <span class="mol-quality-badge">
+                        <i class="fa fa-check"></i>
+                        {% trans %}Publié{% endtrans %}
+                      </span>
+                    </div>
+
+                    <div class="mol-media-zoom">
+                      <span class="mol-zoom-badge">
+                        <i class="fa fa-search-plus"></i>
+                        {% trans %}Voir en diaporama{% endtrans %}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="mol-media-bottom">
+                    <div class="mol-media-title">
+                      {% trans %}Réalisation visuelle{% endtrans %}
+                    </div>
+                    <div class="mol-media-sub">
+                      {{ media.file }}
+                    </div>
+                  </div>
+
+                  <div class="mol-media-actions">
+                    <button
+                      type="button"
+                      class="mol-btn-glass js-delete-media"
+                      data-action="{{ path('talent_portfolio_delete', {id: media.id}) }}"
+                      data-token="{{ csrf_token('del_media_' ~ media.id) }}"
+                      data-name="{{ media.file }}"
+                    >
+                      <i class="fa fa-trash"></i>
+                      {% trans %}Supprimer{% endtrans %}
+                    </button>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="mol-lightbox" id="molLightbox" aria-hidden="true">
+  <div class="mol-lightbox-dialog">
+    <div class="mol-lightbox-topbar">
+      <div class="mol-lightbox-counter" id="molLightboxCounter">
+        <i class="fa fa-image"></i>
+        <span>1 / 1</span>
+      </div>
+
+      <button type="button" class="mol-lightbox-close" id="molLightboxClose" aria-label="Fermer">
+        <i class="fa fa-times"></i>
+      </button>
+    </div>
+
+    <div class="mol-lightbox-stage">
+      <button type="button" class="mol-lightbox-nav mol-lightbox-prev" id="molLightboxPrev" aria-label="Précédent">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+
+      <img alt="" class="mol-lightbox-img" id="molLightboxImg" decoding="async">
+
+      <button type="button" class="mol-lightbox-nav mol-lightbox-next" id="molLightboxNext" aria-label="Suivant">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="mol-lightbox-caption">
+      <div class="mol-lightbox-caption-main" id="molLightboxCaption"></div>
+    </div>
+
+    <div class="mol-lightbox-strip" id="molLightboxStrip"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.js-delete-media').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const action = this.dataset.action || '';
+      const token  = this.dataset.token || '';
+      const name   = this.dataset.name || '';
+
+      Swal.fire({
+        title: 'Supprimer cette photo ?',
+        html: `
+          <div style="font-size:14px; color:#475569;">
+            Cette action est définitive.<br>
+            La photo <strong style="color:#0f172a;">${name}</strong> sera supprimée du portfolio.
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler',
+        reverseButtons: true,
+        focusCancel: true,
+        background: '#ffffff',
+        color: '#0f172a',
+        borderRadius: '22px',
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#e2e8f0',
+        customClass: {
+          popup: 'mol-swal-popup',
+          confirmButton: 'mol-swal-confirm',
+          cancelButton: 'mol-swal-cancel'
+        }
+      }).then((result) => {
+        if (!result.isConfirmed) return;
+
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = action;
+        form.style.display = 'none';
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = '_token';
+        input.value = token;
+
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      });
+    });
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const items = Array.from(document.querySelectorAll('.js-open-slideshow')).map((el, index) => ({
+    index,
+    src: el.dataset.src || '',
+    name: el.dataset.name || '',
+    date: el.dataset.date || ''
+  }));
+
+  const lightbox = document.getElementById('molLightbox');
+  const img = document.getElementById('molLightboxImg');
+  const caption = document.getElementById('molLightboxCaption');
+  const counter = document.getElementById('molLightboxCounter');
+  const prevBtn = document.getElementById('molLightboxPrev');
+  const nextBtn = document.getElementById('molLightboxNext');
+  const closeBtn = document.getElementById('molLightboxClose');
+  const strip = document.getElementById('molLightboxStrip');
+
+  if (!lightbox || !img || !caption || !counter || !prevBtn || !nextBtn || !closeBtn || !strip || !items.length) {
+    return;
+  }
+
+  let currentIndex = 0;
+
+  function buildStrip() {
+    strip.innerHTML = '';
+    items.forEach((item, idx) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mol-lightbox-thumb' + (idx === currentIndex ? ' active' : '');
+      btn.setAttribute('aria-label', 'Photo ' + (idx + 1));
+
+      btn.innerHTML = `<img src="${item.src}" alt="">`;
+
+      btn.addEventListener('click', function () {
+        openAt(idx);
+      });
+
+      strip.appendChild(btn);
+    });
+  }
+
+  function updateStripActive() {
+    strip.querySelectorAll('.mol-lightbox-thumb').forEach((thumb, idx) => {
+      thumb.classList.toggle('active', idx === currentIndex);
+    });
+
+    const active = strip.querySelector('.mol-lightbox-thumb.active');
+    if (active) {
+      active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }
+
+  function render() {
+    const item = items[currentIndex];
+    if (!item) return;
+
+    img.src = item.src;
+    img.alt = item.name || 'Photo portfolio';
+    caption.innerHTML = `
+      <div><strong>${item.name}</strong></div>
+      <div style="opacity:.78; font-weight:600;">${item.date}</div>
+    `;
+    counter.innerHTML = `<i class="fa fa-image"></i><span>${currentIndex + 1} / ${items.length}</span>`;
+    updateStripActive();
+  }
+
+  function openAt(index) {
+    currentIndex = index;
+    render();
+    lightbox.classList.add('is-open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('is-open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function next() {
+    currentIndex = (currentIndex + 1) % items.length;
+    render();
+  }
+
+  function prev() {
+    currentIndex = (currentIndex - 1 + items.length) % items.length;
+    render();
+  }
+
+  buildStrip();
+
+  document.querySelectorAll('.js-open-slideshow').forEach((el) => {
+    el.addEventListener('click', function () {
+      const index = Number(this.dataset.index || 0);
+      openAt(index);
+    });
+  });
+
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
+  closeBtn.addEventListener('click', closeLightbox);
+
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) {
+      closeLightbox();
+    }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!lightbox.classList.contains('is-open')) return;
+
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') next();
+    if (e.key === 'ArrowLeft') prev();
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1903 @@
+{% extends 'base.html.twig' %}
+
+{% if listingType == 'talent' %}
+    {% set pageTitle = 'Talents' %}
+    {% set heroCountLabel = 'talents disponibles' %}
+    {% set heroBadge = 'Talents locaux disponibles rapidement' %}
+    {% set heroDescription = 'Trouvez rapidement un professionnel qualifié près de vous et contactez-le simplement.' %}
+{% elseif listingType == 'company' %}
+    {% set pageTitle = 'Compagnies' %}
+    {% set heroCountLabel = 'entreprises disponibles' %}
+    {% set heroBadge = 'Entreprises locales à votre service' %}
+    {% set heroDescription = 'Découvrez rapidement les entreprises, employeurs et recruteurs présents sur la plateforme.' %}
+{% else %}
+    {% set pageTitle = 'Particuliers' %}
+    {% set heroCountLabel = 'particuliers disponibles' %}
+    {% set heroBadge = 'Particuliers actifs près de vous' %}
+    {% set heroDescription = 'Retrouvez rapidement des particuliers actifs, recommandés et disponibles près de chez vous.' %}
+{% endif %}
+
+{% if listingType == 'talent' %}
+    {% set seo_description = 'Trouvez un talent, artisan, technicien ou prestataire qualifié près de chez vous au Cameroun. Comparez les profils, compétences et avis.' %}
+{% elseif listingType == 'company' %}
+    {% set seo_description = 'Découvrez les entreprises et recruteurs locaux présents sur Main d’Œuvre Locale au Cameroun.' %}
+{% else %}
+    {% set seo_description = 'Découvrez les particuliers actifs et les besoins locaux publiés sur Main d’Œuvre Locale au Cameroun.' %}
+{% endif %}
+{% block title %}{{ pageTitle }} locaux au Cameroun | Main d’Œuvre Locale{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% if listingType == 'talent' %}
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+            integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+            crossorigin="">
+        <link rel="stylesheet" href="{{ asset('css/talents/nearby-map.css') }}?v=20260721-2">
+        <link rel="stylesheet" href="{{ asset('css/search/search-radius.css') }}?v=20260721-1">
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+
+    {% include "liste_talents/_vip_ui.html.twig" %}
+
+        {# =====================================================
+           HERO TALENTS / COMPAGNIES / PARTICULIERS
+        ====================================================== #}
+        <section class="vip-hero vip-jobs-slider-hero vip-directory-slider-hero">
+
+            {# Slider d’images #}
+            <div class="vip-jobs-bg-slider" id="vipDirectoryBgSlider">
+
+                <div
+                    class="vip-jobs-bg-slide active"
+                    style="background-image:url('{{ asset('images/jobs/hero1.png') }}');">
+                </div>
+
+                <div
+                    class="vip-jobs-bg-slide"
+                    style="background-image:url('{{ asset('images/jobs/hero2.png') }}');">
+                </div>
+
+                <div
+                    class="vip-jobs-bg-slide"
+                    style="background-image:url('{{ asset('images/jobs/hero3.png') }}');">
+                </div>
+
+                <div
+                    class="vip-jobs-bg-slide"
+                    style="background-image:url('{{ asset('images/jobs/hero4.png') }}');">
+                </div>
+
+                <div
+                    class="vip-jobs-bg-slide"
+                    style="background-image:url('{{ asset('images/jobs/hero5.png') }}');">
+                </div>
+
+                <div
+                    class="vip-jobs-bg-slide"
+                    style="background-image:url('{{ asset('images/jobs/hero6.png') }}');">
+                </div>
+
+                <div
+                    class="vip-jobs-bg-slide"
+                    style="background-image:url('{{ asset('images/jobs/hero7.png') }}');">
+                </div>
+
+                <div
+                    class="vip-jobs-bg-slide"
+                    style="background-image:url('{{ asset('images/jobs/hero8.png') }}');">
+                </div>
+
+            </div>
+
+            {# Overlay #}
+            <div class="vip-jobs-slider-overlay"></div>
+
+            {# Contenu principal du hero #}
+            <div class="container vip-hero-inner vip-jobs-hero-inner vip-directory-hero-inner">
+            
+                <div class="vip-directory-hero-layout {{ listingType != 'talent' ? 'vip-directory-hero-layout--single' : '' }}">
+            
+                    {# Partie texte #}
+                    <div class="text-center vip-jobs-hero-content vip-directory-hero-content">
+            
+                        <div class="vip-jobs-hero-badge">
+                            <i class="fa fa-bolt"></i>
+                            <span>{{ heroBadge|trans }}</span>
+                        </div>
+            
+                        <h1 class="vip-title vip-jobs-hero-title"><span id="resultCount">{{ talents|length }}</span> {{ heroCountLabel|trans }}</h1>
+            
+                        <p class="vip-sub vip-jobs-hero-sub">
+                            {{ heroDescription|trans }}
+                        </p>
+            
+                        <div class="vip-pillrow vip-jobs-hero-pills">
+            
+                            <span class="vip-pill">
+                                <i class="fa fa-shield"></i>
+                                {% trans %}Profils vérifiés{% endtrans %}
+                            </span>
+            
+                            <span class="vip-pill">
+                                <i class="fa fa-map-marker"></i>
+                                {% trans %}Profils près de vous{% endtrans %}
+                            </span>
+            
+                            <span class="vip-pill">
+                                <i class="fa fa-bolt"></i>
+                                {% trans %}Accès rapide{% endtrans %}
+                            </span>
+            
+                            {% if app.user %}
+                                <span class="vip-pill vip-contact-pill">
+                                    <i class="fa fa-address-book"></i>
+            
+                                    <span id="remainingContactsCounter">
+                                        <span
+                                            class="spinner-border spinner-border-sm"
+                                            style="width:12px;height:12px;">
+                                        </span>
+                                    </span>
+                                </span>
+                            {% endif %}
+            
+                        </div>
+            
+                    </div>
+            
+                    {# Le formulaire de proximité est réservé à l'annuaire des talents #}
+                    {% if listingType == 'talent' %}
+                        {% set requestedRadius = app.request.query.get('radius') %}
+                        {% set currentRadius = requestedRadius in ['0', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100']
+                            ? requestedRadius
+                            : 0
+                        %}
+
+                        <div class="vip-directory-search-box">
+            
+                        {% include 'includes/_radius_equal_height.html.twig' %}
+
+                        <form
+                            method="get"
+                            action="{{ path('liste_talents') }}"
+                            id="vipTalentSearchForm"
+                            class="vip-search vip-directory-search-form"
+                            autocomplete="off"
+                            data-turbo="false">
+            
+                            <div class="vip-directory-search-grid">
+            
+                                {# Champ 1 : mots-clés #}
+                                <div class="vip-field vip-directory-field">
+                                    <i class="fa fa-search"></i>
+            
+                                    <input
+                                        type="text"
+                                        id="vipTalentSearch"
+                                        name="q"
+                                        value="{{ q }}"
+                                        class="vip-input"
+                                        placeholder="{{ 'Métier, compétence ou nom'|trans }}"
+                                        autocomplete="off">
+                                </div>
+            
+                                {# Champ 2 : localisation #}
+                                <div class="vip-field vip-directory-field">
+                                    <i class="fa fa-map-marker"></i>
+            
+                                    <input
+                                        type="text"
+                                        id="vipTalentCity"
+                                        name="city"
+                                        value="{{ app.request.query.get('city') }}"
+                                        class="vip-input"
+                                        placeholder="{{ 'Ville, région ou pays'|trans }}"
+                                        autocomplete="off">
+                                </div>
+            
+                                {# Champ 3 : rayon de 0 à 100 km, par pas de 10 km #}
+                                <div class="vip-directory-range-field">
+                                    <div class="vip-directory-range-head">
+                                        <label class="visually-hidden" for="vipTalentRadius">{% trans %}Rayon{% endtrans %}</label>
+                                        <output id="vipTalentRadiusValue" for="vipTalentRadius">
+                                            {{ currentRadius }} km
+                                        </output>
+                                    </div>
+
+                                    <input
+                                        type="range"
+                                        id="vipTalentRadius"
+                                        name="radius"
+                                        value="{{ currentRadius }}"
+                                        class="form-range vip-directory-range"
+                                        min="0"
+                                        max="100"
+                                        step="10"
+                                        aria-label="{{ 'Rayon'|trans }}"
+                                        aria-describedby="vipTalentRadiusScale">
+
+                                    <div class="vip-directory-range-scale" id="vipTalentRadiusScale">
+                                        <span>0 km</span>
+                                        <span>25 km</span>
+                                        <span>50 km</span>
+                                        <span>75 km</span>
+                                        <span>100 km</span>
+                                    </div>
+                                </div>
+            
+                                {# Bouton #}
+                                <button
+                                    type="submit"
+                                    id="vipTalentSearchBtn"
+                                    class="vip-btn vip-directory-search-btn">
+            
+                                    <i class="fa fa-search mol-search-button__icon" aria-hidden="true"></i>
+                                    <span class="mol-search-button__label">{% trans %}Rechercher{% endtrans %}</span>
+                                </button>
+            
+                            </div>
+            
+                        </form>
+            
+                        </div>
+                    {% endif %}
+            
+                </div>
+            
+            </div>
+
+        </section>
+
+        {% if listingType == 'talent' %}
+            <section
+                class="vip-nearby-map-section"
+                id="vipNearbyTalentMapSection"
+                hidden>
+                <div class="vip-shell">
+                    <div class="vip-nearby-map-card">
+                        <div class="vip-nearby-map-header">
+                            <div>
+                                <span class="vip-nearby-map-kicker">
+                                    {% trans %}Recherche géolocalisée{% endtrans %}
+                                </span>
+                                <h2>{% trans %}Talents disponibles dans votre rayon{% endtrans %}</h2>
+                                <p id="vipNearbyTalentMapSummary">
+                                    {% trans %}Autorisez votre position pour lancer la recherche.{% endtrans %}
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="vip-nearby-map-close"
+                                id="vipNearbyTalentMapClose"
+                                aria-label="{{ 'Fermer la carte'|trans }}">
+                                <i class="fa fa-times"></i>
+                            </button>
+                        </div>
+
+                        <div
+                            id="vipNearbyTalentMap"
+                            data-search-url="{{ path('api_talents_nearby_map') }}"
+                            data-csrf-token="{{ csrf_token('nearby_talent_map') }}">
+                        </div>
+
+                        <div class="vip-nearby-map-footer">
+                            <i class="fa fa-shield"></i>
+                            {% trans %}La position affichée des talents est approximative. Les contacts restent protégés par votre abonnement.{% endtrans %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% endif %}
+
+        {# =====================================================
+           CONTENU DE LA PAGE
+           Ton ancien contenu continue ici
+        ====================================================== #}
+        <div class="vip-shell vip-directory-content-shell">
+
+            {% if talents is empty %}
+
+            {% if listingType == 'talent' %}
+                <p>Aucun talent trouvé.</p>
+            {% elseif listingType == 'company' %}
+                <p>Aucune compagnie trouvée.</p>
+            {% else %}
+                <p>Aucun particulier trouvé.</p>
+            {% endif %}
+        
+        {% endif %}
+
+            <div class="row g-4">
+    {% for t in talents %}
+        {% if listingType == 'talent' %}
+            {% set user = t.user %}
+            {% set professionalProfile = t %}
+        {% else %}
+            {% set user = t %}
+            {% set professionalProfile = t.professionalProfile %}
+        {% endif %}
+        
+        {% set profile = user.personalProfile %}
+        {% set verified = listingType == 'talent' ? professionalProfile.isVerified : user.isEmailVerified %}
+        {% set stats = ratingsStats[user.id] ?? {'avg': 0, 'voters': 0} %}
+        {% set flag = user.country and user.country.flagFile ? asset('uploads/flags/' ~ user.country.flagFile) : null %}
+        {% set avatar = profile and profile.photo ? asset('uploads/profiles/' ~ profile.photo) : asset('uploads/profiles/avatar.png') %}
+        {% set skills = listingType == 'talent' ? professionalProfile.skills : [] %}
+        
+        {# Sécurisation du statut #}
+        {% set status = professionalProfile and professionalProfile.statusProfile ? professionalProfile.statusProfile.status : null %}
+        {% set isDisponible = status == 'Disponible' %}
+
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 border-0 shadow-sm hover-shadow" style="border-radius: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #ffffff; overflow: visible; position: relative; backdrop-filter: blur(10px);">
+                <div class="card-body p-4" style="padding-top: 50px;">
+                    
+                    <!-- Photo en haut à gauche qui dépasse du bord -->
+                    <div class="position-absolute" style="top: -20px; left: 20px; z-index: 10;">
+                        <img src="{{ avatar }}" alt="Avatar" loading="lazy" decoding="async" 
+                             class="rounded-3" 
+                             style="width: 70px; height: 70px; object-fit: cover; border: 3px solid #fff; box-shadow: 0 8px 24px rgba(0,0,0,0.12); border-radius: 14px;">
+                    </div>
+
+                    <!-- Avis + Évaluer en haut à droite -->
+                    <div class="text-end" style="margin-left: 80px; min-height: 50px;">
+                        <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+                            <div class="d-flex align-items-center gap-1">
+                                {% for i in 1..5 %}
+                                    <i class="fa fa-star" style="color: {{ i <= stats.avg|round ? '#f59e0b' : '#e5e7eb' }}; font-size: 0.8rem; transition: all 0.2s;"></i>
+                                {% endfor %}
+                                <span class="fw-bold ms-1" style="font-size: 0.85rem; color: #1a1a2e;">{{ stats.avg|number_format(1) }}</span>
+                                <span class="text-muted" style="font-size: 0.7rem;">/5</span>
+                            </div>
+                            
+                            
+                            <a href="{{ app.user ? path('ajax_user_reviews', {slug: user.slug}) : path('app_login') }}" class="{{ app.user ? 'show-user-reviews' : '' }}" data-user-slug="{{ user.slug }}" data-reviews-url="{{ app.user ? path('ajax_user_reviews', {slug: user.slug}) : path('app_login') }}"
+                               style="display: inline-flex; align-items: center; gap: 5px; border-radius: 100px; font-size: 0.65rem; font-weight: 500; padding: 0.2rem 0.8rem; background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb; border: none; text-decoration: none; transition: all 0.2s;">
+                                <i class="fa-regular fa-comment-dots" style="font-size: 0.6rem;"></i>
+                                {{ stats.voters }} Voir les avis
+                            </a>
+
+                            <a href="#" class="review-trigger" 
+                               data-user-slug="{{ user.slug }}" data-review-url="{{ path('review_create', {slug: user.slug}) }}"
+                               style="display: inline-flex; align-items: center; gap: 4px; border-radius: 100px; font-size: 0.65rem; padding: 0.2rem 0.8rem; background: linear-gradient(135deg, #fef9e7, #fef3c7); color: #92400e; border: 1px solid #fde68a; text-decoration: none; transition: all 0.2s;">
+                                <i class="fa-regular fa-star" style="font-size: 0.6rem; color: #f59e0b;"></i>Évaluer
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Nom, profession et vérification (en bas) -->
+                    <div class="mt-2">
+                        <h6 class="fw-bold mb-1" style="font-size: 1rem; color: #0f172a; letter-spacing: -0.01em;">
+                            {{ profile and profile.fullName ? profile.fullName : ('Profil sans nom'|trans) }}
+                            
+                            {% if verified %}
+                                <span class="badge" style="font-size: 0.55rem; padding: 0.2rem 0.6rem; background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; border-radius: 100px; font-weight: 500;">
+                                    <i class="bi bi-patch-check-fill me-1" style="font-size: 0.5rem;"></i>Vérifié
+                                </span>
+                            {% else %}
+                                <span class="badge" style="font-size: 0.55rem; padding: 0.2rem 0.6rem; background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; border-radius: 100px; font-weight: 500;">
+                                    <i class="bi bi-x-circle-fill me-1" style="font-size: 0.5rem;"></i>Non vérifié
+                                </span>
+                            {% endif %}
+                        </h6>
+                        <div class="text-muted small" style="font-size: 0.8rem; color: #64748b;">
+                            <i class="fa fa-briefcase me-1" style="font-size: 0.7rem;"></i>
+                            {{ listingType == 'talent' ? professionalProfile.profession.profession ?? 'Profil professionnel'|trans : pageTitle }}
+                        </div>
+                    </div>
+
+                    <!-- Localisation avec icône et drapeau -->
+                    <div class="d-flex gap-4 mt-3 mb-3 pb-3" style="font-size: 0.8rem; border-bottom: 1px solid #f1f5f9;">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa fa-map-marker" style="color: #ef4444; font-size: 0.8rem;"></i>
+                            
+                            <div>
+                                <small class="d-block text-muted text-uppercase" style="font-size: 0.5rem; letter-spacing: 0.05em; color: #94a3b8;">Ville</small>
+                                <span class="fw-medium" style="color: #0f172a; font-size: 0.8rem;">{{ profile.city ?? '—' }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 8px;">
+                                {% if flag %}
+                                    <img src="{{ flag }}" alt="Drapeau" loading="lazy" decoding="async" style="width: 18px; height: 12px; object-fit: cover; border-radius: 2px;">
+                                {% else %}
+                                    <i class="fa fa-globe" aria-hidden="true" style="font-size: 13px; color:#64748b;"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <small class="d-block text-muted text-uppercase" style="font-size: 0.5rem; letter-spacing: 0.05em; color: #94a3b8;">Pays</small>
+                                <span class="fw-medium" style="color: #0f172a; font-size: 0.8rem;">{{ user.country.country ?? 'Cameroun'|trans }}</span>
+                            </div>
+                        </div>
+                        {% if status %}
+                            <div class="d-flex align-items-center ms-auto">
+                                <span class="badge" 
+                                      style="font-size: 0.55rem; padding: 0.25rem 0.7rem; border-radius: 100px; 
+                                             background: {{ isDisponible ? 'linear-gradient(135deg, #d1fae5, #a7f3d0)' : 'linear-gradient(135deg, #fee2e2, #fecaca)' }}; 
+                                             color: {{ isDisponible ? '#065f46' : '#991b1b' }}; 
+                                             font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                    <span style="width: 5px; height: 5px; border-radius: 50%; display: inline-block; 
+                                                 background: {{ isDisponible ? '#10b981' : '#ef4444' }}; 
+                                                 animation: pulse-dot 1.5s infinite;"></span>
+                                    {% if isDisponible %}
+                                        Disponible
+                                    {% else %}
+                                        Indisponible
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Boutons d'action - Design Premium -->
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        {% if app.user and app.user.id != user.id %}
+                            <!-- Téléphone -->
+                            {% if user.phone %}
+                                <button
+                                        type="button"
+                                        onclick="showContact('phone', '{{ user.slug }}', '')"
+                                        data-user="{{ user.id }}"
+                                        title="Téléphone"
+                                        style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; transition: all 0.2s; cursor: pointer; hover:border-color:#2563eb; hover:color:#2563eb; hover:shadow-md;">
+                                    <i class="fa fa-phone" style="font-size: 0.75rem;"></i>
+                                </button>
+                            {% endif %}
+                            
+                            <!-- Email -->
+                            <button
+                                    type="button"
+                                    onclick="showContact('email', '{{ user.slug }}', '')"
+                                    data-user="{{ user.id }}"
+                                    title="Email"
+                                    style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; transition: all 0.2s; cursor: pointer; hover:border-color:#2563eb; hover:color:#2563eb; hover:shadow-md;">
+                                <i class="fa fa-envelope" style="font-size: 0.75rem;"></i>
+                            </button>
+                            
+                            <!-- Demande d'amitié -->
+                            <button type="button" class="mol-friend-btn" data-user="{{ user.id }}" 
+                                    style="display: inline-flex; align-items: center; gap: 6px; border-radius: 100px; font-size: 0.7rem; font-weight: 500; padding: 0.3rem 1rem; background: linear-gradient(135deg, #f8fafc, #f1f5f9); color: #475569; border: 1px solid #e2e8f0; transition: all 0.2s; cursor: pointer; hover:border-color:#8b5cf6; hover:color:#7c3aed; hover:shadow-md;">
+                                <i class="fa fa-user-plus" style="font-size: 0.7rem;"></i>
+                                <span class="label">Demande d'amitié</span>
+                            </button>
+                            
+                            <!-- Download CV -->
+                            {% if listingType == 'talent' and professionalProfile.cv %}
+                                <a href="{{ asset('uploads/cv/' ~ professionalProfile.cv) }}" download title="Télécharger CV" 
+                                   style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 10px; border: 1px solid #e2e8f0; background: #ffffff; color: #475569; transition: all 0.2s; text-decoration: none; hover:border-color:#2563eb; hover:color:#2563eb; hover:shadow-md;">
+                                    <i class="fa fa-download" style="font-size: 0.75rem;"></i>
+                                </a>
+                            {% endif %}
+                            
+                            <!-- Profil -->
+                            <a href="{{ path('profil_talent', {slug: profile.slug }) }}" 
+                               style="display: inline-flex; align-items: center; gap: 6px; border-radius: 100px; font-size: 0.7rem; font-weight: 600; padding: 0.3rem 1.2rem; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: none; transition: all 0.2s; text-decoration: none; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25); hover:shadow-lg; hover:transform:translateY(-1px);">
+                                <i class="fa fa-eye" style="font-size: 0.7rem;"></i>Profil
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Animation CSS pour le pulse du statut -->
+<style>
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    
+    .hover-shadow:hover {
+        box-shadow: 0 20px 60px rgba(0,0,0,0.08) !important;
+        transform: translateY(-4px);
+    }
+    
+    .card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+         
+			{% set p = pagination %}
+			{% if p.pages > 1 %}
+				<nav class="d-flex justify-content-center mt-4" aria-label="{{ 'Pagination'|trans }}">
+					<ul class="pagination">
+						<li class="page-item {{ p.page <= 1 ? 'disabled' : '' }}">
+							<a class="page-link" href="{{ path('liste_talents', app.request.query.all | merge({'page': p.page - 1})) }}">
+								{% trans %}Précédent{% endtrans %}
+							</a>
+						</li>
+
+						{% for i in 1..p.pages %}
+							<li class="page-item {{ i == p.page ? 'active' : '' }}">
+								<a class="page-link" href="{{ path('liste_talents', app.request.query.all | merge({'page': i})) }}">{{ i }}</a>
+							</li>
+						{% endfor %}
+
+						<li class="page-item {{ p.page >= p.pages ? 'disabled' : '' }}">
+							<a class="page-link" href="{{ path('liste_talents', app.request.query.all | merge({'page': p.page + 1})) }}">
+								{% trans %}Suivant{% endtrans %}
+							</a>
+						</li>
+					</ul>
+				</nav>
+			{% endif %}
+
+		</div>
+	</section>
+
+	<div class="modal fade mol-modal" id="contactTalent" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-md">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<span class="mol-icon">
+							<i class="fa fa-envelope"></i>
+						</span>
+						{% trans %}Contacter le talent{% endtrans %}
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<div class="mb-3">
+						<label class="form-label">{% trans %}Objet{% endtrans %}</label>
+						<input class="form-control" placeholder="{{ 'Ex: Mission urgente…'|trans }}">
+						<div class="mol-hint">{% trans %}Sois clair : durée, lieu, budget, disponibilité.{% endtrans %}</div>
+					</div>
+					<div class="mb-0">
+						<label class="form-label">{% trans %}Message{% endtrans %}</label>
+						<textarea class="form-control" rows="5" placeholder="{{ 'Décris brièvement ton besoin…'|trans }}"></textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-light" data-bs-dismiss="modal">{% trans %}Annuler{% endtrans %}</button>
+					<button class="btn btn-primary">
+						<i class="fa fa-paper-plane me-2"></i>{% trans %}Envoyer{% endtrans %}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade mol-modal" id="commentTalent" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-md">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<span class="mol-icon" style="background:rgba(32,201,151,.12);color:#20c997;">
+							<i class="fa fa-comment"></i>
+						</span>
+						{% trans %}Message rapide{% endtrans %}
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<label class="form-label">{% trans %}Ton message{% endtrans %}</label>
+					<textarea class="form-control" rows="5" placeholder="{{ 'Écris un message…'|trans }}"></textarea>
+					<div class="mol-hint">{% trans %}Conseil : pose une question précise pour accélérer la réponse.{% endtrans %}</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-light" data-bs-dismiss="modal">{% trans %}Fermer{% endtrans %}</button>
+					<button class="btn btn-primary">
+						<i class="fa fa-send me-2"></i>{% trans %}Envoyer{% endtrans %}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div
+        class="modal fade"
+        id="reviewsModal"
+        tabindex="-1"
+        data-bs-backdrop="true"
+        data-bs-keyboard="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+    
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa fa-comments me-2"></i>
+                        Derniers avis
+                    </h5>
+    
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+                </div>
+    
+                <div class="modal-body" id="reviewsContainer">
+    
+                </div>
+    
+            </div>
+        </div>
+    </div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			[
+                'contactTalent',
+                'commentTalent',
+                'reviewsModal'
+            ].forEach((id) => {
+            
+                const el = document.getElementById(id);
+            
+                if (el) {
+                    document.body.appendChild(el);
+                }
+            });
+
+			function renderStars(block, avg) {
+				const n = Math.round(Number(avg) || 0);
+				block.querySelectorAll('.mol-star').forEach((btn) => {
+					const v = parseInt(btn.dataset.value, 10);
+					btn.classList.toggle('is-on', v <= n);
+				});
+			}
+
+			document.querySelectorAll('.mol-rating').forEach((block) => {
+				renderStars(block, block.dataset.avg);
+			});
+
+			document.addEventListener('click', async (e) => {
+				const btn = e.target.closest('.mol-star');
+				if (!btn) return;
+
+				const block = btn.closest('.mol-rating');
+				const url = block?.dataset.rateUrl;
+				if (!block || !url) return;
+
+				const stars = parseInt(btn.dataset.value, 10);
+				renderStars(block, stars);
+				block.querySelectorAll('.mol-star').forEach(b => b.disabled = true);
+
+				try {
+					const form = new FormData();
+					form.append('stars', String(stars));
+
+					const res = await fetch(url, {
+						method: 'POST',
+						body: form,
+						headers: { 'X-Requested-With': 'XMLHttpRequest' }
+					});
+
+					if (res.status === 401) {
+						const data = await res.json().catch(() => null);
+						window.location.href = (data && data.loginUrl) ? data.loginUrl : "{{ path('app_login') }}";
+						return;
+					}
+
+					const data = await res.json();
+					if (!data.ok) {
+						alert(data.message || "Erreur lors du vote.");
+						return;
+					}
+
+					const avgEl = block.querySelector('.mol-avg');
+					const countEl = block.querySelector('.mol-count');
+
+					if (avgEl) avgEl.textContent = (Number(data.avg) || 0).toFixed(1);
+					if (countEl) countEl.textContent = (Number(data.voters) || 0);
+
+					renderStars(block, data.avg);
+
+				} catch (err) {
+					console.error(err);
+					alert("Impossible de voter. Réessayez.");
+				} finally {
+					block.querySelectorAll('.mol-star').forEach(b => b.disabled = false);
+				}
+			});
+		});
+	</script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const input = document.getElementById('vipTalentSearch');
+			if (!input) return;
+
+			const cards = Array.from(document.querySelectorAll('.card'));
+			const pagination = document.querySelector('nav[aria-label]');
+			const emptyAlert = document.querySelector('.vip-empty, .alert.alert-info');
+
+			function normalizeText(text) {
+				return (text || '')
+					.toString()
+					.normalize('NFD')
+					.replace(/[\u0300-\u036f]/g, '')
+					.toLowerCase()
+					.trim();
+			}
+
+			function filterTalents() {
+				const query = normalizeText(input.value);
+
+				let visibleCount = 0;
+
+				cards.forEach((card) => {
+					const searchableNode = card.querySelector('.vip-search-data');
+					const searchableText = normalizeText(
+						searchableNode ? searchableNode.textContent : card.textContent
+					);
+
+					const matches = query === '' || searchableText.includes(query);
+
+					card.style.display = matches ? '' : 'none';
+
+					if (matches) {
+						visibleCount++;
+					}
+				});
+
+				if (pagination) {
+					pagination.style.display = query !== '' ? 'none' : '';
+				}
+
+				if (emptyAlert) {
+					if (cards.length > 0) {
+						emptyAlert.style.display = visibleCount === 0 ? '' : 'none';
+						if (visibleCount === 0) {
+							emptyAlert.textContent = "Aucun talent ne correspond à votre recherche.";
+						}
+					}
+				}
+			}
+
+			input.addEventListener('input', filterTalents);
+
+			// Si un texte existe déjà dans le champ au chargement
+			filterTalents();
+		});
+	</script>
+	
+	<script>
+    // Version optimisée avec event delegation ciblée
+    document.addEventListener('DOMContentLoaded', function() {
+       
+        document.addEventListener('click', async function(e){
+
+            const btn = e.target.closest('.show-user-reviews');
+
+            if(!btn) return;
+
+            e.preventDefault();
+
+            const userSlug = btn.dataset.userSlug;
+            const reviewsUrl = btn.dataset.reviewsUrl || btn.getAttribute('href');
+            
+            // CORRECTION : Rechercher dans vip-card OU card
+            const card = btn.closest('.vip-card') || btn.closest('.card');
+            
+            // CORRECTION : Chercher le nom dans les bons éléments
+            let userName = 'Utilisateur';
+            
+            // Méthode 1: Chercher dans le h6 qui contient le nom
+            const h6Element = card?.querySelector('h6.fw-bold') || card?.querySelector('h6');
+            
+            if (h6Element) {
+                // Cloner l'élément pour supprimer les badges
+                const clone = h6Element.cloneNode(true);
+                // Supprimer tous les badges (span avec classe badge)
+                clone.querySelectorAll('.badge').forEach(el => el.remove());
+                // Supprimer les espaces inutiles
+                userName = clone.textContent?.trim() || 'Utilisateur';
+            }
+            
+            // Méthode 2: Fallback - chercher dans .vip-name
+            if (userName === 'Utilisateur') {
+                const vipName = card?.querySelector('.vip-name');
+                if (vipName) {
+                    userName = vipName.textContent?.trim() || 'Utilisateur';
+                }
+            }
+
+            const modalEl = document.getElementById('reviewsModal');
+            
+            // Mettre à jour le titre de la modale avec le nom de l'utilisateur
+            const modalTitle = modalEl.querySelector('.modal-title');
+            if (modalTitle) {
+                modalTitle.innerHTML = `
+                    <i class="fa fa-comments me-2"></i>
+                    Avis de : <strong>${userName}</strong>
+                `;
+            }
+
+            let modal = bootstrap.Modal.getInstance(modalEl);
+            
+            if(!modal){
+                modal = new bootstrap.Modal(modalEl, {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+            }
+
+            const container = document.getElementById('reviewsContainer');
+
+            container.innerHTML =
+                '<div class="text-center py-4"><i class="fa fa-spinner fa-spin me-2"></i>Chargement...</div>';
+
+            modal.show();
+            
+            setTimeout(() => {
+                const modalDialog = modalEl.querySelector('.modal-dialog');
+                if (modalDialog) {
+                    modalDialog.style.marginTop = '5vh';
+                    modalDialog.style.marginBottom = '5vh';
+                }
+            }, 50);
+
+            setTimeout(() => {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                if(backdrops.length > 1){
+                    for(let i = 1; i < backdrops.length; i++){
+                        backdrops[i].remove();
+                    }
+                }
+            }, 100);
+
+            try {
+
+                const response = await fetch(reviewsUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Chargement des avis impossible (HTTP ${response.status})`);
+                }
+
+                const reviews = await response.json();
+
+                if (!Array.isArray(reviews)) {
+                    throw new Error('La réponse des avis est invalide.');
+                }
+
+                let html = '';
+
+                if(reviews.length === 0){
+
+                    html = `
+                        <div class="alert alert-info">
+                            Aucun avis disponible pour ${userName}.
+                        </div>
+                    `;
+
+                } else {
+
+                    reviews.forEach(item => {
+
+                        let criteriaHtml = '';
+                        let total = 0;
+                    
+                        if (item.criteria) {
+                    
+                            item.criteria.forEach(c => {
+                    
+                                total += Number(c.score);
+                    
+                                const score5 = (Number(c.score) / 2).toFixed(1);
+                    
+                                let emoji = '😐';
+                    
+                                if (c.score >= 10) emoji = '😍';
+                                else if (c.score >= 9) emoji = '🤩';
+                                else if (c.score >= 8) emoji = '😄';
+                                else if (c.score >= 7) emoji = '😊';
+                                else if (c.score >= 6) emoji = '🙂';
+                                else if (c.score >= 5) emoji = '😐';
+                                else if (c.score >= 4) emoji = '😕';
+                                else if (c.score >= 3) emoji = '😣';
+                                else if (c.score >= 2) emoji = '😠';
+                                else emoji = '😡';
+                    
+                                criteriaHtml += `
+                                    <div class="mol-criterion">
+                                        <div class="mol-criterion-name">
+                                            ${c.name}
+                                        </div>
+                                        <div class="mol-criterion-score">
+                                            <span class="mol-emoji">
+                                                ${emoji}
+                                            </span>
+                                            <span class="mol-score">
+                                                ${score5}/5
+                                            </span>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                        }
+                    
+                        const average10 =
+                            item.criteria && item.criteria.length > 0
+                                ? (total / item.criteria.length)
+                                : 0;
+                    
+                        const average5 = (average10 / 2).toFixed(1);
+                    
+                        html += `
+                            <div class="border-bottom mb-4 pb-4">
+                    
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                    
+                                    <strong class="fs-6">
+                                        ${item.author}
+                                    </strong>
+                    
+                                    <div>
+                                        <span class="badge bg-success me-2">
+                                            ⭐ ${average5}/5
+                                        </span>
+                                        <small class="text-muted">
+                                            ${item.date}
+                                        </small>
+                                    </div>
+                    
+                                </div>
+                    
+                                <div class="review-two-columns">
+                    
+                                    <div class="review-comment-col">
+                                        <div class="mol-review-comment">
+                                            <i class="fa fa-quote-left me-2"></i>
+                                            ${item.comment || 'Aucun commentaire'}
+                                        </div>
+                                    </div>
+                    
+                                    <div class="review-criteria-col">
+                                        <div class="mol-review-scores">
+                                            ${criteriaHtml}
+                                        </div>
+                                    </div>
+                    
+                                </div>
+                    
+                            </div>
+                        `;
+                    });
+                }
+
+                container.innerHTML = html;
+
+            } catch(error){
+
+                console.error(error);
+
+                container.innerHTML = `
+                    <div class="alert alert-danger">
+                        Impossible de charger les avis.
+                    </div>
+                `;
+            }
+        });
+
+    });
+</script>
+
+    <script>
+        const reviewsModal =
+            document.getElementById('reviewsModal');
+        
+        reviewsModal.addEventListener(
+            'hidden.bs.modal',
+            function(){
+        
+        
+                document.body.style.removeProperty('padding-right');
+        
+                
+            }
+        );
+    </script>
+    
+    
+    <!-- Dans le <head> ou avant la fin du </body> -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+
+    <script>
+        document.querySelectorAll('.review-trigger').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const reviewUrl = this.dataset.reviewUrl;
+                const isLoggedIn = {{ app.user ? 'true' : 'false' }};
+                
+                // Ajouter le spinner sur le bouton
+                const btnContent = this.querySelector('.btn-content');
+                const btnText = this.querySelector('.btn-text');
+                const btnIcon = this.querySelector('i');
+                
+                if (!isLoggedIn) {
+                    // Désactiver le bouton et afficher le spinner
+                    this.classList.add('loading');
+                    if (btnText) btnText.textContent = 'Chargement...';
+                    if (btnIcon) {
+                        btnIcon.className = 'fa-solid fa-spinner fa-spin me-2';
+                    }
+                    this.style.pointerEvents = 'none';
+                    this.style.opacity = '0.7';
+                    
+                    // SweetAlert premium
+                    Swal.fire({
+                        title: '✨ Authentification requise',
+                        html: `
+                            <div style="padding: 10px 0;">
+                                <div style="font-size: 48px; margin-bottom: 15px;">🔐</div>
+                                <p style="font-size: 16px; color: #475569; margin-bottom: 5px;">
+                                    Pour laisser un avis, vous devez être connecté.
+                                </p>
+                                <p style="font-size: 14px; color: #94a3b8;">
+                                    Connectez-vous pour partager votre expérience !
+                                </p>
+                            </div>
+                        `,
+                        icon: 'info',
+                        iconColor: '#6366f1',
+                        confirmButtonText: 'Se connecter 🔑',
+                        cancelButtonText: 'Annuler',
+                        showCancelButton: true,
+                        confirmButtonColor: '#6366f1',
+                        cancelButtonColor: '#94a3b8',
+                        background: '#ffffff',
+                        backdrop: 'rgba(15, 23, 42, 0.4)',
+                        customClass: {
+                            popup: 'swal-premium-popup',
+                            title: 'swal-premium-title',
+                            confirmButton: 'swal-premium-confirm',
+                            cancelButton: 'swal-premium-cancel'
+                        }
+                    }).then(function(result) {
+                        // Restaurer le bouton
+                        btn.classList.remove('loading');
+                        if (btnText) btnText.textContent = 'Laisser un avis';
+                        if (btnIcon) {
+                            btnIcon.className = 'fa-regular fa-star me-2';
+                        }
+                        btn.style.pointerEvents = 'auto';
+                        btn.style.opacity = '1';
+                        
+                        if (result.isConfirmed) {
+                            // Stocker l'URL dans la session via une requête AJAX
+                            fetch('{{ path('store_redirect_url') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({ redirect: reviewUrl })
+                            }).then(function() {
+                                window.location.href = '{{ path('app_login') }}';
+                            });
+                        }
+                    });
+                    
+                    return;
+                }
+                
+                // Utilisateur connecté - redirection directe
+                this.classList.add('loading');
+                if (btnText) btnText.textContent = 'Redirection...';
+                if (btnIcon) {
+                    btnIcon.className = 'fa-solid fa-spinner fa-spin me-2';
+                }
+                this.style.pointerEvents = 'none';
+                this.style.opacity = '0.7';
+                
+                setTimeout(function() {
+                    window.location.href = reviewUrl;
+                }, 500);
+            });
+        });
+    </script>
+    
+    
+    <script>
+// ============================================
+// FONCTIONS DE GESTION DES AMIS
+// ============================================
+
+function initFriendButtons() {
+    if (!window.MOL_FRIEND) return;
+
+    async function ajaxJson(url, options = {}) {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(options.headers || {}),
+            },
+        });
+
+        if (res.redirected) {
+            window.location.href = res.url;
+            return null;
+        }
+
+        if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            throw new Error(`HTTP ${res.status} ${text}`);
+        }
+
+        const ct = res.headers.get('content-type') || '';
+        return ct.includes('application/json') ? await res.json() : {};
+    }
+
+    function tplUrl(tpl, id) {
+        id = String(id || '').trim();
+
+        if (!/^\d+$/.test(id)) {
+            throw new Error('ID utilisateur invalide : ' + id);
+        }
+
+        return String(tpl)
+            .replace('__ID__', encodeURIComponent(id))
+            .replace(/\/0\b/, '/' + encodeURIComponent(id));
+    }
+
+    function setBtnLoading(btn, loading) {
+        btn.disabled = loading;
+        btn.classList.toggle('disabled', !!loading);
+        btn.dataset.loading = loading ? '1' : '0';
+    }
+
+    function updateFriendButton(btn, state, friendshipId) {
+        btn.classList.remove('btn-primary', 'btn-danger', 'btn-secondary', 'btn-light');
+        btn.disabled = false;
+
+        if (friendshipId) btn.dataset.friendshipId = String(friendshipId);
+        else delete btn.dataset.friendshipId;
+
+        const labelEl = btn.querySelector('.label');
+        if (!labelEl) return;
+
+        btn.onclick = null;
+
+        switch (state) {
+            case 'none':
+                btn.classList.add('btn-primary');
+                labelEl.innerText = "Demande d’amitié";
+                btn.onclick = () => sendFriendRequest(btn);
+                break;
+            case 'pending_sent':
+                btn.classList.add('btn-danger');
+                labelEl.innerText = "Annuler la demande";
+                btn.onclick = () => cancelFriendRequest(btn);
+                break;
+            case 'pending_received':
+                btn.classList.add('btn-secondary');
+                labelEl.innerText = "Répondre à la demande";
+                btn.onclick = () => promptAcceptReject(btn);
+                break;
+            case 'friends':
+                btn.classList.add('btn-danger');
+                labelEl.innerText = "Bloquer";
+                btn.onclick = () => confirmBlock(btn);
+                break;
+            case 'blocked':
+                btn.classList.add('btn-secondary');
+                btn.disabled = true;
+                labelEl.innerText = "Vous ne pouvez pas demander l’amitié";
+                break;
+            default:
+                btn.classList.add('btn-primary');
+                labelEl.innerText = "Demande d’amitié";
+                btn.onclick = () => sendFriendRequest(btn);
+        }
+    }
+
+    async function loadState(btn) {
+        const userId = btn.dataset.user;
+        const url = tplUrl(window.MOL_FRIEND.stateUrlTpl, userId);
+
+        try {
+            setBtnLoading(btn, true);
+            const data = await ajaxJson(url);
+            updateFriendButton(btn, data.state || 'none', data.friendshipId || null);
+        } catch (e) {
+            console.error(e);
+            updateFriendButton(btn, 'none', null);
+        } finally {
+            setBtnLoading(btn, false);
+        }
+    }
+
+    async function sendFriendRequest(btn) {
+        const userId = btn.dataset.user;
+        try {
+            await ajaxJson(tplUrl(window.MOL_FRIEND.requestUrlTpl, userId), { method: 'POST' });
+            await loadState(btn);
+        } catch (e) {
+            console.error(e);
+            notify('error', 'Erreur', "Impossible d'envoyer la demande.");
+        }
+    }
+
+    async function cancelFriendRequest(btn) {
+        const userId = btn.dataset.user;
+        const ok = await askConfirm('Annuler la demande ?', "La demande d’amitié sera supprimée.");
+        if (!ok) return;
+
+        try {
+            await ajaxJson(tplUrl(window.MOL_FRIEND.cancelUrlTpl, userId), { method: 'POST' });
+            await loadState(btn);
+        } catch (e) {
+            console.error(e);
+            notify('error', 'Erreur', "Impossible d'annuler la demande.");
+        }
+    }
+
+    async function blockUser(btn) {
+        const userId = btn.dataset.user;
+        await ajaxJson(tplUrl(window.MOL_FRIEND.blockUrlTpl, userId), { method: 'POST' });
+        await loadState(btn);
+    }
+
+    async function confirmBlock(btn) {
+        const ok = await askConfirm('Bloquer cet utilisateur ?', "Vous ne recevrez plus de demandes ni de messages de sa part.");
+        if (ok) await blockUser(btn);
+    }
+
+    async function acceptFriendship(btn, friendshipId) {
+        await ajaxJson(tplUrl(window.MOL_FRIEND.acceptUrlTpl, friendshipId), { method: 'POST' });
+        await loadState(btn);
+    }
+
+    async function rejectFriendship(btn, friendshipId) {
+        await ajaxJson(tplUrl(window.MOL_FRIEND.rejectUrlTpl, friendshipId), { method: 'POST' });
+        await loadState(btn);
+    }
+
+    async function promptAcceptReject(btn) {
+        const friendshipId = btn.dataset.friendshipId;
+        if (!friendshipId) return;
+
+        if (window.Swal) {
+            const r = await Swal.fire({
+                icon: 'question',
+                title: 'Demande d’amitié',
+                text: 'Voulez-vous accepter cette demande ?',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: 'Accepter',
+                denyButtonText: 'Refuser',
+                cancelButtonText: 'Plus tard',
+                confirmButtonColor: '#2563eb'
+            });
+
+            if (r.isConfirmed) await acceptFriendship(btn, friendshipId);
+            else if (r.isDenied) await rejectFriendship(btn, friendshipId);
+            return;
+        }
+
+        const ok = confirm('Accepter cette demande ?');
+        if (ok) await acceptFriendship(btn, friendshipId);
+    }
+
+    function askConfirm(title, text) {
+        if (window.Swal) {
+            return Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui',
+                cancelButtonText: 'Non',
+                confirmButtonColor: '#dc2626'
+            }).then(r => r.isConfirmed);
+        }
+        return Promise.resolve(confirm(title + '\n' + text));
+    }
+
+    function notify(type, title, message) {
+        if (window.Swal) {
+            Swal.fire({
+                icon: type === 'error' ? 'error' : 'info',
+                title: title,
+                text: message,
+                confirmButtonColor: '#2563eb'
+            });
+        } else {
+            alert(message);
+        }
+    }
+
+    // Initialiser tous les boutons
+    document.querySelectorAll('.mol-friend-btn').forEach(loadState);
+}
+
+// ============================================
+// FONCTIONS EMAIL ET TÉLÉPHONE
+// ============================================
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================
+// INITIALISATION AU CHARGEMENT
+// ============================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les boutons d'amitié
+    if (typeof initFriendButtons === 'function') {
+        initFriendButtons();
+    }
+});
+
+// Réinitialiser après les chargements AJAX (si nécessaire)
+document.addEventListener('turbo:load', function() {
+    if (typeof initFriendButtons === 'function') {
+        initFriendButtons();
+    }
+});
+</script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const input = document.getElementById('vipTalentSearch');
+            const clearBtn = document.getElementById('searchClearBtn');
+            const resultCount = document.getElementById('resultCount');
+            
+            if (!input) return;
+        
+            const cards = Array.from(document.querySelectorAll('.card'));
+            const pagination = document.querySelector('nav[aria-label]');
+            const emptyAlert = document.querySelector('.vip-empty, .alert.alert-info');
+        
+            function normalizeText(text) {
+                return (text || '')
+                    .toString()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .trim();
+            }
+        
+            function updateResultCount(count) {
+                if (resultCount) {
+                    resultCount.classList.add('updating');
+                    resultCount.textContent = count;
+                    setTimeout(() => {
+                        resultCount.classList.remove('updating');
+                    }, 300);
+                }
+            }
+        
+            function filterTalents() {
+                const query = normalizeText(input.value);
+                
+                // Afficher/cacher le bouton clear
+                if (clearBtn) {
+                    clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+                }
+        
+                let visibleCount = 0;
+        
+                cards.forEach((card) => {
+                    const searchableNode = card.querySelector('.vip-search-data');
+                    const searchableText = normalizeText(
+                        searchableNode ? searchableNode.textContent : card.textContent
+                    );
+        
+                    const matches = query === '' || searchableText.includes(query);
+        
+                    if (matches) {
+                        card.style.display = '';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                        card.style.transition = 'all 0.3s ease';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(10px)';
+                        card.style.transition = 'all 0.3s ease';
+                    }
+                });
+        
+                // Mettre à jour le compteur
+                updateResultCount(visibleCount);
+        
+                // Gérer la pagination
+                if (pagination) {
+                    pagination.style.display = query !== '' ? 'none' : '';
+                }
+        
+                // Gérer le message "aucun résultat"
+                if (emptyAlert) {
+                    if (cards.length > 0) {
+                        emptyAlert.style.display = visibleCount === 0 ? '' : 'none';
+                        if (visibleCount === 0) {
+                            emptyAlert.textContent = "Aucun profil ne correspond à votre recherche.";
+                        }
+                    }
+                }
+            }
+        
+            // Événements
+            let debounceTimer;
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(filterTalents, 150);
+            });
+            
+            // Raccourci clavier Ctrl+K ou Cmd+K
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    input.focus();
+                    input.select();
+                }
+                if (e.key === 'Escape') {
+                    input.blur();
+                }
+            });
+        
+            // Bouton clear
+            if (clearBtn) {
+                clearBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    input.value = '';
+                    input.focus();
+                    filterTalents();
+                });
+            }
+        
+            // Focus sur la recherche avec animation
+            input.addEventListener('focus', function() {
+                this.closest('.search-input-wrapper').classList.add('focused');
+            });
+        
+            input.addEventListener('blur', function() {
+                this.closest('.search-input-wrapper').classList.remove('focused');
+            });
+        
+            // Initialisation
+            filterTalents();
+        });
+    </script>
+
+
+    <script>
+        // ============================================
+        // GESTION DES CONTACTS AVEC LIMITE D'ABONNEMENT
+        // ============================================
+        
+        let remainingContacts = null;
+        let currentPlan = '';
+        window.MOL_CONTACT_AUTHENTICATED = {{ app.user ? 'true' : 'false' }};
+        const canBypassContactLimit = {{ (
+            is_granted('ROLE_ADMIN')
+            or is_granted('ROLE_SUPER_ADMIN')
+            or is_granted('ROLE_MODERATEUR')
+            or is_granted('ROLE_MODERATOR')
+        ) ? 'true' : 'false' }};
+        
+        // Charger le nombre de contacts restants au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.MOL_CONTACT_AUTHENTICATED) return;
+
+            fetch('{{ path('contact_remaining') }}')
+                .then(response => response.json())
+                .then(data => {
+                    remainingContacts = data.remaining;
+                    currentPlan = data.plan;
+                    
+                    // Mettre à jour l'affichage du compteur si présent
+                    const counterEl = document.getElementById('remainingContactsCounter');
+                    if (counterEl) {
+                        if (remainingContacts >= 99999) {
+                            counterEl.textContent = '♾️ Illimité';
+                        } else {
+                            counterEl.textContent = `${remainingContacts} contact${remainingContacts > 1 ? 's' : ''} restant${remainingContacts > 1 ? 's' : ''}`;
+                        }
+                    }
+                })
+                .catch(error => console.error('Erreur chargement contacts:', error));
+        });
+        
+        function showContact(type, userSlug, value) {
+            // Vérifier s'il reste des contacts
+            if (
+                !canBypassContactLimit
+                && remainingContacts !== null
+                && remainingContacts <= 0
+                && remainingContacts !== 99999
+            ) {
+                Swal.fire({
+                    title: '⚠️ Limite de contacts atteinte',
+                    html: `
+                        <div style="padding: 10px 0;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">📊</div>
+                            <p style="font-size: 16px; color: #475569; margin-bottom: 5px;">
+                                Vous avez utilisé tous vos contacts pour ce mois.
+                            </p>
+                            <p style="font-size: 14px; color: #94a3b8;">
+                                Passez au plan <strong>Pro</strong> ou <strong>Premium</strong> pour obtenir plus de contacts.
+                            </p>
+                            <div style="margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 12px;">
+                                <span style="font-size: 13px; color: #64748b;">Plan actuel :</span>
+                                <span style="font-weight: 700; color: #0f172a;">${currentPlan || 'Découverte'}</span>
+                            </div>
+                        </div>
+                    `,
+                    icon: 'warning',
+                    confirmButtonText: 'Voir les plans',
+                    cancelButtonText: 'Fermer',
+                    showCancelButton: true,
+                    confirmButtonColor: '#6366f1',
+                    cancelButtonColor: '#94a3b8',
+                    background: '#ffffff',
+                    backdrop: 'rgba(15, 23, 42, 0.4)',
+                    customClass: {
+                        popup: 'swal-premium-popup'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '{{ path('subscription_plans') }}';
+                    }
+                });
+                return;
+            }
+        
+            // Montrer le chargement
+            Swal.fire({
+                title: 'Chargement...',
+                text: 'Récupération des informations',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        
+            // Appel AJAX pour récupérer le contact
+            fetch('{{ path('contact_show', {slug: '0000000000000000000000000000000000000000000000000000000000000000'}) }}'.replace('0000000000000000000000000000000000000000000000000000000000000000', encodeURIComponent(userSlug)), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `type=${type}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.close();
+        
+                if (data.error) {
+                    Swal.fire({
+                        title: '❌ Accès refusé',
+                        html: `
+                            <div style="padding: 10px 0;">
+                                <div style="font-size: 40px; margin-bottom: 15px;">🔒</div>
+                                <p style="font-size: 15px; color: #475569;">
+                                    ${data.error}
+                                </p>
+                            </div>
+                        `,
+                        icon: 'error',
+                        confirmButtonText: 'Voir les offres',
+                        confirmButtonColor: '#6366f1'
+                    }).then(() => {
+                        if (data.limit_reached) {
+                            window.location.href = '{{ path('subscription_plans') }}';
+                        }
+                    });
+                    return;
+                }
+        
+                // Mettre à jour le compteur local
+                if (data.remaining !== undefined && data.remaining < 99999) {
+                    remainingContacts = data.remaining;
+                }
+        
+                // Ouvrir directement l'application native après le contrôle du quota.
+                const contactValue = String(data.value || '').trim();
+                if (!contactValue) {
+                    throw new Error('Coordonnée de contact indisponible.');
+                }
+                const contactTarget = type === 'phone'
+                    ? `tel:${contactValue.replace(/[^0-9+*#]/g, '')}`
+                    : `mailto:${contactValue}`;
+
+                // Mettre à jour le compteur dans l'interface
+                const counterEl = document.getElementById('remainingContactsCounter');
+                if (counterEl && data.remaining !== undefined) {
+                    if (data.remaining >= 99999) {
+                        counterEl.textContent = '♾️ Illimité';
+                    } else {
+                        counterEl.textContent = `${data.remaining} contact${data.remaining > 1 ? 's' : ''} restant${data.remaining > 1 ? 's' : ''}`;
+                    }
+                }
+                // Laisser l'interface mettre à jour le quota puis lancer l'application système.
+                Swal.fire({toast:true,position:'top',icon:'success',title:type === 'phone' ? 'Ouverture du téléphone…' : 'Ouverture de votre messagerie…',showConfirmButton:false,timer:900,timerProgressBar:true});
+                window.setTimeout(() => { window.location.href = contactTarget; }, 120);
+
+            })
+            .catch(error => {
+                Swal.close();
+                console.error('Erreur:', error);
+                Swal.fire({
+                    title: '❌ Erreur',
+                    text: 'Impossible de récupérer les informations. Veuillez réessayer.',
+                    icon: 'error',
+                    confirmButtonColor: '#6366f1'
+                });
+            });
+        }
+        
+        // Les coordonnées ne sont jamais intégrées dans le HTML : elles sont obtenues
+        // uniquement via showContact(), après contrôle d’authentification et d’abonnement.
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+
+    <script>
+        // Dans votre fichier JS principal ou dans le template
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger le nombre de contacts restants
+            function updateContactCounter() {
+                if (!window.MOL_CONTACT_AUTHENTICATED) return;
+
+                const counterEl = document.getElementById('remainingContactsCounter');
+                if (!counterEl) return;
+        
+                fetch('{{ path('contact_remaining') }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        const count = data.remaining;
+                        const max = data.max;
+                        
+                        let html = '';
+                        if (count >= 99999) {
+                            html = '<span class="count-number high">♾️ Illimité</span>';
+                        } else {
+                            const className = count <= 3 ? 'low' : (count <= 10 ? 'medium' : 'high');
+                            html = `<span class="count-number ${className}">${count}</span>`;
+                            html += `<span class="count-label ms-1">/ ${max}</span>`;
+                        }
+                        
+                        counterEl.innerHTML = html;
+                        
+                        // Animation
+                        const numberEl = counterEl.querySelector('.count-number');
+                        if (numberEl) {
+                            numberEl.classList.add('updating');
+                            setTimeout(() => {
+                                numberEl.classList.remove('updating');
+                            }, 300);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erreur chargement contacts:', error);
+                        counterEl.innerHTML = '<span class="text-muted">⚠️</span>';
+                    });
+            }
+        
+            // Mettre à jour immédiatement
+            updateContactCounter();
+            
+            // Mettre à jour toutes les 60 secondes
+            setInterval(updateContactCounter, 60000);
+        });
+    </script>
+
+<script>
+(function () {
+    function initVipDirectoryHero() {
+        const slider = document.getElementById('vipDirectoryBgSlider');
+
+        if (
+            slider &&
+            slider.dataset.bound !== '1'
+        ) {
+            slider.dataset.bound = '1';
+
+            const slides = Array.from(
+                slider.querySelectorAll('.vip-jobs-bg-slide')
+            );
+
+            let currentIndex = 0;
+
+            function showSlide(index) {
+                if (!slides.length) {
+                    return;
+                }
+
+                currentIndex =
+                    (index + slides.length) % slides.length;
+
+                slides.forEach(function (slide, slideIndex) {
+                    slide.classList.toggle(
+                        'active',
+                        slideIndex === currentIndex
+                    );
+                });
+            }
+
+            showSlide(0);
+
+            if (slides.length > 1) {
+                window.setInterval(function () {
+                    showSlide(currentIndex + 1);
+                }, 5200);
+            }
+        }
+
+        initVipDirectorySearch();
+    }
+
+    function normalizeVipText(value) {
+        return (value || '')
+            .toString()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    function initVipDirectorySearch() {
+        const keywordInput =
+            document.getElementById('vipTalentSearch');
+
+        const cityInput =
+            document.getElementById('vipTalentCity');
+
+        const searchButton =
+            document.getElementById('vipTalentSearchBtn');
+
+        const resultCount =
+            document.getElementById('resultCount');
+
+        if (
+            !keywordInput ||
+            keywordInput.__vipDirectorySearchBound
+        ) {
+            return;
+        }
+
+        keywordInput.__vipDirectorySearchBound = true;
+
+        function filterProfiles() {
+            const keyword = normalizeVipText(
+                keywordInput.value
+            );
+
+            const location = normalizeVipText(
+                cityInput ? cityInput.value : ''
+            );
+
+            const profileColumns = Array.from(
+                document.querySelectorAll(
+                    '.vip-directory-content-shell .row.g-4 > [class*="col-"]'
+                )
+            );
+
+            let visibleCount = 0;
+
+            profileColumns.forEach(function (column) {
+                const card = column.querySelector('.card');
+
+                const searchableText = normalizeVipText(
+                    card ? card.textContent : column.textContent
+                );
+
+                const keywordMatches =
+                    keyword === '' ||
+                    searchableText.includes(keyword);
+
+                const locationMatches =
+                    location === '' ||
+                    searchableText.includes(location);
+
+                const visible =
+                    keywordMatches && locationMatches;
+
+                column.style.display =
+                    visible ? '' : 'none';
+
+                if (visible) {
+                    visibleCount++;
+                }
+            });
+
+            if (resultCount) {
+                resultCount.textContent = visibleCount;
+            }
+
+            const pagination = document.querySelector(
+                'nav[aria-label]'
+            );
+
+            if (pagination) {
+                pagination.style.display =
+                    keyword !== '' || location !== ''
+                        ? 'none'
+                        : '';
+            }
+        }
+
+        let searchTimer = null;
+
+        function delayedFilter() {
+            window.clearTimeout(searchTimer);
+
+            searchTimer = window.setTimeout(
+                filterProfiles,
+                150
+            );
+        }
+
+        keywordInput.addEventListener(
+            'input',
+            delayedFilter
+        );
+
+        if (cityInput) {
+            cityInput.addEventListener(
+                'input',
+                delayedFilter
+            );
+        }
+
+        if (searchButton) {
+            searchButton.addEventListener(
+                'click',
+                filterProfiles
+            );
+        }
+
+        filterProfiles();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener(
+            'DOMContentLoaded',
+            initVipDirectoryHero
+        );
+    } else {
+        initVipDirectoryHero();
+    }
+
+    document.addEventListener(
+        'turbo:load',
+        initVipDirectoryHero
+    );
+
+    document.addEventListener(
+        'turbo:render',
+        initVipDirectoryHero
+    );
+})();
+</script>
+
+{% if listingType == 'talent' %}
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin="">
+    </script>
+    <script src="{{ asset('js/talents/nearby-map.js') }}?v=20260721-5"></script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Gestion de mes annonces{% endtrans %}{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ asset('css/annonce/manage.css') }}">
+
+<main class="anm-page mt-4">
+    <section class="anm-hero">
+        <div class="anm-hero-in">
+            <div>
+                <h1><i class="fa-solid fa-bullhorn me-2"></i>{% trans %}Mes annonces{% endtrans %}</h1>
+                <p>{% trans %}Gérez vos services, disponibilités et promotions sans modifier votre profil permanent.{% endtrans %}</p>
+            </div>
+            <a href="{{ path('annonce_new') }}" class="anm-primary" data-turbo="false"><i class="fa-solid fa-plus"></i> {% trans %}Publier une annonce{% endtrans %}</a>
+        </div>
+    </section>
+
+    {% for message in app.flashes('annonce_success') %}
+        <div class="anm-flash"><i class="fa-solid fa-circle-check me-2"></i>{{ message }}</div>
+    {% endfor %}
+
+    <section class="anm-shell" id="annonceManager" data-bulk-url="{{ path('annonce_bulk_delete') }}" data-bulk-token="{{ csrf_token('annonce_bulk_delete') }}">
+        <div class="anm-tools">
+            <div class="anm-search"><i class="fa-solid fa-magnifying-glass"></i><input id="annonceSearch" type="search" placeholder="{% trans %}Rechercher dans toutes les colonnes…{% endtrans %}" autocomplete="off"></div>
+            <div class="anm-tool-right">
+                <button class="anm-bulk" id="annonceBulkDelete" type="button"><i class="fa-solid fa-trash"></i><span>{% trans %}Supprimer 0 annonce{% endtrans %}</span></button>
+                <label class="visually-hidden" for="annonceLimit">{% trans %}Lignes par page{% endtrans %}</label>
+                <select class="anm-limit" id="annonceLimit">
+                    {% for size in [10, 15, 20, 30, 50] %}<option value="{{ size }}">{{ size }} {% trans %}par page{% endtrans %}</option>{% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="anm-table-wrap">
+            <table class="anm-table">
+                <thead><tr><th><input class="anm-check" type="checkbox" id="annonceSelectAll" aria-label="{% trans %}Tout sélectionner{% endtrans %}"></th><th>{% trans %}Type{% endtrans %}</th><th>{% trans %}Annonce{% endtrans %}</th><th>{% trans %}Catégorie / Profession{% endtrans %}</th><th>{% trans %}Salaire journalier{% endtrans %}</th><th>{% trans %}Statut{% endtrans %}</th><th>{% trans %}Création{% endtrans %}</th><th>{% trans %}Afficher maintenant{% endtrans %}</th><th>{% trans %}Actions{% endtrans %}</th></tr></thead>
+                <tbody id="annonceRows">
+                    {% for annonce in annonces %}
+                        {% set status = annonce.publier and annonce.afficherMaintenant ? 'published' : (annonce.afficherMaintenant ? 'pending' : 'draft') %}
+                        <tr class="js-annonce-row" data-id="{{ annonce.slug }}">
+                            <td><input class="anm-check js-row-check" type="checkbox" value="{{ annonce.slug }}" aria-label="{% trans %}Sélectionner{% endtrans %} {{ annonce.titre }}"></td>
+                            <td><span class="anm-type"><i class="fa-solid fa-bullhorn"></i> {% trans %}Annonce{% endtrans %}</span></td>
+                            <td class="anm-title"><strong title="{{ annonce.titre }}">{{ annonce.titre }}</strong><small><i class="fa-solid fa-location-dot me-1"></i>{{ annonce.ville }}</small></td>
+                            <td><strong style="color:#344560">{{ annonce.categorie.nom }}</strong><br><small>{{ annonce.profession.profession }}</small></td>
+                            <td><strong style="color:#102a54">{% if annonce.salaireJournalier %}{{ annonce.salaireJournalier|number_format(0, ',', ' ') }} {% trans %}FCFA/jour{% endtrans %}{% else %}{% trans %}À convenir{% endtrans %}{% endif %}</strong></td>
+                            <td><span class="anm-status {{ status }} js-status">{% if status == 'published' %}{% trans %}Publiée{% endtrans %}{% elseif status == 'pending' %}{% trans %}En modération{% endtrans %}{% else %}{% trans %}Brouillon{% endtrans %}{% endif %}</span></td>
+                            <td>{{ annonce.dateCreation|date('d/m/Y') }}<br><small>{{ annonce.dateCreation|date('H:i') }}</small></td>
+                            <td>
+                                <label class="anm-switch" title="{% trans %}Afficher maintenant{% endtrans %}">
+                                    <input class="js-display-toggle" type="checkbox" {{ annonce.afficherMaintenant ? 'checked' : '' }} data-url="{{ path('annonce_toggle_display', {slug: annonce.slug}) }}" data-token="{{ csrf_token('annonce_display_' ~ annonce.id) }}">
+                                    <span class="anm-slider"></span>
+                                </label>
+                            </td>
+                            <td><div class="anm-actions">
+                                <a class="anm-action" href="{{ path('annonce_show', {slug: annonce.slug}) }}" title="{% trans %}Aperçu{% endtrans %}" data-turbo="false"><i class="fa-regular fa-eye"></i></a>
+                                <a class="anm-action" href="{{ path('annonce_edit', {slug: annonce.slug}) }}" title="{% trans %}Modifier{% endtrans %}" data-turbo="false"><i class="fa-solid fa-pen"></i></a>
+                                <a class="anm-action boost" href="{{ path('annonce_boost', {annonce: annonce.slug}) }}" title="{% trans %}Booster{% endtrans %}" data-turbo="false"><i class="fa-solid fa-rocket"></i></a>
+                                <button class="anm-action delete js-delete-annonce" type="button" title="{% trans %}Supprimer{% endtrans %}" data-url="{{ path('annonce_delete', {slug: annonce.slug}) }}" data-token="{{ csrf_token('annonce_delete_' ~ annonce.id) }}"><i class="fa-solid fa-trash"></i></button>
+                            </div></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="anm-empty" id="annonceEmpty" {{ annonces is not empty ? 'hidden' : '' }}><i class="fa-regular fa-folder-open"></i><strong>{% trans %}Aucune annonce trouvée{% endtrans %}</strong><div>{% trans %}Publiez votre première annonce ou modifiez votre recherche.{% endtrans %}</div></div>
+        <div class="anm-pager"><div class="anm-page-info" id="annoncePageInfo">0 {% trans %}résultat{% endtrans %}</div><div class="anm-page-buttons"><button class="anm-page-btn" id="annoncePrev" type="button"><i class="fa-solid fa-chevron-left"></i> {% trans %}Précédent{% endtrans %}</button><span class="anm-page-number" id="annoncePageNumber">1</span><button class="anm-page-btn" id="annonceNext" type="button">{% trans %}Suivant{% endtrans %} <i class="fa-solid fa-chevron-right"></i></button></div></div>
+    </section>
+</main>
+
+<script src="{{ asset('js/annonce/manage.js') }}" defer></script>
+{% endblock %}

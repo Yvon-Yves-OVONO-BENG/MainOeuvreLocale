@@ -1,0 +1,938 @@
+{% extends 'baseLoginRegister.html.twig' %}
+
+{% block title %}Créer un compte – Main d'Oeuvre Locale{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/auth/register.css') }}?v={{ random() }}">
+{% endblock %}
+
+{% block body %}
+
+
+  <section class="auth-wrap registration-page registration-split-page">
+  <div class="auth-split-card">
+
+    <div class="auth-manual-panel">
+      <a href="{{ path('accueil') }}" class="home-btn" data-turbo="false">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>{% trans %}Accueil{% endtrans %}</span>
+      </a>
+
+      <h1 class="auth-title">{% trans %}Créer un compte{% endtrans %}</h1>
+      <p class="auth-subtitle">
+        
+      </p>
+
+      <div class="mobile-email-divider" aria-hidden="true">
+        <span>{% trans %}Ou avec votre adresse e-mail{% endtrans %}</span>
+      </div>
+
+      {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans %}Fermer{% endtrans %}"></button>
+        </div>
+      {% endfor %}
+
+      {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans %}Fermer{% endtrans %}"></button>
+        </div>
+      {% endfor %}
+
+      {{ form_errors(registrationForm) }}
+
+      {{ form_start(registrationForm, {
+        attr: {
+          id: 'registerForm',
+          novalidate: 'novalidate',
+          class: 'manual-register-form'
+        }
+      }) }}
+
+        <div class="form-row-2">
+          <div class="form-groupx">
+            <div class="floating-field" id="emailField" data-check-url="{{ path('app_register_check_email') }}">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M5.5 7.5 12 12l6.5-4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+
+              {{ form_widget(registrationForm.email, {
+                attr: {
+                  class: 'form-control in floating-control',
+                  placeholder: ' ',
+                  autocomplete: 'email',
+                  inputmode: 'email',
+                  spellcheck: 'false',
+                  id: 'register_email',
+                  'aria-describedby': 'emailFeedback'
+                }
+              }) }}
+
+              <label for="register_email" class="floating-label">
+                {% trans %}Adresse email{% endtrans %}
+              </label>
+
+              <span class="email-live-icon" aria-hidden="true"></span>
+            </div>
+
+            <div id="emailFeedback" class="email-feedback" aria-live="polite"></div>
+
+            {{ form_errors(registrationForm.email) }}
+          </div>
+        </div>
+
+        <div class="password-row-2">
+          <div class="form-groupx">
+            <div class="floating-field password-field">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7.5 10V8.2A4.5 4.5 0 0 1 12 3.7a4.5 4.5 0 0 1 4.5 4.5V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6.5 10h11A2.5 2.5 0 0 1 20 12.5v6A2.5 2.5 0 0 1 17.5 21h-11A2.5 2.5 0 0 1 4 18.5v-6A2.5 2.5 0 0 1 6.5 10Z" stroke="currentColor" stroke-width="2"/>
+              </svg>
+
+              {{ form_widget(registrationForm.plainPassword.first, {
+                attr: {
+                  class: 'form-control in floating-control',
+                  placeholder: ' ',
+                  id: 'register_password_first',
+                  autocomplete: 'new-password'
+                }
+              }) }}
+
+              <label for="register_password_first" class="floating-label">
+                {% trans %}Mot de passe{% endtrans %}
+              </label>
+
+              <button type="button"
+                      class="password-toggle"
+                      id="togglePasswordFirst"
+                      aria-label="{{ 'Afficher le mot de passe'|trans }}"
+                      title="{{ 'Afficher le mot de passe'|trans }}">
+                <svg id="iconEyeFirst" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+
+                <svg id="iconEyeOffFirst" class="d-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M9.88 5.09A11.37 11.37 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.06 3.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M6.71 6.72C4.03 8.14 2 12 2 12a17.62 17.62 0 0 0 5.09 5.28A10.86 10.86 0 0 0 12 19c1.61 0 3.09-.33 4.41-.91" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {{ form_errors(registrationForm.plainPassword.first) }}
+          </div>
+
+          <div class="form-groupx">
+            <div class="floating-field password-field">
+              <svg class="field-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M7.5 10V8.2A4.5 4.5 0 0 1 12 3.7a4.5 4.5 0 0 1 4.5 4.5V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M6.5 10h11A2.5 2.5 0 0 1 20 12.5v6A2.5 2.5 0 0 1 17.5 21h-11A2.5 2.5 0 0 1 4 18.5v-6A2.5 2.5 0 0 1 6.5 10Z" stroke="currentColor" stroke-width="2"/>
+                <path d="M9.5 16l1.7 1.7L15 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+
+              {{ form_widget(registrationForm.plainPassword.second, {
+                attr: {
+                  class: 'form-control in floating-control',
+                  placeholder: ' ',
+                  id: 'register_password_second',
+                  autocomplete: 'new-password'
+                }
+              }) }}
+
+              <label for="register_password_second" class="floating-label">
+                {% trans %}Répéter le mot de passe{% endtrans %}
+              </label>
+
+              <button type="button"
+                      class="password-toggle"
+                      id="togglePasswordSecond"
+                      aria-label="{{ 'Afficher le mot de passe'|trans }}"
+                      title="{{ 'Afficher le mot de passe'|trans }}">
+                <svg id="iconEyeSecond" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                </svg>
+
+                <svg id="iconEyeOffSecond" class="d-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <path d="M9.88 5.09A11.37 11.37 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.06 3.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M6.71 6.72C4.03 8.14 2 12 2 12a17.62 17.62 0 0 0 5.09 5.28A10.86 10.86 0 0 0 12 19c1.61 0 3.09-.33 4.41-.91" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            {{ form_errors(registrationForm.plainPassword.second) }}
+          </div>
+        </div>
+
+        <div class="password-meter" aria-live="polite" aria-atomic="true">
+          <div class="password-meter-track">
+            <div class="password-meter-bar" id="passwordMeterBar"></div>
+          </div>
+          <div class="password-meter-text" id="passwordMeterText">
+            {% trans %}Rigidité du mot de passe : non définie{% endtrans %}
+          </div>
+        </div>
+        
+        <div class="auth-check">
+            <input type="checkbox"
+                   id="agree_terms"
+                   name="agree_terms"
+                   class="auth-checkbox"
+                   required>
+        
+            <label class="auth-check-label" for="agree_terms">
+                {% trans %}En cochant cette case, vous acceptez nos{% endtrans %}
+                <a href="{{ path('legal_terms') }}" target="_blank" rel="noopener">
+                    {% trans %}termes et conditions{% endtrans %}
+                </a>
+                {% trans %}et notre{% endtrans %}
+                <a href="{{ path('legal_privacy') }}" target="_blank" rel="noopener">
+                    {% trans %}politique de confidentialité{% endtrans %}
+                </a><span>{% trans %}.{% endtrans %}</span>
+            </label>
+        </div>
+
+        <input type="hidden" value="{{ csrfToken }}" name="csrfToken">
+
+        <button type="submit" class="btn-create" id="submitRegisterBtn" disabled aria-disabled="true">
+          <span class="btn-create-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M15 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+              <path d="M19 8v6M16 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="btn-create-label">{% trans %}Créer mon compte{% endtrans %}</span>
+          <span class="btn-create-spinner" aria-hidden="true"></span>
+        </button>
+
+      {{ form_end(registrationForm) }}
+
+      <div class="login-link">
+        {% trans %}Déjà un compte ?{% endtrans %}
+        <a href="{{ path('app_login') }}" data-turbo="false">{% trans %}Se connecter{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div class="auth-social-panel">
+      <div class="social-panel-inner">
+
+        <h2 class="social-title">{% trans %}Création rapide d'un compte{% endtrans %}</h2>
+        <p class="social-subtitle">
+          {% trans %}Utilisez un réseau social pour créer votre compte plus rapidement.{% endtrans %}
+        </p>
+
+        <div class="social-row">
+          <a href="{{ path('connect_google_start') }}" class="social-btn" data-turbo="false" data-social-login="true" aria-label="{{ 'Continuer avec Google'|trans }}">
+            <span class="social-logo social-icon-google" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="img">
+                <path fill="#FFC107" d="M43.61 20.08H42V20H24v8h11.3C33.65 32.66 29.22 36 24 36c-6.63 0-12-5.37-12-12S17.37 12 24 12c3.06 0 5.84 1.15 7.96 3.04l5.66-5.66C34.05 6.05 29.27 4 24 4 12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20c0-1.34-.14-2.63-.39-3.92Z"/>
+                <path fill="#FF3D00" d="M6.31 14.69l6.57 4.82C14.66 15.1 18.96 12 24 12c3.06 0 5.84 1.15 7.96 3.04l5.66-5.66C34.05 6.05 29.27 4 24 4 16.32 4 9.66 8.34 6.31 14.69Z"/>
+                <path fill="#4CAF50" d="M24 44c5.16 0 9.86-1.97 13.41-5.18l-6.19-5.24C29.15 35.15 26.64 36 24 36c-5.2 0-9.62-3.32-11.28-7.95l-6.52 5.02C9.51 39.56 16.24 44 24 44Z"/>
+                <path fill="#1976D2" d="M43.61 20.08H42V20H24v8h11.3a12.04 12.04 0 0 1-4.08 5.58l6.19 5.24C36.97 39.22 44 34 44 24c0-1.34-.14-2.63-.39-3.92Z"/>
+              </svg>
+            </span>
+            <span class="social-btn-label">{% trans %}Google{% endtrans %}</span>
+            <span class="social-spinner" aria-hidden="true"></span>
+          </a>
+
+          <a href="{{ path('connect_facebook_start') }}" class="social-btn" data-turbo="false" data-social-login="true" aria-label="{{ 'Continuer avec Facebook'|trans }}">
+            <span class="social-logo social-icon-facebook" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="img">
+                <circle cx="24" cy="24" r="22" fill="#1877F2"/>
+                <path fill="#FFFFFF" d="M29.6 25.4h-3.9V39h-5.6V25.4h-2.8v-4.8h2.8v-3.1c0-2.3 1.1-5.9 5.9-5.9l4.3.02v4.8h-3.1c-.5 0-1.5.26-1.5 1.63v2.55h4.7l-.8 4.8Z"/>
+              </svg>
+            </span>
+            <span class="social-btn-label">{% trans %}Facebook{% endtrans %}</span>
+            <span class="social-spinner" aria-hidden="true"></span>
+          </a>
+
+          {# <a href="{{ path('connect_apple_start') }}" class="social-btn" data-turbo="false" data-social-login="true" aria-label="{{ 'Continuer avec Apple'|trans }}">
+            <span class="social-logo social-icon-apple" aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img">
+                <path fill="currentColor" d="M16.37 1.43c0 1.14-.42 2.18-1.25 3.11-.9 1-1.98 1.58-3.08 1.49-.14-1.1.4-2.29 1.18-3.18.86-.98 2.31-1.7 3.15-1.42ZM20.69 17.37c-.55 1.25-.81 1.81-1.52 2.92-.99 1.51-2.38 3.39-4.1 3.41-1.53.02-1.92-1-4-.99-2.08.01-2.52 1-4.05.99-1.72-.02-3.04-1.71-4.03-3.22-2.76-4.22-3.05-9.17-1.35-11.8 1.21-1.87 3.12-2.96 4.91-2.96 1.82 0 2.97 1 4.48 1 1.46 0 2.35-1 4.46-1 1.59 0 3.28.87 4.48 2.37-3.94 2.16-3.3 7.79.72 9.28Z"/>
+              </svg>
+            </span>
+            <span class="social-btn-label">{% trans %}Apple{% endtrans %}</span>
+            <span class="social-spinner" aria-hidden="true"></span>
+          </a>
+
+          <a href="{{ path('connect_microsoft_start') }}" class="social-btn" data-turbo="false" data-social-login="true" aria-label="{{ 'Continuer avec Microsoft'|trans }}">
+            <span class="social-logo social-icon-microsoft" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="img">
+                <path fill="#F25022" d="M4 4h19v19H4z"/>
+                <path fill="#7FBA00" d="M25 4h19v19H25z"/>
+                <path fill="#00A4EF" d="M4 25h19v19H4z"/>
+                <path fill="#FFB900" d="M25 25h19v19H25z"/>
+              </svg>
+            </span>
+            <span class="social-btn-label">{% trans %}Microsoft{% endtrans %}</span>
+            <span class="social-spinner" aria-hidden="true"></span>
+          </a> #}
+        </div>
+
+        <div class="social-assurance">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="5" y="10" width="14" height="11" rx="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 14v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>{% trans %}Connexion sécurisée. Vos identifiants restent protégés.{% endtrans %}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<script>
+  (function () {
+    document.addEventListener('DOMContentLoaded', function () {
+      function byId() {
+        for (let i = 0; i < arguments.length; i++) {
+          const el = document.getElementById(arguments[i]);
+          if (el) return el;
+        }
+
+        return null;
+      }
+
+      const form = document.getElementById('registerForm');
+      const submitBtn = document.getElementById('submitRegisterBtn');
+      const submitLabel = submitBtn ? submitBtn.querySelector('.btn-create-label') : null;
+
+      const emailInput = byId('register_email', '{{ registrationForm.email.vars.id }}');
+
+      const pwd1 = byId('register_password_first', '{{ registrationForm.plainPassword.first.vars.id }}');
+      const pwd2 = byId('register_password_second', '{{ registrationForm.plainPassword.second.vars.id }}');
+      const agreeTerms = document.getElementById('agree_terms');
+
+      const emailField = document.getElementById('emailField');
+      const emailFeedback = document.getElementById('emailFeedback');
+      const checkUrl = emailField ? emailField.dataset.checkUrl : null;
+
+      let emailTimer = null;
+      let lastCheckedEmail = '';
+      let emailState = 'empty';
+
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+      const phoneRegex = /^[+]?[\d\s().-]{6,30}$/;
+
+      function passwordMeetsRequirements(value) {
+        return value.length >= 8
+          && /[a-z]/.test(value)
+          && /[A-Z]/.test(value)
+          && /\d/.test(value)
+          && /[^A-Za-z0-9]/.test(value);
+      }
+
+      function isFormReady() {
+        const emailValue = emailInput ? emailInput.value.trim().toLowerCase() : '';
+        const passwordValue = pwd1 ? pwd1.value : '';
+        const confirmationValue = pwd2 ? pwd2.value : '';
+
+        return emailRegex.test(emailValue)
+          && emailState !== 'used'
+          && emailState !== 'invalid'
+          && passwordMeetsRequirements(passwordValue)
+          && confirmationValue === passwordValue
+          && Boolean(agreeTerms && agreeTerms.checked);
+      }
+
+      function updateSubmitState() {
+        if (!submitBtn || submitBtn.classList.contains('is-loading')) return;
+
+        const enabled = isFormReady();
+        submitBtn.disabled = !enabled;
+        submitBtn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+      }
+
+      function resetEmailClasses() {
+        if (!emailField || !emailFeedback) return;
+
+        emailField.classList.remove('email-valid', 'email-invalid', 'email-checking');
+        emailFeedback.classList.remove('is-valid', 'is-invalid', 'is-checking');
+      }
+
+      function setEmailMessage(state, message) {
+        emailState = state;
+
+        if (!emailField || !emailFeedback) return;
+
+        resetEmailClasses();
+        emailFeedback.textContent = message || '';
+
+        if (state === 'checking') {
+          emailField.classList.add('email-checking');
+          emailFeedback.classList.add('is-checking');
+        }
+
+        if (state === 'available') {
+          emailField.classList.add('email-valid');
+          emailFeedback.classList.add('is-valid');
+        }
+
+        if (state === 'invalid' || state === 'used') {
+          emailField.classList.add('email-invalid');
+          emailFeedback.classList.add('is-invalid');
+        }
+
+        updateSubmitState();
+      }
+
+      function validateFields() {
+      let ok = true;
+      let firstInvalid = null;
+
+      const emailValue = (emailInput ? emailInput.value : '').trim();
+      const pwd1Value = (pwd1 ? pwd1.value : '').trim();
+      const pwd2Value = (pwd2 ? pwd2.value : '').trim();
+
+
+      if (!emailValue) {
+        vibrateField(emailInput);
+        setEmailMessage('invalid', 'Email requis');
+        firstInvalid = firstInvalid || emailInput;
+        ok = false;
+      } else if (!emailRegex.test(emailValue)) {
+        vibrateField(emailInput);
+        setEmailMessage('invalid', 'Email non valide');
+        firstInvalid = firstInvalid || emailInput;
+        ok = false;
+      } else {
+        clearInvalidField(emailInput);
+      }
+
+      if (!pwd1Value) {
+        vibrateField(pwd1);
+        firstInvalid = firstInvalid || pwd1;
+        ok = false;
+      } else {
+        clearInvalidField(pwd1);
+      }
+
+      if (!pwd2Value) {
+        vibrateField(pwd2);
+        firstInvalid = firstInvalid || pwd2;
+        ok = false;
+      } else {
+        clearInvalidField(pwd2);
+      }
+
+      if (pwd1Value && pwd2Value && pwd1Value !== pwd2Value) {
+        vibrateField(pwd1);
+        vibrateField(pwd2);
+        firstInvalid = firstInvalid || pwd2;
+        ok = false;
+      }
+
+      if (!ok) {
+        vibrateDevice();
+
+        if (firstInvalid) {
+          firstInvalid.focus();
+        }
+      }
+
+      return ok;
+      }
+
+      function checkEmailAvailability(callback) {
+        if (!emailInput || !checkUrl) {
+          setEmailMessage('unverified', 'La disponibilité sera vérifiée à l’envoi');
+          if (typeof callback === 'function') callback(true);
+          return;
+        }
+
+        const email = emailInput.value.trim().toLowerCase();
+
+        clearTimeout(emailTimer);
+
+        if (!email) {
+          lastCheckedEmail = '';
+          setEmailMessage('empty', '');
+          if (typeof callback === 'function') callback(false);
+          return;
+        }
+
+        if (!emailRegex.test(email)) {
+          lastCheckedEmail = '';
+          setEmailMessage('invalid', 'Email non valide');
+          if (typeof callback === 'function') callback(false);
+          return;
+        }
+
+        if (lastCheckedEmail === email && emailState === 'available') {
+          if (typeof callback === 'function') callback(true);
+          return;
+        }
+
+        if (lastCheckedEmail === email && emailState === 'used') {
+          if (typeof callback === 'function') callback(false);
+          return;
+        }
+
+        setEmailMessage('checking', 'Vérification...');
+
+        emailTimer = setTimeout(function () {
+          fetch(checkUrl + '?email=' + encodeURIComponent(email), {
+            method: 'GET',
+            credentials: 'same-origin',
+            cache: 'no-store',
+            headers: {
+              'Accept': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            }
+          })
+          .then(function (response) {
+            return response.text().then(function (text) {
+              let data;
+
+              try {
+                data = JSON.parse(text);
+              } catch (e) {
+                throw new Error('JSON invalide');
+              }
+
+              if (!response.ok) {
+                throw new Error(data.message || 'Erreur HTTP ' + response.status);
+              }
+
+              return data;
+            });
+          })
+          .then(function (data) {
+            lastCheckedEmail = email;
+
+            if (data.exists === true || Number(data.count) > 0) {
+              setEmailMessage('used', data.message || 'Email déjà utilisé');
+              if (typeof callback === 'function') callback(false);
+              return;
+            }
+
+            setEmailMessage('available', data.message || 'Email disponible');
+            if (typeof callback === 'function') callback(true);
+          })
+          .catch(function () {
+            lastCheckedEmail = '';
+            // En cas de réseau mobile instable, ne jamais bloquer la création :
+            // la validation serveur vérifiera l’unicité de façon autoritaire.
+            setEmailMessage('unverified', 'Vérification différée — vous pouvez continuer');
+            if (typeof callback === 'function') callback(true);
+          });
+        }, 350);
+      }
+
+      if (emailInput) {
+        emailInput.addEventListener('input', function () {
+          emailInput.classList.remove('is-invalid');
+          lastCheckedEmail = '';
+          clearTimeout(emailTimer);
+
+          const value = emailInput.value.trim().toLowerCase();
+
+          if (!value) {
+            setEmailMessage('empty', '');
+            return;
+          }
+
+          if (!emailRegex.test(value)) {
+            setEmailMessage('invalid', 'Email non valide');
+            return;
+          }
+
+          checkEmailAvailability();
+        });
+
+        emailInput.addEventListener('blur', function () {
+          checkEmailAvailability();
+        });
+      }
+
+      function initPasswordToggle(input, buttonId, eyeId, eyeOffId) {
+        const button = document.getElementById(buttonId);
+        const eye = document.getElementById(eyeId);
+        const eyeOff = document.getElementById(eyeOffId);
+
+        if (!input || !button || !eye || !eyeOff) return;
+
+        button.addEventListener('click', function () {
+          const isPassword = input.type === 'password';
+
+          input.type = isPassword ? 'text' : 'password';
+
+          eye.classList.toggle('d-none', isPassword);
+          eyeOff.classList.toggle('d-none', !isPassword);
+
+          button.setAttribute('aria-label', isPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe');
+        });
+      }
+
+      initPasswordToggle(pwd1, 'togglePasswordFirst', 'iconEyeFirst', 'iconEyeOffFirst');
+      initPasswordToggle(pwd2, 'togglePasswordSecond', 'iconEyeSecond', 'iconEyeOffSecond');
+
+      const meterBar = document.getElementById('passwordMeterBar');
+      const meterText = document.getElementById('passwordMeterText');
+
+      function renderPasswordStrength() {
+        if (!pwd1 || !meterBar || !meterText) return;
+
+        const value = pwd1.value || '';
+        let score = 0;
+
+        if (value.length >= 8) score++;
+        if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score++;
+        if (/\d/.test(value)) score++;
+        if (/[^A-Za-z0-9]/.test(value)) score++;
+        if (value.length >= 12) score++;
+
+        meterText.classList.remove('is-weak', 'is-medium', 'is-strong');
+
+        if (!value) {
+          meterBar.style.width = '0%';
+          meterBar.style.background = '#64748b';
+          meterText.textContent = 'Rigidité du mot de passe : non définie';
+          updateSubmitState();
+          return;
+        }
+
+        if (score <= 1) {
+          meterBar.style.width = '25%';
+          meterBar.style.background = '#ef4444';
+          meterText.textContent = 'Rigidité du mot de passe : faible';
+          meterText.classList.add('is-weak');
+          updateSubmitState();
+          return;
+        }
+
+        if (score <= 3) {
+          meterBar.style.width = '60%';
+          meterBar.style.background = '#eab308';
+          meterText.textContent = 'Rigidité du mot de passe : moyenne';
+          meterText.classList.add('is-medium');
+          updateSubmitState();
+          return;
+        }
+
+        meterBar.style.width = '100%';
+        meterBar.style.background = '#22c55e';
+        meterText.textContent = 'Rigidité du mot de passe : forte';
+        meterText.classList.add('is-strong');
+        updateSubmitState();
+      }
+
+      if (pwd1) {
+        pwd1.addEventListener('input', renderPasswordStrength);
+        renderPasswordStrength();
+      }
+
+      if (pwd2) {
+        pwd2.addEventListener('input', updateSubmitState);
+        pwd2.addEventListener('change', updateSubmitState);
+      }
+
+      if (agreeTerms) {
+        agreeTerms.addEventListener('change', updateSubmitState);
+      }
+
+      updateSubmitState();
+
+      if (form) {
+        form.addEventListener('submit', function (event) {
+          if (form.dataset.ready === '1') {
+            return;
+          }
+
+          event.preventDefault();
+
+          if (!validateFields()) {
+            return;
+          }
+
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('is-loading');
+            submitBtn.setAttribute('aria-busy', 'true');
+            submitBtn.setAttribute('aria-disabled', 'true');
+
+            if (submitLabel) {
+              submitLabel.textContent = 'Vérification...';
+            }
+          }
+
+          checkEmailAvailability(function (emailOk) {
+            if (!emailOk) {
+              if (submitBtn) {
+                submitBtn.classList.remove('is-loading');
+                submitBtn.removeAttribute('aria-busy');
+
+                if (submitLabel) {
+                  submitLabel.textContent = 'Créer mon compte';
+                }
+
+                updateSubmitState();
+              }
+
+              if (emailInput) {
+                emailInput.focus();
+              }
+
+              return;
+            }
+
+            form.dataset.ready = '1';
+            form.submit();
+          });
+        });
+      }
+    });
+  })();
+
+  const countryCode = document.getElementById('countryCode');
+
+  function refreshFloatingFields() {
+    document.querySelectorAll('.floating-field').forEach(function (field) {
+      const input = field.querySelector('.form-control, .form-select');
+
+      if (!input) return;
+
+      field.classList.toggle('has-value', (input.value || '').trim() !== '');
+
+      input.addEventListener('input', function () {
+        field.classList.toggle('has-value', (input.value || '').trim() !== '');
+      });
+
+      input.addEventListener('change', function () {
+        field.classList.toggle('has-value', (input.value || '').trim() !== '');
+      });
+    });
+  }
+
+  refreshFloatingFields();
+
+  function getFieldBox(input) {
+    if (!input) return null;
+
+    return input.closest('.floating-field') ||
+          input.closest('.phone-field') ||
+          input.parentElement;
+  }
+
+  function vibrateField(input) {
+    const box = getFieldBox(input);
+
+    if (!box) return;
+
+    box.classList.remove('field-vibrate');
+
+    void box.offsetWidth;
+
+    box.classList.add('field-vibrate');
+
+    input.classList.add('is-invalid');
+
+    setTimeout(function () {
+      box.classList.remove('field-vibrate');
+    }, 420);
+  }
+
+  function clearInvalidField(input) {
+    if (!input) return;
+
+    input.classList.remove('is-invalid');
+
+    const box = getFieldBox(input);
+
+    if (box) {
+      box.classList.remove('field-vibrate');
+    }
+  }
+
+  function vibrateDevice() {
+    if (navigator.vibrate) {
+      navigator.vibrate([70, 40, 70]);
+    }
+  }
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('registerForm');
+    const submitBtn = document.getElementById('submitRegisterBtn');
+
+    const fields = [
+      document.getElementById('register_type_compte'),
+      document.getElementById('register_email'),
+      document.getElementById('register_phone'),
+      document.getElementById('register_password_first'),
+      document.getElementById('register_password_second'),
+      document.getElementById('agree_terms')
+    ].filter(Boolean);
+
+    function getBox(field) {
+      if (!field) return null;
+
+      if (field.id === 'register_phone') {
+        return field.closest('.phone-field') || field.closest('.floating-field');
+      }
+
+      return field.closest('.floating-field') || field.parentElement;
+    }
+
+    function shake(field) {
+      const box = getBox(field);
+
+      field.classList.add('is-invalid');
+
+      if (box) {
+        box.classList.remove('mol-vibrate');
+        void box.offsetWidth;
+        box.classList.add('mol-vibrate');
+
+        setTimeout(function () {
+          box.classList.remove('mol-vibrate');
+        }, 450);
+      }
+    }
+
+    function clearField(field) {
+      field.classList.remove('is-invalid');
+
+      const box = getBox(field);
+      if (box) {
+        box.classList.remove('mol-vibrate');
+      }
+    }
+
+    function isEmpty(field) {
+        if (field.type === 'checkbox') {
+            return !field.checked;
+        }
+    
+        return !field.value || field.value.trim() === '';
+    }
+
+    function validateRequiredFields() {
+      let valid = true;
+      let firstInvalid = null;
+
+      fields.forEach(function (field) {
+        if (isEmpty(field)) {
+          shake(field);
+          firstInvalid = firstInvalid || field;
+          valid = false;
+        } else {
+          clearField(field);
+        }
+      });
+
+      const pwd1 = document.getElementById('register_password_first');
+      const pwd2 = document.getElementById('register_password_second');
+
+      if (pwd1 && pwd2 && pwd1.value.trim() && pwd2.value.trim() && pwd1.value !== pwd2.value) {
+        shake(pwd1);
+        shake(pwd2);
+        firstInvalid = firstInvalid || pwd2;
+        valid = false;
+      }
+
+      if (!valid) {
+        if (navigator.vibrate) {
+          navigator.vibrate([80, 40, 80]);
+        }
+
+        if (firstInvalid) {
+          firstInvalid.focus();
+        }
+      }
+
+      return valid;
+    }
+
+    fields.forEach(function (field) {
+      field.addEventListener('input', function () {
+        clearField(field);
+      });
+
+      field.addEventListener('change', function () {
+        clearField(field);
+      });
+    });
+
+    if (submitBtn) {
+      submitBtn.addEventListener('click', function (event) {
+        if (!validateRequiredFields()) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+    }
+
+    if (form) {
+      form.addEventListener('submit', function (event) {
+        if (!validateRequiredFields()) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+    }
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const socialLinks = Array.from(document.querySelectorAll('[data-social-login="true"]'));
+
+    function resetSocialButtons() {
+      socialLinks.forEach(function (link) {
+        link.classList.remove('is-loading');
+        link.removeAttribute('aria-busy');
+        link.removeAttribute('aria-disabled');
+      });
+    }
+
+    socialLinks.forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (link.classList.contains('is-loading')) {
+          return;
+        }
+
+        const href = link.getAttribute('href');
+
+        if (!href) {
+          return;
+        }
+
+        socialLinks.forEach(function (socialLink) {
+          socialLink.setAttribute('aria-disabled', 'true');
+        });
+
+        link.classList.add('is-loading');
+        link.setAttribute('aria-busy', 'true');
+
+        window.setTimeout(function () {
+          window.location.assign(href);
+        }, 90);
+      }, true);
+    });
+
+    window.addEventListener('pageshow', resetSocialButtons);
+  });
+</script>
+
+{% endblock %}

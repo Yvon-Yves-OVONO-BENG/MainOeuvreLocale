@@ -1,88 +1,379 @@
 {% extends 'base.html.twig' %}
+{% set seo_description = 'Main d’Œuvre Locale met en relation talents, artisans, prestataires, particuliers et entreprises. Trouvez un emploi, une mission ou un professionnel près de chez vous.' %}
+{% block title %}Main d’Œuvre Locale | Emplois, talents et services{% endblock %}
+{% block body_class %}page-marketing{% endblock %}
 
-{% block title %}{% trans %}Accueil{% endtrans %}{% endblock %}
 {% block stylesheets %}
-	<style>
-		th,
-		tfoot {
-			font-size: 15px !important;
-			text-align: center !important;
-			font-weight: bold !important;
-			background-color: #F1F1F1 !important;
-		}
-
-		.infoTable {
-			text-align: center !important;
-			vertical-align: middle !important;
-		}
-
-		tr:hover {
-			background-color: rgba(62, 128, 235, 0.2) !important;
-			color: #3e80eb !important;
-		}
-
-        td {
-			font-size: 12px !important;
-			text-align: center !important;
-		}
-	</style>
+	{{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/home/home-main.css') }}?v=20260713">
+  <link rel="stylesheet" href="{{ asset('css/home/home-sections.css') }}?v=20260713">
+  <link rel="stylesheet" href="{{ asset('css/home/home-pricing.css') }}?v=20260713">
+  <link rel="stylesheet" href="{{ asset('css/home/home-jobs.css') }}?v=20260713">
+  <link rel="stylesheet" href="{{ asset('css/home/home-hero.css') }}?v=20260713">
+  <link rel="preload" as="image" href="{{ asset('images/hero/talents/talent-background.png') }}" fetchpriority="high">
+  <link rel="stylesheet" href="{{ asset('css/home/home-kjd.css') }}?v=20260805">
+  <link rel="stylesheet" href="{{ asset('css/search/search-radius.css') }}?v=20260721-1">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    .ph-hero-bg-slider:not(.is-media-ready){background:linear-gradient(100deg,#15233b 25%,#263b5a 42%,#15233b 60%);background-size:220% 100%;animation:molHeroSkeleton 1.3s linear infinite}
+    .ph-hero-bg-slider.is-media-ready{animation:none}
+    @keyframes molHeroSkeleton{from{background-position:100% 0}to{background-position:-120% 0}}
+  </style>
 {% endblock %}
+
 {% block body %}
+	<div class="ph-home">
+        
+        <!-- HERO INDEX -->
+        <section class="ph-hero-v4 ph-hero-v4-collage">
+            <div class="container-fluid px-0">
+                <div class="ph-hero-shell">
 
-<!-- App-Content -->
+                    <div class="ph-hero-bg-slider" id="phHeroSlider">
+                      <div class="ph-hero-bg-slide ph-hero-bg-slide--first active"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-construction.png') }}"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-macon.png') }}"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-menagere.png') }}"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-electricite.png') }}"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-chauffeur.png') }}"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-lessive.png') }}"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-coiffeuse.png') }}"></div>
+                      <div class="ph-hero-bg-slide" data-bg="{{ asset('images/hero/talents/talent-couture.png') }}"></div>
+                  </div>
 
-		{% if licence == 1 %}
-			{% if is_granted('ROLE_CAISSIERE_ACCUEIL') %}
-                {% include "includes/_accueilCaissiereAccueil.html.twig" %}
-            {% endif %}
+                    <div class="ph-hero-overlay"></div>
 
-			{% if is_granted('ROLE_CAISSIERE_PHARMACIE') %}
-                {% include "includes/_accueilCaissierePharmacie.html.twig" %}
-            {% endif %}
+                    <div class="ph-hero-content">
+                        <div class="container">
+                            <div class="row justify-content-center">
+                                <div class="col-xl-10 col-lg-11">
+                                    <div class="ph-hero-main text-center">
 
-			{% if is_granted('ROLE_REGIES_DES_RECETTES') or is_granted('ROLE_COMPTABLE') %}
-                {% include "includes/_accueilRegiesDesRecettes.html.twig" %}
-            {% endif %}
 
-            {% if is_granted('ROLE_PHARMACIEN') or is_granted('ROLE_SECRETAIRE') %}
-                {% include "includes/_accueilPharmacien.html.twig" %}
-            {% endif %}
+                                        <h1 class="ph-hero-title">
+                                            <span class="ph-hero-title-main">
+                                                <span class="ph-title-white">Main-d’œuvre</span>
+                                                <span class="ph-title-gold">Locale</span>
+                                            </span>
 
-			{% if is_granted('ROLE_DIRECTEUR') %}
-                {% include "includes/_accueilDirecteur.html.twig" %}
-            {% endif %}
+                                            <span class="ph-hero-title-sub">
+                                                {% trans %}Parce que la richesse est déjà autour de nous.{% endtrans %}
+                                            </span>
+                                        </h1>
 
-			{% if is_granted('ROLE_ADMINISTRATEUR') %}
-                {% include "includes/_accueilAdmin.html.twig" %}
-            {% endif %}
+                                        {% if not app.user %}
+                                            <a href="{{ path('app_register') }}" class="ph-hero-register-cta" data-hero-register data-turbo="false">
+                                                <i class="fa-solid fa-user-plus ph-hero-register-icon" aria-hidden="true"></i>
+                                                <i class="fa-solid fa-spinner fa-spin ph-hero-register-spinner" aria-hidden="true"></i>
+                                                <span>{% trans %}Inscription{% endtrans %}</span>
+                                            </a>
+                                        {% endif %}
 
-			{% if is_granted('ROLE_PARAMETRES_VITAUX') %}
-                {% include "includes/_accueilParametresVitaux.html.twig" %}
-            {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% include "job/_nearby_search_map.html.twig" with {job_nearby_part: 'form'} %}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <script>
+        (function () {
+            const slider = document.getElementById('phHeroSlider');
+            if (!slider || slider.dataset.lazyBound === '1') return;
+            slider.dataset.lazyBound = '1';
+            const slides = Array.from(slider.querySelectorAll('[data-bg]'));
+            const firstUrl = {{ asset('images/hero/talents/talent-background.png')|json_encode|raw }};
+
+            function markReady() { slider.classList.add('is-media-ready'); }
+            const firstImage = new Image();
+            firstImage.decoding = 'async';
+            firstImage.onload = markReady; firstImage.onerror = markReady; firstImage.src = firstUrl;
+            if (firstImage.complete) markReady();
+
+            function preloadSlide(slide) {
+                if (!slide || slide.dataset.loaded === '1' || !slide.dataset.bg) return;
+                slide.dataset.loaded = '1';
+                const image = new Image(); image.decoding = 'async';
+                image.onload = function () { slide.style.backgroundImage = 'url("' + slide.dataset.bg.replace(/"/g, '\\"') + '")'; };
+                image.src = slide.dataset.bg;
+            }
+
+            // Les deux visuels suivants sont préparés tôt ; le reste est différé pour économiser la 4G.
+            preloadSlide(slides[0]); preloadSlide(slides[1]);
+            const loadRest = function () { slides.slice(2).forEach(function (slide, index) { setTimeout(function(){ preloadSlide(slide); }, index * 450); }); };
+            if ('requestIdleCallback' in window) requestIdleCallback(loadRest, {timeout:1800}); else setTimeout(loadRest, 900);
+        }());
+        </script>
+
+        {% include "job/_nearby_search_map.html.twig" with {job_nearby_part: 'map'} %}
+
+        <!-- HERO JOBS - BANDE DÉFILANTE PREMIUM -->
+        <section class="vip-hero vip-jobs-ticker-hero bg-white">
+            <div class="vip-jobs-ticker-wrap">
+
+                <div class="vip-jobs-ticker-label">
+                    <i class="fa fa-bolt"></i>
+                    <span>{{ total }} {% trans %}offres disponibles{% endtrans %}</span>
+                </div>
+
+                <div class="vip-jobs-ticker-mask">
+                    {# Une seule animation très lente pilote toute la bande. #}
+                    <div class="vip-jobs-ticker-track" style="animation-duration: 80s !important;">
+
+						<div class="vip-jobs-ticker-content" style="animation: none !important;">
+							{% for row in professionsWithCounts %}
+								{% if row.total > 0 %}
+									<a
+										href="{{ path('liste_jobs', {'q': row.profession.profession}) }}"
+										class="vip-ticker-profession"
+										data-turbo="false"
+									>
+										{{ row.profession.profession }}
+										<strong>({{ row.total }})</strong>
+									</a>
+								{% endif %}
+							{% endfor %}
+						</div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="home-jobs-intro" aria-labelledby="jobs-showcase-title">
+          <div class="container">
+            <header class="home-jobs-heading">
+              <span class="home-jobs-heading__icon" aria-hidden="true">
+                <i class="fa-solid fa-briefcase"></i>
+              </span>
+              <div class="home-jobs-heading__content">
+                <span class="home-jobs-heading__eyebrow">{% trans %}Offres d'emploi{% endtrans %}</span>
+                <h2 id="jobs-showcase-title">{% trans %}Les talents que nos employeurs recherchent aujourd'hui{% endtrans %}</h2>
+              </div>
+            </header>
+          </div>
+        </section>
+
+        {% include "includes/_content_jobs.html.twig" %}
+
+		<div class="mol-saas-premium">
 			
-			{% if is_granted('ROLE_MEDECIN') %}
-                {% include "includes/_accueilMedecin.html.twig" %}
-            {% endif %}
+			{# ===================== DOWNLOAD APPS (3 BOUTONS PREMIUM) ===================== #}
+			<section class="sptb bg-white" id="download-app">
+				<div class="container">
+<div class="mol-app-strip p-4 p-lg-5">
+						<div class="row align-items-center g-4">
+							<div class="col-lg-7">
+								<div class="mol-app-title mb-2">
+									📲
+									{% trans %}Téléchargez l’application Main d’Œuvre Local{% endtrans %}
+								</div>
+								<div class="mol-app-sub">
+									{% trans %}Accédez aux talents, aux offres et au chat en un clin d’œil. Une expérience fluide, rapide et premium — partout, tout le temps.{% endtrans %}
+								</div>
+							</div>
 
-			{% if is_granted('ROLE_LABORANTIN') %}
-                {% include "includes/_accueilLaborantin.html.twig" %}
-            {% endif %}
+							<div class="col-lg-5">
+								<div class="row g-3">
+									<div class="col-12">
+										<a href="{{ path('download_android_app') }}" class="mol-store-btn" data-turbo="false" download>
+											<span class="mol-store-ico mol-android">
+												<i class="fa fa-android"></i>
+											</span>
+											<span class="mol-store-meta">
+												<small>{% trans %}Téléchargement direct{% endtrans %}</small>
+												<strong>APK Android</strong>
+											</span>
+											<span class="mol-store-arrow">
+												<i class="fa fa-arrow-right"></i>
+											</span>
+										</a>
+									</div>
 
-			{% if is_granted('ROLE_HOSPITALISATION') %}
-                {% include "includes/_accueilHospitalisation.html.twig" %}
-            {% endif %}
+									<div class="col-12">
+										<span class="mol-store-btn mol-store-btn--disabled" aria-disabled="true" title="Bientôt disponible">
+											<span class="mol-store-ico mol-apple">
+												<i class="fa fa-apple"></i>
+											</span>
+											<span class="mol-store-meta">
+												<small>{% trans %}Bientôt disponible{% endtrans %}</small>
+												<strong>App Store (iPhone)</strong>
+											</span>
+											<span class="mol-store-arrow">
+												<i class="fa fa-arrow-right"></i>
+											</span>
+										</span>
+									</div>
 
-			{% if is_granted('ROLE_ACCUEIL') %}
-                {% include "includes/_accueilAccueil.html.twig" %}
-            {% endif %}
+								</div>
+								
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+<!--/Section-->
+		</div>
+	</div>
+	{% include 'includes/_view_announcement_spinner.html.twig' %}
+{% endblock %}
 
-			{% else %}
-			{% include "includes/_licence.html.twig" %}
-		{% endif %}
-            
+{% block javascripts %}
+	{{ parent() }}
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-        </div>
-    </div>
-    <!-- End app-content-->
+
+
+
+
+
+
+
+<script src="{{ asset('js/home/home-kjd.js') }}?v=20260805" defer></script>
+
+<script>
+    /**
+     * Impose une seule animation de dix minutes sur la bande des offres.
+     * Le contrôle protège aussi la vitesse contre une réinitialisation par le script global.
+     */
+    function enforceVerySlowJobsTicker() {
+        document.querySelectorAll('.vip-jobs-ticker-hero').forEach(function (hero) {
+            const track = hero.querySelector('.vip-jobs-ticker-track');
+
+            if (!track) {
+                return;
+            }
+
+            track.style.setProperty('animation-duration', '600s', 'important');
+
+            hero.querySelectorAll('.vip-jobs-ticker-content').forEach(function (content) {
+                content.style.setProperty('animation', 'none', 'important');
+            });
+
+            if (track.dataset.slowTickerObserved === '1') {
+                return;
+            }
+
+            track.dataset.slowTickerObserved = '1';
+
+            const observer = new MutationObserver(function () {
+                const duration = track.style.getPropertyValue('animation-duration');
+                const priority = track.style.getPropertyPriority('animation-duration');
+
+                if (duration !== '80s' || priority !== 'important') {
+                    track.style.setProperty('animation-duration', '80s', 'important');
+                }
+            });
+
+            observer.observe(track, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        });
+    }
+
+    /**
+     * Applique le réglage après les scripts différés et les reconstructions Turbo.
+     */
+    function scheduleVerySlowJobsTicker() {
+        window.requestAnimationFrame(function () {
+            enforceVerySlowJobsTicker();
+            window.setTimeout(enforceVerySlowJobsTicker, 250);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', scheduleVerySlowJobsTicker);
+    document.addEventListener('turbo:load', scheduleVerySlowJobsTicker);
+    window.addEventListener('load', scheduleVerySlowJobsTicker);
+    window.addEventListener('pageshow', scheduleVerySlowJobsTicker);
+</script>
+
+<script>
+    (function () {
+        'use strict';
+
+        /** Charge uniquement la section paginée et conserve l'utilisateur au bon endroit. */
+        async function loadHomePageSection(link, section) {
+            const sectionName = section.dataset.homeAjaxPagination;
+            const requestedUrl = new URL(link.href, window.location.href);
+            requestedUrl.searchParams.delete('partial');
+            requestedUrl.searchParams.delete('home_section');
+            const fetchUrl = new URL(requestedUrl.href);
+
+            fetchUrl.hash = '';
+            fetchUrl.searchParams.set('partial', '1');
+            fetchUrl.searchParams.set('home_section', sectionName);
+
+            section.setAttribute('aria-busy', 'true');
+            section.style.opacity = '.62';
+            section.style.pointerEvents = 'none';
+
+            try {
+                const response = await fetch(fetchUrl.toString(), {
+                    headers: {
+                        'Accept': 'text/html',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Réponse de pagination invalide.');
+                }
+
+                const html = await response.text();
+                const parsedDocument = new DOMParser().parseFromString(html, 'text/html');
+                const replacement = parsedDocument.querySelector('[data-home-ajax-pagination="' + sectionName + '"]');
+
+                if (!replacement) {
+                    throw new Error('Section paginée introuvable.');
+                }
+
+                section.replaceWith(replacement);
+                replacement.dispatchEvent(new CustomEvent('mol:home-content-updated', {bubbles: true}));
+                window.history.pushState({ molHomePagination: true }, '', requestedUrl.toString());
+
+                window.requestAnimationFrame(function () {
+                    const offset = 88;
+                    const top = Math.max(0, replacement.getBoundingClientRect().top + window.scrollY - offset);
+                    window.scrollTo({ top: top, behavior: 'smooth' });
+
+                    const activePage = replacement.querySelector('.active');
+                    if (activePage) activePage.setAttribute('aria-current', 'page');
+                });
+            } catch (error) {
+                window.location.assign(requestedUrl.toString());
+            }
+        }
+
+        /** Intercepte les paginations de l'accueil sans perturber les clics spéciaux. */
+        function handleHomePaginationClick(event) {
+            const link = event.target.closest('[data-home-ajax-pagination] a');
+            if (!link || event.defaultPrevented || event.button !== 0) return;
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+            if (link.classList.contains('disabled') || link.classList.contains('active')) {
+                event.preventDefault();
+                return;
+            }
+
+            const section = link.closest('[data-home-ajax-pagination]');
+            if (!section) return;
+
+            event.preventDefault();
+            loadHomePageSection(link, section);
+        }
+
+        document.addEventListener('click', handleHomePaginationClick);
+        window.addEventListener('popstate', function () {
+            window.location.reload();
+        });
+    }());
+</script>
 
 {% endblock %}

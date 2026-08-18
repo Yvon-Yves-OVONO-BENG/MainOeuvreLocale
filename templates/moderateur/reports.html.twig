@@ -1,0 +1,399 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Signalements{% endtrans %}
+{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_reports.html.twig" %}
+
+<div class="mod-page">
+	<div class="wrap">
+
+		<div class="card">
+			<div class="hd">
+				<div>
+					<div class="h1">🚨 {% trans %}Signalements (Comptes){% endtrans %}</div>
+					<div class="hint">{% trans %}Traitement des comptes signalés : suivre, analyser, décider (ouvrir / résoudre / marquer à supprimer).{% endtrans %}</div>
+				</div>
+				<div class="filters">
+					<a class="btn" href="{{ path('moderateur_report_jobs_index') }}">📦 {% trans %}Signalements Jobs{% endtrans %}</a>
+					<a class="btn primary" href="{{ path('moderateur_reports_index', {status: 'open'}) }}">📌 {% trans %}Ouverts{% endtrans %}</a>
+				</div>
+			</div>
+
+			<div
+				class="bd">
+				{# KPI #}
+				<div class="kpis">
+					<div class="kpi">
+						<div class="t">{% trans %}Ouverts (14j){% endtrans %}</div>
+						<div class="v">{{ stats.kpi.open ?? 0 }}</div>
+					</div>
+					<div class="kpi">
+						<div class="t">{% trans %}Traités (14j){% endtrans %}</div>
+						<div class="v">{{ stats.kpi.resolved ?? 0 }}</div>
+					</div>
+					<div class="kpi">
+						<div class="t">{% trans %}Annulés (14j){% endtrans %}</div>
+						<div class="v">{{ stats.kpi.canceled ?? 0 }}</div>
+					</div>
+					<div class="kpi">
+						<div class="t">{% trans %}Total (14j){% endtrans %}</div>
+						<div class="v">{{ stats.kpi.total ?? 0 }}</div>
+					</div>
+				</div>
+
+				{# Filters #}
+				<form class="mt-3" method="get" action="{{ path('moderateur_reports_index', {status: 'open', q: ''}) }}" style="margin-top:14px;">
+					<div class="filters">
+						<select class="select" name="status">
+							<option value="">{% trans %}— Tous statuts —{% endtrans %}</option>
+							<option value="open" {{ status == 'open' ? 'selected' : '' }}>{% trans %}open{% endtrans %}</option>
+							<option value="resolved" {{ status == 'resolved' ? 'selected' : '' }}>{% trans %}resolved{% endtrans %}</option>
+							<option value="canceled" {{ status == 'canceled' ? 'selected' : '' }}>{% trans %}canceled{% endtrans %}</option>
+						</select>
+
+						<input class="input" type="search" name="q" value="{{ q }}" placeholder="{{ 'Rechercher (email, raison, reporter)…'|trans }}">
+
+						<select class="select" name="limit">
+							{% for n in [10,12,15,20,30,50] %}
+								<option value="{{ n }}" {{ limit == n ? 'selected' : '' }}>{{ n }}/{% trans %}page{% endtrans %}</option>
+							{% endfor %}
+						</select>
+
+						<button class="btn warn" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+						<a class="btn" href="{{ path('moderateur_reports_index', {status: 'open'}) }}">{% trans %}Réinitialiser{% endtrans %}</a>
+					</div>
+				</form>
+
+				{# Charts #}
+				<div class="grid" style="margin-top:14px;">
+					<div class="col-6">
+						<div class="chartbox">
+							<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;margin-bottom:10px;">
+								<div>
+									<div style="font-weight:950;">{% trans %}Volume (14 jours){% endtrans %}</div>
+									<div class="muted" style="font-size:12px;">{% trans %}Évolution des signalements (aire + ligne).{% endtrans %}</div>
+								</div>
+								<span class="chip">📈 {% trans %}Trend{% endtrans %}</span>
+							</div>
+							<canvas id="chArea14"></canvas>
+						</div>
+					</div>
+
+					<div class="col-6">
+						<div class="chartbox">
+							<div style="font-weight:950;margin-bottom:6px;">{% trans %}Pie Chart — Statuts (14j){% endtrans %}</div>
+							<div class="muted" style="font-size:12px;margin-bottom:10px;">{% trans %}Répartition open / resolved / canceled.{% endtrans %}</div>
+							<canvas id="chPieStatus"></canvas>
+						</div>
+					</div>
+
+					<div class="col-6">
+						<div class="chartbox">
+							<div style="font-weight:950;margin-bottom:6px;">{% trans %}Horizontal Bar — Top catégories (30j){% endtrans %}</div>
+							<div class="muted" style="font-size:12px;margin-bottom:10px;">{% trans %}Catégories de signalements les plus fréquentes.{% endtrans %}</div>
+							<canvas id="chBarCats"></canvas>
+						</div>
+					</div>
+
+					<div class="col-6">
+						<div class="chartbox">
+							<div style="font-weight:950;margin-bottom:6px;">{% trans %}Combination Line & Bar — Total vs Ouverts{% endtrans %}</div>
+							<div class="muted" style="font-size:12px;margin-bottom:10px;">{% trans %}Barres = total/jour • Ligne = total cumul (demo premium).{% endtrans %}</div>
+							<canvas id="chCombo"></canvas>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<div class="chartbox">
+							<div style="font-weight:950;margin-bottom:6px;">{% trans %}Line Chart — Top comptes signalés (30j){% endtrans %}</div>
+							<div class="muted" style="font-size:12px;margin-bottom:10px;">{% trans %}Plus d’occurrences = compte à surveiller.{% endtrans %}</div>
+							<canvas id="chTopTargets"></canvas>
+						</div>
+					</div>
+				</div>
+
+				{# Table #}
+				<div style="margin-top:14px;" class="chartbox">
+					<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+						<div>
+							<div style="font-weight:950;">{% trans %}Liste des signalements{% endtrans %}</div>
+							<div class="muted" style="font-size:12px;">{% trans %}Clique “Ouvrir” pour traiter et prendre une décision.{% endtrans %}</div>
+						</div>
+						<div class="muted" style="font-size:12px;">
+							{% trans %}Total:{% endtrans %}
+							<b>{{ total }}</b>
+						</div>
+					</div>
+
+					<div class="table-responsive">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>#</th>
+									<th>{% trans %}Reporter{% endtrans %}</th>
+									<th>{% trans %}Cible{% endtrans %}</th>
+									<th>{% trans %}Catégorie{% endtrans %}</th>
+									<th>{% trans %}Statut{% endtrans %}</th>
+									<th>{% trans %}Date{% endtrans %}</th>
+									<th style="text-align:right;">{% trans %}Action{% endtrans %}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for r in items %}
+
+									<tr>
+										<td>{{ loop.index }}</td>
+										<td class="muted">{{ r.reporter ? (r.reporter.email ?? ('#' ~ r.reporter.id)) : '—' }}</td>
+										<td class="muted">{{ r.targetUser ? (r.targetUser.email ?? ('#' ~ r.targetUser.id)) : '—' }}</td>
+										<td class="muted">{{ r.categorie ? r.categorie.label : '—' }}</td>
+										<td>
+											{% if r.status == 'open' %}
+												<span class="chip open">{% trans %}OPEN{% endtrans %}</span>
+											{% elseif r.status == 'resolved' %}
+												<span class="chip resolved">{% trans %}RESOLVED{% endtrans %}</span>
+											{% else %}
+												<span class="chip canceled">{{ r.status|upper }}</span>
+											{% endif %}
+										</td>
+										<td class="muted">{{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '—' }}</td>
+										<td style="text-align:right;">
+											<a class="btn primary" href="{{ path('moderateur_reports_show', {slug: r.slug}) }}">{% trans %}Ouvrir{% endtrans %}</a>
+										</td>
+									</tr>
+								{% else %}
+									<tr>
+										<td colspan="7" class="muted" style="padding: 18px; text-align:center;">{% trans %}Aucun signalement{% endtrans %}</td>
+									</tr>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+
+					{# pagination simple #}
+					{% set pages = (total / limit)|round(0, 'ceil') %}
+					{% if pages > 1 %}
+						<div class="pager" style="margin-top:12px;">
+							{% for p in 1..pages %}
+								<a class="btn {{ p == page ? 'primary' : '' }}" href="{{ path('moderateur_reports_index', {page: p, limit: limit, status: status, q: q}) }}">{{ p }}</a>
+							{% endfor %}
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+
+	</div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+	    (() => {
+            const stats = {{ stats|json_encode|raw }};
+            const dailyLabels = stats.daily.labels || [];
+            const dailyValues = stats.daily.values || [];
+
+            const byStatus = stats.byStatus || {};
+            const open = Number(byStatus.open || 0);
+            const resolved = Number(byStatus.resolved || 0);
+            const canceled = Number(byStatus.canceled || 0);
+
+            const cats = stats.categories || [];
+            const catLabels = cats.map(x => x.label);
+            const catValues = cats.map(x => Number(x.value || 0));
+
+            const targets = stats.topTargets || [];
+            const tgtLabels = targets.map(x => x.label);
+            const tgtValues = targets.map(x => Number(x.value || 0));
+
+            // ===== Area Chart (14j)
+            new Chart(document.getElementById('chArea14'), {
+                type: 'line',
+                data: {
+                    labels: dailyLabels,
+                    datasets: [
+                        {
+                            label: '{{ "Signalements"|trans|e("js") }}',
+                            data: dailyValues,
+                            tension: 0.35,
+                            fill: true,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a1').trim() || 'rgba(56,189,248,.35)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // ===== Pie Chart
+            new Chart(document.getElementById('chPieStatus'), {
+                type: 'pie',
+                data: {
+                    labels: [
+                        '{{ "open"|trans|e("js") }}', '{{ "resolved"|trans|e("js") }}', '{{ "canceled"|trans|e("js") }}'
+                    ],
+                    datasets: [
+                        {
+                            data: [
+                                open, resolved, canceled
+                            ],
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // ===== Horizontal Bar (Top categories)
+            new Chart(document.getElementById('chBarCats'), {
+                type: 'bar',
+                data: {
+                    labels: catLabels,
+                    datasets: [
+                        {
+                            label: '{{ "Occurrences"|trans|e("js") }}',
+                            data: catValues,
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+                }
+            });
+
+            // ===== Combo Line + Bar (demo premium)
+            const cum = [];
+            dailyValues.reduce((acc, v, i) => {
+                acc += Number(v || 0);
+                cum[i] = acc;
+                return acc;
+            }, 0);
+
+            new Chart(document.getElementById('chCombo'), {
+                data: {
+                    labels: dailyLabels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: '{{ "Total/jour"|trans|e("js") }}',
+                            data: dailyValues,
+                            borderWidth: 1
+                        }, {
+                            type: 'line',
+                            label: '{{ "Cumul"|trans|e("js") }}',
+                            data: cum,
+                            tension: 0.35,
+                            fill: true,
+                            borderWidth: 2,
+                            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a4').trim() || 'rgba(168,85,247,.30)',
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+            });
+
+            // ===== Line chart (Top targets)
+            new Chart(document.getElementById('chTopTargets'), {
+                type: 'line',
+                data: {
+                    labels: tgtLabels,
+                    datasets: [
+                        {
+                            label: '{{ "Signalements"|trans|e("js") }}',
+                            data: tgtValues,
+                            tension: 0.35,
+                            fill: true,
+                            borderWidth: 2,
+                            pointRadius: 3,
+                            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a3').trim() || 'rgba(245,158,11,.35)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })();
+    </script>
+{% endblock %}

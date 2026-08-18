@@ -1,0 +1,212 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Booster une annonce{% endtrans %}{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ asset('css/annonce/boost.css') }}">
+
+<main class="anboost mt-4">
+    <section class="anboost-hero">
+        <div class="anboost-hero__content">
+            <div>
+                <h1 class="anboost-hero__title">
+                    <i class="fa-solid fa-rocket" aria-hidden="true"></i>
+                    {% trans %}Booster une annonce{% endtrans %}
+                </h1>
+
+                <p class="anboost-hero__description">
+                    {% trans %}Sélectionnez une annonce, puis choisissez l’offre de visibilité adaptée à votre besoin.{% endtrans %}
+                </p>
+            </div>
+
+            <a
+                class="anboost-back"
+                href="{{ path('annonce_manage') }}"
+                data-turbo="false"
+            >
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+                {% trans %}Mes annonces{% endtrans %}
+            </a>
+        </div>
+    </section>
+
+    {% for message in app.flashes('annonce_success') %}
+        <div class="anboost-flash anboost-flash--success" role="status">
+            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('annonce_error') %}
+        <div class="anboost-flash anboost-flash--error" role="alert">
+            <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if annonces is empty %}
+        <section class="anboost-empty">
+            <i class="fa-regular fa-folder-open fa-2x" aria-hidden="true"></i>
+
+            <p>{% trans %}Vous devez d’abord publier une annonce.{% endtrans %}</p>
+
+            <a href="{{ path('annonce_new') }}" data-turbo="false">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                {% trans %}Publier une annonce{% endtrans %}
+            </a>
+        </section>
+    {% else %}
+        <form
+            class="anboost-selector"
+            method="get"
+            action="{{ path('annonce_boost') }}"
+            data-turbo="false"
+            data-annonce-auto-select
+        >
+            <label for="boostAnnonceSelect">{% trans %}Annonce à booster{% endtrans %}</label>
+
+            <div class="anboost-select-wrapper">
+                <select
+                    id="boostAnnonceSelect"
+                    name="annonce"
+                    required
+                    data-annonce-select
+                >
+                    <option value="">{% trans %}Sélectionnez une annonce{% endtrans %}</option>
+
+                    {% for annonce in annonces %}
+                        <option
+                            value="{{ annonce.slug }}"
+                            {{ selectedAnnonce and selectedAnnonce.slug == annonce.slug ? 'selected' : '' }}
+                        >
+                            {{ annonce.titre }} — {{ annonce.ville }}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <span class="anboost-select-icon" aria-hidden="true">
+                    <i class="fa-solid fa-chevron-down"></i>
+                </span>
+            </div>
+
+            <div
+                class="anboost-selector__loading"
+                data-annonce-loading
+                aria-live="polite"
+                hidden
+            >
+                <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                {% trans %}Chargement de l’annonce…{% endtrans %}
+            </div>
+
+            {% if selectedAnnonce %}
+                <div class="anboost-current">
+                    <i class="fa-solid fa-bullhorn" aria-hidden="true"></i>
+                    {% trans %}Boost pour :{% endtrans %}
+                    <strong>{{ selectedAnnonce.titre }}</strong>
+                </div>
+            {% else %}
+                <div class="anboost-selector__help">
+                    {% trans %}La page se met à jour automatiquement après votre sélection.{% endtrans %}
+                </div>
+            {% endif %}
+        </form>
+
+        <section class="anboost-grid" aria-label="{% trans %}Offres de boost{% endtrans %}">
+            {% for key, plan in plans %}
+                <article class="anboost-card anboost-card--{{ plan.class }}">
+                    <div class="anboost-card__body">
+                        <div class="anboost-card__icon" aria-hidden="true">
+                            {{ plan.icon }}
+                        </div>
+
+                        <h2 class="anboost-card__name">
+                            {% trans %}Boost{% endtrans %} {{ plan.name }}
+                        </h2>
+
+                        <div class="anboost-card__price">
+                            {{ plan.price|number_format(0, ',', ' ') }}
+                            <small>{% trans %}FCFA{% endtrans %}</small>
+                        </div>
+
+                        <p class="anboost-card__description">
+                            {{ plan.description }}
+                        </p>
+
+                        <span class="anboost-renew {{ plan.renewable ? '' : 'anboost-renew--fixed' }}">
+                            <i
+                                class="fa-solid {{ plan.renewable ? 'fa-rotate' : 'fa-calendar-check' }}"
+                                aria-hidden="true"
+                            ></i>
+                            {% if plan.renewable %}{% trans %}Renouvelable{% endtrans %}{% else %}{% trans %}Durée fixe{% endtrans %}{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="anboost-card__footer">
+                        <form
+                            method="post"
+                            action="{{ path('annonce_boost_select', { plan: key }) }}"
+                            data-turbo="false"
+                            data-boost-form
+                        >
+                            <input
+                                type="hidden"
+                                name="annonce"
+                                value="{{ selectedAnnonce ? selectedAnnonce.slug : '' }}"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="_token"
+                                value="{{ selectedAnnonce ? csrf_token('annonce_boost_' ~ selectedAnnonce.id) : '' }}"
+                            >
+
+                            <button
+                                class="anboost-choose"
+                                type="submit"
+                                {{ not selectedAnnonce ? 'disabled' : '' }}
+                            >
+                                <span data-button-label>
+                                    <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                                    {% if selectedAnnonce %}{% trans %}Choisir ce boost{% endtrans %}{% else %}{% trans %}Sélectionnez une annonce{% endtrans %}{% endif %}
+                                </span>
+
+                                <span data-button-loading hidden>
+                                    <i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i>
+                                    {% trans %}Traitement…{% endtrans %}
+                                </span>
+                            </button>
+                        </form>
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+
+        {% if recentBoosts is not empty %}
+            <section class="anboost-history">
+                <h2>{% trans %}Demandes récentes{% endtrans %}</h2>
+
+                <div class="anboost-history__list">
+                    {% for boost in recentBoosts %}
+                        <div class="anboost-history__item">
+                            <span>
+                                <strong>{% trans %}Boost{% endtrans %} {{ boost.plan|capitalize }}</strong>
+                                ·
+                                {{ boost.montant|number_format(0, ',', ' ') }} FCFA
+                            </span>
+
+                            <span>
+                                {{ boost.statut|replace({'_': ' '})|capitalize }}
+                                ·
+                                {{ boost.dateDemande|date('d/m/Y H:i') }}
+                            </span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+    {% endif %}
+</main>
+
+<script src="{{ asset('js/annonce/boost.js') }}" defer></script>
+{% endblock %}

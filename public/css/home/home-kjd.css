@@ -1,0 +1,528 @@
+
+.ph-hero-bg-slide--first {
+  background-image: url('../../images/hero/talents/talent-background.png');
+}
+.ph-hero-register-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-width: 168px;
+      margin: 13px auto 14px;
+      padding: 12px 24px;
+      border: 1px solid rgba(255, 255, 255, .55);
+      border-radius: 999px;
+      background: linear-gradient(135deg, #69b900, #4d9700);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 900;
+      text-decoration: none;
+      box-shadow: 0 14px 30px rgba(68, 143, 0, .35);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .ph-hero-register-cta:hover,
+    .ph-hero-register-cta:focus-visible {
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 18px 36px rgba(68, 143, 0, .44);
+    }
+
+    .ph-hero-register-cta .ph-hero-register-spinner {
+      display: none;
+    }
+
+    .ph-hero-register-cta.is-loading {
+      pointer-events: none;
+      opacity: .9;
+    }
+
+    .ph-hero-register-cta.is-loading .ph-hero-register-icon {
+      display: none;
+    }
+
+    .ph-hero-register-cta.is-loading .ph-hero-register-spinner {
+      display: inline-block;
+    }
+
+    /* Titre premium de la section Offres */
+    .home-jobs-intro {
+      position: relative;
+      z-index: 2;
+      padding: 34px 0 4px;
+      background: #fff;
+    }
+
+    .home-jobs-heading {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin: 0;
+      padding: 18px 22px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(5, 36, 92, .09);
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 92% 0%, rgba(85, 185, 0, .12), transparent 34%),
+        linear-gradient(135deg, #fff 0%, #f7fbff 100%);
+      box-shadow: 0 15px 38px rgba(5, 36, 92, .08);
+    }
+
+    .home-jobs-heading::after {
+      content: "";
+      width: 110px;
+      height: 110px;
+      position: absolute;
+      right: -48px;
+      bottom: -64px;
+      border-radius: 50%;
+      background: rgba(85, 185, 0, .10);
+      pointer-events: none;
+    }
+
+    .home-jobs-heading__icon {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0b63ce, #073c83);
+      color: #fff;
+      font-size: 21px;
+      box-shadow: 0 10px 22px rgba(11, 99, 206, .24);
+    }
+
+    .home-jobs-heading__content {
+      min-width: 0;
+    }
+
+    .home-jobs-heading__eyebrow {
+      display: block;
+      margin-bottom: 4px;
+      color: #55a900;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .home-jobs-heading h2 {
+      margin: 0;
+      color: #05245c;
+      font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+      font-weight: 950;
+      letter-spacing: -.035em;
+      line-height: 1.12;
+    }
+
+    .home-jobs-heading h2::after {
+      content: "";
+      display: block;
+      width: 68px;
+      height: 4px;
+      margin-top: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0b63ce, #55b900);
+    }
+
+    /* Titre premium de la section Annonces */
+    .ph-home .anpub-head.home-annonces-heading {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 0 0 22px;
+      padding: 18px 22px;
+      overflow: hidden;
+      border: 1px solid rgba(5, 36, 92, .09);
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 92% 0%, rgba(85, 185, 0, .12), transparent 34%),
+        linear-gradient(135deg, #fff 0%, #f7fbff 100%);
+      box-shadow: 0 15px 38px rgba(5, 36, 92, .08);
+    }
+
+    .ph-home .anpub-head.home-annonces-heading::after {
+      content: "";
+      position: absolute;
+      right: -48px;
+      bottom: -64px;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: rgba(85, 185, 0, .10);
+      pointer-events: none;
+    }
+
+    .home-annonces-heading__main {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .home-annonces-heading__icon {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #0b63ce, #073c83);
+      color: #fff;
+      font-size: 21px;
+      box-shadow: 0 10px 22px rgba(11, 99, 206, .24);
+    }
+
+    .home-annonces-heading__content {
+      min-width: 0;
+    }
+
+    .home-annonces-heading__eyebrow {
+      display: block;
+      margin-bottom: 4px;
+      color: #55a900;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      line-height: 1.2;
+      text-transform: uppercase;
+    }
+
+    .ph-home .anpub-head.home-annonces-heading h2 {
+      margin: 0;
+      color: #05245c;
+      font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+      font-weight: 950;
+      letter-spacing: -.035em;
+      line-height: 1.12;
+    }
+
+    .ph-home .anpub-head.home-annonces-heading h2::after {
+      content: "";
+      display: block;
+      width: 68px;
+      height: 4px;
+      margin-top: 10px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #0b63ce, #55b900);
+    }
+
+    .ph-home .home-annonces-heading .anpub-count {
+      position: relative;
+      z-index: 1;
+      flex: 0 0 auto;
+      margin: 0;
+    }
+
+    /* Accueil : supprime le grand vide entre les cartes Offres et les Annonces. */
+    .ph-home .vip-wrap#missions {
+      padding-top: 22px !important;
+      padding-bottom: 5px !important;
+    }
+
+    .ph-home .vip-wrap#missions + .anpub {
+      margin-top: 0 !important;
+      padding-top: 5px !important;
+    }
+
+    /* Mobile : contenu descendu sous le menu, titre aéré et formulaire visible. */
+    @media (max-width: 620px) {
+      .home-jobs-intro {
+        padding: 20px 0 2px;
+      }
+
+      .home-jobs-intro .container {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .home-jobs-heading {
+        align-items: flex-start;
+        gap: 12px;
+        padding: 15px 14px;
+        border-radius: 16px;
+      }
+
+      .home-jobs-heading__icon {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        border-radius: 13px;
+        font-size: 17px;
+      }
+
+      .home-jobs-heading__eyebrow {
+        margin-bottom: 3px;
+        font-size: 9px;
+      }
+
+      .home-jobs-heading h2 {
+        font-size: clamp(1.08rem, 5vw, 1.3rem);
+        line-height: 1.16;
+      }
+
+      .home-jobs-heading h2::after {
+        width: 48px;
+        height: 3px;
+        margin-top: 8px;
+      }
+
+      .ph-home .vip-wrap#missions {
+        padding-top: 14px !important;
+        padding-bottom: 4px !important;
+      }
+
+      .ph-home .vip-wrap#missions + .anpub {
+        margin-top: 0 !important;
+        padding-top: 4px !important;
+      }
+
+      .ph-home .anpub-head.home-annonces-heading {
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 16px;
+        padding: 15px 14px;
+        border-radius: 16px;
+      }
+
+      .home-annonces-heading__main {
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .home-annonces-heading__icon {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        border-radius: 13px;
+        font-size: 17px;
+      }
+
+      .home-annonces-heading__eyebrow {
+        margin-bottom: 3px;
+        font-size: 9px;
+      }
+
+      .ph-home .anpub-head.home-annonces-heading h2 {
+        font-size: clamp(1.08rem, 5vw, 1.3rem);
+        line-height: 1.16;
+      }
+
+      .ph-home .anpub-head.home-annonces-heading h2::after {
+        width: 48px;
+        height: 3px;
+        margin-top: 8px;
+      }
+
+      .ph-home .home-annonces-heading .anpub-count {
+        display: none;
+      }
+
+      .ph-hero-v4 .ph-hero-shell {
+        min-height: 560px !important;
+        height: 560px !important;
+      }
+
+      .ph-hero-v4 .ph-hero-content {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: flex-start !important;
+        padding: 82px 0 8px !important;
+      }
+
+      .ph-hero-v4 .ph-hero-content > .container {
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+
+      .ph-hero-v4 .ph-hero-main {
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .ph-hero-v4 .ph-hero-title {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+      }
+
+      .ph-hero-v4 .ph-hero-title-main {
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: .98 !important;
+      }
+
+      .ph-hero-v4 .ph-hero-title-sub {
+        display: block !important;
+        margin: 8px 0 0 !important;
+        padding: 0 !important;
+        line-height: 1.18 !important;
+      }
+
+      .ph-hero-v4 .ph-hero-main > p {
+        margin: 11px auto 9px !important;
+        padding: 0 !important;
+        line-height: 1.28 !important;
+      }
+
+      .ph-hero-register-cta {
+        min-width: 154px;
+        margin: 12px auto 10px;
+        padding: 10px 20px;
+      }
+
+      .ph-hero-v4 .mol-job-nearby__form {
+        margin-top: 4px !important;
+      }
+    }
+  
+
+
+						/* --- Download strip premium, sans casser ton thème --- */
+						.mol-app-strip {
+							border-radius: 26px;
+							border: 1px solid rgba(15, 23, 42, .10);
+							background: radial-gradient(900px circle at 10% 0%, rgba(13,110,253,.10), transparent 45%), radial-gradient(900px circle at 90% 10%, rgba(32, 201, 151, 0.10), transparent 50%), linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.90));
+							box-shadow: 0 22px 60px rgba(2, 6, 23, .10);
+							overflow: hidden;
+							position: relative;
+						}
+						.mol-app-strip:before {
+							content: "";
+							position: absolute;
+							inset: -2px;
+							background: linear-gradient(120deg, rgba(13,110,253,.18), rgba(32,201,151,.12), rgba(111,66,193,.12));
+							opacity: .55;
+							pointer-events: none;
+							mix-blend-mode: multiply;
+						}
+						.mol-app-strip > * {
+							position: relative;
+							z-index: 1;
+						}
+
+						.mol-app-title {
+							font-weight: 950;
+							letter-spacing: -0.03em;
+							color: rgba(15, 23, 42, .92);
+							font-size: clamp(1.35rem, 2.2vw, 2rem);
+						}
+						.mol-app-sub {
+							color: rgba(15, 23, 42, .62);
+							font-weight: 650;
+							max-width: 780px;
+						}
+
+						.mol-store-btn {
+							display: flex;
+							align-items: center;
+							gap: 12px;
+							padding: 14px 16px;
+							border-radius: 18px;
+							border: 1px solid rgba(15, 23, 42, .10);
+							background: rgba(255, 255, 255, .92);
+							box-shadow: 0 16px 35px rgba(2, 6, 23, .10);
+							text-decoration: none;
+							transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+						}
+						.mol-store-btn:hover {
+							transform: translateY(-2px);
+							box-shadow: 0 26px 70px rgba(2, 6, 23, .14);
+							filter: saturate(1.06);
+							text-decoration: none;
+						}
+
+						.mol-store-ico {
+							width: 46px;
+							height: 46px;
+							border-radius: 16px;
+							display: grid;
+							place-items: center;
+							border: 1px solid rgba(255, 255, 255, .7);
+							box-shadow: 0 10px 18px rgba(2, 6, 23, .10);
+							position: relative;
+							overflow: hidden;
+						}
+						.mol-store-ico:before {
+							content: "";
+							position: absolute;
+							inset: -40%;
+							background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.80), transparent 55%);
+							transform: rotate(18deg);
+						}
+						.mol-store-ico i {
+							position: relative;
+							z-index: 1;
+							font-size: 18px;
+							color: rgba(15, 23, 42, .86);
+						}
+
+						.mol-store-meta small {
+							display: block;
+							color: rgba(15, 23, 42, .55);
+							font-weight: 800;
+							letter-spacing: 0.02em;
+							text-transform: uppercase;
+							font-size: 0.72rem;
+						}
+						.mol-store-meta strong {
+							display: block;
+							font-weight: 950;
+							letter-spacing: -0.01em;
+							color: rgba(15, 23, 42, .90);
+							line-height: 1.1;
+							font-size: 1.05rem;
+						}
+
+						.mol-store-arrow {
+							margin-left: auto;
+							width: 40px;
+							height: 40px;
+							border-radius: 14px;
+							display: grid;
+							place-items: center;
+							border: 1px solid rgba(15, 23, 42, .10);
+							background: rgba(255, 255, 255, .70);
+							box-shadow: 0 10px 18px rgba(2, 6, 23, .08);
+							transition: transform 0.15s ease;
+						}
+						.mol-store-btn:hover .mol-store-arrow {
+							transform: translateX(2px);
+						}
+
+						/* Couleurs icônes (soft) */
+						.mol-android {
+							background: rgba(32, 201, 151, .16);
+						}
+						.mol-apple {
+							background: rgba(13, 110, 253, .14);
+						}
+						.mol-wp {
+							background: rgba(111, 66, 193, .14);
+						}
+					
+
+
+    [data-home-ajax-pagination] {
+      transition: opacity .2s ease, filter .2s ease;
+    }
+
+    [data-home-ajax-pagination].mol-home-pagination-loading {
+      opacity: .58;
+      filter: saturate(.72);
+      pointer-events: none;
+      cursor: progress;
+    }
+  
+
+.mol-store-btn--disabled{opacity:.62;cursor:not-allowed;filter:grayscale(.25);}

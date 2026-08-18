@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Utilisateurs{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_users.html.twig" %}
+
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">
+          👥 {% trans %}Utilisateurs{% endtrans %}
+          {% if filter == 'new' %}<span class="chip">⏱️ {% trans %}Nouveaux (24h){% endtrans %}</span>{% endif %}
+        </div>
+        <div class="hint">{% trans %}Liste, recherche et tri — par défaut 10 utilisateurs.{% endtrans %}</div>
+      </div>
+
+      <form class="filters" method="get">
+        <input type="hidden" name="filter" value="{{ filter }}">
+        <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Rechercher : email, nom, ville…'|trans }}">
+        <select class="select" name="role">
+          <option value="">{% trans %}Tous rôles{% endtrans %}</option>
+          <option value="talent" {{ role=='talent'?'selected':'' }}>{% trans %}Talent{% endtrans %}</option>
+          <option value="particulier" {{ role=='particulier'?'selected':'' }}>{% trans %}Particulier{% endtrans %}</option>
+          <option value="company" {{ role=='company'?'selected':'' }}>{% trans %}Company{% endtrans %}</option>
+        </select>
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit==n?'selected':'' }}>{{ n }}/page</option>
+          {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+        <a class="btn" href="{{ path('moderateur_users_index', filter ? {filter:filter} : {}) }}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+      <div class="chip">{% trans %}Total :{% endtrans %} {{ total }}</div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Utilisateur{% endtrans %}</th>
+              <th>{% trans %}Rôle{% endtrans %}</th>
+              <th>{% trans %}Adresse{% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+              <th style="text-align:right;">{% trans %}Action{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in items %}
+              {% set pp = u.personalProfile ?? null %}
+              {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+              {% set roles = u.roles ?? [] %}
+              {% set roleLabel = ('ROLE_TALENT' in roles) ? ('Talent'|trans) : (('ROLE_COMPANY' in roles) ? ('Company'|trans) : ('Particulier'|trans)) %}
+              <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <img class="avatar" src="{{ photo }}" alt="photo">
+                    <div>
+                      <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : u.email }}</div>
+                      <div class="muted" style="font-size:12px;">{{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip">{{ roleLabel }}</span></td>
+                <td class="muted" style="font-size:12px;">
+                  {{ pp and pp.adress ? pp.adress : '—' }}{% if pp and pp.city %} • {{ pp.city }}{% endif %}
+                </td>
+                <td class="muted" style="font-size:12px;">{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                <td style="text-align:right;">
+                  {% if u.personalProfile and u.personalProfile.slug %}
+                    <a class="btn primary" href="{{ path ('moderateur_verifications_show_slug', {slug: u.personalProfile.slug}) }}">{% trans %}Vérifier{% endtrans %}</a>
+                  {% else %}
+                    <span class="muted">{% trans %}Profil incomplet{% endtrans %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted" style="padding:18px;text-align:center;">{% trans %}Aucun utilisateur{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p==page ? 'primary' : '' }}"
+               href="{{ path('moderateur_users_index', {page:p, limit:limit, q:q, role:role, filter:filter}) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

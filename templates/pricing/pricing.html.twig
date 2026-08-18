@@ -1,0 +1,395 @@
+{# templates/pricing/pricing.html.twig #}
+{% extends 'base.html.twig' %}
+{% set seo_description = 'Découvrez les formules Main d’Œuvre Locale pour gagner en visibilité, contacter davantage de talents et accélérer vos recrutements au Cameroun.' %}
+{% block title %}{% trans %}Plans d'abonnement| Main-d’œuvre locale{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "pricing/_vip_ui.html.twig" %}
+
+<section class="sptb mol-page py-4">
+  <div class="container-fluid px-3 px-md-4 px-lg-5">
+
+    {# HERO #}
+    <div class="mol-hero mb-4 mt-4">
+      <div class="row align-items-center g-3 ">
+        <div class="col-lg-8">
+          <h2 class="mol-title mb-2">{% trans %}Choisissez le plan qui vous correspond{% endtrans %}</h2>
+          <div class="mol-soft">
+            {% trans %}Des options simples, claires et orientées résultats : plus de visibilité, plus de contacts, plus d'opportunités.{% endtrans %}
+          </div>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+          <span class="mol-badge"><i class="fa fa-shield"></i> {% trans %}Paiement sécurisé{% endtrans %}</span>
+          <span class="mol-badge ms-2"><i class="fa fa-refresh"></i> {% trans %}Annulable à tout moment{% endtrans %}</span>
+        </div>
+      </div>
+    </div>
+
+    {# PLANS #}
+    <div class="row g-4">
+
+      {% for planData in plans %}
+        {% set plan = planData.entity %}
+        {% set meta = planData.meta %}
+        {% set isFeatured = meta.featured %}
+        {% set isCurrent = planData.isCurrent %}
+        {% set features = planData.features %}
+        {% set slug = planData.slug %}
+
+        <div class="col-md-6 col-xl-3">
+          <div class="mol-card">
+            <div class="card-body">
+              <div class="mol-plan {{ isFeatured ? 'mol-featured' : '' }} {{ isCurrent ? 'mol-current' : '' }}">
+                <div class="mol-plan-inner">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="mol-icon" 
+                         style="{% if slug == 'free' %}background:rgba(16,185,129,.10); border-color:rgba(16,185,129,.18); color:#10b981;
+                               {% elseif slug == 'premium' %}background:rgba(13,110,253,.14); border-color:rgba(13,110,253,.26); color:#0d6efd;
+                               {% elseif slug == 'vip' %}background:rgba(220,53,69,.10); border-color:rgba(220,53,69,.18); color:#dc3545;
+                               {% else %}background:rgba(108,117,125,.10); border-color:rgba(108,117,125,.18); color:#6c757d;
+                               {% endif %}">
+                      <i class="{{ meta.icon }}"></i>
+                    </div>
+                    <span class="mol-badge" 
+                          style="{% if isCurrent %}background:#10b981; color:#fff; border-color:#10b981;{% endif %}">
+                      {% if isCurrent %}
+                        <i class="fa fa-check-circle"></i> {% trans %}Votre plan{% endtrans %}
+                      {% else %}
+                        <i class="{{ meta.badgeIcon }}"></i> {{ meta.badge }}
+                      {% endif %}
+                    </span>
+                  </div>
+
+                  <h3 class="mol-h">{{ plan.name }}</h3>
+                  <div class="mol-soft">{{ plan.description }}</div>
+
+                  <div class="mol-price">
+                    {{ planData.priceFormatted }}
+                    <small>{{ planData.priceLabel }}</small>
+                  </div>
+
+                  <ul class="mol-ul">
+                    {% for feature in features %}
+                      <li>
+                        <i class="fa fa-check-circle"></i> 
+                        {{ feature }}
+                      </li>
+                    {% endfor %}
+                  </ul>
+
+                  <div class="mol-cta mt-3 d-grid">
+                    {% if isCurrent %}
+                      <button class="btn btn-success" disabled>
+                        <i class="fa fa-check-circle me-2"></i> {% trans %}Plan actif{% endtrans %}
+                      </button>
+                    {% elseif slug == 'free' %}
+                      <a href="{{ path('app_register') }}" class="btn btn-light">
+                        <i class="fa fa-user-plus me-2"></i> {% trans %}Commencer{% endtrans %}
+                      </a>
+                    {% elseif slug == 'premium' %}
+                      <a href="{{ path('subscribe_premium') }}" class="btn btn-primary">
+                        <i class="fa fa-bolt me-2"></i> {% trans %}Passer en Premium{% endtrans %}
+                      </a>
+                    {% elseif slug == 'vip' %}
+                      <a href="{{ path('subscribe_vip') }}" class="btn btn-dark">
+                        <i class="fa fa-crown me-2"></i> {% trans %}Devenir VIP{% endtrans %}
+                      </a>
+                    {% else %}
+                      <a href="{{ path('subscribe_plan', {slug: slug}) }}" class="btn btn-outline-primary">
+                        <i class="fa fa-arrow-right me-2"></i> {% trans %}Choisir{% endtrans %}
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+    </div>
+
+    {# Comparaison rapide #}
+    <div class="mol-card mb-4 mt-4">
+      <div class="card-body">
+        <div class="row g-3 align-items-center">
+          <div class="col-lg-8">
+            <div class="fw-bold mb-1"><i class="fa fa-question-circle text-primary me-2"></i> {% trans %}Besoin d'aide pour choisir ?{% endtrans %}</div>
+            <div class="mol-soft">
+              {% trans %}Premium est idéal pour la plupart des talents. VIP donne plus de visibilité, des contacts illimités et un chat prioritaire.{% endtrans %}
+            </div>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <a href="javascript:void(0)" class="btn btn-outline-primary rounded-4 fw-bold" onclick="openContactSupport()">
+              <i class="fa fa-envelope me-2"></i> {% trans %}Parler à un conseiller{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# Tableau comparatif #}
+    <div class="mol-card mb-4">
+      <div class="card-body">
+        <h5 class="fw-bold mb-3"><i class="fa fa-table me-2 text-primary"></i> {% trans %}Comparaison des plans{% endtrans %}</h5>
+        <div class="table-responsive">
+          <table class="table table-borderless table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>{% trans %}Fonctionnalités{% endtrans %}</th>
+                {% for planData in plans %}
+                  <th class="text-center">
+                    <span class="fw-bold">{{ planData.entity.name }}</span>
+                    <br>
+                    <small class="text-muted">{{ planData.priceFormatted }} XAF</small>
+                  </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>{% trans %}Voir les missions{% endtrans %}</strong></td>
+                {% for planData in plans %}
+                  <td class="text-center">
+                    <i class="fa fa-check-circle text-success"></i>
+                  </td>
+                {% endfor %}
+              </tr>
+              <tr>
+                <td><strong>{% trans %}Contacts / mois{% endtrans %}</strong></td>
+                {% for planData in plans %}
+                  <td class="text-center fw-bold">
+                    {% if planData.entity.maxContacts >= 99999 %}
+                      ♾️ {% trans %}Illimité{% endtrans %}
+                    {% else %}
+                      {{ planData.entity.maxContacts }}
+                    {% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+              <tr>
+                <td><strong>{% trans %}Chat{% endtrans %}</strong></td>
+                {% for planData in plans %}
+                  <td class="text-center">
+                    {% if planData.entity.canChat %}
+                      <i class="fa fa-check-circle text-success"></i>
+                      {% if planData.entity.chatType == 'unidirectional' %}
+                        <br><small class="text-muted">({% trans %}Unidirectionnel{% endtrans %})</small>
+                      {% endif %}
+                    {% else %}
+                      <i class="fa fa-times-circle text-danger"></i>
+                    {% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+              <tr>
+                <td><strong>{% trans %}Profil complet{% endtrans %}</strong></td>
+                {% for planData in plans %}
+                  <td class="text-center">
+                    {% if planData.slug != 'free' %}
+                      <i class="fa fa-check-circle text-success"></i>
+                    {% else %}
+                      <i class="fa fa-minus-circle text-muted"></i>
+                    {% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+              <tr>
+                <td><strong>{% trans %}Mise en avant{% endtrans %}</strong></td>
+                {% for planData in plans %}
+                  <td class="text-center">
+                    {% if planData.slug in ['premium', 'vip'] %}
+                      <i class="fa fa-check-circle text-success"></i>
+                    {% else %}
+                      <i class="fa fa-minus-circle text-muted"></i>
+                    {% endif %}
+                  </td>
+                {% endfor %}
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  :root{
+    --mol-bg:#f6f8fc;
+    --mol-card:rgba(255,255,255,.92);
+    --mol-border:rgba(15,23,42,.08);
+    --mol-muted:rgba(15,23,42,.62);
+    --mol-text:rgba(15,23,42,.92);
+    --mol-shadow:0 18px 45px rgba(2,6,23,.08);
+    --mol-shadow-sm:0 10px 25px rgba(2,6,23,.06);
+    --r:22px;
+  }
+
+  .mol-page{
+    background:
+      radial-gradient(900px circle at 10% 10%, rgba(13,110,253,.12), transparent 55%),
+      radial-gradient(900px circle at 90% 10%, rgba(32,201,151,.10), transparent 55%),
+      var(--mol-bg);
+  }
+
+  .mol-hero{
+    border-radius:var(--r);
+    padding:24px;
+    background:
+      radial-gradient(1100px circle at 12% 18%, rgba(13,110,253,.18), transparent 58%),
+      radial-gradient(900px circle at 88% 12%, rgba(32,201,151,.14), transparent 55%),
+      linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
+    border:1px solid var(--mol-border);
+    box-shadow: var(--mol-shadow-sm);
+  }
+
+  .mol-title{ font-weight:950; letter-spacing:-.03em; line-height:1.05; color:var(--mol-text); }
+  .mol-soft{ color:var(--mol-muted); }
+
+  .mol-card{
+    background:var(--mol-card);
+    border:1px solid var(--mol-border);
+    border-radius:var(--r);
+    box-shadow:var(--mol-shadow-sm);
+    overflow:hidden;
+    transition:.18s ease;
+    animation: molFadeUp .55s ease both;
+  }
+  .mol-card:hover{ transform: translateY(-2px); box-shadow:var(--mol-shadow); }
+
+  .mol-plan{
+    position:relative;
+    padding:18px;
+    border-radius:var(--r);
+    border:1px solid var(--mol-border);
+    background:rgba(255,255,255,.75);
+    box-shadow:0 10px 26px rgba(2,6,23,.06);
+    height:100%;
+    overflow:hidden;
+  }
+
+  .mol-plan::before{
+    content:"";
+    position:absolute; inset:-2px;
+    background: radial-gradient(500px circle at 10% 10%, rgba(13,110,253,.14), transparent 60%),
+                radial-gradient(500px circle at 90% 20%, rgba(32,201,151,.12), transparent 58%);
+    opacity:.8;
+    pointer-events:none;
+  }
+
+  .mol-plan-inner{ position:relative; z-index:2; }
+
+  .mol-plan.mol-current{
+    border-color:#10b981 !important;
+    box-shadow:0 18px 45px rgba(16,185,129,.15);
+  }
+
+  .mol-badge{
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.35rem .6rem;
+    border-radius:999px;
+    border:1px solid var(--mol-border);
+    background:rgba(255,255,255,.85);
+    font-weight:900;
+    color:rgba(15,23,42,.75);
+    font-size:.82rem;
+  }
+
+  .mol-icon{
+    width:48px; height:48px;
+    border-radius:16px;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(13,110,253,.10);
+    border:1px solid rgba(13,110,253,.18);
+    box-shadow:0 10px 22px rgba(2,6,23,.08);
+    font-size:20px;
+    color:#0d6efd;
+  }
+
+  .mol-h{
+    font-weight:950;
+    letter-spacing:-.02em;
+    margin:10px 0 6px;
+    color:var(--mol-text);
+  }
+
+  .mol-price{
+    font-weight:950;
+    letter-spacing:-.02em;
+    font-size:32px;
+    margin:8px 0 0;
+    color:var(--mol-text);
+  }
+  .mol-price small{
+    font-size:14px;
+    font-weight:800;
+    color:var(--mol-muted);
+  }
+
+  .mol-ul{ list-style:none; padding:0; margin:14px 0 0; }
+  .mol-ul li{
+    display:flex; gap:.55rem;
+    padding:.45rem 0;
+    border-bottom:1px dashed rgba(15,23,42,.10);
+    color:rgba(15,23,42,.78);
+    font-weight:700;
+    font-size:0.9rem;
+  }
+  .mol-ul li:last-child{ border-bottom:0; }
+  .mol-ul i{ margin-top:3px; width:18px; text-align:center; color:#0d6efd; }
+
+  .mol-cta .btn{
+    border-radius:16px;
+    font-weight:900;
+    padding:.65rem .9rem;
+  }
+
+  .mol-featured{
+    border:1px solid rgba(13,110,253,.25) !important;
+    box-shadow:0 18px 45px rgba(13,110,253,.12);
+    transform: translateY(-2px);
+  }
+  .mol-featured .mol-icon{
+    background:rgba(13,110,253,.14);
+    border-color:rgba(13,110,253,.26);
+  }
+
+  /* Tableau comparatif */
+  .table td, .table th {
+    padding: 12px 8px;
+    vertical-align: middle;
+  }
+
+  .table tr:hover {
+    background: rgba(13,110,253,0.03);
+  }
+
+  @keyframes molFadeUp{
+    from{ opacity:0; transform: translateY(10px); }
+    to{ opacity:1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .mol-price {
+      font-size: 24px;
+    }
+    .mol-ul li {
+      font-size: 0.8rem;
+    }
+    .table-responsive {
+      font-size: 0.8rem;
+    }
+  }
+</style>
+
+<script>
+function openContactSupport() {
+    // Ouvrir un modal ou rediriger vers le support
+    window.location.href = '{{ path('contact_support') }}';
+}
+</script>
+
+{% endblock %}

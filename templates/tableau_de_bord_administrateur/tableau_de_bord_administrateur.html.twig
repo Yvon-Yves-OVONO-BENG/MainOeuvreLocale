@@ -1,0 +1,802 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{% trans %}Tableau de bord administrateur{% endtrans %}{% endblock %}
+
+{% block body %}
+    {% include 'tableau_de_bord_administrateur/_vip_ui.html.twig' %}
+
+    {# =====================================================
+       Valeurs sûres : on conserve les variables existantes
+       sans rendre le template fragile si une donnée manque.
+       ===================================================== #}
+    {% set kpi = kpi|default({}) %}
+    {% set envLabel = environment|default('PROD') %}
+    {% set securityEvents = securityEvents|default([]) %}
+    {% set alertsData = alertsData|default([]) %}
+    {% set flaggedJobs = flaggedJobs|default([]) %}
+    {% set topZones = topZones|default([]) %}
+    {% set recentConnections = recentConnections|default([]) %}
+    {% set pendingKyc = pendingKyc|default([]) %}
+    {% set latestFailedPayments = latestFailedPayments|default([]) %}
+    {% set payoutQueue = payoutQueue|default([]) %}
+    {% set latestPayments = latestPayments|default([]) %}
+    {% set topApis = topApis|default([]) %}
+    {% set plansData = plansData|default([]) %}
+    {% set providerData = providerData|default([]) %}
+    {% set usersSplit = usersSplit|default({'company': 0, 'talent': 0, 'particulier': 0, 'staff': 0}) %}
+    {% set growthStats = growthStats|default({'signups': 0, 'delta': 0}) %}
+    {% set activationRate = activationRate|default(0) %}
+    {% set retentionRate = retentionRate|default(0) %}
+    {% set roleCounts = roleCounts|default({
+        'superAdmin': 0,
+        'admin': 0,
+        'moderateur': 0,
+        'company': 0,
+        'particulier': 0,
+        'talent': 0
+    }) %}
+    {% set complianceChecklist = complianceChecklist|default({
+        'twoFactorStaff': {'rate': 0},
+        'kycCompanies': {'rate': 0},
+        'sensitiveLogs': {'rate': 0},
+        'signedWebhooks': {'rate': 0},
+        'encryptedBackups': {'allEncrypted': false}
+    }) %}
+    {% set securityPosture = kpi.securityPosture|default({
+        'score': 0,
+        'metrics': {
+            'twoFactorStaff': {'label': '2FA staff', 'rate': 0},
+            'kycCompanies': {'label': 'KYC entreprises', 'rate': 0},
+            'auditCoverage': {'label': 'Couverture audit', 'rate': 0}
+        }
+    }) %}
+    {% set ops = ops|default({
+        'uptime': 99.98,
+        'latency': 182,
+        'errorRate': 0.24,
+        'cpu': 46,
+        'ram': 63,
+        'storage': 71,
+        'queueDepth': 148,
+        'cronSuccess': 98,
+        'backupStatus': 'OK',
+        'securityScore': 91,
+        'openIncidents': 2,
+        'deploymentsToday': 6,
+        'apiCallsToday': 128420,
+        'failedPayments': 3,
+        'activeSubscriptions': 184,
+        'mrr': 2450000,
+        'gmv': 18600000
+    }) %}
+
+    {% set currentRoute = app.request.attributes.get('_route')|default('') %}
+    {% set unreadMessages = kpi.unreadAdminMessages ?? 0 %}
+
+    <div class="admin-dashboard" data-admin-dashboard>
+        <div class="admin-dashboard__container">
+            <div class="admin-dashboard__layout">
+
+                {# =====================================================
+                   MENU GAUCHE CONSERVÉ
+                   ===================================================== #}
+                <aside class="admin-sidebar">
+                    <div class="admin-sidebar__panel">
+                        <div class="admin-sidebar__header">
+                            <div class="admin-sidebar__identity">
+                                <span class="admin-sidebar__logo" aria-hidden="true">🛡️</span>
+                                <div>
+                                    <h2 class="admin-sidebar__title">Admin Console</h2>
+                                    <div class="admin-sidebar__subtitle">Main d’Œuvre Locale</div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="button"
+                                id="adminSidebarToggle"
+                                class="admin-sidebar__toggle"
+                                aria-controls="adminSidebarBody"
+                                aria-expanded="false"
+                                title="{{ 'Afficher ou masquer le menu'|trans }}"
+                            >☰</button>
+                        </div>
+
+                        <div id="adminSidebarBody" class="admin-sidebar__body">
+                            {% set nav = [
+                                {'route':'tableau_de_bord','href':path('tableau_de_bord'),'label':'Tableau de bord'|trans,'icon':'🏠','badge':'Accueil'|trans},
+                                {'route':'admin_categories_index','href':path('admin_categories_index'),'label':'Catégories'|trans,'icon':'🏷️','badge':kpi.categories ?? '-'},
+                                {'route':'admin_professions_index','href':path('admin_professions_index'),'label':'Professions'|trans,'icon':'💼','badge':kpi.professions ?? '-'},
+                                {'route':'admin_talents_index','href':path('admin_talents_index'),'label':'Talents'|trans,'icon':'🧑‍🔧','badge':kpi.talents ?? '-'},
+                                {'route':'admin_companies_index','href':path('admin_companies_index'),'label':'Compagnies'|trans,'icon':'🏢','badge':kpi.companies ?? '-'},
+                                {'route':'admin_individuals_index','href':path('admin_individuals_index'),'label':'Particuliers'|trans,'icon':'🧑‍💼','badge':kpi.individuals ?? '-'},
+                                {'route':'admin_moderators_index','href':path('admin_moderators_index'),'label':'Modérateurs'|trans,'icon':'🧿','badge':kpi.moderators ?? '-'},
+                                {'route':'admin_jobs_moderation','href':path('admin_jobs_moderation'),'label':'Modération Offres'|trans,'icon':'📣','badge':kpi.pendingModerationJobs ?? 0,'tone':'warning'},
+                                {'route':'admin_annonces_moderation','href':path('admin_annonces_moderation'),'label':'Modération Annonces'|trans,'icon':'📢','badge':'À valider'|trans,'tone':'warning'},
+                                {'route':'moderateur_verifications_index','href':path('moderateur_verifications_index'),'label':'Vérifications'|trans,'icon':'✅','badge':kpi.pendingVerifications ?? (kpi.pendingProfiles ?? '-'),'tone':'warning'},
+                                {'route':'admin_harassment_investigate','href':path('admin_harassment_investigate'),'label':'Harcèlement'|trans,'icon':'🚨','badge':kpi.harassmentOpen ?? 0,'tone':'danger'},
+                                {'route':'moderateur_reports_index','href':path('moderateur_reports_index'),'label':'Signalements'|trans,'icon':'🚨','badge':kpi.pendingReports ?? '-','tone':'danger'},
+                                {'route':'admin_payment_dispute_index','href':path('admin_payment_dispute_index'),'label':'Litiges'|trans,'icon':'💳','badge':securityEvents|length,'tone':'danger'},
+                                {'route':'admin_kyc_rules','href':path('admin_kyc_rules'),'label':'Règles KYC'|trans,'icon':'🧠','badge':kpi.rules ?? '-','tone':'danger'},
+                                {'route':'admin_sanction_index','href':path('admin_sanction_index'),'label':'Sanctions'|trans,'icon':'🧾','badge':(kpi.sanctions ?? 0)|number_format(0, ',', ' '),'tone':'warning'},
+                                {'route':'admin_invoices_index','href':path('admin_invoices_index'),'label':'Paiements du jour'|trans,'icon':'💳','badge':(kpi.paymentsToday ?? 0)|number_format(0, ',', ' ')},
+                                {'route':'admin_newsletter_index','href':path('admin_newsletter_index'),'label':'Alertes offres'|trans,'icon':'🔔','badge':'Auto'},
+                                {'route':'admin_audit_index','href':path('admin_audit_index'),'label':'Audit & logs'|trans,'icon':'🧾','badge':'Logs'},
+                                {'route':'admin_support_new','href':path('admin_support_new'),'label':'Support'|trans,'icon':'🎧','badge':kpi.openTickets ?? '-'}
+                            ] %}
+
+                            <nav class="admin-nav" aria-label="{{ 'Navigation administration'|trans }}">
+                                {% for item in nav %}
+                                    {% set isActive = currentRoute == item.route %}
+                                    <a
+                                        href="{{ item.href }}"
+                                        class="admin-nav__link{{ isActive ? ' is-active' : '' }}{{ item.tone is defined ? ' is-' ~ item.tone : '' }}"
+                                        data-turbo="false"
+                                    >
+                                        <span class="admin-nav__main">
+                                            <span class="admin-nav__icon" aria-hidden="true">{{ item.icon }}</span>
+                                            <span class="admin-nav__label">{{ item.label }}</span>
+                                        </span>
+                                        <span class="admin-nav__badge">{{ item.badge }}</span>
+                                    </a>
+                                {% endfor %}
+                            </nav>
+
+                            {# <section class="admin-sidebar__section">
+                                <div class="admin-sidebar__section-head">
+                                    <span class="admin-sidebar__section-title">{% trans %}Actions rapides{% endtrans %}</span>
+                                    <span class="admin-sidebar__section-label">Ops</span>
+                                </div>
+                                <div class="admin-sidebar__quick-grid">
+                                    <a class="admin-sidebar__quick" href="{{ path('moderateur_verifications_index') }}">✅ {% trans %}Valider{% endtrans %}</a>
+                                    <a class="admin-sidebar__quick" href="{{ path('admin_harassment_investigate') }}">🚨 {% trans %}Traiter{% endtrans %}</a>
+                                    <a class="admin-sidebar__quick" href="{{ path('admin_annonces_moderation') }}" data-turbo="false">📢 {% trans %}Annonces{% endtrans %}</a>
+                                    <a class="admin-sidebar__quick" href="{{ path('admin_broadcast_index') }}">📣 Broadcast</a>
+                                </div>
+                            </section> #}
+
+                            {# <section class="admin-sidebar__section">
+                                <div class="admin-sidebar__section-head">
+                                    <div>
+                                        <div class="admin-sidebar__section-title">{% trans %}Centre d’administration{% endtrans %}</div>
+                                        <div class="admin-sidebar__section-label">{% trans %}Sécurité • Finance • Support{% endtrans %}</div>
+                                    </div>
+                                </div>
+                                <div class="admin-sidebar__chips">
+                                    <a class="admin-sidebar__chip" href="{{ path('admin_settings_index') }}">⚙️ {% trans %}Paramètres{% endtrans %}</a>
+                                    <a class="admin-sidebar__chip" href="{{ path('admin_backups_index') }}">🗄️ Backups</a>
+                                    <a class="admin-sidebar__chip" href="{{ path('admin_integrations_index') }}">🔌 {% trans %}Intégrations{% endtrans %}</a>
+                                </div>
+                            </section> #}
+                        </div>
+                    </div>
+                </aside>
+
+                {# =====================================================
+                   CONTENU CENTRAL REDISPOSÉ
+                   ===================================================== #}
+                <main class="admin-main" style="padding:clamp(12px, 1.8vw, 24px);">
+                    <div class="admin-stack">
+
+                        <section class="admin-hero">
+                            <div class="admin-hero__inner">
+                                <div>
+                                    {# <div class="admin-eyebrow">Administration · {{ envLabel }}</div> #}
+                                    <h1 class="admin-hero__title">{% trans %}Tableau de bord Admin.{% endtrans %}</h1>
+                                    {# <p class="admin-hero__description">
+                                        {% trans %}Utilisateurs, modération, paiements, sécurité et exploitation sont regroupés par niveau de priorité, sans supprimer vos outils ni modifier vos routes.{% endtrans %}
+                                    </p> #}
+
+                                    <div class="admin-hero__meta">
+                                        <a
+                                            class="admin-meta-chip"
+                                            href="{{ path('admin_users_online') }}"
+                                            style="color:inherit;text-decoration:none;cursor:pointer;"
+                                            title="{{ 'Afficher les utilisateurs connectés'|trans }}"
+                                        >👥 {% trans %}Connectés :{% endtrans %} {{ kpi.onlineUsers ?? '-' }}</a>
+                                        <a
+                                            class="admin-meta-chip admin-meta-chip--info"
+                                            href="{{ path('admin_users_signups_24h') }}"
+                                            style="color:inherit;text-decoration:none;cursor:pointer;"
+                                            title="{{ 'Afficher les inscriptions des dernières 24 heures'|trans }}"
+                                        >✨ {% trans %}Inscriptions 24h :{% endtrans %} {{ kpi.signups24h ?? '-' }}</a>
+                                        {# <span class="admin-meta-chip admin-meta-chip--danger">🚨 {% trans %}Incidents :{% endtrans %} {{ kpi.incidentsOpen ?? 0 }}</span> #}
+                                        {# <span class="admin-meta-chip admin-meta-chip--success">💰 {{ (kpi.mrr ?? 0)|number_format(0, ',', ' ') }} XAF RMR</span> #}
+                                        {# <span class="admin-meta-chip">🕒 <span id="adminLiveClock">--:--:--</span></span> #}
+                                    </div>
+                                </div>
+
+                                <div class="admin-hero__actions">
+                                    <div class="admin-search">
+                                        <input
+                                            id="adminSearch"
+                                            class="admin-search__input"
+                                            type="search"
+                                            autocomplete="off"
+                                            placeholder="{{ 'Rechercher un utilisateur, une offre, un paiement…'|trans }}"
+                                            aria-label="{{ 'Recherche globale'|trans }}"
+                                        >
+                                        <span class="admin-search__icon" aria-hidden="true">⌕</span>
+                                        <div id="globalSearchResults" class="admin-search__results" hidden>
+                                            <div id="searchResultsContent"></div>
+                                        </div>
+                                    </div>
+
+                                    {# <button type="button" class="admin-button admin-button--dark" data-chat-open>
+                                        💬 {% trans %}Messages{% endtrans %}
+                                        {% if unreadMessages > 0 %}
+                                            <span class="admin-status admin-status--danger">{{ unreadMessages > 99 ? '99+' : unreadMessages }}</span>
+                                        {% endif %}
+                                    </button> #}
+                                    <a class="admin-button admin-button--primary" href="{{ path('admin_broadcast_index') }}">📢 {% trans %}Notifier{% endtrans %}</a>
+                                    {# <button type="button" id="adminOpenCommand" class="admin-button">⌘ {% trans %}Commandes{% endtrans %}</button> #}
+                                </div>
+                            </div>
+                        </section>
+
+                        {# Priorités directement actionnables #}
+                        <section>
+                            <div class="admin-card__header" style="padding:0 0 10px;border:0;">
+                                <div>
+                                    {# <h2 class="admin-section-title">{% trans %}Priorités administratives{% endtrans %}</h2>
+                                    <p class="admin-section-subtitle">{% trans %}Les files qui nécessitent une décision ou une vérification immédiate.{% endtrans %}</p> #}
+                                </div>
+                            </div>
+
+                            <div class="admin-priority-grid">
+                                <a class="admin-action-card" href="{{ path('moderateur_verifications_index') }}">
+                                    <div class="admin-action-card__top">
+                                        <span class="admin-action-card__icon">✅</span>
+                                        <strong class="admin-action-card__count">{{ kpi.pendingVerifications ?? (kpi.pendingProfiles ?? 0) }}</strong>
+                                    </div>
+                                    <div>
+                                        <h3 class="admin-action-card__title">{% trans %}Profils à vérifier{% endtrans %}</h3>
+                                        <p class="admin-action-card__description">{% trans %}Contrôler les profils, pièces et informations professionnelles.{% endtrans %}</p>
+                                        <span class="admin-action-card__link">{% trans %}Ouvrir la file{% endtrans %} →</span>
+                                    </div>
+                                </a>
+
+                                <a class="admin-action-card admin-action-card--warning" href="{{ path('admin_jobs_moderation') }}" data-turbo="false">
+                                    <div class="admin-action-card__top">
+                                        <span class="admin-action-card__icon">📣</span>
+                                        <strong class="admin-action-card__count">{{ kpi.pendingModerationJobs ?? 0 }}</strong>
+                                    </div>
+                                    <div>
+                                        <h3 class="admin-action-card__title">{% trans %}Offres à modérer{% endtrans %}</h3>
+                                        <p class="admin-action-card__description">{% trans %}Examiner la conformité et la qualité des offres soumises.{% endtrans %}</p>
+                                        <span class="admin-action-card__link">{% trans %}Modérer les offres{% endtrans %} →</span>
+                                    </div>
+                                </a>
+
+                                <a class="admin-action-card admin-action-card--warning" href="{{ path('admin_annonces_moderation') }}" data-turbo="false">
+                                    <div class="admin-action-card__top">
+                                        <span class="admin-action-card__icon">📢</span>
+                                        <strong class="admin-action-card__count">{{ kpi.pendingModerationAnnonces ?? '—' }}</strong>
+                                    </div>
+                                    <div>
+                                        <h3 class="admin-action-card__title">{% trans %}Annonces à modérer{% endtrans %}</h3>
+                                        <p class="admin-action-card__description">{% trans %}Valider, refuser ou demander une correction avant diffusion.{% endtrans %}</p>
+                                        <span class="admin-action-card__link">{% trans %}Modérer les annonces{% endtrans %} →</span>
+                                    </div>
+                                </a>
+
+                                <a class="admin-action-card admin-action-card--danger" href="{{ path('moderateur_reports_index', {status: 'open'}) }}">
+                                    <div class="admin-action-card__top">
+                                        <span class="admin-action-card__icon">🚨</span>
+                                        <strong class="admin-action-card__count">{{ kpi.pendingReports ?? 0 }}</strong>
+                                    </div>
+                                    <div>
+                                        <h3 class="admin-action-card__title">{% trans %}Signalements ouverts{% endtrans %}</h3>
+                                        <p class="admin-action-card__description">{% trans %}Traiter les abus, fraudes, contenus et comportements signalés.{% endtrans %}</p>
+                                        <span class="admin-action-card__link">{% trans %}Traiter les urgences{% endtrans %} →</span>
+                                    </div>
+                                </a>
+
+                                <a class="admin-action-card admin-action-card--danger" href="{{ path('admin_payment_dispute_index') }}">
+                                    <div class="admin-action-card__top">
+                                        <span class="admin-action-card__icon">💳</span>
+                                        <strong class="admin-action-card__count">{{ securityEvents|length }}</strong>
+                                    </div>
+                                    <div>
+                                        <h3 class="admin-action-card__title">{% trans %}Litiges de paiement{% endtrans %}</h3>
+                                        <p class="admin-action-card__description">{% trans %}Contrôler les transactions contestées ou nécessitant une preuve.{% endtrans %}</p>
+                                        <span class="admin-action-card__link">{% trans %}Voir les litiges{% endtrans %} →</span>
+                                    </div>
+                                </a>
+
+                                <a class="admin-action-card admin-action-card--success" href="{{ path('admin_support_new') }}">
+                                    <div class="admin-action-card__top">
+                                        <span class="admin-action-card__icon">🎧</span>
+                                        <strong class="admin-action-card__count">{{ kpi.openTickets ?? 0 }}</strong>
+                                    </div>
+                                    <div>
+                                        <h3 class="admin-action-card__title">{% trans %}Tickets support{% endtrans %}</h3>
+                                        <p class="admin-action-card__description">{% trans %}Suivre les demandes qui attendent une réponse administrative.{% endtrans %}</p>
+                                        <span class="admin-action-card__link">{% trans %}Accéder au support{% endtrans %} →</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </section>
+
+                        {# KPI essentiels #}
+                        <section class="admin-kpi-grid">
+                            {% set mainKpis = [
+                                {'label':'Comptes actifs'|trans,'value':kpi.activeAccounts ?? 0,'icon':'✓','href':path('admin_users_index'),'meta':'+' ~ (kpi.activeDelta7d ?? 0) ~ ' / 7j'},
+                                {'label':'Comptes bloqués'|trans,'value':kpi.blockedAccounts ?? 0,'icon':'⛔','href':path('admin_users_index'),'meta':'Fraude / abus'|trans},
+                                {'label':'Offres actives'|trans,'value':kpi.activeJobs ?? 0,'icon':'📣','href':path('admin_jobs_index', {status:'active'}),'meta':'Qualité & conformité'|trans},
+                                {'label':'Signalements ouverts'|trans,'value':kpi.pendingReports ?? 0,'icon':'🚨','href':path('moderateur_reports_index'),'meta':'SLA : ' ~ (kpi.slaHours ?? '—')}
+                            ] %}
+
+                            {% for item in mainKpis %}
+                                <article class="admin-kpi">
+                                    <div class="admin-kpi__head">
+                                        <span class="admin-kpi__label">{{ item.label }}</span>
+                                        <span class="admin-kpi__icon">{{ item.icon }}</span>
+                                    </div>
+                                    <div class="admin-kpi__value">{{ item.value }}</div>
+                                    <div class="admin-kpi__meta">
+                                        <span>{{ item.meta }}</span>
+                                        <a href="{{ item.href }}">{% trans %}Ouvrir{% endtrans %} →</a>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </section>
+
+                        {# Bande compacte : données business et exploitation #}
+                        {% set usersCurrent = kpi.usersCurrentMonthCount ?? 0 %}
+                        {% set usersPrevious = kpi.usersPreviousMonthCount ?? 0 %}
+                        {% set usersProgress = usersPrevious > 0 ? ((usersCurrent / usersPrevious) * 100) : (usersCurrent > 0 ? 100 : 0) %}
+                        {% if usersProgress > 100 %}{% set usersProgress = 100 %}{% endif %}
+
+                        <section class="admin-metric-strip">
+                            <div class="admin-metric">
+                                <div class="admin-metric__label">{% trans %}Utilisateurs ce mois{% endtrans %}</div>
+                                <div class="admin-metric__value" data-count="{{ usersCurrent }}">{{ usersCurrent }}</div>
+                                <div class="admin-metric__note">{{ usersCurrent }}/{{ usersPrevious }} · {{ (kpi.usersCurrentMonthDelta ?? 0)|number_format(1, ',', ' ') }}%</div>
+                                <div class="admin-progress"><span style="width:{{ usersProgress }}%"></span></div>
+                            </div>
+
+                            <div class="admin-metric">
+                                <div class="admin-metric__label">{% trans %}Revenu mensuel récurrent{% endtrans %}</div>
+                                <div class="admin-metric__value">{{ (kpi.mrr ?? 0)|number_format(0, ',', ' ') }} XAF</div>
+                                <div class="admin-metric__note">{{ (kpi.mrrDelta ?? 0) >= 0 ? '+' : '' }}{{ (kpi.mrrDelta ?? 0)|number_format(1, ',', ' ') }}%</div>
+                                <div class="admin-progress"><span style="width:{{ kpi.mrrProgress ?? 0 }}%"></span></div>
+                            </div>
+
+                            <div class="admin-metric">
+                                <div class="admin-metric__label">{% trans %}Valeur brute des transactions{% endtrans %}</div>
+                                <div class="admin-metric__value">{{ (kpi.gmvStats.gmv ?? 0)|number_format(0, ',', ' ') }} XAF</div>
+                                <div class="admin-metric__note">VBTT plateforme</div>
+                                <div class="admin-progress"><span style="width:100%"></span></div>
+                            </div>
+
+                            <a class="admin-metric" href="{{ path('admin_uptime_index') }}">
+                                <div class="admin-metric__label">Uptime</div>
+                                <div class="admin-metric__value">{{ ops.uptime|default(0)|number_format(2, ',', ' ') }}%</div>
+                                <div class="admin-metric__note">{% trans %}Disponibilité plateforme{% endtrans %}</div>
+                                <div class="admin-progress"><span style="width:{{ ops.uptime|default(0) > 100 ? 100 : ops.uptime|default(0) }}%"></span></div>
+                            </a>
+
+                            <a class="admin-metric" href="{{ path('admin_api_latency_index') }}">
+                                {% set latency = kpi.latency|default(ops.latency|default(0)) %}
+                                {% set latencyProgress = latency <= 100 ? 90 : (latency <= 200 ? 70 : (latency <= 400 ? 45 : 20)) %}
+                                <div class="admin-metric__label">API latency</div>
+                                <div class="admin-metric__value">{{ latency }} ms</div>
+                                <div class="admin-metric__note">{% trans %}Temps de réponse moyen{% endtrans %}</div>
+                                <div class="admin-progress"><span style="width:{{ latencyProgress }}%"></span></div>
+                            </a>
+                        </section>
+
+                        <div class="admin-tabs-wrap">
+                            <div class="admin-tabs" role="tablist" aria-label="{{ 'Sections du tableau de bord'|trans }}">
+                                <button type="button" class="admin-tab is-active" data-admin-tab="overview" role="tab" aria-selected="true">📊 {% trans %}Vue d’ensemble{% endtrans %}</button>
+                                <button type="button" class="admin-tab" data-admin-tab="finance" role="tab" aria-selected="false">💳 {% trans %}Finance{% endtrans %}</button>
+                                <button type="button" class="admin-tab" data-admin-tab="ops" role="tab" aria-selected="false">☁️ {% trans %}Cloud & Ops{% endtrans %}</button>
+                            </div>
+                        </div>
+
+                        {# =====================================================
+                           VUE D'ENSEMBLE
+                           ===================================================== #}
+                        <section class="admin-tab-panel is-active" data-admin-panel="overview">
+                            <div class="admin-stack">
+                                <div class="admin-grid-12">
+                                    <article class="admin-card admin-card--elevated admin-col-7">
+                                        <header class="admin-card__header">
+                                            <div>
+                                                <h2 class="admin-section-title">{% trans %}Croissance & inscriptions{% endtrans %}</h2>
+                                                <p class="admin-section-subtitle">{% trans %}Évolution des inscriptions selon la période sélectionnée.{% endtrans %}</p>
+                                            </div>
+                                            <div class="admin-tabs" data-growth-range-switcher>
+                                                <button type="button" class="admin-tab" data-growth-range="30">30j</button>
+                                                <button type="button" class="admin-tab" data-growth-range="90">90j</button>
+                                                <button type="button" class="admin-tab is-active" data-growth-range="12">12m</button>
+                                            </div>
+                                        </header>
+                                        <div class="admin-card__body">
+                                            <div class="admin-kpi__meta" style="justify-content:flex-start;margin-top:0;">
+                                                <strong class="admin-section-title">{{ growthStats.signups|default(0) }}</strong>
+                                                <span>{{ growthStats.delta|default(0) >= 0 ? '+' : '' }}{{ growthStats.delta|default(0) }}%</span>
+                                            </div>
+                                            <div class="admin-chart admin-chart--lg"><canvas id="chartSignups"></canvas></div>
+                                        </div>
+                                    </article>
+
+                                    <article class="admin-card admin-card--elevated admin-col-5">
+                                        <header class="admin-card__header">
+                                            <div>
+                                                <h2 class="admin-section-title">{% trans %}Répartition utilisateurs{% endtrans %}</h2>
+                                                <p class="admin-section-subtitle">Company · Talent · {% trans %}Particulier{% endtrans %} · Staff</p>
+                                            </div>
+                                            <a class="admin-button admin-button--compact" href="{{ path('admin_users_index') }}">{% trans %}Détails{% endtrans %}</a>
+                                        </header>
+                                        <div class="admin-card__body">
+                                            <div class="admin-chart admin-chart--sm"><canvas id="chartUsersSplit"></canvas></div>
+                                            <div class="admin-card-list" style="margin-top:12px;">
+                                                <div class="admin-list-item__head"><span class="admin-list-item__meta">Company</span><strong>{{ usersSplit.company ?? 0 }}</strong></div>
+                                                <div class="admin-list-item__head"><span class="admin-list-item__meta">Talent</span><strong>{{ usersSplit.talent ?? 0 }}</strong></div>
+                                                <div class="admin-list-item__head"><span class="admin-list-item__meta">{% trans %}Particulier{% endtrans %}</span><strong>{{ usersSplit.particulier ?? 0 }}</strong></div>
+                                                <div class="admin-list-item__head"><span class="admin-list-item__meta">Staff</span><strong>{{ usersSplit.staff ?? 0 }}</strong></div>
+                                                <div class="admin-list-item__head"><span class="admin-status admin-status--success">Activation {{ activationRate }}%</span><span class="admin-status admin-status--info">Rétention {{ retentionRate }}%</span></div>
+                                            </div>
+                                        </div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header">
+                                            <div>
+                                                <h2 class="admin-section-title">{% trans %}Offres vs recrutements{% endtrans %}</h2>
+                                                <p class="admin-section-subtitle">{% trans %}Conversion de la demande en placement.{% endtrans %}</p>
+                                            </div>
+                                        </header>
+                                        <div class="admin-card__body"><div class="admin-chart admin-chart--sm"><canvas id="chartJobs"></canvas></div></div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header">
+                                            <div>
+                                                <h2 class="admin-section-title">Trust & Safety</h2>
+                                                <p class="admin-section-subtitle">{% trans %}Typologie des signalements actifs.{% endtrans %}</p>
+                                            </div>
+                                        </header>
+                                        <div class="admin-card__body"><div class="admin-chart admin-chart--sm"><canvas id="chartModeration"></canvas></div></div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header">
+                                            <div>
+                                                <h2 class="admin-section-title">{% trans %}Top zones{% endtrans %}</h2>
+                                                <p class="admin-section-subtitle">{% trans %}Villes présentant le plus d’utilisateurs connectés.{% endtrans %}</p>
+                                            </div>
+                                            <a class="admin-button admin-button--compact" href="{{ path('admin_audit_index') }}">{% trans %}Explorer{% endtrans %}</a>
+                                        </header>
+                                        <div class="admin-table-wrap">
+                                            <table class="admin-table" style="min-width:420px;">
+                                                <thead><tr><th>N°</th><th>{% trans %}Ville{% endtrans %}</th><th>{% trans %}Connectés{% endtrans %}</th></tr></thead>
+                                                <tbody>
+                                                    {% for zone in topZones %}
+                                                        <tr><td>{{ loop.index }}</td><td class="admin-table__title">{{ zone.name }}</td><td><span class="admin-status admin-status--info">{{ zone.users }}</span></td></tr>
+                                                    {% else %}
+                                                        <tr><td colspan="3" class="admin-empty">{% trans %}Aucune donnée de zone{% endtrans %}</td></tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </article>
+                                </div>
+
+                                {# <div class="admin-grid-12">
+                                    <article class="admin-card admin-col-8">
+                                        <header class="admin-card__header">
+                                            <div>
+                                                <h2 class="admin-section-title">{% trans %}File de traitement{% endtrans %}</h2>
+                                                <p class="admin-section-subtitle">{% trans %}Signalements et offres nécessitant une action.{% endtrans %}</p>
+                                            </div>
+                                            <span class="admin-status admin-status--danger">{{ kpi.pendingReports ?? 0 }} open</span>
+                                        </header>
+                                        <div class="admin-table-wrap">
+                                            <table class="admin-table">
+                                                <thead><tr><th>{% trans %}Type{% endtrans %}</th><th>{% trans %}Objet{% endtrans %}</th><th>{% trans %}Priorité{% endtrans %}</th><th>{% trans %}Action{% endtrans %}</th></tr></thead>
+                                                <tbody>
+                                                    {% for report in flaggedJobs %}
+                                                        <tr>
+                                                            <td><span class="admin-status admin-status--warning">Report</span></td>
+                                                            <td>
+                                                                <div class="admin-table__title">
+                                                                    {% if report.targetJob is defined and report.targetJob %}
+                                                                        {{ report.targetJob.title ?? ('Job #' ~ report.targetJob.id) }}
+                                                                    {% else %}
+                                                                        {{ report.title ?? ('Signalement #' ~ report.id) }}
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="admin-list-item__meta">{{ report.createdAt ? report.createdAt|date('d/m/Y H:i') : '' }}</div>
+                                                            </td>
+                                                            <td><span class="admin-status admin-status--danger">{% trans %}Haute{% endtrans %}</span></td>
+                                                            <td><a class="admin-button admin-button--danger admin-button--compact" href="{{ path('admin_harassment_investigate') }}">{% trans %}Traiter{% endtrans %}</a></td>
+                                                        </tr>
+                                                    {% else %}
+                                                        <tr><td colspan="4" class="admin-empty">{% trans %}Aucune alerte{% endtrans %}</td></tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <footer class="admin-card__footer">
+                                            <span class="admin-section-subtitle">{% trans %}Les éléments urgents restent visibles avant les statistiques secondaires.{% endtrans %}</span>
+                                            <a class="admin-button admin-button--compact" href="{{ path('moderateur_reports_index') }}">{% trans %}Tous les signalements{% endtrans %}</a>
+                                        </footer>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header">
+                                            <div>
+                                                <h2 class="admin-section-title">{% trans %}Alertes intelligentes{% endtrans %}</h2>
+                                                <p class="admin-section-subtitle">{% trans %}Éléments nécessitant une attention rapide.{% endtrans %}</p>
+                                            </div>
+                                            <a class="admin-button admin-button--compact" href="{{ path('admin_security_incidents') }}">{% trans %}Voir{% endtrans %}</a>
+                                        </header>
+                                        <div class="admin-card__body admin-card-list">
+                                            {% for alert in alertsData %}
+                                                <div class="admin-alert{{ alert.level == 'critical' ? ' admin-alert--critical' : (alert.level == 'warning' ? ' admin-alert--warning' : ' admin-alert--info') }}">
+                                                    <div class="admin-list-item__head">
+                                                        <div>
+                                                            <div class="admin-alert__title">{{ alert.title|trans }}</div>
+                                                            <div class="admin-alert__meta">{{ alert.meta|trans }}</div>
+                                                        </div>
+                                                        <span class="admin-alert__time">{{ alert.time|trans }}</span>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <div class="admin-empty">{% trans %}Aucune alerte{% endtrans %}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </article>
+                                </div> #}
+                            </div>
+                        </section>
+
+                        {# =====================================================
+                           FINANCE
+                           ===================================================== #}
+                        <section class="admin-tab-panel" data-admin-panel="finance">
+                            <div class="admin-stack">
+                                <article class="admin-card">
+                                    <header class="admin-card__header">
+                                        <div>
+                                            <h2 class="admin-section-title">{% trans %}Revenus{% endtrans %}</h2>
+                                            <p class="admin-section-subtitle">{% trans %}Revenu mensuel récurrent et stabilité des abonnements.{% endtrans %}</p>
+                                        </div>
+                                        <span class="admin-status admin-status--success">RMR</span>
+                                    </header>
+                                    <div class="admin-card__body"><div class="admin-chart admin-chart--lg"><canvas id="chartRevenue"></canvas></div></div>
+                                </article>
+
+                                <div class="admin-grid-12">
+                                    <article class="admin-card admin-col-6">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">{% trans %}Mix des plans{% endtrans %}</h2><p class="admin-section-subtitle">{% trans %}Répartition de la base d’abonnés.{% endtrans %}</p></div></header>
+                                        <div class="admin-card__body admin-grid-12">
+                                            <div class="admin-col-6"><div class="admin-chart admin-chart--sm"><canvas id="chartPlans"></canvas></div></div>
+                                            <div class="admin-col-6 admin-card-list">
+                                                {% for plan in plansData %}
+                                                    <div class="admin-list-item__head"><span class="admin-list-item__meta">{{ plan.name }}</span><span><strong>{{ plan.count|number_format(0, ',', ' ') }}</strong><small class="admin-list-item__meta"> · {{ plan.total|number_format(0, ',', ' ') }} XAF</small></span></div>
+                                                {% else %}
+                                                    <div class="admin-empty">{% trans %}Aucune donnée plan{% endtrans %}</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-6">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">{% trans %}Mix des providers{% endtrans %}</h2><p class="admin-section-subtitle">{% trans %}Répartition des paiements réussis par fournisseur.{% endtrans %}</p></div></header>
+                                        <div class="admin-card__body admin-grid-12">
+                                            <div class="admin-col-6"><div class="admin-chart admin-chart--sm"><canvas id="chartProviders"></canvas></div></div>
+                                            <div class="admin-col-6 admin-card-list">
+                                                {% for provider in providerData %}
+                                                    <div class="admin-list-item__head"><span class="admin-list-item__meta">{{ provider.name }}</span><span><strong>{{ provider.count|number_format(0, ',', ' ') }}</strong><small class="admin-list-item__meta"> · {{ provider.total|number_format(0, ',', ' ') }} XAF</small></span></div>
+                                                {% else %}
+                                                    <div class="admin-empty">{% trans %}Aucune donnée provider{% endtrans %}</div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">{% trans %}Paiements échoués{% endtrans %}</h2><p class="admin-section-subtitle">{% trans %}Dernières transactions à investiguer.{% endtrans %}</p></div><a class="admin-button admin-button--compact" href="{{ path('admin_payments_failures_index') }}">{% trans %}Ouvrir{% endtrans %}</a></header>
+                                        <div class="admin-card__body admin-card-list">
+                                            {% for payment in latestFailedPayments %}
+                                                <div class="admin-list-item"><div class="admin-list-item__head"><div><div class="admin-list-item__title">#{{ payment.id }} · {{ payment.userEmail }}</div><div class="admin-list-item__meta">{{ payment.provider }} · {{ payment.plan }} · {{ payment.status }}</div><div class="admin-list-item__meta">{{ payment.paidAt ? payment.paidAt|date('d/m/Y H:i') : '-' }}</div></div><span class="admin-status admin-status--danger">{{ payment.amount|number_format(0, ',', ' ') }} {{ payment.currency }}</span></div></div>
+                                            {% else %}<div class="admin-empty">{% trans %}Aucun paiement échoué{% endtrans %}</div>{% endfor %}
+                                        </div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">Queue payouts</h2><p class="admin-section-subtitle">{% trans %}Reversements à approuver.{% endtrans %}</p></div><a class="admin-button admin-button--compact" href="{{ path('admin_payments_index') }}">Payouts</a></header>
+                                        <div class="admin-card__body admin-card-list">
+                                            {% for payout in payoutQueue %}
+                                                <div class="admin-list-item"><div class="admin-list-item__head"><div><div class="admin-list-item__title">{{ payout.beneficiary|default('—') }}</div><div class="admin-list-item__meta">{{ payout.status|default('—') }}</div></div><span class="admin-status admin-status--warning">{{ (payout.amount|default(0))|number_format(0, ',', ' ') }}</span></div></div>
+                                            {% else %}<div class="admin-empty">{% trans %}Aucun payout en attente{% endtrans %}</div>{% endfor %}
+                                        </div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">{% trans %}Derniers paiements{% endtrans %}</h2><p class="admin-section-subtitle">{% trans %}Traçabilité monétique et factures.{% endtrans %}</p></div><a class="admin-button admin-button--compact" href="{{ path('admin_payments_index') }}">{% trans %}Voir tout{% endtrans %}</a></header>
+                                        <div class="admin-table-wrap">
+                                            <table class="admin-table" style="min-width:430px;">
+                                                <thead><tr><th>{% trans %}Montant{% endtrans %}</th><th>{% trans %}Date{% endtrans %}</th><th>{% trans %}Facture{% endtrans %}</th></tr></thead>
+                                                <tbody>
+                                                    {% for payment in latestPayments %}
+                                                        <tr>
+                                                            <td class="admin-table__title">{{ payment.amount is defined and payment.amount ? payment.amount|number_format(0, ',', ' ') : '-' }} XAF</td>
+                                                            <td>{{ payment.paidAt is defined and payment.paidAt ? payment.paidAt|date('d/m/Y H:i') : '-' }}</td>
+                                                            <td>
+                                                                {% if payment.invoices is defined and payment.invoices|length > 0 %}
+                                                                    <a class="admin-button admin-button--compact admin-button--icon" href="{{ path('invoice_download', {slug: payment.invoices[0].slug}) }}" title="{{ 'Télécharger la facture'|trans }}">📥</a>
+                                                                {% else %}
+                                                                    <span class="admin-status">{% trans %}Indisponible{% endtrans %}</span>
+                                                                {% endif %}
+                                                            </td>
+                                                        </tr>
+                                                    {% else %}<tr><td colspan="3" class="admin-empty">{% trans %}Aucun paiement récent{% endtrans %}</td></tr>{% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
+                        </section>
+
+                        {# =====================================================
+                           CLOUD & OPS
+                           ===================================================== #}
+                        <section class="admin-tab-panel" data-admin-panel="ops">
+                            <div class="admin-stack">
+                                <div class="admin-grid-12">
+                                    <article class="admin-card admin-col-8">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">{% trans %}Tendances utilisateurs{% endtrans %}</h2><p class="admin-section-subtitle">{% trans %}Inscriptions quotidiennes par rôle.{% endtrans %}</p></div><span class="admin-status admin-status--info">{% trans %}Observabilité{% endtrans %}</span></header>
+                                        <div class="admin-card__body"><div class="admin-chart admin-chart--lg"><canvas id="chartHealth"></canvas></div></div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">Top APIs</h2><p class="admin-section-subtitle">{% trans %}Endpoints les plus sollicités.{% endtrans %}</p></div></header>
+                                        <div class="admin-card__body admin-card-list">
+                                            {% for api in topApis %}
+                                                <div class="admin-list-item"><div class="admin-list-item__head"><div><div class="admin-list-item__title">{{ api.endpoint }}</div><div class="admin-list-item__meta">{{ api.avgMs|number_format(0, ',', ' ') }} ms · {{ api.errorRate|number_format(1, ',', ' ') }}% erreurs</div></div><strong>{{ api.hits >= 1000 ? (api.hits / 1000)|number_format(1, ',', ' ') ~ 'k' : api.hits|number_format(0, ',', ' ') }}</strong></div></div>
+                                            {% else %}<div class="admin-empty">{% trans %}Aucune métrique API{% endtrans %}</div>{% endfor %}
+                                            <a class="admin-button" href="{{ path('admin_api_metrics_index') }}">📡 Metrics API</a>
+                                        </div>
+                                    </article>
+                                </div>
+
+                                <div class="admin-grid-12">
+                                    <article class="admin-card admin-col-8">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">Control center</h2><p class="admin-section-subtitle">{% trans %}Actions d’exploitation et de gouvernance technique.{% endtrans %}</p></div><span class="admin-status">Ops</span></header>
+                                        <div class="admin-card__body">
+                                            <div class="admin-control-grid" data-admin-placeholder-actions>
+                                                <a class="admin-control-button" href="{{ path('admin_kyc_rules') }}">✅ KYC</a>
+                                                {# <button type="button" class="admin-control-button" data-soon-label="{{ 'Réindexer'|trans }}">🔎 {% trans %}Réindexer{% endtrans %}</button>
+                                                <button type="button" class="admin-control-button" data-soon-label="Restart queue">📨 Restart queue</button>
+                                                <button type="button" class="admin-control-button" data-soon-label="Webhooks">🪝 Webhooks</button> #}
+                                                <a class="admin-control-button" href="{{ path('admin_audit_index') }}">🧾 {% trans %}Audit{% endtrans %}</a>
+                                                <form method="post" action="{{ path('admin_platform_toggle_maintenance') }}">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('toggle_maintenance') }}">
+                                                    <button type="submit" class="admin-control-button {{ maintenanceEnabled|default(false) ? 'admin-button--success' : 'admin-button--danger' }}">
+                                                        {{ maintenanceEnabled|default(false) ? '✅' : '⛔' }}
+                                                        {{ maintenanceEnabled|default(false) ? ('Rouvrir le site'|trans) : ('Mettre le site en maintenance'|trans) }}
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </article>
+
+                                    <article class="admin-card admin-col-4">
+                                        <header class="admin-card__header"><div><h2 class="admin-section-title">{% trans %}Santé technique{% endtrans %}</h2><p class="admin-section-subtitle">{% trans %}Résumé des services applicatifs.{% endtrans %}</p></div></header>
+                                        <div class="admin-card__body admin-card-list">
+                                            {% set opsRows = [
+                                                {'label':'CPU','value':ops.cpu ~ '%','progress':ops.cpu},
+                                                {'label':'RAM','value':ops.ram ~ '%','progress':ops.ram},
+                                                {'label':'Stockage'|trans,'value':ops.storage ~ '%','progress':ops.storage},
+                                                {'label':'Cron success','value':ops.cronSuccess ~ '%','progress':ops.cronSuccess},
+                                                {'label':'Queue depth','value':ops.queueDepth,'progress':50}
+                                            ] %}
+                                            {% for metric in opsRows %}
+                                                <div><div class="admin-mini-metric__head"><span>{{ metric.label }}</span><strong>{{ metric.value }}</strong></div><div class="admin-progress"><span style="width:{{ metric.progress > 100 ? 100 : metric.progress }}%"></span></div></div>
+                                            {% endfor %}
+                                            <div class="admin-list-item__head"><span class="admin-list-item__meta">Backup</span><span class="admin-status admin-status--success">{{ ops.backupStatus }}</span></div>
+                                        </div>
+                                    </article>
+                                </div>
+                            </div>
+                        </section>
+
+                        
+                    </div>
+                </main>
+            </div>
+        </div>
+
+        {# Command center #}
+        <div id="adminCommandModal" class="admin-modal" aria-hidden="true">
+            <div class="admin-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="adminCommandTitle">
+                <header class="admin-modal__header">
+                    <div>
+                        <h2 id="adminCommandTitle" class="admin-section-title">Command Center</h2>
+                        <p class="admin-section-subtitle">{% trans %}Raccourcis administrateur et navigation rapide.{% endtrans %}</p>
+                    </div>
+                    <button type="button" id="adminCloseCommand" class="admin-button admin-button--icon" aria-label="{{ 'Fermer'|trans }}">×</button>
+                </header>
+                <div class="admin-modal__body">
+                    <input id="adminCommandInput" class="admin-modal__input" type="text" placeholder="{{ 'Tapez une commande ou une action…'|trans }}">
+                    <div class="admin-command-grid">
+                        <a class="admin-command-card" href="{{ path('admin_companies_pending_index') }}"><div class="admin-command-card__title">✅ {% trans %}Ouvrir la file KYC{% endtrans %}</div><div class="admin-command-card__meta">{% trans %}Entreprises à vérifier et valider{% endtrans %}</div></a>
+                        <button type="button" class="admin-command-card" data-open-admin-tab="finance"><div class="admin-command-card__title">💳 {% trans %}Voir les finances{% endtrans %}</div><div class="admin-command-card__meta">RMR, {% trans %}revenus et paiements{% endtrans %}</div></button>
+                        <button type="button" class="admin-command-card" data-soon-label="{{ 'Purger le cache'|trans }}"><div class="admin-command-card__title">🧹 {% trans %}Purger le cache{% endtrans %}</div><div class="admin-command-card__meta">{% trans %}Action à brancher côté serveur{% endtrans %}</div></button>
+                        <a class="admin-command-card" href="{{ path('admin_security_incidents') }}"><div class="admin-command-card__title">🚨 Incident manager</div><div class="admin-command-card__meta">{% trans %}Piloter les incidents critiques{% endtrans %}</div></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="adminToastWrap" class="admin-toast-wrap" aria-live="polite">
+            {% for message in app.flashes('success') %}<div class="admin-toast admin-toast--success">{{ message }}</div>{% endfor %}
+            {% for message in app.flashes('warning') %}<div class="admin-toast admin-toast--warning">{{ message }}</div>{% endfor %}
+            {% for message in app.flashes('error') %}<div class="admin-toast admin-toast--error">{{ message }}</div>{% endfor %}
+        </div>
+
+        {# Seul pont Twig -> JavaScript. Aucun script métier inline. #}
+        <script id="adminDashboardData" type="application/json">
+            {{ {
+                searchUrl: path('admin_search_global'),
+                charts: {
+                    signups30d: charts.signups30d|default([]),
+                    usersSplit: usersSplit,
+                    jobs: chartJobVsRecruits.jobsVsRecruits|default({'jobs':0,'recruited':0}),
+                    moderation: chartsModeration|default({'spam':0,'abuse':0,'fraud':0,'identity':0,'other':0}),
+                    revenue: {
+                        labels: revenueChart.labels|default([]),
+                        values: revenueChart.mrr|default([])
+                    },
+                    plans: {
+                        labels: subscriptionPlanLabels|default([]),
+                        values: subscriptionPlanValues|default([])
+                    },
+                    providers: {
+                        labels: providerLabels|default([]),
+                        values: providerValues|default([])
+                    },
+                    userTrend: {
+                        labels: userTrendChart.labels|default([]),
+                        talent: userTrendChart.talent|default([]),
+                        particulier: userTrendChart.particulier|default([]),
+                        company: userTrendChart.company|default([])
+                    },
+                    growth: signupChartData|default({
+                        '30': {'labels': [], 'signups': []},
+                        '90': {'labels': [], 'signups': []},
+                        '12': {'labels': [], 'signups': []}
+                    })
+                },
+                i18n: {
+                    users: 'Utilisateurs'|trans,
+                    companies: 'Entreprises'|trans,
+                    jobs: 'Offres'|trans,
+                    transactions: 'Transactions'|trans,
+                    tickets: 'Tickets'|trans,
+                    noResult: 'Aucun résultat'|trans,
+                    searchError: 'Erreur lors de la recherche globale'|trans,
+                    comingSoon: 'bientôt disponible'|trans,
+                    signups: 'Inscriptions'|trans,
+                    recruited: 'Recrutés'|trans,
+                    volume: 'Volume'|trans,
+                    reports: 'Signalements'|trans,
+                    spam: 'Spam'|trans,
+                    abuse: 'Abus'|trans,
+                    fraud: 'Fraude'|trans,
+                    identity: 'Identité'|trans,
+                    other: 'Autres'|trans
+                }
+            }|json_encode|raw }}
+        </script>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+        <script src="{{ asset('js/admin-dashboard.js') }}?v=20260726-2" defer></script>
+    </div>
+{% endblock %}

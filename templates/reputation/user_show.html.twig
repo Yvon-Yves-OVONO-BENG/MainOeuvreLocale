@@ -1,0 +1,368 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Réputation • Profil{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-80px)] bg-gradient-to-b from-slate-50 via-white to-slate-50">
+  <div class="mx-auto max-w-6xl px-4 py-8">
+
+    {% for label, messages in app.flashes %}
+      {% for msg in messages %}
+        <div class="mb-4 rounded-2xl border border-slate-200 bg-white/80 backdrop-blur px-4 py-3 text-sm text-slate-800 shadow-[0_10px_40px_rgba(15,23,42,.06)]">
+          <span class="font-extrabold">{{ label|upper }}</span> • {{ msg }}
+        </div>
+      {% endfor %}
+    {% endfor %}
+
+    <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_22px_70px_rgba(15,23,42,.10)] overflow-hidden">
+      <div class="p-6 sm:p-7 bg-gradient-to-r from-indigo-50 via-white to-emerald-50">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <div class="flex items-center gap-3">
+              <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-slate-900 to-indigo-600 text-white grid place-items-center font-black">
+                {{ target.publicDisplayName|slice(0,1)|upper }}
+              </div>
+              <div class="min-w-0">
+                <h1 class="truncate text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+                  ⭐ {{ target.publicDisplayName|trans }}
+                </h1>
+              </div>
+            </div>
+
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-extrabold text-slate-700">
+                {% trans %}Moyenne :{% endtrans %} {{ avgStars|number_format(1, '.', ' ') }}★
+              </span>
+              <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-extrabold text-slate-700">
+                {% trans %}Notes :{% endtrans %} {{ ratingsCount }}
+              </span>
+
+              {% if isSerious %}
+                <span class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">
+                  ✅ {% trans %}Profil sérieux{% endtrans %}
+                </span>
+              {% else %}
+                <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-extrabold text-slate-700">
+                  ℹ️ {% trans %}En cours de fiabilisation{% endtrans %}
+                </span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('reputation_particuliers') }}"
+               class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-900 hover:bg-slate-50">
+              ← {% trans %}Particuliers{% endtrans %}
+            </a>
+            <a href="{{ path('reputation_companies') }}"
+               class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-900 hover:bg-slate-50">
+              ← {% trans %}Compagnies{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6 sm:p-7">
+        <div class="grid gap-5 lg:grid-cols-5">
+
+          <div class="lg:col-span-2">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(15,23,42,.05)]">
+              
+              <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                <div class="text-lg sm:text-xl font-extrabold leading-tight text-slate-900">
+                  {% trans %}Donner / modifier mon avis{% endtrans %}
+                </div>
+                <div class="text-[11px] sm:text-xs font-bold text-slate-500">
+                  {% trans %}Note + commentaire{% endtrans %}
+                </div>
+              </div>
+
+              {% if canRate %}
+                {% if hasMyOpinion and not editMode %}
+                  <div class="mt-4 space-y-4">
+                    <div class="rounded-[26px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_12px_32px_rgba(15,23,42,.045)]">
+                      <div class="flex items-center justify-between gap-3">
+                        <div class="text-sm font-bold text-slate-800">{% trans %}Votre note{% endtrans %}</div>
+                        <div class="text-xs font-semibold text-slate-500">
+                          {% if myReview and myReview.createdAt %}
+                            {{ myReview.createdAt|date('d/m/Y H:i') }}
+                          {% elseif myRating and myRating.createdAt %}
+                            {{ myRating.createdAt|date('d/m/Y H:i') }}
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <div class="mt-3 flex items-center gap-2">
+                        <span class="text-sm font-bold text-slate-700">{{ myRating ? myRating.stars : 0 }}/5</span>
+                        <div class="inline-flex items-center gap-1">
+                          {% set myStars = myRating ? myRating.stars : 0 %}
+                          {% for i in 1..5 %}
+                            <svg viewBox="0 0 24 24"
+                                class="h-4 w-4 {{ i <= myStars ? 'fill-amber-400 stroke-amber-400' : 'fill-transparent stroke-slate-300' }}"
+                                style="stroke-width:1.6;">
+                              <path d="M12 2.75l2.82 5.72 6.31.92-4.57 4.45 1.08 6.28L12 17.14l-5.64 2.97 1.08-6.28L2.87 9.39l6.31-.92L12 2.75z"/>
+                            </svg>
+                          {% endfor %}
+                        </div>
+                      </div>
+
+                      <div class="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-700">
+                        {{ myReview ? myReview.comment : '' }}
+                      </div>
+
+                      <div class="mt-4 max-w-full">
+                        <a href="{{ path('reputation_show', { slug: target.personalProfile.slug, edit: 1 }) }}"
+                          class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-800 transition hover:bg-slate-50">
+                          ✏️ {% trans %}Éditer mon avis{% endtrans %}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="mt-4 max-w-full">
+                    {{ form_start(form) }}
+
+                    <div class="mb-5">
+                      <div class="mb-2 text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                        {% trans %}Note{% endtrans %}
+                      </div>
+
+                      <div class="rounded-[22px] border border-slate-200/80 bg-white/95 px-4 py-4 shadow-[0_8px_24px_rgba(15,23,42,.04)]">
+                        <div class="flex flex-col items-center gap-3">
+                          <div id="rating-stars" class="flex items-center justify-center gap-2.5 sm:gap-3">
+                            {% for child in form.stars %}
+                              <label
+                                class="js-rating-star inline-flex cursor-pointer items-center justify-center p-0.5 transition duration-150 hover:scale-110"
+                                data-value="{{ child.vars.value }}"
+                                aria-label="{{ child.vars.value }}/5"
+                                title="{{ child.vars.value }}/5"
+                              >
+                                <input
+                                  type="radio"
+                                  id="{{ child.vars.id }}"
+                                  name="{{ child.vars.full_name }}"
+                                  value="{{ child.vars.value }}"
+                                  class="js-rating-input sr-only"
+                                  {% if child.vars.checked %}checked{% endif %}
+                                  required
+                                >
+
+                                <svg viewBox="0 0 24 24"
+                                    class="js-rating-icon h-5 w-5 sm:h-6 sm:w-6 fill-transparent stroke-slate-400 transition-all duration-150"
+                                    style="stroke-width:1.7;">
+                                  <path d="M12 2.75l2.82 5.72 6.31.92-4.57 4.45 1.08 6.28L12 17.14l-5.64 2.97 1.08-6.28L2.87 9.39l6.31-.92L12 2.75z"/>
+                                </svg>
+                              </label>
+                            {% endfor %}
+                          </div>
+
+                          <div id="rating-label" class="text-center text-sm font-medium text-slate-500">
+                            {% trans %}Choisis une note{% endtrans %}
+                          </div>
+
+                          <div class="text-center text-[11px] leading-5 text-slate-400">
+                            {% trans %}Clique sur une étoile pour noter le profil.{% endtrans %}
+                          </div>
+                        </div>
+                      </div>
+
+                      {{ form_errors(form.stars) }}
+                    </div>
+
+                    <div class="mb-4">
+                      <div class="mb-2 text-sm font-bold text-slate-700">
+                        {% trans %}Commentaire{% endtrans %}
+                      </div>
+
+                      {{ form_widget(form.comment, {
+                        attr: {
+                          class: 'w-full min-h-[130px] sm:min-h-[150px] rounded-[20px] sm:rounded-[24px] border border-slate-200/80 bg-white/90 px-3.5 sm:px-4 py-3 text-sm sm:text-[15px] leading-6 sm:leading-7 text-slate-700 placeholder:text-slate-400 shadow-[0_10px_30px_rgba(15,23,42,.04)] outline-none transition-all duration-200 focus:border-slate-300 focus:ring-4 focus:ring-slate-100',
+                          required: 'required'
+                        }
+                      }) }}
+
+                      {{ form_errors(form.comment) }}
+
+                      <div class="mt-2 text-xs text-slate-400">
+                        {% trans %}Le commentaire est obligatoire.{% endtrans %}
+                      </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                      <button class="flex-1 rounded-[22px] bg-slate-900 py-3.5 text-sm font-bold tracking-[0.02em] text-white shadow-[0_12px_30px_rgba(15,23,42,.16)] transition duration-200 hover:-translate-y-[1px] hover:bg-slate-800">
+                        {% if hasMyOpinion %}
+                          {% trans %}Mettre à jour{% endtrans %} ✅
+                        {% else %}
+                          {% trans %}Enregistrer{% endtrans %} ✅
+                        {% endif %}
+                      </button>
+
+                      {% if hasMyOpinion and editMode %}
+                        <a href="{{ path('reputation_show', { slug: target.personalProfile.slug }) }}"
+                          class="rounded-[22px] border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+                          {% trans %}Annuler{% endtrans %}
+                        </a>
+                      {% endif %}
+                    </div>
+
+                    {% if form._token is defined %}
+                      {{ form_widget(form._token) }}
+                    {% endif %}
+                    {{ form_end(form, { render_rest: false }) }}
+                  </div>
+                {% endif %}
+              {% else %}
+                <div class="mt-4 rounded-[26px] border border-slate-200/80 bg-white/90 p-5 shadow-[0_12px_32px_rgba(15,23,42,.045)]">
+                  <div class="text-lg font-extrabold text-slate-900">
+                    🔒 {% trans %}Connexion requise{% endtrans %}
+                  </div>
+
+                  <div class="mt-2 text-sm leading-6 text-slate-600">
+                    {% trans %}Le détail de la réputation est visible publiquement. En revanche, pour voter ou laisser un avis, vous devez être connecté.{% endtrans %}
+                  </div>
+
+                  <div class="mt-4 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    {% trans %}Connectez-vous pour noter ce profil et partager votre expérience.{% endtrans %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mt-4 rounded-3xl border border-slate-200 bg-white p-5">
+              <div class="text-sm font-black text-slate-900">{% trans %}Règle “profil sérieux”{% endtrans %}</div>
+              <div class="mt-1 text-sm text-slate-600">{% trans %}≥ 4★ et ≥ 5 notes.{% endtrans %}</div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-3">
+            <div id="reputation-reviews" class="rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_14px_45px_rgba(15,23,42,.06)]">
+              <div class="flex items-center justify-between gap-3">
+                <div class="font-black text-slate-900">💬 {% trans %}Commentaires{% endtrans %}</div>
+
+                <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                  <span class="text-slate-600">
+                    {{ avgStars|number_format(1, '.', ' ') }}/5
+                  </span>
+
+                  <span class="inline-flex items-center gap-0.5">
+                    {% set avgRounded = avgStars|round(0, 'common') %}
+                    {% for i in 1..5 %}
+                      <svg viewBox="0 0 24 24"
+                           class="h-4 w-4 {{ i <= avgRounded ? 'fill-amber-400 stroke-amber-400' : 'fill-transparent stroke-slate-300' }}"
+                           style="stroke-width:1.6;">
+                        <path d="M12 2.75l2.82 5.72 6.31.92-4.57 4.45 1.08 6.28L12 17.14l-5.64 2.97 1.08-6.28L2.87 9.39l6.31-.92L12 2.75z"/>
+                      </svg>
+                    {% endfor %}
+                  </span>
+
+                  <span class="text-slate-400">
+                    • {{ ratingsCount }} {% trans %}avis{% endtrans %}
+                  </span>
+                </div>
+              </div>
+
+              <div class="mt-4 space-y-3">
+                {% for r in reviews %}
+                  <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                      <div class="text-sm font-extrabold text-slate-900">
+                        {{ r.targetBy ? r.targetBy.publicDisplayName : ('Utilisateur'|trans) }}
+                      </div>
+                      <div class="text-xs font-extrabold text-slate-500">
+                        {{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '' }}
+                      </div>
+                    </div>
+                    <div class="mt-2 text-sm text-slate-700">
+                      {{ r.comment }}
+                    </div>
+                  </div>
+                {% else %}
+                  <div class="rounded-2xl border border-slate-200 bg-white p-6 text-center">
+                    <div class="text-lg font-black text-slate-900">{% trans %}Pas encore de commentaire{% endtrans %}</div>
+                    <div class="mt-1 text-sm text-slate-600">{% trans %}Sois le premier à laisser un avis.{% endtrans %}</div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const wrapper = document.getElementById('rating-stars');
+  if (!wrapper) return;
+
+  const stars = Array.from(wrapper.querySelectorAll('.js-rating-star'));
+  const label = document.getElementById('rating-label');
+
+  function getInput(star) {
+    return star.querySelector('.js-rating-input');
+  }
+
+  function getValue() {
+    const active = stars.find(star => {
+      const input = getInput(star);
+      return input && input.checked;
+    });
+
+    if (!active) return 0;
+
+    const input = getInput(active);
+    return input ? parseInt(input.value, 10) : 0;
+  }
+
+  function paint(value) {
+  stars.forEach((star, index) => {
+    const icon = star.querySelector('.js-rating-icon');
+    const active = (index + 1) <= value;
+
+    if (active) {
+      icon.classList.remove('fill-transparent', 'stroke-slate-400');
+      icon.classList.add('fill-amber-400', 'stroke-amber-400');
+    } else {
+      icon.classList.remove('fill-amber-400', 'stroke-amber-400');
+      icon.classList.add('fill-transparent', 'stroke-slate-400');
+    }
+  });
+
+  if (label) {
+    label.textContent = value > 0 ? value + '/5' : 'Choisis une note';
+  }
+}
+
+  stars.forEach((star, index) => {
+    const input = getInput(star);
+    const value = index + 1;
+
+    star.addEventListener('mouseenter', function () {
+      paint(value);
+    });
+
+    star.addEventListener('click', function () {
+      if (input) {
+        input.checked = true;
+        paint(value);
+      }
+    });
+
+    if (input) {
+      input.addEventListener('change', function () {
+        paint(value);
+      });
+    }
+  });
+
+  wrapper.addEventListener('mouseleave', function () {
+    paint(getValue());
+  });
+
+  paint(getValue());
+});
+</script>
+{% endblock %}

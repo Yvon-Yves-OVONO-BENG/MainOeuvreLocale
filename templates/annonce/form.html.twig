@@ -1,0 +1,136 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% if isEdit %}{% trans %}Modifier mon annonce{% endtrans %}{% else %}{% trans %}Publier une annonce{% endtrans %}{% endif %}
+{% if creationSuccess %}
+    <div
+        hidden
+        data-annonce-creation-success
+        data-requested="{{ creationSuccess.requested ? '1' : '0' }}"
+        data-annonce-title="{{ creationSuccess.annonce.titre|e('html_attr') }}"
+        data-manage-url="{{ path('annonce_manage') }}"
+    ></div>
+{% endif %}
+
+<script src="{{ asset('js/annonce/form.js') }}" defer></script>
+
+{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ asset('css/annonce/form.css') }}">
+
+<main class="an-page">
+    <section class="an-hero">
+        <div class="an-hero-in">
+            <div>
+                <span class="an-eyebrow"><i class="fa-solid fa-bullhorn"></i> {% trans %}Publication dynamique{% endtrans %}</span>
+                <h1>{% if isEdit %}{% trans %}Modifier mon annonce{% endtrans %}{% else %}{% trans %}Publier une annonce{% endtrans %}{% endif %}</h1>
+                <p>{% trans %}Votre profil explique qui vous êtes. Votre annonce montre ce que vous proposez aujourd’hui : disponibilité, service, promotion ou offre ponctuelle.{% endtrans %}</p>
+            </div>
+            <div class="an-hero-actions">
+                <a href="{{ path('annonce_manage') }}" class="an-btn an-btn-light" data-turbo="false"><i class="fa-solid fa-table-list"></i> {% trans %}Gérer mes annonces{% endtrans %}</a>
+            </div>
+        </div>
+    </section>
+
+    {% for message in app.flashes('annonce_error') %}
+        <div class="an-flash error"><i class="fa-solid fa-circle-exclamation me-2"></i>{{ message }}</div>
+    {% endfor %}
+
+    <div class="an-layout">
+        <section class="an-card">
+            <div class="an-card-head">
+                <h2><i class="fa-solid fa-pen-ruler me-2 text-primary"></i>{% trans %}Votre offre actuelle{% endtrans %}</h2>
+                <p>{% trans %}Des informations précises inspirent confiance et facilitent les prises de contact.{% endtrans %}</p>
+            </div>
+            <div class="an-card-body">
+                {{ form_start(form, {'attr': {'class': 'an-form', 'data-turbo': 'false', 'data-mol-autosave': '1', 'data-mol-autosave-key': isEdit ? 'annonce-edit' : 'annonce-new'}}) }}
+                    <div class="an-form-grid">
+                        <div class="an-field-full">
+                            {{ form_label(form.titre) }}
+                            {{ form_widget(form.titre) }}
+                            {{ form_errors(form.titre) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(form.categorie) }}
+                            {{ form_widget(form.categorie, {
+                                'attr': {
+                                    'data-professions-url': path('api_professions_by_category', {'id': 0})
+                                }
+                            }) }}
+                            {{ form_errors(form.categorie) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(form.profession) }}
+                            {{ form_widget(form.profession) }}
+                            {{ form_errors(form.profession) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(form.ville) }}
+                            {{ form_widget(form.ville) }}
+                            {{ form_errors(form.ville) }}
+                        </div>
+
+                        <div>
+                            {{ form_label(form.salaireJournalier) }}
+                            {{ form_widget(form.salaireJournalier) }}
+                            {{ form_help(form.salaireJournalier) }}
+                            {{ form_errors(form.salaireJournalier) }}
+                        </div>
+
+                        <div class="an-field-full">
+                            {{ form_label(form.description) }}
+                            {{ form_widget(form.description) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+
+                        <div class="an-field-full">
+                            <div class="an-switch-card">
+                                <div>
+                                    <strong><i class="fa-solid fa-eye me-2 text-success"></i>{% trans %}Afficher maintenant{% endtrans %}</strong>
+                                    <small>{% trans %}L’activation envoie automatiquement l’annonce à l’équipe de modération. Elle ne sera visible publiquement qu’après validation.{% endtrans %}</small>
+                                </div>
+                                <div class="form-check form-switch">
+                                    {{ form_widget(form.afficherMaintenant) }}
+                                    <label class="form-check-label visually-hidden" for="{{ form.afficherMaintenant.vars.id }}">{% trans %}Afficher maintenant{% endtrans %}</label>
+                                </div>
+                            </div>
+                            {{ form_errors(form.afficherMaintenant) }}
+                        </div>
+                    </div>
+
+                    <div class="an-submit">
+                        <a href="{{ path('annonce_manage') }}" class="an-btn an-btn-cancel">{% trans %}Annuler{% endtrans %}</a>
+                        <button type="submit" class="an-btn an-btn-primary">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            {% if isEdit %}{% trans %}Enregistrer les modifications{% endtrans %}{% else %}{% trans %}Enregistrer l’annonce{% endtrans %}{% endif %}
+                        </button>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </section>
+
+        <aside class="an-side">
+            <div class="an-card an-info">
+                <div class="an-info-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <h3>{% trans %}Profil ≠ Annonce{% endtrans %}</h3>
+                <p>{% trans %}Le profil reste votre identité professionnelle. L’annonce évolue avec vos services, vos disponibilités et vos promotions.{% endtrans %}</p>
+            </div>
+            <div class="an-card an-info">
+                <div class="an-info-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>{% trans %}Publication maîtrisée{% endtrans %}</h3>
+                <div class="an-status-flow">
+                    <div class="an-step"><b>1</b> {% trans %}Vous enregistrez{% endtrans %}</div>
+                    <div class="an-step"><b>2</b> {% trans %}Vous demandez l’affichage{% endtrans %}</div>
+                    <div class="an-step"><b>3</b> {% trans %}Un modérateur valide{% endtrans %}</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</main>
+
+
+
+{% endblock %}

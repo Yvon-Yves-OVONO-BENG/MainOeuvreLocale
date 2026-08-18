@@ -1,0 +1,290 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Réputation{% endtrans %} • {{ title }}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% include "reputation/_vip_ui.html.twig" %}
+
+<div class="rep-page min-h-[calc(100vh-80px)] bg-[radial-gradient(1200px_circle_at_10%_0%,rgba(99,102,241,.10),transparent_55%),radial-gradient(900px_circle_at_90%_10%,rgba(16,185,129,.08),transparent_55%),linear-gradient(180deg,#f8fafc,#f8fbff,#f8fafc)]">
+  <div class="rep-shell mx-auto px-4 py-5 sm:py-7">
+
+    {# ===== FLASH ===== #}
+    {% for label, messages in app.flashes %}
+      {% for msg in messages %}
+        <div class="mb-4 rounded-2xl border border-slate-200/70 bg-white/85 px-4 py-3 text-[13px] text-slate-800 shadow-[0_14px_45px_rgba(15,23,42,.06)] backdrop-blur">
+          <span class="font-extrabold tracking-wide">{{ label|upper }}</span>
+          <span class="px-1 text-slate-400">•</span>
+          {{ msg }}
+        </div>
+      {% endfor %}
+    {% endfor %}
+
+    {# ===== HERO ===== #}
+    <section class="rep-hero p-4 sm:p-5">
+  <div class="rep-hero-content">
+    <div class="rep-hero-grid">
+
+      <div class="min-w-0">
+        <div class="rep-hero-kicker">
+          <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+          {% trans %}Espace réputation{% endtrans %}
+        </div>
+
+        <h1 class="rep-hero-title">
+          {% trans %}Réputation{% endtrans %}
+          <span class="text-white/45">•</span>
+          {{ title }}
+        </h1>
+
+        <div class="rep-hero-text">
+          {% trans %}Consulte rapidement les profils, compare les notes et ouvre les détails dans une interface plus élégante, plus légère et plus lisible.{% endtrans %}
+        </div>
+
+        <div class="rep-hero-metas">
+          <span class="rep-hero-pill">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            {% trans %}Total :{% endtrans %} {{ totalCount }}
+          </span>
+
+          <span class="rep-hero-pill">
+            {% trans %}Affichage{% endtrans %}
+            <span class="font-black">{{ rangeFrom }}</span>–<span class="font-black">{{ rangeTo }}</span>
+          </span>
+
+          {% if q %}
+            <span class="rep-hero-pill">
+              {% trans %}Filtre :{% endtrans %} “{{ q }}”
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="rep-tabs-row">
+          <a href="{{ path('reputation_particuliers') }}"
+             class="{{ title == 'Particuliers' ? 'rep-tab rep-tab-active' : 'rep-tab' }}">
+            <span>👤</span> {% trans %}Particuliers{% endtrans %}
+          </a>
+
+          <a href="{{ path('reputation_companies') }}"
+             class="{{ title == 'Companies' ? 'rep-tab rep-tab-active' : 'rep-tab' }}">
+            <span>🏢</span> {% trans %}Compagnies{% endtrans %}
+          </a>
+        </div>
+      </div>
+
+      <form method="get" action="{{ path(routeName) }}" class="w-full lg:max-w-[400px]">
+        <input type="hidden" name="page" value="1">
+
+        <div class="rep-search">
+          <div class="relative">
+            <div class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-[17px] w-[17px]" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8.5 3a5.5 5.5 0 104.21 9.03l3.13 3.13a.75.75 0 101.06-1.06l-3.13-3.13A5.5 5.5 0 008.5 3zM4.5 8.5a4 4 0 118 0 4 4 0 01-8 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+
+            <input
+              name="q"
+              value="{{ q }}"
+              placeholder="{% trans %}Rechercher par nom…{% endtrans %}"
+              class="w-full border border-white/50 bg-white/95 pl-10 pr-[108px] text-slate-900 outline-none transition focus:border-slate-300 focus:ring-4 focus:ring-white/25"
+              autocomplete="off"
+            />
+
+            <div class="absolute inset-y-0 right-2 flex items-center gap-2">
+              {% if q %}
+                <a href="{{ path(routeName) }}"
+                   class="rep-search-btn inline-flex items-center gap-2 border border-slate-200 bg-white px-3 text-slate-700 transition hover:bg-slate-50">
+                  ✕
+                </a>
+                <button class="rep-search-btn inline-flex items-center bg-slate-900 px-4 text-white shadow-[0_10px_26px_rgba(15,23,42,.16)] transition hover:opacity-95">
+                  {% trans %}Filtrer{% endtrans %}
+                </button>
+              {% else %}
+                <button class="rep-search-btn inline-flex items-center bg-slate-900 px-4 text-white shadow-[0_10px_26px_rgba(15,23,42,.16)] transition hover:opacity-95">
+                  {% trans %}Rechercher{% endtrans %}
+                </button>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mt-2 px-1 text-[11px] text-white/72">
+            {% trans %}Tape simplement une partie du nom pour filtrer plus vite.{% endtrans %}
+          </div>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</section>
+
+    {# ===== MAIN BOARD ===== #}
+    <section class="rep-board flex min-h-[420px] flex-col">
+      <div class="rep-top-strip px-5 py-4 sm:px-7">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div class="text-[13px] font-bold tracking-[0.02em] text-slate-900">
+              {% trans %}Annuaire des profils évalués{% endtrans %}
+            </div>
+            <div class="mt-1 text-[12px] text-slate-500">
+              {% trans %}Affichage actuel :{% endtrans %}
+              <span class="font-extrabold text-slate-800">{{ rangeFrom }}</span>–<span class="font-extrabold text-slate-800">{{ rangeTo }}</span>
+              <span class="text-slate-400">/</span>
+              <span class="font-extrabold text-slate-800">{{ totalCount }}</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <span class="rep-pill border border-slate-200 bg-white text-slate-700">
+              ⭐ {% trans %}Notes visibles{% endtrans %}
+            </span>
+            <span class="rep-pill border border-slate-200 bg-white text-slate-700">
+              🔎 {% trans %}Recherche dynamique{% endtrans %}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex-1 p-5 sm:p-7">
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {% for row in rows %}
+            {% set u = row[0] %}
+            {% set avg = (row.avgStars|default(0)) %}
+            {% set cnt = (row.ratingsCount|default(0)) %}
+            {% set full = avg|round(0, 'floor') %}
+
+            {% if u.personalProfile %}
+              <a href="{{ path('reputation_show', {slug: u.personalProfile.slug}) }}"
+                 class="rep-user-card group flex h-full flex-col justify-between p-5">
+
+                <div class="relative z-[1]">
+                  <div class="flex items-start gap-3">
+                    <div class="rep-avatar shrink-0">
+                      {% set photo = (u.personalProfile is defined and u.personalProfile and u.personalProfile.photo) ? u.personalProfile.photo : null %}
+
+                      {% if photo %}
+                        <img
+                          src="{{ asset('uploads/profiles/' ~ photo) }}"
+                          alt="{{ u.publicDisplayName|trans }}"
+                          class="h-full w-full object-cover"
+                          loading="lazy"
+                        >
+                      {% else %}
+                        <div class="grid h-full w-full place-items-center text-[16px] font-black text-white">
+                          {{ (u.publicDisplayName)|slice(0,1)|upper }}
+                        </div>
+                      {% endif %}
+                    </div>
+
+                    <div class="min-w-0 flex-1">
+                      <div class="rep-name truncate">{{ u.publicDisplayName|trans }}</div>
+                      <div class="mt-1 text-[11.5px] text-slate-500">
+                        ID #{{ u.id }}
+                      </div>
+
+                      <div class="mt-3 flex flex-wrap items-center gap-2">
+                        <span class="rep-pill border border-slate-200 bg-slate-50 text-slate-700">
+                          {{ avg|number_format(1, '.', ' ') }}/5
+                        </span>
+                        <span class="rep-pill border border-slate-200 bg-slate-50 text-slate-700">
+                          {{ cnt }} {% trans %}note{% endtrans %}{{ cnt > 1 ? 's' : '' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-5 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-[2px] text-[15px]">
+                      {% for i in 1..5 %}
+                        <span class="{{ i <= full ? 'text-amber-400 drop-shadow-sm' : 'text-slate-200' }}">★</span>
+                      {% endfor %}
+                    </div>
+
+                    <span class="rep-btn-view">
+                      {% trans %}Voir{% endtrans %} →
+                    </span>
+                  </div>
+
+                  {% if avg >= 4 and cnt >= 5 %}
+                    <div class="mt-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11.5px] font-extrabold text-emerald-700">
+                      ✅ {% trans %}Profil sérieux{% endtrans %}
+                      <span class="font-black text-emerald-500">•</span>
+                      ≥4★ & ≥5 {% trans %}notes{% endtrans %}
+                    </div>
+                  {% else %}
+                    <div class="mt-4 text-[11.5px] leading-5 text-slate-500">
+                      {% trans %}Plus d’avis permet une réputation plus fiable et plus lisible.{% endtrans %}
+                    </div>
+                  {% endif %}
+                </div>
+              </a>
+            {% endif %}
+
+          {% else %}
+            <div class="rep-empty md:col-span-2 xl:col-span-3 p-10 text-center">
+              <div class="text-[18px] font-black tracking-tight text-slate-900">
+                {% trans %}Aucun résultat{% endtrans %}
+              </div>
+              <div class="mt-2 text-[13px] text-slate-600">
+                {% trans %}Essaie une autre recherche ou change de catégorie.{% endtrans %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {% if totalPages > 1 %}
+          {% set start = currentPage - 2 %}
+          {% if start < 1 %}{% set start = 1 %}{% endif %}
+
+          {% set end = currentPage + 2 %}
+          {% if end > totalPages %}{% set end = totalPages %}{% endif %}
+
+          <div class="mt-8 border-t border-slate-200/80 pt-5">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div class="text-[12.5px] text-slate-600">
+                {% trans %}Page{% endtrans %}
+                <span class="font-extrabold text-slate-900">{{ currentPage }}</span>
+                <span class="text-slate-400">/</span>
+                <span class="font-extrabold text-slate-900">{{ totalPages }}</span>
+              </div>
+
+              <nav class="rep-pagination flex flex-wrap items-center gap-2">
+                <a class="border px-4 py-2 transition {{ currentPage <= 1 ? 'pointer-events-none rounded-2xl border-slate-200 bg-white opacity-40' : 'rounded-2xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50' }}"
+                   href="{{ path(routeName, {page: currentPage - 1, q: q}) }}">
+                  ← {% trans %}Précédent{% endtrans %}
+                </a>
+
+                {% if start > 1 %}
+                  <a class="rounded-2xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50"
+                     href="{{ path(routeName, {page: 1, q: q}) }}">1</a>
+                  {% if start > 2 %}
+                    <span class="px-2 text-slate-400">…</span>
+                  {% endif %}
+                {% endif %}
+
+                {% for p in start..end %}
+                  <a class="border px-4 py-2 transition {{ p == currentPage ? 'rounded-2xl border-slate-900 bg-slate-900 text-white shadow-[0_10px_25px_rgba(15,23,42,.18)]' : 'rounded-2xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50' }}"
+                     href="{{ path(routeName, {page: p, q: q}) }}">{{ p }}</a>
+                {% endfor %}
+
+                {% if end < totalPages %}
+                  {% if end < totalPages - 1 %}
+                    <span class="px-2 text-slate-400">…</span>
+                  {% endif %}
+                  <a class="rounded-2xl border border-slate-200 bg-white px-4 py-2 hover:bg-slate-50"
+                     href="{{ path(routeName, {page: totalPages, q: q}) }}">{{ totalPages }}</a>
+                {% endif %}
+
+                <a class="border px-4 py-2 transition {{ currentPage >= totalPages ? 'pointer-events-none rounded-2xl border-slate-200 bg-white opacity-40' : 'rounded-2xl border-slate-200 bg-white text-slate-900 hover:bg-slate-50' }}"
+                   href="{{ path(routeName, {page: currentPage + 1, q: q}) }}">
+                  {% trans %}Suivant{% endtrans %} →
+                </a>
+              </nav>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

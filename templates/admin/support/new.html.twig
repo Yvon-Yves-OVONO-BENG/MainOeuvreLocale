@@ -1,0 +1,180 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Nouveau ticket{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/support/_vip_ui.html.twig' %}
+
+  <div class="vip-shell" data-admin-support-page="new">
+    <div class="vip-container vip-grid">
+
+      <section class="vip-card vip-page-head">
+        <div class="vip-card-inner">
+          <div class="vip-page-head-top">
+            <div class="vip-page-head-main">
+              <div class="vip-page-kicker">{% trans %}Support • Création{% endtrans %}</div>
+              <h1 class="vip-page-head-title">{% trans %}Créer un ticket support{% endtrans %}</h1>
+              <p class="vip-page-head-text">
+                {% trans %}Enregistre une demande client, un incident technique ou une escalade interne dans un formulaire structuré, moderne et premium.{% endtrans %}
+              </p>
+            </div>
+          </div>
+
+          <div class="vip-page-head-actions">
+            {% include 'admin/support/_quick_actions.html.twig' %}
+          </div>
+        </div>
+      </section>
+
+      {% for label, messages in app.flashes %}
+        {% for message in messages %}
+          <div class="vip-alert vip-alert-{{ label }}">
+            <strong>{{ label|capitalize }}</strong>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endfor %}
+
+      <section class="vip-grid vip-grid-main">
+        <article class="vip-card">
+          <div class="vip-card-inner">
+            <h2 class="vip-section-title">{% trans %}Formulaire ticket{% endtrans %}</h2>
+            <p class="vip-section-subtitle">{% trans %}Version branchée sur ton `SupportTicketType`.{% endtrans %}</p>
+
+            <div class="vip-separator"></div>
+
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'vip-form'}}) }}
+
+              <div class="vip-form-grid">
+                <div>
+                  <label class="vip-label">{% trans %}Sujet{% endtrans %}</label>
+                  {{ form_widget(form.subject, {
+                    attr: {
+                      class: 'vip-input',
+                      placeholder: 'Ex: Paiement validé mais annonce non visible'|trans,
+                      'data-ticket-subject': '1'
+                    }
+                  }) }}
+                  {{ form_errors(form.subject) }}
+                </div>
+
+                <div>
+                  <label class="vip-label">{% trans %}Nom du client{% endtrans %}</label>
+                  {{ form_widget(form.customerName, {
+                    attr: {
+                      class: 'vip-input',
+                      placeholder: 'Ex: Atlas RH'|trans
+                    }
+                  }) }}
+                  {{ form_errors(form.customerName) }}
+                </div>
+
+                <div>
+                  <label class="vip-label">{% trans %}Email du client{% endtrans %}</label>
+                  {{ form_widget(form.customerEmail, {
+                    attr: {
+                      class: 'vip-input',
+                      placeholder: 'client@exemple.com'
+                    }
+                  }) }}
+                  {{ form_errors(form.customerEmail) }}
+                </div>
+
+                <div>
+                  <label class="vip-label">{% trans %}Canal{% endtrans %}</label>
+                  {{ form_widget(form.channel, {
+                    attr: { class: 'vip-select' }
+                  }) }}
+                  {{ form_errors(form.channel) }}
+                </div>
+
+                <div>
+                  <label class="vip-label">{% trans %}Priorité{% endtrans %}</label>
+                  {{ form_widget(form.priority, {
+                    attr: { class: 'vip-select' }
+                  }) }}
+                  {{ form_errors(form.priority) }}
+                </div>
+
+                <div>
+                  <label class="vip-label">{% trans %}Statut{% endtrans %}</label>
+                  {{ form_widget(form.status, {
+                    attr: { class: 'vip-select' }
+                  }) }}
+                  {{ form_errors(form.status) }}
+                </div>
+
+                <div style="grid-column:1 / -1;">
+                  <label class="vip-label">{% trans %}Assigné à{% endtrans %}</label>
+                  {{ form_widget(form.ownerName, {
+                    attr: {
+                      class: 'vip-input',
+                      placeholder: 'Ex: Team Support / Kevin / Clarisse'|trans
+                    }
+                  }) }}
+                  {{ form_errors(form.ownerName) }}
+                </div>
+              </div>
+
+              <div style="margin-top:14px;">
+                <label class="vip-label">{% trans %}Description{% endtrans %}</label>
+                {{ form_widget(form.message, {
+                  attr: {
+                    class: 'vip-textarea',
+                    rows: 10,
+                    placeholder: 'Décris le problème, le contexte, le provider, l’impact métier, le compte concerné, l’heure approximative, l’action attendue et les preuves éventuelles.'|trans,
+                    'data-ticket-body': '1'
+                  }
+                }) }}
+                {{ form_errors(form.message) }}
+
+                <div class="vip-help" style="margin-top:8px;">
+                  <span data-ticket-count>0</span> {% trans %}caractères{% endtrans %}
+                </div>
+              </div>
+
+              <div class="vip-actions">
+                <button type="submit" class="vip-btn vip-btn-primary">{% trans %}Enregistrer le ticket{% endtrans %}</button>
+                <a href="{{ path('admin_support_index') }}" class="vip-btn vip-btn-soft">{% trans %}Retour boîte support{% endtrans %}</a>
+              </div>
+
+            {{ form_end(form) }}
+          </div>
+        </article>
+
+        <aside class="vip-card">
+          <div class="vip-card-inner">
+            <h2 class="vip-section-title">{% trans %}Prévisualisation{% endtrans %}</h2>
+            <p class="vip-section-subtitle">{% trans %}Le contenu du ticket se met à jour pendant la saisie.{% endtrans %}</p>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-preview">
+              <div class="vip-preview-label">{% trans %}Sujet{% endtrans %}</div>
+              <div data-ticket-preview-subject class="vip-preview-title">{% trans %}Sans titre{% endtrans %}</div>
+
+              <div style="height:16px"></div>
+
+              <div class="vip-preview-label">{% trans %}Résumé{% endtrans %}</div>
+              <div data-ticket-preview-body class="vip-preview-body">
+                {% trans %}Le détail du ticket apparaîtra ici pendant la saisie.{% endtrans %}
+              </div>
+            </div>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-mini-card">
+              <div style="font-weight:900;">{% trans %}Bonnes pratiques{% endtrans %}</div>
+              <div class="vip-help" style="margin-top:8px;">
+                {% trans %}Mentionne le provider, l’impact métier, le compte concerné, l’heure approximative, l’action attendue et les preuves éventuelles.{% endtrans %}
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-support.js') }}"></script>
+{% endblock %}

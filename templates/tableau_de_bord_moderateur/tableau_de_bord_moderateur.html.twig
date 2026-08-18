@@ -1,0 +1,771 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "tableau_de_bord_moderateur/_vip_ui.html.twig" %}
+
+{# =========================
+   ✅ Safe defaults (évite erreurs si variables non passées)
+   ========================= #}
+{% set kpi = kpi ?? {} %}
+{% set reports = reports ?? [] %}
+{% set lastDecisions = lastDecisions ?? [] %}
+{% set hasLogs = hasLogs ?? false %}
+{% set sanctions = sanctions ?? [] %}
+
+{% set analytics = analytics ?? {} %}
+{% set signups7d = analytics.signups7d ?? {'labels': [], 'values': []} %}
+{% set gender7d  = analytics.gender7d  ?? {'F': 0, 'M': 0, 'PM': 0} %}
+{% set roles7d   = analytics.roles7d   ?? {'ROLE_TALENT': 0, 'ROLE_PARTICULIER': 0, 'ROLE_COMPANY': 0} %}
+{% set lastUsers = analytics.lastUsers ?? [] %}
+
+
+<div class="mod-page mt-3">
+
+  {# TOPBAR #}
+  <div class="mod-topbar mt-3">
+    <div class="mod-topbar-inner">
+      <div class="mod-brand">
+        <div class="mod-mark">🧑‍⚖️</div>
+        <div class="mod-title">
+          <h1>{% trans %}Tableau de bord Modérateur{% endtrans %}</h1>
+          <div class="sub">{% trans %}Qualité, sécurité & confiance — modération intelligente (sans suppression définitive){% endtrans %}</div>
+        </div>
+      </div>
+
+      <div class="mod-actions">
+        {# Messages avec badge #}
+        {% set unread = kpi.unreadMessages ?? 0 %}
+        <a class="mod-btn mod-msg" type="button" onclick="MOLChatOpen()" title="{{ 'Messages'|trans }}">
+          💬 {% trans %}Messages{% endtrans %}
+          {% if unread > 0 %}
+            <span class="mod-badge">{{ unread > 99 ? '99+' : unread }}</span>
+          {% endif %}
+        </a>
+
+        <a class="mod-btn mod-btn-warn" href="{{ path('moderateur_reports_index') }}">🚨 {% trans %}Signalements{% endtrans %}</a>
+        <a class="mod-btn mod-btn-primary" href="{{ path('moderateur_verifications_index') }}">✅ {% trans %}Vérifications{% endtrans %}</a>
+        <a class="mod-btn mod-btn-annonce" href="{{ path('admin_annonces_moderation') }}" data-turbo="false">📣 {% trans %}Annonces{% endtrans %}</a>
+        <a class="mod-btn" href="{{ path('moderateur_analytics_index') }}">📊 {% trans %}Analytics{% endtrans %}</a>
+        <a class="mod-btn mod-btn-green" href="{{ path('moderateur_rules_index') }}">🛡️ {% trans %}Règles{% endtrans %}</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mod-wrap">
+
+    {# HERO #}
+    <div class="mod-card">
+      <div class="hd">
+        <div>
+          <div class="h2">{% trans %}Vue d’ensemble{% endtrans %}</div>
+          <div class="hint">{% trans %}Tout ce qu’un modérateur doit voir en 30 secondes : files, risques, activités, actions rapides.{% endtrans %}</div>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="chip info">🧭 {% trans %}Session:{% endtrans %} {{ kpi.shift ?? ('Live'|trans) }}</span>
+          <span class="chip">📌 {% trans %}Priorité:{% endtrans %} {{ kpi.priority ?? ('Normal'|trans) }}</span>
+          <span class="chip good">✅ SLA: {{ kpi.sla ?? 'OK' }}</span>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="t">{% trans %}Signalements ouverts{% endtrans %}</div>
+            <div class="v">{{ kpi.pendingReports ?? 0 }}</div>
+            <div class="a"><a href="{{ path('moderateur_reports_index') }}">{% trans %}Traiter maintenant{% endtrans %}</a></div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Profils à vérifier{% endtrans %}</div>
+            <div class="v">{{ kpi.profilesToVerify ?? 0 }}</div>
+            <div class="a"><a href="{{ path('moderateur_verifications_index') }}">{% trans %}Examiner{% endtrans %}</a></div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Contenus sensibles{% endtrans %}</div>
+            <div class="v">{{ kpi.suspectContent ?? (kpi.suspectJobs ?? 0) }}</div>
+            <div class="a"><a href="{{ path('moderateur_content_suspects') }}">{% trans %}Voir la file{% endtrans %}</a></div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Comptes à surveiller{% endtrans %}</div>
+            <div class="v">{{ kpi.watchlist ?? 0 }}</div>
+            <div class="a"><a href="{{ path('moderateur_watchlist_index') }}">{% trans %}Watchlist{% endtrans %}</a></div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Nouveaux comptes (24h){% endtrans %}</div>
+            <div class="v">{{ kpi.newUsers24h ?? 0 }}</div>
+            <div class="a"><a href="{{ path('moderateur_users_index', {'filter': 'new'}) }}">{% trans %}Voir la liste{% endtrans %}</a></div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Temps moyen de traitement{% endtrans %}</div>
+            <div class="v">{{ kpi.avgHandleHours ?? 0 }}h</div>
+            <div class="a"><a href="{{ path('moderateur_analytics_user') }}">{% trans %}Détails SLA{% endtrans %}</a></div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Taux d’appel / contestation{% endtrans %}</div>
+            <div class="v">{{ kpi.appealRate ?? 0 }}%</div>
+            <div class="a"><a href="{{ path('moderateur_appeals_index') }}">{% trans %}Voir les appels{% endtrans %}</a></div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Actions modération (7j){% endtrans %}</div>
+            <div class="v">{{ kpi.actions7d ?? 0 }}</div>
+            <div class="a"><a href="{{ path('moderateur_logs_index') }}">{% trans %}Journaux d’audit{% endtrans %}</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ft">
+        <a class="mod-btn" href="{{ path('admin_jobs_index') }}" data-turbo="false">💼 {% trans %}Les Offres{% endtrans %}</a>
+        <a class="mod-btn" href="{{ path('admin_jobs_moderation') }}" data-turbo="false">💼 {% trans %}Modération Offres{% endtrans %}</a>
+        <a class="mod-btn mod-btn-annonce" href="{{ path('admin_annonces_moderation') }}" data-turbo="false">📣 {% trans %}Modération Annonces{% endtrans %}</a>
+        <a class="mod-btn" href="{{ path('moderateur_users_index') }}" data-turbo="false">👥 {% trans %}Tous les utilisateurs{% endtrans %}</a>
+        <a class="mod-btn" href="{{ path('moderateur_companies_index') }}" data-turbo="false">🏢 {% trans %}Compagnies{% endtrans %}</a>
+        <a class="mod-btn" href="{{ path('moderateur_particuliers_index') }}" data-turbo="false">🧑‍💼 {% trans %}Particuliers{% endtrans %}</a>
+        <a class="mod-btn" href="{{ path('moderateur_talents_index') }}" data-turbo="false">🧑‍💼 {% trans %}Talents{% endtrans %}</a>
+        <a class="mod-btn mod-btn-primary" href="{{ path('moderateur_reports_index') }}" data-turbo="false">🚨 {% trans %}Centre de signalements{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div class="mod-card mt-3">
+      <div class="hd">
+        <div>
+          <div class="fw-bold">📊 {% trans %}Statistiques & graphiques (aperçu){% endtrans %}</div>
+          <div class="hint">{% trans %}Tendances des 7 derniers jours : inscriptions, répartition, derniers comptes.{% endtrans %}</div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="mod-btn" href="{{ path('moderateur_analytics_index') }}">📈 {% trans %}Page analytics{% endtrans %}</a>
+          <button class="mod-btn mod-btn-primary" type="button" data-more-toggle="#modMoreCharts">
+            {% trans %}Tout voir{% endtrans %}
+          </button>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="kpis">
+          <div class="kpi">
+            <div class="t">{% trans %}Nouveaux inscrits (7j){% endtrans %}</div>
+            <div class="v">{{ analytics.totalNew7d ?? (analytics.total7d ?? 0) }}</div>
+            <div class="a">
+              <a href="{{ path('moderateur_users_index', { range: '7d' }) }}">{% trans %}Ouvrir la liste{% endtrans %}</a>
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Talents (7j){% endtrans %}</div>
+            <div class="v">{{ roles7d.ROLE_TALENT ?? 0 }}</div>
+            <div class="a">
+              <a href="{{ path('moderateur_talents_index', { range: '7d' }) }}">{% trans %}Voir les talents{% endtrans %}</a>
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Particuliers (7j){% endtrans %}</div>
+            <div class="v">{{ roles7d.ROLE_PARTICULIER ?? 0 }}</div>
+            <div class="a">
+              <a href="{{ path('moderateur_particuliers_index', { range: '7d' }) }}">{% trans %}Voir les particuliers{% endtrans %}</a>
+            </div>
+          </div>
+
+          <div class="kpi">
+            <div class="t">{% trans %}Compagnies (7j){% endtrans %}</div>
+            <div class="v">{{ roles7d.ROLE_COMPANY ?? 0 }}</div>
+            <div class="a">
+              <a href="{{ path('moderateur_companies_index', { range: '7d' }) }}">{% trans %}Voir les compagnies{% endtrans %}</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="ana-grid">
+          <div class="ana-col-7">
+            <div class="chart-box">
+              <div class="chart-head">
+                <div>
+                  <div class="chart-title">📈 {% trans %}Inscriptions — 7 derniers jours{% endtrans %}</div>
+                  <div class="chart-sub">{% trans %}Évolution jour par jour (tendance).{% endtrans %}</div>
+                </div>
+                <span class="chip info">{% trans %}Total:{% endtrans %} {{ analytics.total7d ?? 0 }}</span>
+              </div>
+              <canvas id="chartSignups7d" class="chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="ana-col-5">
+            <div class="chart-box">
+              <div class="chart-head">
+                <div>
+                  <div class="chart-title">👥 {% trans %}Inscrits (7 jours) — par sexe{% endtrans %}</div>
+                  <div class="chart-sub">{% trans %}Sans sexe ⇒{% endtrans %} <b>PM</b> ({% trans %}personne morale{% endtrans %}).</div>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                  <span class="chip info">F: {{ gender7d.F ?? 0 }}</span>
+                  <span class="chip good">M: {{ gender7d.M ?? 0 }}</span>
+                  <span class="chip warn">PM: {{ gender7d.PM ?? 0 }}</span>
+                </div>
+              </div>
+              <canvas id="chartGender7d" class="chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="ana-col-6">
+            <div class="chart-box">
+              <div class="chart-head">
+                <div>
+                  <div class="chart-title">🧩 {% trans %}Inscriptions (7 jours) — par rôle{% endtrans %}</div>
+                  <div class="chart-sub">{% trans %}Talent / Particulier / Company.{% endtrans %}</div>
+                </div>
+              </div>
+              <canvas id="chartRoles7d" class="chart-canvas"></canvas>
+            </div>
+          </div>
+
+          <div class="ana-col-6">
+            <div class="chart-box">
+              <div class="chart-head">
+                <div>
+                  <div class="chart-title">🆕 {% trans %}4 derniers utilisateurs — par rôle{% endtrans %}</div>
+                  <div class="chart-sub">{% trans %}Dernières inscriptions (triées par date).{% endtrans %}</div>
+                </div>
+                <a class="mod-btn" href="{{ path('moderateur_users_index', { range: '7d' }) }}">{% trans %}Voir tous{% endtrans %}</a>
+              </div>
+
+              <div class="table-responsive">
+                <table class="mod-table">
+                  <thead>
+                    <tr>
+                      <th>{% trans %}Utilisateur{% endtrans %}</th>
+                      <th>{% trans %}Rôle{% endtrans %}</th>
+                      <th>{% trans %}Inscrit le{% endtrans %}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for u in lastUsers %}
+                      {% set rolesArr = u.roles ?? [] %}
+                      {% set role = u.role ?? '' %}
+                      {% if rolesArr is iterable and rolesArr|length %}
+                        {% if 'ROLE_TALENT' in rolesArr %}{% set role = 'ROLE_TALENT' %}
+                        {% elseif 'ROLE_COMPANY' in rolesArr %}{% set role = 'ROLE_COMPANY' %}
+                        {% elseif 'ROLE_PARTICULIER' in rolesArr %}{% set role = 'ROLE_PARTICULIER' %}
+                        {% endif %}
+                      {% endif %}
+
+                      <tr>
+                        <td class="muted">
+                          {{ u.displayName ?? u.fullName ?? u.email ?? ('#' ~ (u.id ?? '—')) }}
+                        </td>
+                        <td>
+                          {% if role == 'ROLE_TALENT' %}
+                            <span class="role-pill role-talent">🧑‍💼 {% trans %}Talent{% endtrans %}</span>
+                          {% elseif role == 'ROLE_COMPANY' %}
+                            <span class="role-pill role-comp">🏢 Company</span>
+                          {% else %}
+                            <span class="role-pill role-part">👤 {% trans %}Particulier{% endtrans %}</span>
+                          {% endif %}
+                        </td>
+                        <td class="muted">
+                          {{ u.createdAt is defined and u.createdAt ? u.createdAt : '—' }}
+                          
+                        </td>
+                      </tr>
+                    {% else %}
+                      <tr>
+                        <td colspan="3" class="text-center muted" style="padding:14px;">{% trans %}Aucun utilisateur{% endtrans %}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="hint mt-2">
+                {% trans %}Astuce : clique “Tout voir” pour afficher plus de graphiques (activité, spam, vérifications…).{% endtrans %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="modMoreCharts" class="mt-3">
+          <div class="ana-grid">
+            <div class="ana-col-12">
+              <div class="mod-card">
+                <div class="hd">
+                  <div>
+                    <div class="fw-bold">🧠 {% trans %}Analytics avancées (plus de graphiques){% endtrans %}</div>
+                    <div class="hint">{% trans %}Espace extensible : activité, pics, spam, vérifications, conversions, signalements…{% endtrans %}</div>
+                  </div>
+                  <a class="mod-btn" href="{{ path('moderateur_analytics_index') }}">{% trans %}Ouvrir la page complète{% endtrans %}</a>
+                </div>
+
+                <div class="bd">
+                  <div class="ana-grid">
+                    <div class="ana-col-6">
+                      <div class="chart-box">
+                        <div class="chart-head">
+                          <div>
+                            <div class="chart-title">🚨 {% trans %}Signalements — 14 jours{% endtrans %}</div>
+                            <div class="chart-sub">{% trans %}Volume & tendance (placeholder).{% endtrans %}</div>
+                          </div>
+                          <span class="chip warn">Pro</span>
+                        </div>
+                        <div class="muted" style="font-size:12px;">
+                          {% trans %}Place ici un graphique “reports14d” (line/bar) quand tu passes la donnée.{% endtrans %}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="ana-col-6">
+                      <div class="chart-box">
+                        <div class="chart-head">
+                          <div>
+                            <div class="chart-title">🛡️ {% trans %}Vérifications — entonnoir{% endtrans %}</div>
+                            <div class="chart-sub">{% trans %}Demandées → validées → refusées (placeholder).{% endtrans %}</div>
+                          </div>
+                          <span class="chip good">SLA</span>
+                        </div>
+                        <div class="muted" style="font-size:12px;">
+                          {% trans %}Place ici un graphique “verificationFunnel”.{% endtrans %}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="ana-col-12">
+                      <div class="chart-box">
+                        <div class="chart-head">
+                          <div>
+                            <div class="chart-title">💬 {% trans %}Messages / Spam / Activité{% endtrans %}</div>
+                            <div class="chart-sub">{% trans %}Détection des pics + anti-abus (placeholder).{% endtrans %}</div>
+                          </div>
+                          <span class="chip info">Monitoring</span>
+                        </div>
+                        <div class="muted" style="font-size:12px;">
+                          {% trans %}Place ici 1 ou 2 graphiques supplémentaires (messages7d, spamRate7d, activeUsers7d).{% endtrans %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="ft">
+                  <a class="mod-btn" href="{{ path('moderateur_analytics_index') }}">📊 {% trans %}Analytics{% endtrans %}</a>
+                  <a class="mod-btn mod-btn-warn" href="/moderateur/risk">🛡️ Risk</a>
+                  <button class="mod-btn" type="button" data-more-toggle="#modMoreCharts">{% trans %}Réduire{% endtrans %}</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="mod-grid">
+
+      <div class="d-grid gap-3">
+        <div class="mod-card">
+          <div class="hd">
+            <div>
+              <div class="fw-bold">🚨 {% trans %}File de modération — signalements récents{% endtrans %}</div>
+              <div class="hint">{% trans %}Ouvrir, classer, recommander une action (masquer, avertir, suspendre).{% endtrans %}</div>
+            </div>
+            <a class="mod-btn mod-btn-warn" href="{{ path('moderateur_reports_index') }}">{% trans %}Voir tout{% endtrans %}</a>
+          </div>
+
+          <div class="bd p-0">
+            <div class="table-responsive">
+              <table class="mod-table">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>{% trans %}Cible{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Date{% endtrans %}</th>
+                  <th class="text-end">{% trans %}Action{% endtrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for r in reports %}
+                  {% set st = r.status ?? '' %}
+                  <tr>
+                    <td>#{{ r.id }}</td>
+                    <td class="muted">
+                      {% if r.targetUser is defined and r.targetUser %}
+                        👤 {% trans %}Utilisateur{% endtrans %}
+                      {% else %}
+                        📦 {% trans %}Autre{% endtrans %}
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if st == 'open' or st == 'OPEN' %}
+                        <span class="chip warn">{% trans %}OUVERT{% endtrans %}</span>
+                      {% elseif st == 'resolved' or st == 'RESOLVED' %}
+                        <span class="chip good">{% trans %}RÉSOLU{% endtrans %}</span>
+                      {% else %}
+                        <span class="chip">{{ st ?: '—' }}</span>
+                      {% endif %}
+                    </td>
+                    <td class="muted">{{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '-' }}</td>
+                    <td class="text-end">
+                      <a class="mod-btn mod-btn-primary" style="padding:8px 10px" href="{{ path('moderateur_reports_show', {id: r.id}) }}">{% trans %}Ouvrir{% endtrans %}</a>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="5" class="text-center muted" style="padding: 18px;">{% trans %}Aucun signalement{% endtrans %}</td>
+                  </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="ft">
+            <a class="mod-btn" href="{{ path('moderateur_reports_index') }}">{% trans %}Historique{% endtrans %}</a>
+            <a class="mod-btn mod-btn-warn" href="{{ path('moderateur_reports_index', {status: 'open'}) }}">{% trans %}Traiter{% endtrans %}</a>
+          </div>
+        </div>
+
+        <div class="mod-card">
+          <div class="hd">
+            <div>
+              <div class="fw-bold">✅ {% trans %}Dernières décisions{% endtrans %}</div>
+              <div class="hint">{% trans %}Audit interne : ce qui a été examiné / résolu / rejeté.{% endtrans %}</div>
+            </div>
+            <a class="mod-btn" href="{{ path('moderateur_reports_index', {status: 'closed'}) }}">{% trans %}Voir{% endtrans %}</a>
+          </div>
+
+          <div class="bd p-0">
+            <div class="table-responsive">
+              <table class="mod-table">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>{% trans %}Décision{% endtrans %}</th>
+                  <th>{% trans %}Traité le{% endtrans %}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for r in lastDecisions %}
+                  <tr>
+                    <td>#{{ r.id }}</td>
+                    <td class="muted">{{ r.status ?? '—' }}</td>
+                    <td class="muted">{{ r.handledAt ? r.handledAt|date('d/m/Y H:i') : '-' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="3" class="text-center muted" style="padding: 18px;">{% trans %}Aucune décision{% endtrans %}</td></tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-grid gap-3">
+        <div class="mod-card">
+          <div class="hd">
+            <div>
+              <div class="fw-bold">⚡ {% trans %}Raccourcis Modération{% endtrans %}</div>
+              <div class="hint">{% trans %}Accès direct : utilisateurs, talents, compagnies, contenus, sanctions.{% endtrans %}</div>
+            </div>
+          </div>
+          <div class="bd">
+            <div class="quick-grid">
+              <a class="tile" href="{{ path('moderateur_talents_index') }}">
+                <span class="ic">🧑‍💼</span>
+                <span class="tx"><div class="a">{% trans %}Talents{% endtrans %}</div><div class="b">{% trans %}Lister / filtrer{% endtrans %}</div></span>
+              </a>
+              <a class="tile" href="{{ path('moderateur_particuliers_index') }}">
+                <span class="ic">👤</span>
+                <span class="tx"><div class="a">{% trans %}Particuliers{% endtrans %}</div><div class="b">{% trans %}Contrôle comptes{% endtrans %}</div></span>
+              </a>
+              <a class="tile" href="{{ path('moderateur_companies_index') }}">
+                <span class="ic">🏢</span>
+                <span class="tx"><div class="a">{% trans %}Compagnies{% endtrans %}</div><div class="b">{% trans %}Recruteurs{% endtrans %}</div></span>
+              </a>
+              <a class="tile" href="{{ path('moderateur_verifications_index') }}">
+                <span class="ic">✅</span>
+                <span class="tx"><div class="a">{% trans %}Vérifications{% endtrans %}</div><div class="b">{% trans %}Profils & pièces{% endtrans %}</div></span>
+              </a>
+              <a class="tile" href="{{ path('moderateur_content_suspects') }}">
+                <span class="ic">🧾</span>
+                <span class="tx"><div class="a">{% trans %}Contenus{% endtrans %}</div><div class="b">{% trans %}Jobs / posts{% endtrans %}</div></span>
+              </a> 
+              <a class="tile" href="{{ path('moderateur_sanctions_index') }}">
+                <span class="ic">🛑</span>
+                <span class="tx"><div class="a">{% trans %}Sanctions{% endtrans %}</div><div class="b">{% trans %}Historique{% endtrans %}</div></span>
+              </a> 
+              <a class="tile" href="{{ path('moderateur_appeals_index') }}">
+                <span class="ic">📨</span>
+                <span class="tx"><div class="a">{% trans %}Appels{% endtrans %}</div><div class="b">{% trans %}Contestations{% endtrans %}</div></span>
+              </a>
+              <a class="tile" href="{{ path('moderateur_analytics_index') }}">
+                <span class="ic">📊</span>
+                <span class="tx"><div class="a">{% trans %}Analytics{% endtrans %}</div><div class="b">{% trans %}Qualité & risques{% endtrans %}</div></span>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="mod-card">
+          <div class="hd">
+            <div>
+              <div class="fw-bold">🛡️ {% trans %}Santé & risques{% endtrans %}</div>
+              <div class="hint">{% trans %}Indicateurs de fraude, spam, abus, comportements.{% endtrans %}</div>
+            </div>
+            <a class="mod-btn" href="{{ path('moderateur_risk_index') }}">{% trans %}Voir{% endtrans %}</a>
+          </div>
+          <div class="bd">
+            <ul class="list">
+              <li>
+                <div class="h">
+                  <div class="t">{% trans %}Spam / messages{% endtrans %}</div>
+                  <span class="chip warn">{{ kpi.spamRate ?? 0 }}%</span>
+                </div>
+                <div class="p">{% trans %}Surveillez les pics de nouveaux comptes + envois massifs.{% endtrans %}</div>
+              </li>
+              <li>
+                <div class="h">
+                  <div class="t">{% trans %}Usurpation / faux profils{% endtrans %}</div>
+                  <span class="chip">{{ kpi.fakeProfiles ?? 0 }}</span>
+                </div>
+                <div class="p">{% trans %}Profils incomplets, photos dupliquées, infos incohérentes.{% endtrans %}</div>
+              </li>
+              <li>
+                <div class="h">
+                  <div class="t">{% trans %}Offres douteuses{% endtrans %}</div>
+                  <span class="chip warn">{{ kpi.suspectJobs ?? 0 }}</span>
+                </div>
+                <div class="p">{% trans %}Annonces répétitives, salaires irréalistes, liens externes.{% endtrans %}</div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mod-card">
+          <div class="hd">
+            <div>
+              <div class="fw-bold">🧾 {% trans %}Historique sanctions{% endtrans %}</div>
+              <div class="hint">{% trans %}Traçabilité des décisions et actions modérateur.{% endtrans %}</div>
+            </div>
+            <a class="mod-btn" href="{{ path('moderateur_sanctions_index') }}">{% trans %}Voir{% endtrans %}</a>
+          </div>
+          <div class="bd">
+            {% if hasLogs %}
+              <ul class="list">
+                {% for l in sanctions %}
+                  <li>
+                    <div class="h">
+                      <div class="t">{{ l.action ?? ('Action'|trans) }}</div>
+                      <span class="muted" style="font-size:12px;">{{ l.createdAt ? l.createdAt|date('d/m H:i') : '-' }}</span>
+                    </div>
+                    <div class="p muted">
+                      {{ l.details ?? '—' }}
+                    </div>
+                  </li>
+                {% else %}
+                  <li class="muted">{% trans %}Aucune sanction récente{% endtrans %}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <div class="muted">
+                {% trans %}Pas encore d’entité{% endtrans %} <code>UserLogs</code>. {% trans %}(Optionnel) Crée-la pour tracer toutes les actions.{% endtrans %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-card mt-3">
+      <div class="hd">
+        <div>
+          <div class="fw-bold">🧠 {% trans %}Centre de commandes (Modération){% endtrans %}</div>
+          <div class="hint">{% trans %}Outils avancés : recherche globale, exports, règles, modèles de réponse, vérifications.{% endtrans %}</div>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="row g-3">
+
+          <div class="col-12 col-lg-4">
+            <div class="mod-card" style="border-radius: 18px;">
+              <div class="hd">
+                <div class="fw-bold">🔎 {% trans %}Recherche globale{% endtrans %}</div>
+                <div class="hint">{% trans %}Utilisateur / Talent / Compagnie / Signalement / Message{% endtrans %}</div>
+              </div>
+              <div class="bd">
+                <form method="get" action="{{ path('moderateur_search') }}">
+                  <input name="q" class="form-control"
+                        style="background: rgba(255,255,255,.92); border:1px solid rgba(15,23,42,.14); color: rgba(15,23,42,.92);"
+                        placeholder="{{ 'Rechercher (email, téléphone, ID, mot-clé)…'|trans }}">
+                  <div class="d-flex gap-2 flex-wrap mt-2">
+                    <button class="mod-btn mod-btn-primary" type="submit">{% trans %}Rechercher{% endtrans %}</button>
+                    <a class="mod-btn" href="{{ path('moderateur_search_advanced') }}">{% trans %}Recherche avancée{% endtrans %}</a>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="mod-card" style="border-radius: 18px;">
+              <div class="hd">
+                <div class="fw-bold">📤 {% trans %}Exports & preuves{% endtrans %}</div>
+                <div class="hint">{% trans %}Télécharger des rapports (audit){% endtrans %}</div>
+              </div>
+              <div class="bd">
+                <div class="d-flex flex-wrap gap-2">
+                  <a class="mod-btn" href="{{ path('moderateur_export_reports') }}">📄 {% trans %}Export des signalements{% endtrans %}</a>
+                  <a class="mod-btn" href="{{ path('moderateur_export_users') }}">👤 {% trans %}Export des utilisateurs{% endtrans %}</a>
+                  <a class="mod-btn" href="{{ path('moderateur_export_companies') }}">🏢 {% trans %}Export des compagnies{% endtrans %}</a>
+                </div>
+                <div class="hint mt-2">{% trans %}Conservez une trace avant toute décision sensible.{% endtrans %}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-4">
+            <div class="mod-card" style="border-radius: 18px;">
+              <div class="hd">
+                <div class="fw-bold">🗣️ {% trans %}Modèles de réponses{% endtrans %}</div>
+                <div class="hint">{% trans %}Messages standards pour modération{% endtrans %}</div>
+              </div>
+              <div class="bd">
+                <div class="d-flex flex-wrap gap-2">
+                  <a class="mod-btn" href="{{ path('moderateur_template_show', { slug: 'warning' }) }}">⚠️ {% trans %}Avertissement{% endtrans %}</a>
+                  <a class="mod-btn" href="{{ path('moderateur_template_show', { slug: 'review' }) }}">🔍 {% trans %}Demande d’informations{% endtrans %}</a>
+                  <a class="mod-btn" href="{{ path('moderateur_template_show', { slug: 'closure' }) }}">✅ {% trans %}Clôture{% endtrans %}</a>
+                </div>
+                <div class="hint mt-2">{% trans %}Accélère la modération, garde le ton cohérent.{% endtrans %}</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="ft">
+        <a class="mod-btn" href="{{ path('moderateur_settings') }}">⚙️ {% trans %}Paramètres modération{% endtrans %}</a>
+        <a class="mod-btn mod-btn-green" href="{{ path('moderateur_rules') }}">🛡️ {% trans %}Règles & politiques{% endtrans %}</a>
+        <button class="mod-btn mod-btn-primary" type="button" onclick="MOLChatOpen()">💬 {% trans %}Ouvrir messages{% endtrans %}</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+  {# ===== Charts (CDN) ===== #}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+    (() => {
+      // Toggle "Tout voir"
+      document.querySelectorAll('[data-more-toggle]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = btn.getAttribute('data-more-toggle');
+          const el = document.querySelector(target);
+          if (!el) return;
+          el.classList.toggle('is-open');
+          if (el.classList.contains('is-open')) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
+      });
+
+      // Data Twig -> JS
+      const signups7d = {{ signups7d|json_encode|raw }};
+      const gender7d  = {{ gender7d|json_encode|raw }};
+      const roles7d   = {{ roles7d|json_encode|raw }};
+
+      if (!window.Chart) return;
+
+      // 1) Line: signups 7d
+      const c1 = document.getElementById('chartSignups7d');
+      if (c1) {
+        new Chart(c1, {
+          type: 'line',
+          data: {
+            labels: (signups7d.labels || []),
+            datasets: [{
+              label: 'Inscriptions',
+              data: (signups7d.values || []),
+              tension: 0.35,
+              fill: true,
+              borderWidth: 2,
+              pointRadius: 3
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false } },
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      // 2) Doughnut: gender 7d (F/M/PM)
+      const c2 = document.getElementById('chartGender7d');
+      if (c2) {
+        const F  = Number(gender7d.F || 0);
+        const M  = Number(gender7d.M || 0);
+        const PM = Number(gender7d.PM || 0);
+
+        new Chart(c2, {
+          type: 'doughnut',
+          data: {
+            labels: ['F', 'M', 'PM'],
+            datasets: [{
+              data: [F, M, PM],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'bottom' } },
+            cutout: '62%'
+          }
+        });
+      }
+
+      // 3) Bar: roles 7d
+      const c3 = document.getElementById('chartRoles7d');
+      if (c3) {
+        new Chart(c3, {
+          type: 'bar',
+          data: {
+            labels: ['Talent', 'Particulier', 'Company'],
+            datasets: [{
+              label: 'Inscriptions (7j)',
+              data: [
+                Number(roles7d.ROLE_TALENT || 0),
+                Number(roles7d.ROLE_PARTICULIER || 0),
+                Number(roles7d.ROLE_COMPANY || 0)
+              ],
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false } },
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      }
+    })();
+  </script>
+{% endblock %}

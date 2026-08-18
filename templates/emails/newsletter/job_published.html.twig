@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Nouvelle offre correspondant à votre profession</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f6fb;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f3f6fb;margin:0;padding:32px 12px;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:680px;background:#ffffff;border-radius:28px;overflow:hidden;border:1px solid rgba(15,23,42,.08);box-shadow:0 18px 48px rgba(15,23,42,.08);">
+                    <tr>
+                        <td style="padding:0;background:linear-gradient(135deg,#0f172a 0%,#1d4ed8 60%,#60a5fa 100%);">
+                            <div style="padding:34px 34px 26px 34px;">
+                                <div style="display:inline-block;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;">
+                                    Main d’Œuvre Locale
+                                </div>
+
+                                <h1 style="margin:18px 0 10px 0;font-size:28px;line-height:1.2;color:#fff;">
+                                    Une nouvelle offre correspondant à votre profession
+                                </h1>
+
+                                <p style="margin:0;color:rgba(255,255,255,.88);font-size:15px;line-height:1.7;">
+                                    Vous suivez la profession « {{ professionName }} ». Une nouvelle opportunité vient d’être validée.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:34px;">
+                            <div style="padding:24px;border-radius:22px;background:#f8fbff;border:1px solid rgba(37,99,235,.12);">
+                                <div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#2563eb;margin-bottom:10px;">
+                                    Offre {{ professionName }}
+                                </div>
+
+                                <h2 style="margin:0 0 12px 0;font-size:24px;line-height:1.35;color:#0f172a;">
+                                    {{ jobTitle }}
+                                </h2>
+
+                                {% if jobDescription is not empty %}
+                                    <p style="margin:0;color:#475569;font-size:15px;line-height:1.8;">
+                                        {{ jobDescription|striptags|slice(0, 220) }}{% if jobDescription|length > 220 %}...{% endif %}
+                                    </p>
+                                {% else %}
+                                    <p style="margin:0;color:#475569;font-size:15px;line-height:1.8;">
+                                        Une nouvelle offre a été ajoutée. Connectez-vous pour la consulter et postuler rapidement.
+                                    </p>
+                                {% endif %}
+                            </div>
+
+                            <div style="padding-top:28px;text-align:center;">
+                                <a href="{{ platformUrl }}" style="display:inline-block;padding:14px 22px;border-radius:14px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;text-decoration:none;font-weight:700;font-size:14px;">
+                                    Voir l’offre
+                                </a>
+                            </div>
+
+                            <div style="padding-top:30px;">
+                                <p style="margin:0 0 10px 0;color:#64748b;font-size:13px;line-height:1.7;text-align:center;">
+                                    Vous recevez cet email parce que vous avez activé les alertes offres pour la profession « {{ professionName }} ».
+                                </p>
+
+                                <p style="margin:0;text-align:center;">
+                                    <a href="{{ unsubscribeUrl }}" style="color:#dc2626;text-decoration:none;font-size:13px;font-weight:700;">
+                                        Se désabonner des alertes offres
+                                    </a>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:18px 24px;background:#f8fafc;border-top:1px solid rgba(15,23,42,.06);text-align:center;">
+                            <p style="margin:0;color:#94a3b8;font-size:12px;line-height:1.7;">
+                                © {{ "now"|date("Y") }} Main d’Œuvre Locale
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

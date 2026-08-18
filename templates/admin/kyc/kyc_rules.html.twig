@@ -1,0 +1,546 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Règles KYC{% endtrans %}{% endblock %}
+
+{% block body %}
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),radial-gradient(900px_circle_at_22%_88%,rgba(16,185,129,.10),transparent_55%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+        <div class="mx-auto max-w-7xl px-4 py-6 space-y-5">
+
+            <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)]">
+                <div class="bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.16),transparent_60%),radial-gradient(800px_circle_at_90%_30%,rgba(6,182,212,.12),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.72))] p-5">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                        <div class="text-sm font-semibold text-slate-500">{% trans %}Conformité • Vérification • Risque{% endtrans %}</div>
+                        <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">🧠 {% trans %}Règles KYC{% endtrans %}</h1>
+                        <p class="mt-2 max-w-3xl text-sm font-medium text-slate-600">
+                        {% trans %}Gère les règles de vérification d’identité, de conformité et de contrôle avant publication ou activation.{% endtrans %}
+                        </p>
+
+                        <div class="mt-4 flex flex-wrap gap-2">
+                        <span id="heroEnabledRules" class="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-indigo-50 px-3 py-1.5 text-[11px] font-extrabold text-indigo-700">
+                            ✅ {% trans %}Actives{% endtrans %} : {{ stats.enabled }}
+                        </span>
+
+                        <span id="heroDisabledRules" class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700">
+                            ⏸️ {% trans %}Désactivées{% endtrans %} : {{ stats.disabled }}
+                        </span>
+                        <span class="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-rose-50 px-3 py-1.5 text-[11px] font-extrabold text-rose-700">
+                            🚨 {% trans %}Critiques{% endtrans %} : {{ stats.high }}
+                        </span>
+                        <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700">
+                            🧩 {% trans %}Groupes{% endtrans %} : {{ stats.groups }}
+                        </span>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ path('tableau_de_bord') }}"
+                        class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 shadow-[0_10px_30px_rgba(2,6,23,.06)] hover:bg-slate-50">
+                        ← {% trans %}Tableau de bord{% endtrans %}
+                        </a>
+                        <button type="button"
+                                id="expandAllBtn"
+                                class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-[0_10px_30px_rgba(15,23,42,.16)] hover:opacity-95">
+                        {% trans %}Déplier tout{% endtrans %}
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+                <div class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)] backdrop-blur-xl">
+                    <div class="text-xs font-semibold text-slate-500">{% trans %}Total règles{% endtrans %}</div>
+                    <div id="kpiTotalRules" class="mt-1 text-3xl font-black tracking-tight text-slate-900">{{ stats.total }}</div>
+                </div>
+
+                <div class="rounded-3xl border border-emerald-200/70 bg-emerald-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)] backdrop-blur-xl">
+                    <div class="text-xs font-semibold text-emerald-700">{% trans %}Règles actives{% endtrans %}</div>
+                    <div id="kpiEnabledRules" class="mt-1 text-3xl font-black tracking-tight text-emerald-900">{{ stats.enabled }}</div>
+                </div>
+
+                <div class="rounded-3xl border border-slate-300/70 bg-slate-50/80 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)] backdrop-blur-xl">
+                    <div class="text-xs font-semibold text-slate-600">{% trans %}Règles désactivées{% endtrans %}</div>
+                    <div id="kpiDisabledRules" class="mt-1 text-3xl font-black tracking-tight text-slate-800">{{ stats.disabled }}</div>
+                </div>
+
+                <div class="rounded-3xl border border-rose-200/70 bg-rose-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)] backdrop-blur-xl">
+                    <div class="text-xs font-semibold text-rose-700">{% trans %}Niveau élevé{% endtrans %}</div>
+                    <div id="kpiHighRules" class="mt-1 text-3xl font-black tracking-tight text-rose-900">{{ stats.high }}</div>
+                </div>
+
+                <div class="rounded-3xl border border-cyan-200/70 bg-cyan-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)] backdrop-blur-xl">
+                    <div class="text-xs font-semibold text-cyan-700">{% trans %}Groupes{% endtrans %}</div>
+                    <div id="kpiGroups" class="mt-1 text-3xl font-black tracking-tight text-cyan-900">{{ stats.groups }}</div>
+                </div>
+            </section>
+
+            <section class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+                <div class="grid gap-3 lg:grid-cols-[1fr,220px]">
+                    <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
+                    <span class="text-slate-500">🔎</span>
+                    <input id="kycSearch"
+                            type="text"
+                            class="w-full bg-transparent text-sm font-semibold text-slate-800 placeholder:text-slate-400 outline-none"
+                            placeholder="{% trans %}Rechercher une règle, un groupe ou une description…{% endtrans %}">
+                    </div>
+
+                    <select id="kycGroupFilter"
+                            class="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none">
+                    <option value="">{% trans %}Tous les groupes{% endtrans %}</option>
+                    {% for group in groups %}
+                        <option value="{{ group }}">{{ group }}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+            </section>
+
+            <section class="space-y-4">
+                {% for rule in rules %}
+                    {% set levelClass =
+                    rule.level == 'high'
+                        ? 'border-rose-200/70 bg-rose-50 text-rose-700'
+                        : (rule.level == 'medium'
+                        ? 'border-amber-200/70 bg-amber-50 text-amber-700'
+                        : 'border-slate-200 bg-white text-slate-700')
+                    %}
+
+                    <article class="kyc-rule rounded-3xl border border-slate-200/70 bg-white/75 shadow-[0_12px_35px_rgba(2,6,23,.08)] backdrop-blur-xl"
+                            data-id="{{ rule.id }}"
+                            data-group="{{ rule.groupName }}"
+                            data-search="{{ (rule.label ~ ' ' ~ rule.description ~ ' ' ~ rule.groupName)|lower }}">
+                        <div class="flex flex-col gap-4 p-5 lg:flex-row lg:items-start lg:justify-between">
+                            <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold {{ levelClass }}">
+                                {{ rule.level|upper }}
+                                </span>
+
+                                <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-extrabold text-slate-700">
+                                {{ rule.groupName }}
+                                </span>
+
+                                <span class="kyc-enabled-badge inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-extrabold
+                                {{ rule.enabled
+                                    ? 'border-emerald-200/70 bg-emerald-50 text-emerald-700'
+                                    : 'border-slate-200 bg-white text-slate-600' }}">
+                                <span class="h-1.5 w-1.5 rounded-full {{ rule.enabled ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                                {{ rule.enabled ? 'Active'|trans : 'Inactive'|trans }}
+                                </span>
+                            </div>
+
+                            <h2 class="mt-3 text-lg font-black tracking-tight text-slate-900">
+                                {{ rule.label }}
+                            </h2>
+
+                            <p class="mt-2 text-sm font-medium leading-6 text-slate-600">
+                                {{ rule.description }}
+                            </p>
+                            </div>
+
+                            <div class="flex shrink-0 flex-wrap items-center gap-2">
+                            <label class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-[0_6px_18px_rgba(2,6,23,.05)]">
+                                <span class="text-xs font-extrabold text-slate-700">{% trans %}Activer{% endtrans %}</span>
+                                <button type="button"
+                                        class="kyc-switch relative h-7 w-12 rounded-full transition {{ rule.enabled ? 'bg-emerald-500' : 'bg-slate-300' }}"
+                                        data-toggle-url="{{ path('admin_kyc_toggle', {id: rule.id}) }}"
+                                        data-enabled="{{ rule.enabled ? '1' : '0' }}"
+                                        aria-pressed="{{ rule.enabled ? 'true' : 'false' }}">
+                                <span class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition {{ rule.enabled ? 'left-6' : 'left-1' }}"></span>
+                                </button>
+                            </label>
+
+                            <button type="button"
+                                    class="kyc-expand inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+                                {% trans %}Détails{% endtrans %}
+                            </button>
+                            </div>
+                        </div>
+
+                    <div class="kyc-extra hidden border-t border-slate-200/70 bg-slate-50/50 px-5 py-4">
+                        <div class="grid gap-4 md:grid-cols-3">
+                        <div class="rounded-2xl border border-white/70 bg-white/80 p-4">
+                            <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Clé technique{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">{{ rule.ruleKey }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border border-white/70 bg-white/80 p-4">
+                            <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Groupe{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">{{ rule.groupName }}</div>
+                        </div>
+
+                        <div class="rounded-2xl border border-white/70 bg-white/80 p-4">
+                            <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Dernière mise à jour{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                            {{ rule.updatedAt ? rule.updatedAt|date('d/m/Y H:i') : 'Jamais modifiée'|trans }}
+                            </div>
+                        </div>
+                        </div>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <button type="button"
+                                    class="inline-flex items-center gap-2 rounded-2xl border border-indigo-200/70 bg-indigo-50 px-3 py-2 text-xs font-extrabold text-indigo-700 hover:bg-indigo-100/60 js-kyc-modal"
+                                    data-url="{{ path('admin_kyc_modal_edit', {id: rule.id}) }}">
+                                ✏️ {% trans %}Modifier règle{% endtrans %}
+                            </button>
+
+                            <button type="button"
+                                    class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 hover:bg-slate-50 js-kyc-modal"
+                                    data-url="{{ path('admin_kyc_modal_history', {id: rule.id}) }}">
+                                📜 {% trans %}Historique{% endtrans %}
+                            </button>
+
+                            <button type="button"
+                                    class="inline-flex items-center gap-2 rounded-2xl border border-amber-200/70 bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-700 hover:bg-amber-100/60 js-kyc-modal"
+                                    data-url="{{ path('admin_kyc_modal_impact', {id: rule.id}) }}">
+                                🧪 {% trans %}Tester impact{% endtrans %}
+                            </button>
+                        </div>
+                    </div>
+                    </article>
+                {% endfor %}
+            </section>
+
+            <div id="toastHost" class="fixed right-4 top-4 z-[9999] space-y-2"></div>
+        </div>
+    </div>
+    <div id="kycModal" class="fixed inset-0 z-[9999] hidden">
+        <div class="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]" data-kyc-close></div>
+        <div class="relative flex min-h-full items-center justify-center p-4">
+            <div id="kycModalDialog"
+                class="w-full max-w-3xl overflow-hidden rounded-3xl border border-slate-200/70 bg-white shadow-[0_30px_90px_rgba(2,6,23,.25)]">
+            <div id="kycModalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastHost" class="fixed right-4 top-4 z-[9999] space-y-2"></div>
+
+
+    <script>
+(() => {
+  const searchInput = document.getElementById('kycSearch');
+  const groupFilter = document.getElementById('kycGroupFilter');
+  const cards = Array.from(document.querySelectorAll('.kyc-rule'));
+  const expandAllBtn = document.getElementById('expandAllBtn');
+  const toastHost = document.getElementById('toastHost');
+  const csrfToken = {{ csrf_toggle|json_encode|raw }};
+
+  const modal = document.getElementById('kycModal');
+  const modalContent = document.getElementById('kycModalContent');
+
+  const t = {
+    error: {{ 'Erreur'|trans|json_encode|raw }},
+    active: {{ 'Active'|trans|json_encode|raw }},
+    inactive: {{ 'Inactive'|trans|json_encode|raw }},
+    details: {{ 'Détails'|trans|json_encode|raw }},
+    collapse: {{ 'Réduire'|trans|json_encode|raw }},
+    expandAll: {{ 'Déplier tout'|trans|json_encode|raw }},
+    collapseAll: {{ 'Réduire tout'|trans|json_encode|raw }},
+    ruleEnabled: {{ 'Règle activée.'|trans|json_encode|raw }},
+    ruleDisabled: {{ 'Règle désactivée.'|trans|json_encode|raw }},
+    modalLoadError: {{ 'Impossible de charger la modale.'|trans|json_encode|raw }},
+    ruleUpdated: {{ 'Règle mise à jour.'|trans|json_encode|raw }},
+  };
+
+  const toast = (message, kind = 'info') => {
+    const el = document.createElement('div');
+    el.className =
+      'rounded-2xl border bg-white/90 px-4 py-3 text-sm font-semibold shadow-[0_18px_55px_rgba(2,6,23,.12)] backdrop-blur ' +
+      (kind === 'error'
+        ? 'border-rose-200 text-rose-700'
+        : kind === 'ok'
+          ? 'border-emerald-200 text-emerald-700'
+          : 'border-slate-200 text-slate-700');
+
+    el.textContent = message;
+    toastHost.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  };
+
+  function openModal(html) {
+    modalContent.innerHTML = html;
+    modal.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    modalContent.innerHTML = '';
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  function applyFilters() {
+    const q = (searchInput?.value || '').trim().toLowerCase();
+    const group = groupFilter?.value || '';
+
+    cards.forEach(card => {
+      const text = card.dataset.search || '';
+      const cardGroup = card.dataset.group || '';
+      const matchesSearch = q === '' || text.includes(q);
+      const matchesGroup = group === '' || group === cardGroup;
+      card.classList.toggle('hidden', !(matchesSearch && matchesGroup));
+    });
+  }
+
+  function refreshKpis() {
+  const switches = document.querySelectorAll('.kyc-switch');
+
+  let enabled = 0;
+  let disabled = 0;
+
+  switches.forEach(sw => {
+    const isEnabled = sw.dataset.enabled === '1';
+    if (isEnabled) {
+      enabled++;
+    } else {
+      disabled++;
+    }
+  });
+
+  const total = enabled + disabled;
+
+  const totalEl = document.getElementById('kpiTotalRules');
+  const enabledEl = document.getElementById('kpiEnabledRules');
+  const disabledEl = document.getElementById('kpiDisabledRules');
+  const heroEnabled = document.getElementById('heroEnabledRules');
+  const heroDisabled = document.getElementById('heroDisabledRules');
+
+  if (totalEl) totalEl.textContent = String(total);
+  if (enabledEl) enabledEl.textContent = String(enabled);
+  if (disabledEl) disabledEl.textContent = String(disabled);
+
+  if (heroEnabled) heroEnabled.innerHTML = `✅ {{ 'Actives'|trans }} : ${enabled}`;
+  if (heroDisabled) heroDisabled.innerHTML = `⏸️ {{ 'Désactivées'|trans }} : ${disabled}`;
+}
+
+  searchInput?.addEventListener('input', applyFilters);
+  groupFilter?.addEventListener('change', applyFilters);
+
+  document.querySelectorAll('.kyc-expand').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.kyc-rule');
+      const extra = card?.querySelector('.kyc-extra');
+      if (!extra) return;
+
+      extra.classList.toggle('hidden');
+      btn.textContent = extra.classList.contains('hidden') ? t.details : t.collapse;
+    });
+  });
+
+  expandAllBtn?.addEventListener('click', () => {
+    const hiddenExtras = cards
+      .map(card => card.querySelector('.kyc-extra'))
+      .filter(Boolean)
+      .filter(extra => extra.classList.contains('hidden'));
+
+    const shouldOpenAll = hiddenExtras.length > 0;
+
+    cards.forEach(card => {
+      const extra = card.querySelector('.kyc-extra');
+      const btn = card.querySelector('.kyc-expand');
+      if (!extra || !btn) return;
+
+      if (shouldOpenAll) {
+        extra.classList.remove('hidden');
+        btn.textContent = t.collapse;
+      } else {
+        extra.classList.add('hidden');
+        btn.textContent = t.details;
+      }
+    });
+
+    expandAllBtn.textContent = shouldOpenAll ? t.collapseAll : t.expandAll;
+  });
+
+  async function toggleRule(url) {
+    const body = new URLSearchParams();
+    body.append('_token', csrfToken);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || t.error);
+    }
+
+    return data;
+  }
+
+  document.querySelectorAll('.kyc-switch').forEach(sw => {
+    sw.addEventListener('click', async () => {
+      const url = sw.dataset.toggleUrl;
+      const card = sw.closest('.kyc-rule');
+      const badge = card?.querySelector('.kyc-enabled-badge');
+
+      if (!url || !card || !badge) return;
+
+      sw.disabled = true;
+
+      try {
+        const data = await toggleRule(url);
+        const enabled = !!data.enabled;
+
+        sw.dataset.enabled = enabled ? '1' : '0';
+        sw.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+
+        sw.classList.toggle('bg-emerald-500', enabled);
+        sw.classList.toggle('bg-slate-300', !enabled);
+
+        const knob = sw.querySelector('span');
+        knob?.classList.toggle('left-6', enabled);
+        knob?.classList.toggle('left-1', !enabled);
+
+        badge.className =
+          'kyc-enabled-badge inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-extrabold ' +
+          (enabled
+            ? 'border-emerald-200/70 bg-emerald-50 text-emerald-700'
+            : 'border-slate-200 bg-white text-slate-600');
+
+        badge.innerHTML = `
+          <span class="h-1.5 w-1.5 rounded-full ${enabled ? 'bg-emerald-500' : 'bg-slate-400'}"></span>
+          ${enabled ? t.active : t.inactive}
+        `;
+
+        refreshKpis();
+        toast(enabled ? t.ruleEnabled : t.ruleDisabled, 'ok');
+      } catch (err) {
+        toast(err.message || t.error, 'error');
+      } finally {
+        sw.disabled = false;
+      }
+    });
+  });
+
+  async function loadModal(url) {
+    const res = await fetch(url, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    const html = await res.text();
+
+    if (!res.ok) {
+      throw new Error(t.modalLoadError);
+    }
+
+    openModal(html);
+  }
+
+  document.addEventListener('click', async (e) => {
+    const trigger = e.target.closest('.js-kyc-modal');
+    if (trigger) {
+      e.preventDefault();
+      try {
+        await loadModal(trigger.dataset.url);
+      } catch (err) {
+        toast(err.message || t.error, 'error');
+      }
+      return;
+    }
+
+    if (e.target.closest('[data-kyc-close]')) {
+      e.preventDefault();
+      closeModal();
+    }
+  });
+
+  document.addEventListener('submit', async (e) => {
+    const form = e.target.closest('[data-kyc-edit-form]');
+    if (!form) return;
+
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+
+        if (!data.ok) {
+          throw new Error(data.error || t.error);
+        }
+
+        const card = document.querySelector(`.kyc-rule[data-id="${data.rule.id}"]`);
+        if (card) {
+          const title = card.querySelector('h2');
+          const desc = card.querySelector('p');
+          const badge = card.querySelector('.kyc-enabled-badge');
+          const groupBadge = card.querySelectorAll('span.inline-flex.items-center.rounded-full.border')[1];
+
+          if (title) title.textContent = data.rule.label;
+          if (desc) desc.textContent = data.rule.description;
+
+          card.dataset.group = data.rule.groupName;
+          card.dataset.search = `${data.rule.label} ${data.rule.description} ${data.rule.groupName}`.toLowerCase();
+
+          if (groupBadge) groupBadge.textContent = data.rule.groupName;
+
+          if (badge) {
+            badge.className =
+              'kyc-enabled-badge inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-extrabold ' +
+              (data.rule.enabled
+                ? 'border-emerald-200/70 bg-emerald-50 text-emerald-700'
+                : 'border-slate-200 bg-white text-slate-600');
+
+            badge.innerHTML = `
+              <span class="h-1.5 w-1.5 rounded-full ${data.rule.enabled ? 'bg-emerald-500' : 'bg-slate-400'}"></span>
+              ${data.rule.enabled ? t.active : t.inactive}
+            `;
+          }
+
+          const switchBtn = card.querySelector('.kyc-switch');
+          if (switchBtn) {
+            switchBtn.dataset.enabled = data.rule.enabled ? '1' : '0';
+            switchBtn.setAttribute('aria-pressed', data.rule.enabled ? 'true' : 'false');
+            switchBtn.classList.toggle('bg-emerald-500', data.rule.enabled);
+            switchBtn.classList.toggle('bg-slate-300', !data.rule.enabled);
+
+            const knob = switchBtn.querySelector('span');
+            knob?.classList.toggle('left-6', data.rule.enabled);
+            knob?.classList.toggle('left-1', !data.rule.enabled);
+          }
+
+          refreshKpis();
+        }
+
+        toast(data.message || t.ruleUpdated, 'ok');
+        closeModal();
+        return;
+      }
+
+      const html = await res.text();
+      openModal(html);
+    } catch (err) {
+      toast(err.message || t.error, 'error');
+    } finally {
+      if (submitBtn) submitBtn.disabled = false;
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  refreshKpis();
+})();
+</script>
+{% endblock %}

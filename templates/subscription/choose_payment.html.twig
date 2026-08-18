@@ -1,0 +1,603 @@
+{# templates/subscription/choose_payment.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Choisir votre moyen de paiement{% endtrans %}{% endblock %}
+
+{% block body %}
+<section class="choose-payment py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="payment-card">
+                    <div class="payment-header">
+                        <a href="{{ path('subscription_plans') }}" class="btn-back" data-turbo="false">
+                            <i class="fas fa-arrow-left"></i> Retour aux offres
+                        </a>
+                        <h2 class="text-center mb-1">Choisir votre paiement</h2>
+                        <p class="text-center text-muted">
+                            Abonnement <strong>{{ plan.name }}</strong>
+                        </p>
+                        
+                        {# Résumé du plan et de la durée sélectionnée #}
+                        <div class="plan-resume">
+                            <div class="resume-item">
+                                <span class="resume-label">
+                                    <i class="fas fa-clock me-1"></i> Durée
+                                </span>
+                                <span class="resume-value">{{ selected_duration.label }}</span>
+                            </div>
+                            <div class="resume-item">
+                                <span class="resume-label">
+                                    <i class="fas fa-tag me-1"></i> Prix en FCFA
+                                </span>
+                                <span class="resume-value">{{ selected_duration.price|number_format(0, ',', ' ') }} FCFA</span>
+                            </div>
+                            {% if user_currency != 'XOF' %}
+                            <div class="resume-item">
+                                <span class="resume-label">
+                                    <i class="fas fa-exchange-alt me-1"></i> Prix converti
+                                </span>
+                                <span class="resume-value highlight">{{ formatted_price }}</span>
+                            </div>
+                            {% endif %}
+                            {% if selected_duration.discount > 0 %}
+                            <div class="resume-discount">
+                                <i class="fas fa-percent me-1"></i>
+                                Vous économisez {{ selected_duration.discount }}% avec cette durée !
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="payment-methods">
+                        <h3 class="methods-title">
+                            <i class="fas fa-credit-card me-2"></i>Moyen de paiement
+                        </h3>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="payment-method" onclick="selectMethod(this, 'card')" data-method="card" role="button" tabindex="0" aria-pressed="false">
+                                    <div class="method-icon">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="method-name">Carte bancaire</div>
+                                    <div class="method-desc">Visa, Mastercard</div>
+                                    <div class="method-check">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <input type="radio" name="payment_method" value="card" class="d-none" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="payment-method unavailable" data-method="orange" aria-disabled="true">
+                                    <div class="method-icon orange">
+                                        <i class="fas fa-mobile-alt" style="color: white;"></i>
+                                    </div>
+                                    <div class="method-name">Orange Money</div>
+                                    <div class="method-desc">Bientôt disponible</div>
+                                    <div class="method-check">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <input type="radio" name="payment_method" value="orange" class="d-none" disabled>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="payment-method unavailable" data-method="mtn" aria-disabled="true">
+                                    <div class="method-icon mtn">
+                                        <i class="fas fa-mobile-alt" style="color: #0f172a;"></i>
+                                    </div>
+                                    <div class="method-name">MTN Mobile Money</div>
+                                    <div class="method-desc">Bientôt disponible</div>
+                                    <div class="method-check">
+                                        <i class="fas fa-check-circle"></i>
+                                    </div>
+                                    <input type="radio" name="payment_method" value="mtn" class="d-none" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        {# Message d'erreur pour le radio #}
+                        <div id="methodError" class="text-danger text-center mt-2 small d-none">
+                            <i class="fas fa-exclamation-circle me-1"></i>
+                            Veuillez sélectionner un moyen de paiement
+                        </div>
+                    </div>
+
+                    <div class="payment-footer text-center">
+                        <p class="text-muted small">
+                            <i class="fas fa-lock me-1"></i> 
+                            Paiement 100% sécurisé
+                        </p>
+                        <button type="button" class="btn btn-primary btn-lg w-100" id="continueBtn" disabled>
+                            Continuer <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.choose-payment {
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #f0fdf4 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 40px 0;
+}
+
+.payment-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.payment-header {
+    position: relative;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.btn-back {
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.btn-back:hover {
+    color: #0f172a;
+}
+
+/* ========== RÉSUMÉ DU PLAN ========== */
+.plan-resume {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-top: 20px;
+}
+
+.resume-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.resume-item:last-of-type {
+    border-bottom: none;
+}
+
+.resume-label {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.resume-value {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 0.95rem;
+}
+
+.resume-value.highlight {
+    color: #2563eb;
+    font-size: 1.1rem;
+}
+
+.resume-discount {
+    background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+    color: #059669;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* ========== MÉTHODES DE PAIEMENT ========== */
+.payment-methods {
+    padding: 24px 0;
+}
+
+.methods-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 16px;
+}
+
+.payment-method {
+    background: #fafbfc;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    height: 100%;
+}
+
+.payment-method:hover {
+    border-color: #94a3b8;
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+}
+
+.payment-method.selected {
+    border-color: #0d6efd;
+    background: #eff6ff;
+    box-shadow: 0 0 0 4px rgba(13,110,253,0.10);
+    transform: translateY(-2px);
+}
+
+.method-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.method-check i {
+    display: none;
+    color: white;
+    font-size: 14px;
+}
+
+.payment-method.selected .method-check {
+    border-color: #0d6efd;
+    background: #0d6efd;
+}
+
+.payment-method.selected .method-check i {
+    display: block;
+}
+
+.method-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    font-size: 28px;
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.method-icon.orange {
+    background: #ff6a00;
+}
+
+.method-icon.mtn {
+    background: #fcdb00;
+}
+
+.method-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.method-desc {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+/* ========== FOOTER ========== */
+.payment-footer {
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.payment-footer .text-muted {
+    margin-bottom: 12px;
+}
+
+/* ✅ Style pour le spinner sur le bouton */
+#continueBtn {
+    transition: all 0.3s ease;
+    border-radius: 14px;
+    padding: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+#continueBtn.loading {
+    pointer-events: none !important;
+    opacity: 0.8 !important;
+    cursor: wait !important;
+}
+
+#continueBtn.loading i:not(.fa-spinner) {
+    display: none !important;
+}
+
+#continueBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ✅ Animation d'erreur */
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    10%, 50%, 90% { transform: translateX(-4px); }
+    30%, 70% { transform: translateX(4px); }
+}
+
+#methodError.show {
+    display: block !important;
+    animation: shakeError 0.4s ease-in-out;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .choose-payment {
+        align-items: flex-start;
+        min-height: auto;
+        padding: 16px 0 28px !important;
+    }
+
+    .payment-card {
+        padding: 18px;
+        border-radius: 16px;
+    }
+
+    .payment-header h2 {
+        font-size: 1.35rem;
+        line-height: 1.25;
+        padding: 0;
+    }
+
+    .btn-back {
+        position: static;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 18px;
+        padding: 8px 0;
+    }
+    
+    .payment-method {
+        padding: 16px;
+    }
+    
+    .plan-resume {
+        padding: 12px 16px;
+    }
+
+    .resume-item {
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .resume-label,
+    .resume-value {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .resume-value {
+        max-width: 52%;
+        text-align: right;
+    }
+}
+
+.payment-method.unavailable {
+    cursor: not-allowed;
+    opacity: .62;
+    filter: grayscale(.35);
+}
+
+.payment-method.unavailable:hover {
+    border-color: #e2e8f0;
+    background: #fafbfc;
+    transform: none;
+    box-shadow: none;
+}
+</style>
+
+{# ✅ JavaScript complet #}
+<script>
+let selectedMethod = null;
+const isAuthenticated = {{ app.user ? 'true' : 'false' }};
+
+/** Sélectionne explicitement la carte cliquée sans dépendre de l'événement global du navigateur. */
+function selectMethod(element, method) {
+    selectedMethod = method;
+    
+    // Mettre à jour l'UI
+    document.querySelectorAll('.payment-method').forEach(el => {
+        el.classList.remove('selected');
+        el.setAttribute('aria-pressed', 'false');
+        const radio = el.querySelector('input[type="radio"]');
+        if (radio) radio.checked = false;
+    });
+    element.classList.add('selected');
+    element.setAttribute('aria-pressed', 'true');
+    const selectedRadio = element.querySelector('input[type="radio"]');
+    if (selectedRadio) selectedRadio.checked = true;
+    
+    // Cacher l'erreur si visible
+    document.getElementById('methodError').classList.remove('show');
+    
+    // Activer le bouton
+    const btn = document.getElementById('continueBtn');
+    btn.disabled = false;
+    btn.innerHTML = `Continuer <i class="fas fa-arrow-right ms-2"></i>`;
+}
+
+// ✅ Gestion du clic sur Continuer
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.getElementById('continueBtn');
+
+    document.querySelectorAll('.payment-method').forEach(function (methodCard) {
+        if (methodCard.getAttribute('aria-disabled') === 'true') return;
+        methodCard.addEventListener('keydown', function (keyboardEvent) {
+            if (keyboardEvent.key !== 'Enter' && keyboardEvent.key !== ' ') return;
+            keyboardEvent.preventDefault();
+            selectMethod(methodCard, methodCard.dataset.method);
+        });
+    });
+    
+    if (btn) {
+        btn.addEventListener('click', function(e) {
+            // Vérifier si un moyen de paiement est sélectionné
+            if (!selectedMethod) {
+                e.preventDefault();
+                const errorEl = document.getElementById('methodError');
+                errorEl.classList.add('show');
+                errorEl.textContent = '⚠️ Veuillez sélectionner un moyen de paiement';
+                
+                // Faire vibrer le conteneur des méthodes
+                const methodsContainer = document.querySelector('.payment-methods');
+                methodsContainer.style.animation = 'shakeError 0.4s ease-in-out';
+                setTimeout(() => {
+                    methodsContainer.style.animation = '';
+                }, 400);
+                
+                return;
+            }
+            
+            // Vérifier si l'utilisateur est connecté
+            if (!isAuthenticated) {
+                e.preventDefault();
+                
+                // SweetAlert Premium pour la connexion
+                Swal.fire({
+                    title: '🔐 Connexion requise',
+                    html: `
+                        <div style="padding: 10px 0;">
+                            <div style="font-size: 48px; margin-bottom: 15px;">👋</div>
+                            <p style="font-size: 16px; color: #475569; margin-bottom: 5px;">
+                                Vous devez être connecté pour souscrire à un abonnement.
+                            </p>
+                            <p style="font-size: 14px; color: #94a3b8;">
+                                Connectez-vous ou créez un compte pour continuer.
+                            </p>
+                            <div style="margin-top: 15px; padding: 12px; background: #f1f5f9; border-radius: 12px;">
+                                <span style="font-size: 13px; color: #64748b;">Plan choisi :</span>
+                                <span style="font-weight: 700; color: #0f172a;">{{ plan.name }}</span>
+                                <span style="margin: 0 8px; color: #e2e8f0;">|</span>
+                                <span style="font-weight: 700; color: #2563eb;">{{ selected_duration.price|number_format(0, ',', ' ') }} FCFA</span>
+                            </div>
+                        </div>
+                    `,
+                    icon: 'info',
+                    iconColor: '#6366f1',
+                    confirmButtonText: 'Se connecter 🔑',
+                    cancelButtonText: 'Annuler',
+                    showCancelButton: true,
+                    confirmButtonColor: '#6366f1',
+                    cancelButtonColor: '#94a3b8',
+                    background: '#ffffff',
+                    backdrop: 'rgba(15, 23, 42, 0.4)',
+                    customClass: {
+                        popup: 'swal-premium-popup',
+                        title: 'swal-premium-title',
+                        confirmButton: 'swal-premium-confirm',
+                        cancelButton: 'swal-premium-cancel'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Rediriger vers la page de connexion avec retour
+                        const returnUrl = encodeURIComponent('{{ path('subscription_payment', {slug: plan.slug}) }}?method=' + selectedMethod + '&duration={{ selected_duration.id }}');
+                        window.location.href = '{{ path('app_login') }}?redirect=' + returnUrl;
+                    }
+                });
+                
+                return;
+            }
+            
+            // ✅ Utilisateur connecté et méthode sélectionnée
+            if (this.classList.contains('loading')) {
+                e.preventDefault();
+                return;
+            }
+            
+            // Ajouter la classe loading
+            this.classList.add('loading');
+            
+            // Remplacer le contenu par le spinner
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Redirection...';
+            
+            // Rediriger vers la page de paiement AVEC la durée
+            const redirectUrl = '{{ path('subscription_payment', {slug: plan.slug}) }}?method=' + selectedMethod + '&duration={{ selected_duration.id }}';
+            setTimeout(function() {
+                window.location.href = redirectUrl;
+            }, 300);
+        });
+    }
+});
+
+// ✅ Style SweetAlert Premium
+const style = document.createElement('style');
+style.textContent = `
+    .swal-premium-popup {
+        border-radius: 24px !important;
+        padding: 30px 25px 35px !important;
+        box-shadow: 0 25px 80px rgba(15, 23, 42, 0.25) !important;
+        max-width: 480px !important;
+    }
+    
+    .swal-premium-title {
+        font-family: inherit !important;
+        font-weight: 700 !important;
+        font-size: 22px !important;
+        color: #0f172a !important;
+        padding: 10px 0 5px !important;
+    }
+    
+    .swal-premium-confirm {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7) !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 12px 32px !important;
+        font-weight: 700 !important;
+        font-size: 15px !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.35) !important;
+    }
+    
+    .swal-premium-confirm:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5) !important;
+    }
+    
+    .swal-premium-cancel {
+        background: #f1f5f9 !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 12px 24px !important;
+        font-weight: 600 !important;
+        font-size: 15px !important;
+        color: #64748b !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .swal-premium-cancel:hover {
+        background: #e2e8f0 !important;
+        transform: translateY(-2px) !important;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

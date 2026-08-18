@@ -1,0 +1,279 @@
+{#
+    Compression globale des images avant leur transfert.
+    Aucun service externe ni clé API : le traitement reste dans le navigateur.
+#}
+<script id="mol-global-upload-compression">
+(function () {
+    'use strict';
+
+    if (window.MOL_UPLOAD_COMPRESSION_BOUND) {
+        return;
+    }
+    window.MOL_UPLOAD_COMPRESSION_BOUND = true;
+
+    const MIN_BYTES_TO_COMPRESS = 850 * 1024;
+    const TARGET_BYTES = 750 * 1024;
+    const MAX_DIMENSION = 1440;
+    const MAX_COMPRESSION_WAIT_MS = 8000;
+    const SUPPORTED_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
+    function supportsDataTransfer() {
+        try {
+            return typeof DataTransfer === 'function' && new DataTransfer().items !== undefined;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    function supportsWebp() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        return canvas.toDataURL('image/webp').startsWith('data:image/webp');
+    }
+
+    function canvasToBlob(canvas, type, quality) {
+        return new Promise(function (resolve) {
+            canvas.toBlob(resolve, type, quality);
+        });
+    }
+
+    function replaceExtension(filename, extension) {
+        const cleanName = String(filename || 'image').replace(/\.[a-z0-9]+$/i, '');
+        return cleanName + '.' + extension;
+    }
+
+    async function decodeImage(file) {
+        if ('createImageBitmap' in window) {
+            try {
+                const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+                return {
+                    width: bitmap.width,
+                    height: bitmap.height,
+                    draw: function (context, width, height) {
+                        context.drawImage(bitmap, 0, 0, width, height);
+                    },
+                    close: function () {
+                        if (typeof bitmap.close === 'function') bitmap.close();
+                    }
+                };
+            } catch (error) {
+                /* Le repli HTMLImageElement prend en charge davantage de navigateurs. */
+            }
+        }
+
+        return new Promise(function (resolve, reject) {
+            const url = URL.createObjectURL(file);
+            const image = new Image();
+
+            image.onload = function () {
+                resolve({
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                    draw: function (context, width, height) {
+                        context.drawImage(image, 0, 0, width, height);
+                    },
+                    close: function () {
+                        URL.revokeObjectURL(url);
+                    }
+                });
+            };
+            image.onerror = function () {
+                URL.revokeObjectURL(url);
+                reject(new Error('Image illisible.'));
+            };
+            image.src = url;
+        });
+    }
+
+    function scaledDimensions(width, height, maxDimension) {
+        const largest = Math.max(width, height);
+        const ratio = largest > maxDimension ? maxDimension / largest : 1;
+
+        return {
+            width: Math.max(1, Math.round(width * ratio)),
+            height: Math.max(1, Math.round(height * ratio))
+        };
+    }
+
+    async function compressImage(file) {
+        if (!SUPPORTED_TYPES.has(file.type) || file.size < MIN_BYTES_TO_COMPRESS) {
+            return file;
+        }
+
+        const decoded = await decodeImage(file);
+
+        try {
+            const initialDimensions = scaledDimensions(decoded.width, decoded.height, MAX_DIMENSION);
+            let blob = null;
+            const outputType = supportsWebp() ? 'image/webp' : file.type;
+            const attempts = [
+                { ratio: 1, quality: .78 },
+                { ratio: .78, quality: .68 }
+            ];
+
+            for (const attempt of attempts) {
+                const canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(initialDimensions.width * attempt.ratio));
+                canvas.height = Math.max(1, Math.round(initialDimensions.height * attempt.ratio));
+                const context = canvas.getContext('2d', { alpha: true });
+
+                if (!context) {
+                    return file;
+                }
+
+                context.imageSmoothingEnabled = true;
+                context.imageSmoothingQuality = 'high';
+                decoded.draw(context, canvas.width, canvas.height);
+                blob = await canvasToBlob(canvas, outputType, attempt.quality);
+
+                if (blob && blob.size <= TARGET_BYTES) {
+                    break;
+                }
+            }
+
+            if (!blob || blob.size >= file.size) {
+                return file;
+            }
+
+            const extension = outputType === 'image/webp'
+                ? 'webp'
+                : (outputType === 'image/png' ? 'png' : 'jpg');
+
+            return new File(
+                [blob],
+                replaceExtension(file.name, extension),
+                {
+                    type: outputType,
+                    lastModified: file.lastModified || Date.now()
+                }
+            );
+        } finally {
+            decoded.close();
+        }
+    }
+
+    /** Abandonne proprement l'attente côté interface sur les mobiles peu puissants. */
+    function compressWithTimeBudget(file) {
+        let timeoutId;
+        const timeout = new Promise(function (resolve) {
+            timeoutId = window.setTimeout(function () {
+                resolve(file);
+            }, MAX_COMPRESSION_WAIT_MS);
+        });
+
+        return Promise.race([compressImage(file), timeout]).finally(function () {
+            window.clearTimeout(timeoutId);
+        });
+    }
+
+    function toggleFormButtons(input, disabled) {
+        const form = input.form;
+        if (!form) return;
+
+        const activeOperations = Number(form.dataset.molUploadOperations || 0);
+
+        if (disabled) {
+            form.dataset.molUploadOperations = String(activeOperations + 1);
+            if (activeOperations > 0) return;
+        } else {
+            const remainingOperations = Math.max(0, activeOperations - 1);
+            form.dataset.molUploadOperations = String(remainingOperations);
+            if (remainingOperations > 0) return;
+            delete form.dataset.molUploadOperations;
+        }
+
+        form.querySelectorAll('button[type="submit"], input[type="submit"]').forEach(function (button) {
+            if (disabled) {
+                button.dataset.molUploadWasDisabled = button.disabled ? '1' : '0';
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                return;
+            }
+
+            if (button.dataset.molUploadWasDisabled !== '1') {
+                button.disabled = false;
+            }
+            button.removeAttribute('aria-busy');
+            delete button.dataset.molUploadWasDisabled;
+        });
+    }
+
+    async function processInput(input) {
+        input.dataset.molCompressionStatus = 'processing';
+        input.setAttribute('aria-busy', 'true');
+        toggleFormButtons(input, true);
+
+        const transfer = new DataTransfer();
+        let savedBytes = 0;
+
+        try {
+            for (const file of Array.from(input.files || [])) {
+                let optimized = file;
+
+                try {
+                    optimized = await compressWithTimeBudget(file);
+                } catch (error) {
+                    optimized = file;
+                }
+
+                savedBytes += Math.max(0, file.size - optimized.size);
+                transfer.items.add(optimized);
+            }
+
+            input.files = transfer.files;
+            input.dataset.molCompressionStatus = 'ready';
+            input.dataset.molSavedBytes = String(savedBytes);
+
+            input.dispatchEvent(new CustomEvent('mol:files-compressed', {
+                bubbles: true,
+                detail: {
+                    savedBytes: savedBytes,
+                    files: Array.from(input.files || [])
+                }
+            }));
+        } finally {
+            input.removeAttribute('aria-busy');
+            toggleFormButtons(input, false);
+
+            const resumedEvent = new Event('change', { bubbles: true });
+            Object.defineProperty(resumedEvent, 'molCompressionReady', {
+                value: true
+            });
+            input.dispatchEvent(resumedEvent);
+        }
+    }
+
+    document.addEventListener('change', function (event) {
+        const input = event.target;
+
+        if (
+            event.molCompressionReady
+            || !(input instanceof HTMLInputElement)
+            || input.type !== 'file'
+            || !input.files
+            || input.files.length === 0
+            || !supportsDataTransfer()
+        ) {
+            return;
+        }
+
+        const containsCompressibleImage = Array.from(input.files).some(function (file) {
+            return SUPPORTED_TYPES.has(file.type) && file.size >= MIN_BYTES_TO_COMPRESS;
+        });
+
+        if (!containsCompressibleImage) {
+            return;
+        }
+
+        /*
+         * Les gestionnaires de portfolio, de prévisualisation et du tchat
+         * recevront le nouvel événement une fois les fichiers optimisés.
+         */
+        event.stopImmediatePropagation();
+        processInput(input).catch(function () {
+            input.dataset.molCompressionStatus = 'fallback';
+        });
+    }, true);
+})();
+</script>

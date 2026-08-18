@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Rôles{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/security/_vip_ui.html.twig' %}
+
+  <div class="sec-shell" data-security-page="roles">
+    <div class="sec-container sec-grid">
+
+      <section class="sec-card sec-page-head">
+        <div class="sec-card-inner">
+          <div class="sec-page-head-top">
+            <div class="sec-page-main">
+              <div class="sec-kicker">{% trans %}Sécurité • RBAC{% endtrans %}</div>
+              <h1 class="sec-page-title">{% trans %}Rôles & gouvernance d’accès{% endtrans %}</h1>
+              <p class="sec-page-text">{% trans %}Visualise les rôles réels utilisés par tes utilisateurs et leur niveau de sensibilité.{% endtrans %}</p>
+            </div>
+          </div>
+          <div class="sec-page-actions">{% include 'admin/security/_nav.html.twig' %}</div>
+        </div>
+      </section>
+
+      <section class="sec-grid sec-grid-4">
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Rôles{% endtrans %}</div><div class="value">{{ stats.roles }}</div><div class="hint">{% trans %}Rôles effectivement détectés{% endtrans %}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Privilégiés{% endtrans %}</div><div class="value">{{ stats.privileged }}</div><div class="hint">{% trans %}High + critical{% endtrans %}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Utilisateurs{% endtrans %}</div><div class="value">{{ stats.coveredUsers }}</div><div class="hint">{% trans %}Comptes couverts{% endtrans %}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Dernière revue{% endtrans %}</div><div class="value" style="font-size:1rem;">{{ stats.lastReview ? stats.lastReview|date('d/m/Y H:i') : '—' }}</div><div class="hint">{% trans %}Mise à jour des définitions{% endtrans %}</div></div></article>
+      </section>
+
+      <section class="sec-card">
+        <div class="sec-card-inner">
+          <div class="sec-filters">
+            <div style="flex:2 1 360px;">
+              <input type="search" class="sec-input" placeholder="{% trans %}Rechercher un rôle...{% endtrans %}" data-sec-search="roles">
+            </div>
+          </div>
+
+          <div class="sec-separator"></div>
+
+          <div class="sec-card-list">
+            {% for role in roles %}
+              <article class="sec-mini-card js-sec-role"
+                       data-sec-text="{{ (role.key ~ ' ' ~ role.label ~ ' ' ~ role.scope ~ ' ' ~ role.description)|lower }}">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+                  <div style="min-width:0;flex:1 1 auto;">
+                    <div class="sec-row-title">{{ role.label }}</div>
+                    <div class="sec-row-sub">{{ role.key }} • {{ role.scope }}</div>
+                    <div style="margin-top:10px;color:var(--sec-muted);line-height:1.65;">{{ role.description }}</div>
+                  </div>
+
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <span class="sec-badge {{ role.risk }}">{{ role.risk|upper }}</span>
+                    <span class="sec-badge sec-badge-neutral">{{ role.permissionsCount }} {% trans %}permissions{% endtrans %}</span>
+                    <span class="sec-badge sec-badge-neutral">{{ role.members }} {% trans %}membres{% endtrans %}</span>
+                  </div>
+                </div>
+              </article>
+            {% else %}
+              <div class="sec-mini-card">{% trans %}Aucun rôle trouvé.{% endtrans %}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-security.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,354 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{% trans %}Revue des paiements{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% set statusUi = {
+    'INITIE': {'label':'INITIÉ', 'classes':'bg-slate-100 text-slate-700 ring-slate-200'},
+    'EN_ATTENTE': {'label':'EN ATTENTE', 'classes':'bg-amber-100 text-amber-700 ring-amber-200'},
+    'SUCCES': {'label':'SUCCÈS', 'classes':'bg-emerald-100 text-emerald-700 ring-emerald-200'},
+    'ECHEC': {'label':'ÉCHEC', 'classes':'bg-rose-100 text-rose-700 ring-rose-200'},
+    'ANNULE': {'label':'ANNULÉ', 'classes':'bg-orange-100 text-orange-700 ring-orange-200'},
+    'EXPIRE': {'label':'EXPIRÉ', 'classes':'bg-yellow-100 text-yellow-700 ring-yellow-200'},
+    'REMBOURSE': {'label':'REMBOURSÉ', 'classes':'bg-cyan-100 text-cyan-700 ring-cyan-200'},
+    'PARTIEL': {'label':'PARTIEL', 'classes':'bg-violet-100 text-violet-700 ring-violet-200'},
+    'EN_VERIFICATION': {'label':'EN VÉRIFICATION', 'classes':'bg-blue-100 text-blue-700 ring-blue-200'},
+    'BLOQUE': {'label':'BLOQUÉ', 'classes':'bg-red-100 text-red-700 ring-red-200'}
+} %}
+
+<div class="min-h-screen bg-[radial-gradient(1000px_circle_at_0%_0%,rgba(59,130,246,.10),transparent_35%),radial-gradient(1200px_circle_at_100%_0%,rgba(16,185,129,.10),transparent_35%),linear-gradient(180deg,#f8fafc,#eef2ff_45%,#f8fafc)] text-slate-900">
+    <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+
+        <section class="rounded-[2rem] border border-white/70 bg-white/75 p-5 shadow-[0_20px_80px_rgba(15,23,42,.08)] backdrop-blur xl:p-7">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-600 ring-1 ring-slate-200">
+                            Finance
+                        </span>
+                        <span class="inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-rose-700 ring-1 ring-rose-200">
+                            {% trans %}Paiements{% endtrans %}
+                        </span>
+                    </div>
+
+                    <h1 class="mt-4 text-2xl font-black tracking-tight text-slate-950 lg:text-4xl">
+                        💳 {% trans %}Revue des paiements{% endtrans %}
+                    </h1>
+
+                    <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+                        {% trans %}Filtrez les paiements par statut sans recharger la page et modifiez le statut en AJAX directement depuis le tableau.{% endtrans %}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="javascript:history.back()" class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50">
+                        ← {% trans %}Retour{% endtrans %}
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Total global{% endtrans %}</div>
+                <div class="mt-3 text-3xl font-black text-slate-950">{{ totalPayments|number_format(0, ',', ' ') }}</div>
+                <div class="mt-2 text-sm text-slate-500">{% trans %}Paiements dans la base{% endtrans %}</div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Visibles sur la page{% endtrans %}</div>
+                <div class="mt-3 text-3xl font-black text-slate-950" id="visiblePaymentCount">{{ currentPageCount|number_format(0, ',', ' ') }}</div>
+                <div class="mt-2 text-sm text-slate-500">{% trans %}Après filtre instantané{% endtrans %}</div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Page actuelle{% endtrans %}</div>
+                <div class="mt-3 text-3xl font-black text-slate-950">{{ pagination.page }}</div>
+                <div class="mt-2 text-sm text-slate-500">{% trans %}sur{% endtrans %} {{ pagination.totalPages }}</div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Par page{% endtrans %}</div>
+                <div class="mt-3 text-3xl font-black text-slate-950">{{ pagination.perPage }}</div>
+                <div class="mt-2 text-sm text-slate-500">{% trans %}lignes maximum{% endtrans %}</div>
+            </div>
+        </section>
+
+        <section class="mt-5 rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6">
+            <div class="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                <div class="flex-1">
+                    <label class="mb-2 block text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">
+                        {% trans %}Recherche instantanée{% endtrans %}
+                    </label>
+                    <div class="relative">
+                        <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                            🔎
+                        </span>
+
+                        <input
+                            id="paymentSearch"
+                            type="text"
+                            placeholder="{% trans %}Rechercher par email, provider, plan, id...{% endtrans %}"
+                            class="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-14 pr-4 text-sm font-medium text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-300"
+                        >
+                    </div>
+                </div>
+
+                <div class="xl:max-w-[62%]">
+                    <label class="mb-2 block text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">
+                        {% trans %}Filtrer par statut{% endtrans %}
+                    </label>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" class="payment-filter-btn rounded-full border border-slate-200 bg-slate-900 px-4 py-2 text-xs font-black text-white" data-status-filter="">
+                            {% trans %}Tous{% endtrans %}
+                        </button>
+
+                        {% for code, desc in paymentStatuses %}
+                            <button type="button" class="payment-filter-btn rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50" data-status-filter="{{ code }}">
+                                {{ statusUi[code].label|default(code) }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-5 rounded-[2rem] border border-white/70 bg-white/80 p-3 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-4">
+            <div class="overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200" id="paymentsTable">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">ID</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Utilisateur{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">Provider</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">Plan</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Montant{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Statut{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Date{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Description{% endtrans %}</th>
+                                <th class="px-4 py-3 text-right text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Action{% endtrans %}</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            {% for p in payments %}
+                                {% set currentStatus = statusUi[p.status]|default({'label': p.status, 'classes':'bg-slate-100 text-slate-700 ring-slate-200'}) %}
+
+                                <tr
+                                    class="payment-row hover:bg-slate-50/70"
+                                    data-status="{{ p.status }}"
+                                    data-search="{{ (p.userEmail ~ ' ' ~ p.provider ~ ' ' ~ p.plan ~ ' ' ~ p.id ~ ' ' ~ p.status)|lower }}"
+                                    data-update-url="{{ path('admin_payments_failures_update_status', {id: p.id}) }}"
+                                    data-token="{{ csrf_token('admin_payment_status_' ~ p.id) }}"
+                                >
+                                    <td class="px-4 py-4 text-sm font-black text-slate-900">{{ loop.index }}</td>
+                                    <td class="px-4 py-4 text-sm font-bold text-slate-900">{{ p.userEmail }}</td>
+                                    <td class="px-4 py-4 text-sm text-slate-700">{{ p.provider }}</td>
+                                    <td class="px-4 py-4 text-sm text-slate-700">{{ p.plan }}</td>
+                                    <td class="px-4 py-4 text-sm font-black text-slate-900">{{ p.amount|number_format(0, ',', ' ') }} {{ p.currency }}</td>
+                                    <td class="px-4 py-4">
+                                        <span class="payment-status-badge inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 {{ currentStatus.classes }}">
+                                            {{ currentStatus.label }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-4 text-sm text-slate-700">{{ p.paidAt ?: '-' }}</td>
+                                    <td class="px-4 py-4 text-sm text-slate-600 payment-status-description">{{ p.statusDescription }}</td>
+                                    <td class="px-4 py-4 text-right">
+                                        <div class="flex flex-col items-end gap-2">
+                                            <select class="payment-status-select rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm focus:border-indigo-300">
+                                                {% for code, desc in paymentStatuses %}
+                                                    <option value="{{ code }}" {{ code == p.status ? 'selected' : '' }}>
+                                                        {{ statusUi[code].label|default(code) }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+
+                                            <button
+                                                type="button"
+                                                class="payment-status-save inline-flex items-center rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white shadow-sm transition hover:bg-slate-800">
+                                                💾 {% trans %}Enregistrer{% endtrans %}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="9" class="px-4 py-10 text-center">
+                                        <div class="text-lg font-black text-slate-900">{% trans %}Aucun paiement trouvé{% endtrans %}</div>
+                                        <div class="mt-2 text-sm text-slate-500">{% trans %}La base ne contient pas encore de paiements à afficher.{% endtrans %}</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-slate-200/70 bg-white p-4">
+                <div class="text-sm font-semibold text-slate-600">
+                    {% trans %}Page{% endtrans %} {{ pagination.page }} / {{ pagination.totalPages }}
+                    • {{ totalPayments|number_format(0, ',', ' ') }} {% trans %}paiements au total{% endtrans %}
+                </div>
+
+                <div class="flex items-center gap-3">
+                    {% if pagination.hasPrevious %}
+                        <a href="{{ path('admin_payments_failures_index', {page: pagination.previousPage}) }}"
+                           class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50">
+                            ← {% trans %}Précédent{% endtrans %}
+                        </a>
+                    {% else %}
+                        <span class="inline-flex cursor-not-allowed items-center rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-black text-slate-300">
+                            ← {% trans %}Précédent{% endtrans %}
+                        </span>
+                    {% endif %}
+
+                    {% if pagination.hasNext %}
+                        <a href="{{ path('admin_payments_failures_index', {page: pagination.nextPage}) }}"
+                           class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50">
+                            {% trans %}Suivant{% endtrans %} →
+                        </a>
+                    {% else %}
+                        <span class="inline-flex cursor-not-allowed items-center rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-black text-slate-300">
+                            {% trans %}Suivant{% endtrans %} →
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div id="paymentToast" class="fixed right-5 top-5 z-[9999] hidden rounded-2xl px-4 py-3 text-sm font-bold text-white shadow-2xl"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.payment-filter-btn');
+    const rows = document.querySelectorAll('.payment-row');
+    const searchInput = document.getElementById('paymentSearch');
+    const visibleCount = document.getElementById('visiblePaymentCount');
+    const toast = document.getElementById('paymentToast');
+
+    let activeStatus = '';
+
+    function showToast(message, ok = true) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = 'fixed right-5 top-5 z-[9999] rounded-2xl px-4 py-3 text-sm font-bold text-white shadow-2xl';
+        toast.classList.add(ok ? 'bg-emerald-600' : 'bg-rose-600');
+        toast.classList.remove('hidden');
+
+        clearTimeout(window.__paymentToastTimer);
+        window.__paymentToastTimer = setTimeout(() => {
+            toast.classList.add('hidden');
+        }, 2200);
+    }
+
+    function updateCount() {
+        const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        if (visibleCount) {
+            visibleCount.textContent = new Intl.NumberFormat('fr-FR').format(visibleRows.length);
+        }
+    }
+
+    function filterPayments() {
+        const query = (searchInput?.value || '').trim().toLowerCase();
+
+        rows.forEach(row => {
+            const status = row.dataset.status || '';
+            const haystack = (row.dataset.search || '').toLowerCase();
+
+            const matchesStatus = activeStatus === '' || status === activeStatus;
+            const matchesSearch = query === '' || haystack.includes(query);
+
+            row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+        });
+
+        updateCount();
+    }
+
+    buttons.forEach(button => {
+        button.addEventListener('click', function () {
+            activeStatus = this.dataset.statusFilter || '';
+
+            buttons.forEach(btn => {
+                btn.classList.remove('bg-slate-900', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+
+            this.classList.remove('bg-white', 'text-slate-700');
+            this.classList.add('bg-slate-900', 'text-white');
+
+            filterPayments();
+        });
+    });
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterPayments);
+    }
+
+    document.querySelectorAll('.payment-status-save').forEach(button => {
+        button.addEventListener('click', async function () {
+            const row = this.closest('.payment-row');
+            if (!row) return;
+
+            const select = row.querySelector('.payment-status-select');
+            const badge = row.querySelector('.payment-status-badge');
+            const description = row.querySelector('.payment-status-description');
+
+            const url = row.dataset.updateUrl;
+            const token = row.dataset.token;
+            const status = select ? select.value : '';
+
+            this.disabled = true;
+            this.classList.add('opacity-60', 'cursor-not-allowed');
+
+            try {
+                const formData = new FormData();
+                formData.append('_token', token);
+                formData.append('status', status);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Erreur lors de la mise à jour.');
+                }
+
+                row.dataset.status = data.payment.status;
+                row.dataset.search = (data.payment.userEmail + ' ' + data.payment.provider + ' ' + data.payment.plan + ' ' + data.payment.id + ' ' + data.payment.status).toLowerCase();
+
+                if (badge) {
+                    badge.className = 'payment-status-badge inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 ' + data.statusUi.classes;
+                    badge.textContent = data.statusUi.label;
+                }
+
+                if (description) {
+                    description.textContent = data.payment.statusDescription;
+                }
+
+                filterPayments();
+                showToast(data.message, true);
+            } catch (e) {
+                showToast(e.message || 'Erreur AJAX.', false);
+            } finally {
+                this.disabled = false;
+                this.classList.remove('opacity-60', 'cursor-not-allowed');
+            }
+        });
+    });
+
+    filterPayments();
+});
+</script>
+{% endblock %}

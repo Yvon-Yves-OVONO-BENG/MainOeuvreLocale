@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ (mode == 'new' ? 'Nouvelle règle' : 'Éditer règle')|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_rules_form.html.twig" %}
+
+<div class="rules-page">
+  <div class="rules-wrap">
+
+    <div class="box">
+      <div class="top">
+        <div>
+          <div class="title">
+            {{ (mode == 'new' ? '➕ Nouvelle règle' : '✏️ Éditer règle')|trans }}
+          </div>
+          <div class="hint">{% trans %}Définis des policies de modération (fraude, spam, identité, jobs, messages).{% endtrans %}</div>
+        </div>
+        <a class="btn" href="{{ path('moderateur_rules_index') }}">{% trans %}← Retour{% endtrans %}</a>
+      </div>
+
+      <form method="post">
+        <div class="row">
+          <div class="field">
+            <div class="label">{% trans %}Titre{% endtrans %}</div>
+            <input class="input" name="title" value="{{ r.title }}" required>
+          </div>
+
+          <div class="field">
+            <div class="label">{% trans %}Catégorie{% endtrans %}</div>
+            <select class="select" name="category">
+              {% for c in ['general','fraud','spam','identity','jobs','messages'] %}
+                <option value="{{ c }}" {{ r.category == c ? 'selected' : '' }}>{{ c|trans }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="label">{% trans %}Sévérité{% endtrans %}</div>
+            <select class="select" name="severity">
+              {% for s in ['info','warn','critical'] %}
+                <option value="{{ s }}" {{ r.severity == s ? 'selected' : '' }}>{{ s|trans }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="field">
+            <div class="label">{% trans %}Actif{% endtrans %}</div>
+            <select class="select" name="isActive">
+              <option value="1" {{ r.isActive ? 'selected' : '' }}>{% trans %}Oui{% endtrans %}</option>
+              <option value="0" {{ not r.isActive ? 'selected' : '' }}>{% trans %}Non{% endtrans %}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <div class="label">{% trans %}Description{% endtrans %}</div>
+          <textarea class="ta" name="description" required>{{ r.description }}</textarea>
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <div class="label">{% trans %}Action recommandée (optionnel){% endtrans %}</div>
+          <textarea class="ta" name="recommendedAction">{{ r.recommendedAction }}</textarea>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">💾 {% trans %}Enregistrer{% endtrans %}</button>
+        </div>
+      </form>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

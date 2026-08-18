@@ -1,0 +1,705 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+  {% trans %}Votes reçus{% endtrans %}
+{% endblock %}
+
+{% block body %}
+
+{% include "rating/_vip_ui.html.twig" %}
+
+<style>
+  .reviews-toolbar,
+  .reviews-footer {
+    display: flex !important;
+    visibility: visible !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .reviews-toolbar {
+    padding: 4px 0 18px;
+  }
+
+  .reviews-footer {
+    padding: 18px 0 4px;
+    border-top: 1px solid #edf2f7;
+  }
+
+  .reviews-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #ratingTable {
+    width: 100% !important;
+    min-width: 950px;
+  }
+
+  .reviews-length label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .reviews-length select {
+    width: 75px;
+    height: 40px;
+    padding: 5px 28px 5px 12px;
+    border: 1px solid #dbe3ee;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #0f172a;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .reviews-length select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  .reviews-search {
+    position: relative;
+    width: min(100%, 310px);
+  }
+
+  .reviews-search i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    color: #94a3b8;
+    font-size: 0.78rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .reviews-search input {
+    width: 100%;
+    height: 42px;
+    padding: 8px 14px 8px 40px;
+    border: 1px solid #dbe3ee;
+    border-radius: 11px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 0.84rem;
+    outline: none;
+  }
+
+  .reviews-search input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  .reviews-search input::placeholder {
+    color: #94a3b8;
+  }
+
+  .reviews-page-info {
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .reviews-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 5px;
+  }
+
+  .reviews-page-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 6px 11px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #fff;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+
+  .reviews-page-button:hover:not(:disabled):not(.active) {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
+  .reviews-page-button.active {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(37, 99, 235, 0.2);
+  }
+
+  .reviews-page-button:disabled {
+    border-color: #f1f5f9;
+    background: #f8fafc;
+    color: #cbd5e1;
+    cursor: not-allowed;
+  }
+
+  .reviews-page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 38px;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  .reviews-no-result td {
+    padding: 35px 15px !important;
+    color: #64748b;
+    text-align: center;
+  }
+
+  @media (max-width: 767.98px) {
+    .reviews-toolbar,
+    .reviews-footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .reviews-search {
+      width: 100%;
+      max-width: none;
+    }
+
+    .reviews-pagination {
+      justify-content: flex-start;
+      width: 100%;
+      overflow-x: auto;
+      padding-bottom: 5px;
+    }
+
+    .reviews-page-button {
+      flex: 0 0 auto;
+    }
+  }
+</style>
+
+<div class="container vip-page">
+  <div class="vip-shell">
+
+    <div class="vip-head">
+      <div class="vip-head-top">
+        <div>
+          <div class="vip-title h4 mb-1">
+            ⭐ {% trans %}Votes reçus{% endtrans %}
+          </div>
+
+          <div class="vip-sub">
+            {% trans %}Découvrez qui vous a évalué, les commentaires et les notes reçues.{% endtrans %}
+          </div>
+
+          <div class="vip-total mt-2">
+            {% trans %}Total :{% endtrans %}
+            <span class="fw-bold">{{ reviews|length }}</span>
+          </div>
+        </div>
+
+        <div class="vip-head-actions">
+          <a
+            class="btn btn-vip btn-primary-soft"
+            href="{{ path('tableau_de_bord') }}"
+          >
+            ← {% trans %}Retour au tableau de bord{% endtrans %}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="vip-body">
+      <div class="vip-table-wrap">
+        <div class="vip-table-pad">
+          <div class="reviews-toolbar">
+            <div class="reviews-length">
+              <label for="reviewsPerPage">
+                {% trans %}Afficher{% endtrans %}
+
+                <select id="reviewsPerPage">
+                  <option value="10" selected>10</option>
+                  <option value="15">15</option>
+                  <option value="20">20</option>
+                  <option value="30">30</option>
+                  <option value="40">40</option>
+                  <option value="50">50</option>
+                </select>
+
+                {% trans %}avis par page{% endtrans %}
+              </label>
+            </div>
+
+            <div class="reviews-search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+
+              <input
+                type="search"
+                id="reviewsSearch"
+                placeholder="{% trans %}Rechercher dans les avis…{% endtrans %}"
+                autocomplete="off"
+              >
+            </div>
+          </div>
+
+          <div class="reviews-table-scroll">
+            <table
+              id="ratingTable"
+              class="table table-hover align-middle mb-0"
+            >
+              <thead>
+                <tr>
+                  <th style="width: 60px;">#</th>
+
+                  <th>
+                    {% trans %}Voté par{% endtrans %}
+                  </th>
+
+                  <th>
+                    {% trans %}Commentaire{% endtrans %}
+                  </th>
+
+                  <th style="width: 160px;">
+                    {% trans %}Étoiles{% endtrans %}
+                  </th>
+
+                  <th style="width: 180px;">
+                    {% trans %}Date{% endtrans %}
+                  </th>
+
+                  <th style="width: 190px;" class="text-end">
+                    {% trans %}Options{% endtrans %}
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for review in reviews %}
+                  {% set voter = review.author %}
+
+                  {% set profile =
+                    voter and voter.personalProfile
+                      ? voter.personalProfile
+                      : null
+                  %}
+
+                  {% set displayName =
+                    profile and profile.fullName
+                      ? profile.fullName
+                      : (
+                        voter and voter.fullName is defined and voter.fullName
+                          ? voter.fullName
+                          : (
+                            voter and voter.email
+                              ? voter.email
+                              : 'Utilisateur #' ~ (voter ? voter.id : '')
+                          )
+                      )
+                  %}
+
+                  {% set profileUrl =
+                    voter and profile and profile.slug
+                      ? path('profil_talent', {slug: profile.slug})
+                      : null
+                  %}
+
+                  {% set globalScore = review.globalScore|default(0) %}
+
+                  {# Conversion de la note sur 10 en 5 étoiles #}
+                  {% set starsCount =
+                    (globalScore / 2)|round(0, 'common')
+                  %}
+
+                  <tr class="review-data-row" data-review-row>
+                    <td class="text-muted fw-semibold">
+                      {{ loop.index }}
+                    </td>
+
+                    <td data-search="{{ displayName }}">
+                      <div class="vip-profile">
+                        {% if profile and profile.photo %}
+                          <img
+                            src="{{ asset('uploads/profiles/' ~ profile.photo) }}"
+                            alt="{{ displayName }}"
+                            class="vip-avatar"
+                          >
+                        {% else %}
+                          <div class="vip-avatar-fallback">
+                            {{ displayName|slice(0, 1)|upper }}
+                          </div>
+                        {% endif %}
+
+                        <div>
+                          <div class="vip-name">
+                            {{ displayName }}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td data-search="{{ review.comment|default('') }}">
+                      {% if review.comment %}
+                        <div class="vip-review-comment">
+                          {{ review.comment }}
+                        </div>
+                      {% else %}
+                        <span class="muted small">
+                          {% trans %}Aucun commentaire{% endtrans %}
+                        </span>
+                      {% endif %}
+                    </td>
+
+                    <td
+                      data-search="{{ globalScore }} {{ starsCount }} étoiles"
+                      data-order="{{ globalScore }}"
+                    >
+                      <div
+                        class="stars"
+                        title="{{ globalScore|number_format(1, ',', ' ') }}/5"
+                        aria-label="{{ globalScore|number_format(1, ',', ' ') }} sur 5"
+                      >
+                        {% for i in 1..5 %}
+                          {% if i <= starsCount %}
+                            <span class="star-on">★</span>
+                          {% else %}
+                            <span class="star-off">☆</span>
+                          {% endif %}
+                        {% endfor %}
+                      </div>
+
+                      <div class="muted small mt-1">
+                        {{ (globalScore / 2)|number_format(1, ',', ' ') }}/5
+                      </div>
+                    </td>
+
+                    <td
+                      class="muted"
+                      data-order="{{ review.createdAt ? review.createdAt|date('Y-m-d H:i:s') : '' }}"
+                      data-search="{{ review.createdAt ? review.createdAt|date('d/m/Y H:i') : '' }}"
+                    >
+                      {{ review.createdAt
+                        ? review.createdAt|date('d/m/Y H:i')
+                        : '—'
+                      }}
+                    </td>
+
+                    <td class="text-end">
+                      {% if profileUrl %}
+                        <a
+                          class="btn btn-vip btn-primary-soft btn-sm"
+                          href="{{ profileUrl }}"
+                        >
+                          <i class="fa-regular fa-eye"></i>
+                          {% trans %}Voir le profil{% endtrans %}
+                        </a>
+                      {% else %}
+                        <span class="muted small">
+                          {% trans %}Profil indisponible{% endtrans %}
+                        </span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="6" class="text-center muted py-4">
+                      {% trans %}Aucun avis disponible{% endtrans %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div class="reviews-footer">
+            <div id="reviewsPageInfo" class="reviews-page-info">
+              Page 1 sur 1
+            </div>
+
+            <nav
+              id="reviewsPagination"
+              class="reviews-pagination"
+              aria-label="{% trans %}Pagination des avis{% endtrans %}"
+            ></nav>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  function initializeReviewsTable() {
+    const table = document.getElementById('ratingTable');
+    const perPageSelect = document.getElementById('reviewsPerPage');
+    const searchInput = document.getElementById('reviewsSearch');
+    const pagination = document.getElementById('reviewsPagination');
+    const pageInfo = document.getElementById('reviewsPageInfo');
+
+    if (
+      !table ||
+      !perPageSelect ||
+      !searchInput ||
+      !pagination ||
+      !pageInfo
+    ) {
+      return;
+    }
+
+    const tbody = table.querySelector('tbody');
+
+    if (!tbody) {
+      return;
+    }
+
+    const rows = Array.from(
+      tbody.querySelectorAll('tr[data-review-row]')
+    );
+
+    let currentPage = 1;
+    let perPage = Number(perPageSelect.value) || 10;
+    let searchValue = '';
+
+    const existingEmptyRow = tbody.querySelector(
+      'tr:not([data-review-row])'
+    );
+
+    let searchEmptyRow = tbody.querySelector('.reviews-no-result');
+
+    if (!searchEmptyRow) {
+      searchEmptyRow = document.createElement('tr');
+      searchEmptyRow.className = 'reviews-no-result';
+      searchEmptyRow.style.display = 'none';
+
+      const emptyCell = document.createElement('td');
+      emptyCell.colSpan = 6;
+      emptyCell.textContent =
+        'Aucun avis ne correspond à votre recherche.';
+
+      searchEmptyRow.appendChild(emptyCell);
+      tbody.appendChild(searchEmptyRow);
+    }
+
+    function normalizeText(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function getFilteredRows() {
+      if (!searchValue) {
+        return rows;
+      }
+
+      return rows.filter(function (row) {
+        return normalizeText(row.textContent).includes(searchValue);
+      });
+    }
+
+    function createButton(label, page, options) {
+      const settings = options || {};
+      const button = document.createElement('button');
+
+      button.type = 'button';
+      button.className = 'reviews-page-button';
+      button.textContent = label;
+
+      if (settings.active) {
+        button.classList.add('active');
+        button.setAttribute('aria-current', 'page');
+      }
+
+      button.disabled = Boolean(settings.disabled);
+
+      if (!button.disabled && !settings.active) {
+        button.addEventListener('click', function () {
+          currentPage = page;
+          renderTable();
+        });
+      }
+
+      return button;
+    }
+
+    function createEllipsis() {
+      const ellipsis = document.createElement('span');
+
+      ellipsis.className = 'reviews-page-ellipsis';
+      ellipsis.textContent = '…';
+
+      return ellipsis;
+    }
+
+    function getVisiblePages(totalPages) {
+      if (totalPages <= 9) {
+        return Array.from(
+          { length: totalPages },
+          function (_, index) {
+            return index + 1;
+          }
+        );
+      }
+
+      const importantPages = new Set();
+
+      /* Première page */
+      importantPages.add(1);
+
+      /* Page actuelle et pages voisines */
+      importantPages.add(currentPage - 1);
+      importantPages.add(currentPage);
+      importantPages.add(currentPage + 1);
+
+      /* Trois dernières pages */
+      importantPages.add(totalPages - 2);
+      importantPages.add(totalPages - 1);
+      importantPages.add(totalPages);
+
+      return Array.from(importantPages)
+        .filter(function (page) {
+          return page >= 1 && page <= totalPages;
+        })
+        .sort(function (a, b) {
+          return a - b;
+        });
+    }
+
+    function renderPagination(totalPages) {
+      pagination.innerHTML = '';
+
+      pagination.appendChild(
+        createButton('Précédent', currentPage - 1, {
+          disabled: currentPage === 1
+        })
+      );
+
+      const visiblePages = getVisiblePages(totalPages);
+      let previousPage = null;
+
+      visiblePages.forEach(function (page) {
+        if (
+          previousPage !== null &&
+          page - previousPage > 1
+        ) {
+          pagination.appendChild(createEllipsis());
+        }
+
+        pagination.appendChild(
+          createButton(String(page), page, {
+            active: page === currentPage
+          })
+        );
+
+        previousPage = page;
+      });
+
+      pagination.appendChild(
+        createButton('Suivant', currentPage + 1, {
+          disabled: currentPage === totalPages
+        })
+      );
+    }
+
+    function renderTable() {
+      const filteredRows = getFilteredRows();
+      const totalResults = filteredRows.length;
+      const totalPages = Math.max(
+        1,
+        Math.ceil(totalResults / perPage)
+      );
+
+      if (currentPage > totalPages) {
+        currentPage = totalPages;
+      }
+
+      rows.forEach(function (row) {
+        row.style.display = 'none';
+      });
+
+      if (existingEmptyRow) {
+        existingEmptyRow.style.display =
+          rows.length === 0 ? '' : 'none';
+      }
+
+      searchEmptyRow.style.display =
+        rows.length > 0 && totalResults === 0
+          ? ''
+          : 'none';
+
+      const startIndex = (currentPage - 1) * perPage;
+      const endIndex = startIndex + perPage;
+
+      filteredRows
+        .slice(startIndex, endIndex)
+        .forEach(function (row) {
+          row.style.display = '';
+        });
+
+      if (totalResults === 0) {
+        pageInfo.textContent = 'Page 0 sur 0 — 0 avis';
+      } else {
+        pageInfo.textContent =
+          'Page ' +
+          currentPage +
+          ' sur ' +
+          totalPages +
+          ' — ' +
+          totalResults +
+          (totalResults > 1 ? ' avis' : ' avis');
+      }
+
+      renderPagination(totalPages);
+    }
+
+    perPageSelect.onchange = function () {
+      perPage = Number(this.value) || 10;
+      currentPage = 1;
+      renderTable();
+    };
+
+    searchInput.oninput = function () {
+      searchValue = normalizeText(this.value);
+      currentPage = 1;
+      renderTable();
+    };
+
+    renderTable();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      initializeReviewsTable
+    );
+  } else {
+    initializeReviewsTable();
+  }
+
+  /* Nécessaire lorsque Symfony UX Turbo est activé */
+  document.addEventListener(
+    'turbo:load',
+    initializeReviewsTable
+  );
+})();
+</script>
+
+{% endblock %}

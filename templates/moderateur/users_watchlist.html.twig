@@ -1,0 +1,407 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Watchlist{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_users_watchlist.html.twig" %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">👀 {% trans %}Watchlist — comptes à surveiller{% endtrans %}</div>
+        <div class="hint">{% trans %}Mode 3 : manuel + auto. Je vais ajouter un compte (note) ou suivre les candidats auto (reports/jobs).{% endtrans %}</div>
+
+        <div class="tabs" style="margin-top:10px;">
+          <a class="tab {{ tab == 'manual' ? 'on' : '' }}" href="{{ path('moderateur_watchlist_index', {tab:'manual', q:q, role:role, page:1, limit:limit}) }}">
+            ✅ {% trans %}Watchlist manuelle{% endtrans %} <span class="chip">{% trans %}Actifs:{% endtrans %} {{ manualActiveCount }}</span>
+          </a>
+          <a class="tab {{ tab == 'auto' ? 'on' : '' }}" href="{{ path('moderateur_watchlist_index', {tab:'auto', q:q, role:role, page:1, limit:limit, days:auto.days, tr:auto.tr, tj:auto.tj}) }}">
+            🤖 {% trans %}Auto suspects{% endtrans %}
+          </a>
+        </div>
+      </div>
+
+      <form method="get" class="filters">
+        <input type="hidden" name="tab" value="{{ tab }}">
+        {% if tab == 'manual' %}
+          <input type="hidden" name="active" value="{{ active ? '1' : '0' }}">
+        {% else %}
+          <input type="hidden" name="days" value="{{ auto.days }}">
+          <input type="hidden" name="tr" value="{{ auto.tr }}">
+          <input type="hidden" name="tj" value="{{ auto.tj }}">
+        {% endif %}
+
+        <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Recherche : email, phone, nom, ville…'|trans }}">
+
+        <select class="select" name="role">
+          <option value="">{% trans %}Tous rôles{% endtrans %}</option>
+          <option value="talent" {{ role=='talent'?'selected':'' }}>{% trans %}Talent{% endtrans %}</option>
+          <option value="particulier" {{ role=='particulier'?'selected':'' }}>{% trans %}Particulier{% endtrans %}</option>
+          <option value="company" {{ role=='company'?'selected':'' }}>{% trans %}Company{% endtrans %}</option>
+        </select>
+
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit == n ? 'selected' : '' }}>{{ n }}/page</option>
+          {% endfor %}
+        </select>
+
+        {% if tab == 'manual' %}
+          <select class="select" name="active">
+            <option value="1" {{ active ? 'selected' : '' }}>{% trans %}Actifs{% endtrans %}</option>
+            <option value="0" {{ not active ? 'selected' : '' }}>{% trans %}Inactifs{% endtrans %}</option>
+          </select>
+        {% else %}
+          <select class="select" name="days">
+            {% for d in [7,14,30,60,90] %}
+              <option value="{{ d }}" {{ auto.days == d ? 'selected':'' }}>{{ d }}j</option>
+            {% endfor %}
+          </select>
+          <select class="select" name="tr">
+            {% for v in [2,3,4,5,7,10] %}
+              <option value="{{ v }}" {{ auto.tr == v ? 'selected':'' }}>{% trans %}Reports ≥{% endtrans %} {{ v }}</option>
+            {% endfor %}
+          </select>
+          <select class="select" name="tj">
+            {% for v in [1,2,3,4,5] %}
+              <option value="{{ v }}" {{ auto.tj == v ? 'selected':'' }}>{% trans %}JobsReports ≥{% endtrans %} {{ v }}</option>
+            {% endfor %}
+          </select>
+        {% endif %}
+
+        <button class="btn primary" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+        <a class="btn" href="{{ path('moderateur_watchlist_index', {tab:tab}) }}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+
+      <div class="chartgrid">
+        <div class="col-8">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Combination — Score risque (page){% endtrans %}</div>
+                <div class="muted" style="font-size:12px;">{% trans %}Barres: jobReports • Ligne: openReports (auto). En manuel : bar “1”.{% endtrans %}</div>
+              </div>
+              <span class="chip">📈</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chScore"></canvas></div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Pie — Rôles (page){% endtrans %}</div>
+                <div class="muted" style="font-size:12px;">{% trans %}Talent / Particulier / Company{% endtrans %}</div>
+              </div>
+            </div>
+            <div class="canvaswrap"><canvas id="chRoles"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+        <span class="chip">{% trans %}Total:{% endtrans %} {{ total }}</span>
+        <div class="filters">
+          <a class="btn" href="{{ path('moderateur_content_suspects') }}">🧾 {% trans %}Contenus sensibles{% endtrans %}</a>
+          <a class="btn" href="{{ path('moderateur_analytics_index') }}">📊 {% trans %}Analytics{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            {% if tab == 'manual' %}
+              <tr>
+                <th>#</th>
+                <th>{% trans %}Utilisateur{% endtrans %}</th>
+                <th>{% trans %}Rôle{% endtrans %}</th>
+                <th>{% trans %}Note / raison{% endtrans %}</th>
+                <th>{% trans %}Ajouté le{% endtrans %}</th>
+                <th style="text-align:right;">{% trans %}Actions{% endtrans %}</th>
+              </tr>
+            {% else %}
+              <tr>
+                <th>#</th>
+                <th>{% trans %}Utilisateur{% endtrans %}</th>
+                <th>{% trans %}Rôle{% endtrans %}</th>
+                <th>{% trans %}Open reports{% endtrans %}</th>
+                <th>{% trans %}Job reports{% endtrans %}</th>
+                <th style="text-align:right;">{% trans %}Actions{% endtrans %}</th>
+              </tr>
+            {% endif %}
+          </thead>
+
+          <tbody>
+            {% for row in rows %}
+
+              {% if tab == 'manual' %}
+                {% set w = row %}
+                {% set u = w.targetUser %}
+                {% set pp = u ? u.personalProfile : null %}
+                {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+                {% set roles = u ? u.roles : [] %}
+                {% set roleLabel = ('ROLE_TALENT' in roles) ? ('Talent'|trans) : (('ROLE_COMPANY' in roles) ? ('Company'|trans) : ('Particulier'|trans)) %}
+
+                <tr>
+                  <td>#{{ w.id }}</td>
+                  <td>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                      <img class="avatar" src="{{ photo }}" alt="photo">
+                      <div>
+                        <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : (u ? u.email : '—') }}</div>
+                        <div class="muted" style="font-size:12px;">{{ u ? u.email : '—' }}{% if u and u.phone %} • {{ u.phone }}{% endif %}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="chip">{{ roleLabel }}</span></td>
+                  <td class="muted" style="font-size:12px;">
+                    {{ w.reason ?: '—' }}
+                  </td>
+                  <td class="muted" style="font-size:12px;">{{ w.createdAt ? w.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                  <td style="text-align:right;">
+                    <a class="btn" href="{{ path('moderateur_watchlist_show', {id: w.id}) }}">{% trans %}Voir{% endtrans %}</a>
+                    <a class="btn" href="{{ path('moderateur_verifications_show', {id: u.id}) }}">{% trans %}Vérifications{% endtrans %}</a>
+                    <button class="btn warn js-watch-note"
+                            data-url="{{ path('moderateur_watchlist_note', {id: w.id}) }}"
+                            data-token="{{ csrf_token('watch_note_' ~ w.id) }}"
+                            data-current="{{ w.reason|e('html_attr') }}">
+                      📝 {% trans %}Note{% endtrans %}
+                    </button>
+
+                    <button class="btn js-watch-toggle"
+                            data-url="{{ path('moderateur_watchlist_toggle', {id: w.id}) }}"
+                            data-token="{{ csrf_token('watch_toggle_' ~ w.id) }}"
+                            data-active="{{ w.isActive ? '1' : '0' }}">
+                      {{ w.isActive ? 'Désactiver'|trans : 'Activer'|trans }}
+                    </button>
+                  </td>
+                </tr>
+
+              {% else %}
+                {% set u = row[0] %}
+                {% set openReports = row.openReports ?? 0 %}
+                {% set jobReports  = row.jobReports ?? 0 %}
+                {% set pp = u ? u.personalProfile : null %}
+                {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+                {% set roles = u ? u.roles : [] %}
+                {% set roleLabel = ('ROLE_TALENT' in roles) ? ('Talent'|trans) : (('ROLE_COMPANY' in roles) ? ('Company'|trans) : ('Particulier'|trans)) %}
+
+                {% set autoReason = 'Auto:'|trans ~ ' ' ~ openReports ~ ' ' ~ 'reports open'|trans ~ ' • ' ~ jobReports ~ ' ' ~ 'job reports'|trans ~ ' (' ~ auto.days ~ 'j)' %}
+
+                <tr>
+                  <td>#{{ u.id }}</td>
+                  <td>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                      <img class="avatar" src="{{ photo }}" alt="photo">
+                      <div>
+                        <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : u.email }}</div>
+                        <div class="muted" style="font-size:12px;">{{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><span class="chip">{{ roleLabel }}</span></td>
+                  <td><span class="chip">{{ openReports }}</span></td>
+                  <td><span class="chip">{{ jobReports }}</span></td>
+                  <td style="text-align:right;">
+                    <a class="btn" href="/moderateur/verifications/u/{{ u.id }}">{% trans %}Voir{% endtrans %}</a>
+
+                    <button class="btn primary js-watch-add"
+                            data-url="{{ path('moderateur_watchlist_add', {id: u.id}) }}"
+                            data-token="{{ csrf_token('watch_add_' ~ u.id) }}"
+                            data-reason="{{ autoReason|e('html_attr') }}">
+                      ➕ {% trans %}Ajouter à watchlist{% endtrans %}
+                    </button>
+
+                    <a class="btn" href="/moderateur/reports?status=open&q={{ u.email|url_encode }}">{% trans %}Signalements{% endtrans %}</a>
+                  </td>
+                </tr>
+              {% endif %}
+
+            {% else %}
+              <tr><td colspan="6" style="padding:18px;text-align:center;color:rgba(15,23,42,.62);">{% trans %}Aucun élément{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p == page ? 'primary' : '' }}"
+               href="{{ path('moderateur_watchlist_index', {
+                 tab: tab,
+                 page: p,
+                 limit: limit,
+                 q: q,
+                 role: role,
+                 active: (tab=='manual' ? (active ? '1':'0') : null),
+                 days: auto.days,
+                 tr: auto.tr,
+                 tj: auto.tj
+               }) }}">
+              {{ p }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<script>
+  function toast(message, type='ok', sub=''){
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+      <div class="t-ico">${type==='ok'?'✅':type==='warn'?'⚠️':'⛔'}</div>
+      <div><div class="t-msg">${message}</div>${sub?`<div class="t-sub">${sub}</div>`:''}</div>
+    `;
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 3200);
+  }
+
+  async function postJson(url, payload){
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest' },
+      body: JSON.stringify(payload||{})
+    });
+    const data = await res.json().catch(()=>null);
+    if (!res.ok || !data || data.ok !== true) throw new Error(data?.message || 'Erreur');
+    return data;
+  }
+
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.js-watch-add');
+    if (!btn) return;
+    e.preventDefault();
+
+    try{
+      toast('{{ "Ajout watchlist…"|trans|e("js") }}', 'warn');
+      await postJson(btn.dataset.url, { _token: btn.dataset.token, reason: btn.dataset.reason });
+      toast('{{ "Ajouté ✅"|trans|e("js") }}', 'ok');
+      btn.textContent = '{{ "✅ Ajouté"|trans|e("js") }}';
+      btn.disabled = true;
+      btn.style.opacity = '.65';
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }
+  });
+
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.js-watch-toggle');
+    if (!btn) return;
+    e.preventDefault();
+
+    const active = btn.dataset.active === '1';
+    const next = !active;
+
+    try{
+      toast('{{ "Mise à jour…"|trans|e("js") }}', 'warn');
+      await postJson(btn.dataset.url, { _token: btn.dataset.token, active: next });
+      btn.dataset.active = next ? '1' : '0';
+      btn.textContent = next ? '{{ "Désactiver"|trans|e("js") }}' : '{{ "Activer"|trans|e("js") }}';
+      toast('{{ "OK ✅"|trans|e("js") }}', 'ok');
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }
+  });
+
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.js-watch-note');
+    if (!btn) return;
+    e.preventDefault();
+
+    const current = btn.dataset.current || '';
+    const reason = prompt('{{ "Note / raison (watchlist) :"|trans|e("js") }}', current);
+    if (reason === null) return;
+
+    try{
+      toast('{{ "Sauvegarde note…"|trans|e("js") }}', 'warn');
+      await postJson(btn.dataset.url, { _token: btn.dataset.token, reason });
+      btn.dataset.current = reason;
+      toast('{{ "Note enregistrée ✅"|trans|e("js") }}', 'ok');
+      location.reload();
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }
+  });
+
+  const tab = "{{ tab }}";
+  const raw = {{ rows|json_encode|raw }};
+
+  const roleCounts = { talent:0, particulier:0, company:0 };
+  function detectRole(roles){
+    roles = roles || [];
+    if (roles.includes('ROLE_TALENT')) return 'talent';
+    if (roles.includes('ROLE_COMPANY')) return 'company';
+    return 'particulier';
+  }
+
+  const labels = [];
+  const openSeries = [];
+  const jobSeries = [];
+  const manualSeries = [];
+
+  if (tab === 'auto') {
+    raw.forEach(r=>{
+      const u = r[0];
+      const role = detectRole(u.roles);
+      roleCounts[role]++;
+
+      labels.push(u.email || ('#'+u.id));
+      openSeries.push(Number(r.openReports || 0));
+      jobSeries.push(Number(r.jobReports || 0));
+    });
+  } else {
+    raw.forEach(w=>{
+      const u = w.targetUser;
+      const role = detectRole(u?.roles);
+      roleCounts[role]++;
+
+      labels.push(u?.email || ('#'+(u?.id||'—')));
+      manualSeries.push(1);
+    });
+  }
+
+  function makeChart(id, cfg){
+    const el = document.getElementById(id);
+    if (!el) return;
+    return new Chart(el, { ...cfg, options:{ responsive:true, maintainAspectRatio:false, ...cfg.options } });
+  }
+
+  makeChart('chRoles', {
+    type:'pie',
+    data:{ labels:['{{ "Talent"|trans|e("js") }}','{{ "Particulier"|trans|e("js") }}','{{ "Company"|trans|e("js") }}'], datasets:[{ data:[roleCounts.talent, roleCounts.particulier, roleCounts.company], borderWidth:1 }] },
+    options:{ plugins:{ legend:{ position:'bottom' } } }
+  });
+
+  makeChart('chScore', {
+    data:{
+      labels,
+      datasets: tab === 'auto'
+        ? [
+            { type:'bar', label:'{{ "Job reports"|trans|e("js") }}', data: jobSeries, borderWidth:1 },
+            { type:'line', label:'{{ "Open reports"|trans|e("js") }}', data: openSeries, tension:.35, fill:true, borderWidth:2, pointRadius:2,
+              backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a4').trim() || 'rgba(168,85,247,.28)' }
+          ]
+        : [
+            { type:'bar', label:'{{ "Watchlist (manuel)"|trans|e("js") }}', data: manualSeries, borderWidth:1 }
+          ]
+    },
+    options:{
+      plugins:{ legend:{ position:'bottom' } },
+      scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } }
+    }
+  });
+</script>
+{% endblock %}

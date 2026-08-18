@@ -1,0 +1,1027 @@
+{# templates/chat/_block_settings_modal.html.twig #}
+{#
+    Modale propre de réglages de blocage.
+
+    Important : cette version n'utilise PAS la modale Bootstrap.
+    Elle évite donc le bug de page grisée avec un backdrop Bootstrap bloqué.
+
+    Bouton menu compatible :
+    <button type="button" class="mol-panel-menu__item" data-mol-panel-action="block_setting" data-mol-block-settings-open>
+        <i class="bi bi-slash-circle"></i>
+        <span>Réglages de blocage</span>
+    </button>
+#}
+
+<div
+    id="molBlockSettingsModal"
+    class="mol-block-modal"
+    hidden
+    aria-hidden="true"
+    data-status-url="{{ path('app_chat_block_settings_status') }}"
+    data-save-url="{{ path('app_chat_block_settings_save') }}"
+    data-block-url="{{ path('app_chat_block_settings_block_user') }}"
+    data-unblock-url-template="{{ path('app_chat_block_settings_unblock_user', { id: 0 }) }}"
+    data-csrf="{{ csrf_token('chat_block_settings') }}"
+>
+    <div class="mol-block-modal__backdrop" data-mol-block-close></div>
+
+    <section
+        class="mol-block-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="molBlockSettingsTitle"
+    >
+        <header class="mol-block-modal__header">
+            <div>
+                <div class="mol-block-modal__badge">
+                    <i class="bi bi-shield-lock"></i>
+                    <span>{% trans %}Sécurité du chat{% endtrans %}</span>
+                </div>
+
+                <h2 id="molBlockSettingsTitle" class="mol-block-modal__title">
+                    {% trans %}Réglages de blocage{% endtrans %}
+                </h2>
+
+                <p class="mol-block-modal__subtitle">
+                    {% trans %}Contrôlez qui peut vous contacter, ce qui peut être envoyé, et les utilisateurs bloqués.{% endtrans %}
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="mol-block-modal__close"
+                data-mol-block-close
+                aria-label="{{ 'Fermer'|trans }}"
+            >
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </header>
+
+        <div class="mol-block-layout">
+            <div class="mol-block-panel">
+                <h3>{% trans %}Protection automatique{% endtrans %}</h3>
+
+                <label class="mol-block-switch">
+                    <input type="checkbox" data-block-setting="blockUnknownUsers">
+                    <span></span>
+                    <div>
+                        <strong>{% trans %}Bloquer les utilisateurs inconnus{% endtrans %}</strong>
+                        <small>{% trans %}Empêche les nouveaux contacts non autorisés d’ouvrir une conversation.{% endtrans %}</small>
+                    </div>
+                </label>
+
+                <label class="mol-block-switch">
+                    <input type="checkbox" data-block-setting="blockCalls">
+                    <span></span>
+                    <div>
+                        <strong>{% trans %}Bloquer les appels{% endtrans %}</strong>
+                        <small>{% trans %}Désactive les appels audio et vidéo entrants.{% endtrans %}</small>
+                    </div>
+                </label>
+
+                <label class="mol-block-switch">
+                    <input type="checkbox" data-block-setting="blockFiles">
+                    <span></span>
+                    <div>
+                        <strong>{% trans %}Bloquer les fichiers{% endtrans %}</strong>
+                        <small>{% trans %}Empêche la réception des pièces jointes.{% endtrans %}</small>
+                    </div>
+                </label>
+
+                <label class="mol-block-switch">
+                    <input type="checkbox" data-block-setting="blockLinks">
+                    <span></span>
+                    <div>
+                        <strong>{% trans %}Bloquer les liens{% endtrans %}</strong>
+                        <small>{% trans %}Filtre les messages contenant des liens externes.{% endtrans %}</small>
+                    </div>
+                </label>
+
+                <label class="mol-block-switch">
+                    <input type="checkbox" data-block-setting="profanityFilter">
+                    <span></span>
+                    <div>
+                        <strong>{% trans %}Filtre anti-insultes{% endtrans %}</strong>
+                        <small>{% trans %}Filtre automatiquement les contenus agressifs ou abusifs.{% endtrans %}</small>
+                    </div>
+                </label>
+
+                <label class="mol-block-switch">
+                    <input type="checkbox" data-block-setting="hideBlockedConversations">
+                    <span></span>
+                    <div>
+                        <strong>{% trans %}Masquer les conversations bloquées{% endtrans %}</strong>
+                        <small>{% trans %}Les conversations bloquées ne remontent plus dans la liste.{% endtrans %}</small>
+                    </div>
+                </label>
+            </div>
+
+            <div class="mol-block-panel">
+                <div class="mol-block-panel__top">
+                    <h3>{% trans %}Utilisateurs bloqués{% endtrans %}</h3>
+
+                    <button type="button" class="mol-block-refresh" data-mol-block-refresh>
+                        <i class="bi bi-arrow-clockwise"></i>
+                        <span>{% trans %}Actualiser{% endtrans %}</span>
+                    </button>
+                </div>
+
+                <form class="mol-block-add" data-mol-block-add-form autocomplete="off">
+                    <div class="mol-block-field">
+                        <label>{% trans %}Identifiant, email ou username{% endtrans %}</label>
+                        <input type="text" name="identifier" placeholder="exemple@email.com" required>
+                    </div>
+
+                    <div class="mol-block-field">
+                        <label>{% trans %}Nom affiché{% endtrans %}</label>
+                        <input type="text" name="label" placeholder="{{ 'Nom visible dans la liste'|trans }}">
+                    </div>
+
+                    <div class="mol-block-field">
+                        <label>{% trans %}Raison{% endtrans %}</label>
+                        <input type="text" name="reason" placeholder="{{ 'Spam, harcèlement, contenu indésirable...'|trans }}">
+                    </div>
+
+                    <button type="submit" class="mol-block-btn mol-block-btn--dark">
+                        <i class="bi bi-person-slash"></i>
+                        <span>{% trans %}Bloquer{% endtrans %}</span>
+                    </button>
+                </form>
+
+                <div class="mol-block-search">
+                    <i class="bi bi-search"></i>
+                    <input type="search" data-mol-block-search placeholder="{{ 'Rechercher un utilisateur bloqué...'|trans }}">
+                </div>
+
+                <div class="mol-blocked-list" id="molBlockedUsersList">
+                    <div class="mol-block-empty">
+                        {% trans %}Aucun utilisateur bloqué.{% endtrans %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mol-block-modal__footer">
+            <button type="button" class="mol-block-btn mol-block-btn--ghost" data-mol-block-close>
+                {% trans %}Annuler{% endtrans %}
+            </button>
+
+            <button type="button" class="mol-block-btn mol-block-btn--primary" data-mol-block-save>
+                <i class="bi bi-check2-circle"></i>
+                <span>{% trans %}Enregistrer les réglages{% endtrans %}</span>
+            </button>
+        </footer>
+    </section>
+</div>
+
+<style id="mol-block-settings-modal-style">
+    .mol-block-modal[hidden] {
+        display: none !important;
+    }
+
+    .mol-block-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+    }
+
+    .mol-block-modal__backdrop {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at top right, rgba(239, 68, 68, .28), transparent 34%),
+            rgba(15, 23, 42, .66);
+        backdrop-filter: blur(12px);
+    }
+
+    .mol-block-modal__dialog {
+        position: relative;
+        width: min(1040px, 100%);
+        max-height: calc(100vh - 32px);
+        overflow: auto;
+        border-radius: 30px;
+        padding: 28px;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.98));
+        border: 1px solid rgba(226, 232, 240, .95);
+        box-shadow: 0 34px 110px rgba(15, 23, 42, .34);
+        transform: translateY(16px) scale(.975);
+        opacity: 0;
+        transition: .22s ease;
+    }
+
+    .mol-block-modal.is-open .mol-block-modal__dialog {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .mol-block-modal__header,
+    .mol-block-modal__footer {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+    }
+
+    .mol-block-modal__footer {
+        align-items: center;
+        justify-content: flex-end;
+        border-top: 1px solid rgba(148, 163, 184, .18);
+        padding-top: 18px;
+        margin-top: 22px;
+    }
+
+    .mol-block-modal__badge {
+        width: fit-content;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #fff1f2;
+        color: #dc2626;
+        font-size: 12px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        box-shadow: inset 0 0 0 1px rgba(220, 38, 38, .10);
+    }
+
+    .mol-block-modal__title {
+        margin: 0;
+        font-size: clamp(25px, 4vw, 36px);
+        line-height: 1.05;
+        font-weight: 950;
+        color: #0f172a;
+        letter-spacing: -.04em;
+    }
+
+    .mol-block-modal__subtitle {
+        margin: 10px 0 0;
+        max-width: 640px;
+        color: #64748b;
+        font-size: 14px;
+        line-height: 1.55;
+    }
+
+    .mol-block-modal__close {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border: 0;
+        border-radius: 16px;
+        background: #f8fafc;
+        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .22);
+    }
+
+    .mol-block-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, .85fr);
+        gap: 16px;
+        margin-top: 22px;
+    }
+
+    .mol-block-panel {
+        border-radius: 26px;
+        padding: 18px;
+        background: #fff;
+        border: 1px solid rgba(148, 163, 184, .20);
+        box-shadow: 0 18px 44px rgba(15, 23, 42, .06);
+    }
+
+    .mol-block-panel__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .mol-block-panel h3 {
+        margin: 0 0 14px;
+        font-size: 16px;
+        color: #0f172a;
+        font-weight: 950;
+    }
+
+    .mol-block-panel__top h3 {
+        margin-bottom: 0;
+    }
+
+    .mol-block-refresh {
+        height: 36px;
+        border: 0;
+        border-radius: 12px;
+        padding: 0 12px;
+        background: #f1f5f9;
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .mol-block-switch {
+        display: grid;
+        grid-template-columns: 46px minmax(0, 1fr);
+        gap: 12px;
+        align-items: center;
+        padding: 14px;
+        border-radius: 18px;
+        border: 1px solid rgba(148, 163, 184, .16);
+        background: linear-gradient(180deg, #fff, #f8fafc);
+        cursor: pointer;
+        margin-bottom: 10px;
+        transition: .16s ease;
+    }
+
+    .mol-block-switch:hover {
+        border-color: rgba(220, 38, 38, .22);
+        transform: translateY(-1px);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, .06);
+    }
+
+    .mol-block-switch input {
+        display: none;
+    }
+
+    .mol-block-switch > span {
+        width: 44px;
+        height: 26px;
+        border-radius: 999px;
+        background: #cbd5e1;
+        position: relative;
+        transition: .16s ease;
+    }
+
+    .mol-block-switch > span::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 3px;
+        left: 3px;
+        border-radius: 999px;
+        background: #fff;
+        box-shadow: 0 3px 8px rgba(15, 23, 42, .20);
+        transition: .16s ease;
+    }
+
+    .mol-block-switch input:checked + span {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+
+    .mol-block-switch input:checked + span::after {
+        transform: translateX(18px);
+    }
+
+    .mol-block-switch strong {
+        display: block;
+        color: #0f172a;
+        font-size: 14px;
+        font-weight: 900;
+    }
+
+    .mol-block-switch small {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .mol-block-add {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .mol-block-field label {
+        display: block;
+        color: #334155;
+        font-size: 12px;
+        font-weight: 850;
+        margin-bottom: 6px;
+    }
+
+    .mol-block-field input,
+    .mol-block-search input {
+        width: 100%;
+        border: 0;
+        outline: 0;
+        color: #0f172a;
+        background: transparent;
+    }
+
+    .mol-block-field input {
+        height: 44px;
+        border: 1px solid rgba(148, 163, 184, .28);
+        border-radius: 14px;
+        padding: 0 13px;
+        background: #f8fafc;
+    }
+
+    .mol-block-field input:focus {
+        border-color: rgba(220, 38, 38, .42);
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, .08);
+        background: #fff;
+    }
+
+    .mol-block-search {
+        height: 42px;
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, .25);
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        color: #94a3b8;
+        margin-bottom: 12px;
+    }
+
+    .mol-blocked-list {
+        display: grid;
+        gap: 10px;
+        max-height: 290px;
+        overflow: auto;
+        padding-right: 4px;
+    }
+
+    .mol-blocked-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px;
+        border-radius: 18px;
+        background: #f8fafc;
+        border: 1px solid rgba(148, 163, 184, .18);
+    }
+
+    .mol-blocked-item strong {
+        display: block;
+        color: #0f172a;
+        font-size: 13px;
+        font-weight: 950;
+    }
+
+    .mol-blocked-item small {
+        display: block;
+        color: #64748b;
+        margin-top: 3px;
+        font-size: 12px;
+    }
+
+    .mol-block-empty {
+        color: #64748b;
+        background: #f8fafc;
+        border: 1px dashed rgba(148, 163, 184, .35);
+        border-radius: 18px;
+        padding: 18px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 750;
+    }
+
+    .mol-block-btn {
+        height: 46px;
+        border: 0;
+        border-radius: 16px;
+        padding: 0 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        font-weight: 900;
+        transition: .16s ease;
+    }
+
+    .mol-block-btn--ghost {
+        background: #f8fafc;
+        color: #334155;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, .24);
+    }
+
+    .mol-block-btn--primary {
+        color: #fff;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        box-shadow: 0 14px 28px rgba(220, 38, 38, .22);
+    }
+
+    .mol-block-btn--dark {
+        width: 100%;
+        color: #fff;
+        background: #0f172a;
+    }
+
+    .mol-block-btn--danger-soft {
+        height: 36px;
+        border-radius: 12px;
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 0 12px;
+    }
+
+    .mol-block-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .mol-block-btn.is-loading {
+        pointer-events: none;
+        opacity: .68;
+    }
+
+    body.mol-block-modal-open {
+        overflow: hidden !important;
+    }
+
+    @media (max-width: 860px) {
+        .mol-block-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 620px) {
+        .mol-block-modal {
+            padding: 10px;
+            align-items: flex-end;
+        }
+
+        .mol-block-modal__dialog {
+            border-radius: 26px 26px 18px 18px;
+            padding: 20px;
+        }
+
+        .mol-block-modal__footer {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .mol-block-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script id="mol-block-settings-modal-script">
+(() => {
+    if (window.__MOL_BLOCK_SETTINGS_MODULE__) return;
+    window.__MOL_BLOCK_SETTINGS_MODULE__ = true;
+
+    let previousPanelAction = window.MOLChatPanelAction || null;
+    let lastFocusedElement = null;
+
+    function modal() {
+        return document.getElementById('molBlockSettingsModal');
+    }
+
+    function qsa(selector, root = document) {
+        return Array.from(root.querySelectorAll(selector));
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function notify(type, title, text = '') {
+        if (window.Swal) {
+            Swal.fire({
+                icon: type || 'info',
+                title: title || '',
+                text: text || '',
+                timer: type === 'success' ? 1700 : undefined,
+                showConfirmButton: type !== 'success',
+                confirmButtonColor: '#dc2626',
+                backdrop: 'rgba(15,23,42,.38)'
+            });
+            return;
+        }
+
+        alert([title, text].filter(Boolean).join('\n'));
+    }
+
+    function cleanupBootstrapBackdrops() {
+        /*
+         * Corrige le bug de page grisée :
+         * si une ancienne modale Bootstrap a laissé un backdrop sans modale visible,
+         * on nettoie le backdrop et les classes body.
+         */
+        const hasVisibleBootstrapModal = !!document.querySelector('.modal.show');
+
+        if (!hasVisibleBootstrapModal) {
+            document.querySelectorAll('.modal-backdrop').forEach((backdrop) => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        }
+    }
+
+    function closeAnyPanelMenu() {
+        try {
+            window.MOLChatPanelMenu?.close?.();
+        } catch (_) {}
+
+        document
+            .querySelectorAll('#molChatPanelMenuFinal, #molChatPanelMenu, #molChatPanelMenuRescue, .mol-chat-menu, .mol-panel-menu')
+            .forEach((menu) => {
+                menu.classList.remove('is-open', 'show');
+                menu.setAttribute('aria-hidden', 'true');
+                if (menu.id === 'molChatPanelMenuRescue') {
+                    menu.style.display = 'none';
+                }
+            });
+
+        document
+            .querySelectorAll('#molChatPanelOptionsBtnFinal, #molChatPanelOptionsBtn, #molChatPanelOptionsBtnRescue, [aria-expanded="true"]')
+            .forEach((button) => {
+                if (
+                    button.matches('#molChatPanelOptionsBtnFinal, #molChatPanelOptionsBtn, #molChatPanelOptionsBtnRescue') ||
+                    button.matches('[data-mol-menu-toggle], [data-mol-chat-dropdown-toggle], [data-bs-toggle="dropdown"]')
+                ) {
+                    button.setAttribute('aria-expanded', 'false');
+                }
+            });
+    }
+
+    function openModal() {
+        const m = modal();
+        if (!m) return;
+
+        cleanupBootstrapBackdrops();
+        closeAnyPanelMenu();
+
+        lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+        m.hidden = false;
+        m.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('mol-block-modal-open');
+
+        requestAnimationFrame(() => {
+            m.classList.add('is-open');
+            const firstInput = m.querySelector('input[name="identifier"]');
+            if (firstInput) setTimeout(() => firstInput.focus(), 160);
+        });
+
+        loadStatus();
+    }
+
+    function closeModal() {
+        const m = modal();
+        if (!m) return;
+
+        m.classList.remove('is-open');
+        m.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('mol-block-modal-open');
+
+        setTimeout(() => {
+            m.hidden = true;
+            cleanupBootstrapBackdrops();
+            try {
+                lastFocusedElement?.focus?.();
+            } catch (_) {}
+        }, 180);
+    }
+
+    function unblockUrl(id) {
+        const m = modal();
+        const template = m?.dataset.unblockUrlTemplate || '';
+
+        return template
+            .replace('/0', '/' + encodeURIComponent(id))
+            .replace('=0', '=' + encodeURIComponent(id));
+    }
+
+    function applySettings(settings = {}) {
+        const m = modal();
+        if (!m) return;
+
+        qsa('[data-block-setting]', m).forEach((input) => {
+            input.checked = !!settings[input.dataset.blockSetting];
+        });
+    }
+
+    function getFilteredBlockedUsers(items = []) {
+        const m = modal();
+        const query = String(m?.querySelector('[data-mol-block-search]')?.value || '').trim().toLowerCase();
+
+        if (!query) return items;
+
+        return items.filter((item) => {
+            return [item.label, item.identifier, item.reason]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase()
+                .includes(query);
+        });
+    }
+
+    function renderBlockedUsers(items = []) {
+        const list = document.getElementById('molBlockedUsersList');
+        if (!list) return;
+
+        const filtered = getFilteredBlockedUsers(items);
+        list.dataset.rawItems = JSON.stringify(items || []);
+
+        if (!filtered.length) {
+            list.innerHTML = `<div class="mol-block-empty">${items.length ? 'Aucun résultat.' : 'Aucun utilisateur bloqué.'}</div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map((item) => `
+            <div class="mol-blocked-item">
+                <div>
+                    <strong>${escapeHtml(item.label || item.identifier || 'Utilisateur bloqué')}</strong>
+                    <small>${escapeHtml(item.identifier || '')}</small>
+                    ${item.reason ? `<small>Raison : ${escapeHtml(item.reason)}</small>` : ''}
+                </div>
+
+                <button type="button" class="mol-block-btn mol-block-btn--danger-soft" data-mol-unblock="${Number(item.id)}">
+                    Débloquer
+                </button>
+            </div>
+        `).join('');
+    }
+
+    async function loadStatus() {
+        const m = modal();
+        if (!m) return;
+
+        try {
+            const response = await fetch(m.dataset.statusUrl, {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.success !== true) {
+                throw new Error(data.message || 'Impossible de charger les réglages.');
+            }
+
+            applySettings(data.settings || {});
+            renderBlockedUsers(data.blockedUsers || []);
+        } catch (error) {
+            console.error('[MOL BLOCK SETTINGS] status error', error);
+            renderBlockedUsers([]);
+        }
+    }
+
+    async function saveSettings() {
+        const m = modal();
+        if (!m) return;
+
+        const button = m.querySelector('[data-mol-block-save]');
+        const formData = new FormData();
+
+        formData.append('_token', m.dataset.csrf || '');
+
+        qsa('[data-block-setting]', m).forEach((input) => {
+            formData.append(input.dataset.blockSetting, input.checked ? '1' : '0');
+        });
+
+        try {
+            button?.classList.add('is-loading');
+            if (button) button.disabled = true;
+
+            const response = await fetch(m.dataset.saveUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.success !== true) {
+                throw new Error(data.message || 'Impossible d’enregistrer les réglages.');
+            }
+
+            notify('success', 'Réglages enregistrés', data.message || 'Les réglages de blocage ont été mis à jour.');
+            closeModal();
+        } catch (error) {
+            showError(error.message || 'Impossible d’enregistrer les réglages.');
+        } finally {
+            button?.classList.remove('is-loading');
+            if (button) button.disabled = false;
+        }
+    }
+
+    async function blockUser(form) {
+        const m = modal();
+        if (!m) return;
+
+        const identifier = String(form.querySelector('[name="identifier"]')?.value || '').trim();
+
+        if (!identifier) {
+            showError('Saisissez un identifiant, email ou username.');
+            form.querySelector('[name="identifier"]')?.focus();
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.append('_token', m.dataset.csrf || '');
+
+        const button = form.querySelector('[type="submit"]');
+
+        try {
+            button?.classList.add('is-loading');
+            if (button) button.disabled = true;
+
+            const response = await fetch(m.dataset.blockUrl, {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.success !== true) {
+                throw new Error(data.message || 'Impossible de bloquer cet utilisateur.');
+            }
+
+            form.reset();
+            await loadStatus();
+            notify('success', 'Utilisateur bloqué', data.message || 'La liste de blocage a été mise à jour.');
+        } catch (error) {
+            showError(error.message || 'Impossible de bloquer cet utilisateur.');
+        } finally {
+            button?.classList.remove('is-loading');
+            if (button) button.disabled = false;
+        }
+    }
+
+    async function unblockUser(id) {
+        const m = modal();
+        if (!m || !id) return;
+
+        const formData = new FormData();
+        formData.append('_token', m.dataset.csrf || '');
+
+        try {
+            const response = await fetch(unblockUrl(id), {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok || data.success !== true) {
+                throw new Error(data.message || 'Impossible de débloquer cet utilisateur.');
+            }
+
+            await loadStatus();
+            notify('success', 'Utilisateur débloqué', data.message || 'L’utilisateur a été retiré de la liste.');
+        } catch (error) {
+            showError(error.message || 'Impossible de débloquer cet utilisateur.');
+        }
+    }
+
+    function showError(message) {
+        notify('error', 'Action impossible', message);
+    }
+
+    function installBridge() {
+        previousPanelAction = window.MOLChatPanelAction || previousPanelAction;
+
+        window.MOLChatPanelAction = async function(action, payload = {}) {
+            if (action === 'block_setting' || action === 'blockSettings') {
+                closeAnyPanelMenu();
+                openModal();
+                return true;
+            }
+
+            if (typeof previousPanelAction === 'function' && previousPanelAction !== window.MOLChatPanelAction) {
+                return await previousPanelAction(action, payload);
+            }
+
+            return null;
+        };
+    }
+
+    document.addEventListener('click', async (event) => {
+        const directButton = event.target.closest(
+            '[data-mol-block-settings-open], ' +
+            '[data-action="block_setting"], ' +
+            '[data-action="blockSettings"], ' +
+            '[data-mol-panel-action="block_setting"], ' +
+            '[data-mol-panel-action="blockSettings"]'
+        );
+
+        if (directButton) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+            openModal();
+            return;
+        }
+
+        const closeButton = event.target.closest('[data-mol-block-close]');
+        if (closeButton && modal()?.contains(closeButton)) {
+            event.preventDefault();
+            closeModal();
+            return;
+        }
+
+        const refreshButton = event.target.closest('[data-mol-block-refresh]');
+        if (refreshButton && modal()?.contains(refreshButton)) {
+            event.preventDefault();
+            await loadStatus();
+            return;
+        }
+
+        const saveButton = event.target.closest('[data-mol-block-save]');
+        if (saveButton && modal()?.contains(saveButton)) {
+            event.preventDefault();
+            await saveSettings();
+            return;
+        }
+
+        const unblockButton = event.target.closest('[data-mol-unblock]');
+        if (unblockButton && modal()?.contains(unblockButton)) {
+            event.preventDefault();
+            await unblockUser(unblockButton.dataset.molUnblock);
+        }
+    }, true);
+
+    document.addEventListener('submit', async (event) => {
+        const form = event.target.closest('[data-mol-block-add-form]');
+
+        if (!form || !modal()?.contains(form)) return;
+
+        event.preventDefault();
+        await blockUser(form);
+    });
+
+    document.addEventListener('input', (event) => {
+        const search = event.target.closest('[data-mol-block-search]');
+        if (!search || !modal()?.contains(search)) return;
+
+        const list = document.getElementById('molBlockedUsersList');
+        const raw = list?.dataset?.rawItems || '[]';
+
+        try {
+            renderBlockedUsers(JSON.parse(raw));
+        } catch (_) {
+            renderBlockedUsers([]);
+        }
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal() && !modal().hidden) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('turbo:before-cache', () => {
+        closeModal();
+        cleanupBootstrapBackdrops();
+    });
+
+    document.addEventListener('DOMContentLoaded', installBridge);
+    document.addEventListener('turbo:load', installBridge);
+
+    if (document.readyState !== 'loading') {
+        installBridge();
+    }
+
+    window.MolBlockSettings = {
+        open: openModal,
+        close: closeModal,
+        reload: loadStatus,
+        cleanup: cleanupBootstrapBackdrops
+    };
+})();
+</script>

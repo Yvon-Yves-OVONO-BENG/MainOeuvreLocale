@@ -1,0 +1,43 @@
+<div class="border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,.95),rgba(248,250,252,.92))] px-6 py-5">
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <div class="text-xs font-semibold text-slate-500">{% trans %}Règles KYC{% endtrans %}</div>
+      <div class="text-2xl font-black tracking-tight text-slate-900">🧪 {% trans %}Tester l’impact{% endtrans %}</div>
+      <div class="mt-1 text-sm font-medium text-slate-600">{{ rule.label }}</div>
+    </div>
+
+    <button type="button"
+        class="self-start inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-200/70 bg-white text-[10px] font-bold text-slate-400 shadow-[0_1px_6px_rgba(2,6,23,.04)] transition hover:bg-slate-50 hover:border-slate-300 hover:text-slate-600"
+        data-kyc-close
+        aria-label="{% trans %}Fermer{% endtrans %}">
+      ✕
+    </button>
+  </div>
+</div>
+
+<div class="p-6 space-y-4">
+  <div class="rounded-2xl border border-slate-200 bg-white p-4">
+    <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Périmètre concerné{% endtrans %}</div>
+    <div class="mt-2 text-sm font-semibold text-slate-800">{{ impact.scope }}</div>
+  </div>
+
+  <div class="rounded-2xl border border-slate-200 bg-white p-4">
+    <div class="text-[11px] font-extrabold uppercase tracking-wide text-slate-500">{% trans %}Effet estimé{% endtrans %}</div>
+    <div class="mt-2 text-sm font-semibold text-slate-800">{{ impact.effect }}</div>
+  </div>
+
+  <div class="rounded-2xl border {{ impact.enabled ? 'border-emerald-200/70 bg-emerald-50' : 'border-slate-200 bg-slate-50/70' }} p-4">
+    <div class="text-[11px] font-extrabold uppercase tracking-wide {{ impact.enabled ? 'text-emerald-700' : 'text-slate-500' }}">{% trans %}État actuel{% endtrans %}</div>
+    <div class="mt-2 text-sm font-black {{ impact.enabled ? 'text-emerald-800' : 'text-slate-700' }}">
+      {{ impact.enabled ? 'Cette règle est active et impacte déjà la plateforme.'|trans : 'Cette règle est inactive et n’impacte pas encore les utilisateurs.'|trans }}
+    </div>
+  </div>
+
+  <div class="flex justify-end pt-1">
+    <button type="button"
+            class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-800 hover:bg-slate-50"
+            data-kyc-close>
+      {% trans %}Fermer{% endtrans %}
+    </button>
+  </div>
+</div>

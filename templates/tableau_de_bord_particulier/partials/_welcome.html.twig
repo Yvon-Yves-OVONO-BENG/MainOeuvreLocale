@@ -1,0 +1,35 @@
+{# ===================== INTRODUCTION ===================== #}
+            <section class="mol-card mol-welcome overflow-hidden rounded-[26px]">
+                <div class="grid gap-0 lg:grid-cols-[minmax(0,1fr)_330px]">
+                    <div class="p-6 sm:p-8 lg:p-9">
+
+                        <h2 class="max-w-3xl text-2xl font-bold leading-tight tracking-[-0.035em] text-slate-950 sm:text-3xl lg:text-[2.2rem]">
+                            {% trans %}Tout ce qu’il vous faut pour publier, recruter et postuler.{% endtrans %}
+                        </h2>
+
+                    </div>
+
+                    <aside class="mol-profile-progress-panel border-t p-6 sm:p-7 lg:border-l lg:border-t-0">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-xs font-medium text-slate-500">{% trans %}Profil complété{% endtrans %}</div>
+                                <div class="mt-1 text-3xl font-bold tracking-tight text-slate-950">{{ completion }}%</div>
+                            </div>
+                            {% if completion >= 80 %}
+                                <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-700">{% trans %}Très bon niveau{% endtrans %}</span>
+                            {% else %}
+                                <span class="rounded-full bg-blue-50 px-3 py-1.5 text-[11px] font-semibold text-blue-700">{% trans %}À compléter{% endtrans %}</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mol-progress-track mt-4" aria-hidden="true">
+                            <div class="mol-progress-value" style="width: {{ completion }}%;"></div>
+                        </div>
+
+                        <a href="{{ path('profile_edit') }}" data-turbo="false"
+                            class="mt-4 inline-flex items-center text-xs font-semibold text-blue-700 no-underline hover:text-blue-800 hover:underline">
+                            {% trans %}Mettre mon profil à jour →{% endtrans %}
+                        </a>
+                    </aside>
+                </div>
+            </section>

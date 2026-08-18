@@ -1,0 +1,238 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans with {'%method%': method} %}Paiement %method%{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "payment_boost/_vip_ui_mobile_pay.html.twig" %}
+
+<div class="container vip-wrap">
+  <div class="vip-hero w-100">
+    <div class="vip-shell">
+
+      <div class="vip-topbar">
+        <a class="vip-back" href="{{ path('payment_boost', {plan: plan, montant: montant}) }}">
+          <span style="font-weight:900;">←</span>
+          <span>{% trans %}Retour{% endtrans %}</span>
+        </a>
+
+        <div class="vip-badge">
+          <span class="vip-dot"></span>
+          <span>{{ montant|number_format(0,'.',' ') }} XAF</span>
+        </div>
+      </div>
+
+      <div class="vip-card">
+        <div class="vip-card-h">
+          <div>
+            <h3 class="vip-title">{% trans %}Paiement Mobile{% endtrans %}</h3>
+            <p class="vip-sub">
+              {% trans %}Vous êtes en train de payer par{% endtrans %}
+              <strong class="{% if method == 'OM' %}text-warning{% else %}text-info{% endif %}">
+                {{ method == 'OM' ? 'Orange Money (OM)' : 'MTN Mobile Money (MoMo)' }}
+              </strong>
+            </p>
+          </div>
+
+          <div class="vip-method-pill">
+            <span class="vip-method-icon">
+              {% if method == 'OM' %}
+                <i class="fa fa-circle text-warning"></i>
+              {% else %}
+                <i class="fa fa-circle text-info"></i>
+              {% endif %}
+            </span>
+            <span>{{ method }}</span>
+          </div>
+        </div>
+
+        <div class="vip-card-b">
+
+          <div class="vip-kpis">
+            <div class="vip-kpi">
+              <small>{% trans %}Plan{% endtrans %}</small>
+              <div>{{ plan|capitalize }}</div>
+            </div>
+            <div class="vip-kpi">
+              <small>{% trans %}Montant{% endtrans %}</small>
+              <div>{{ montant|number_format(0,'.',' ') }} XAF</div>
+            </div>
+            <div class="vip-kpi">
+              <small>{% trans %}Pays{% endtrans %}</small>
+              <div>{% trans %}Cameroun (+237){% endtrans %}</div>
+            </div>
+          </div>
+
+          <form id="mobilePayForm" method="post" action="javascript:void(0);">
+            {% set planIds = {'premium': 1, 'gold': 2, 'vip': 3} %}
+
+            <input type="hidden" id="payMethod" value="{{ method }}">
+            <input type="hidden" id="payPlan" value="{{ planIds[plan|lower|trim] ?? 0 }}">
+
+            <label class="form-label fw-bold">{% trans %}Numéro de téléphone{% endtrans %}</label>
+            <div class="vip-input-wrap">
+              <span class="vip-prefix">+237</span>
+              <input
+                type="tel"
+                class="vip-input"
+                id="payPhone"
+                name="phone"
+                placeholder="6XXXXXXXX"
+                required
+                inputmode="numeric"
+                pattern="[0-9]{9}">
+            </div>
+
+            <div class="vip-hint">{% trans %}Exemple : 6XXXXXXXX (9 chiffres){% endtrans %}</div>
+
+            <div class="vip-actions">
+              <div class="vip-lock">
+                <i class="fa fa-lock"></i>
+                <span>{% trans %}Paiement sécurisé{% endtrans %}</span>
+              </div>
+
+              <button id="payBtn" type="submit" class="vip-btn vip-btn-primary">
+                <i class="fa fa-paper-plane"></i>
+                <span>{% trans %}Lancer le paiement{% endtrans %}</span>
+              </button>
+            </div>
+
+            <div id="payStatus" class="vip-status">
+              <span class="spinner"></span>
+              <span class="txt">{% trans %}Saisissez votre numéro puis lancez le paiement.{% endtrans %}</span>
+            </div>
+          </form>
+
+          <div class="vip-success" id="vipSuccess" aria-hidden="true">
+            <div class="vip-success-card">
+              <div class="vip-success-ring">
+                <svg class="vip-check" viewBox="0 0 52 52" aria-hidden="true">
+                  <circle class="vip-check-circle" cx="26" cy="26" r="25" fill="none"></circle>
+                  <path class="vip-check-mark" fill="none" d="M14 27 L22 35 L38 19"></path>
+                </svg>
+              </div>
+
+              <h4 class="vip-success-title">{% trans %}Paiement effectué avec succès{% endtrans %}</h4>
+              <p class="vip-success-sub" id="vipSuccessMsg">
+                {% trans %}Votre paiement a été enregistré. Redirection en cours…{% endtrans %}
+              </p>
+
+              <div class="vip-success-cta">
+                <span class="vip-count">
+                  {% trans %}Redirection dans{% endtrans %} <strong id="vipCount">5</strong>s
+                </span>
+                <a class="vip-link" id="vipGoNow" href="#">{% trans %}Aller maintenant{% endtrans %}</a>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            const AJAX_PAYMENT_INIT_URL = "{{ path('ajax_payment_init') }}";
+            const DASHBOARD_URL = "{{ path('tableau_de_bord') }}";
+
+            const postJson = async (url, body) => {
+              const r = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                body: JSON.stringify(body)
+              });
+
+              const raw = await r.text();
+              let data = {};
+              try { data = raw ? JSON.parse(raw) : {}; } catch(e) {}
+
+              if (!r.ok) throw new Error(data.message || `HTTP ${r.status} : ${raw || '{{ 'Erreur serveur'|trans|e('js') }}'}`);
+              return data;
+            };
+
+            const statusBox = document.getElementById('payStatus');
+            const statusTxt = statusBox?.querySelector('.txt');
+            const payBtn = document.getElementById('payBtn');
+
+            const setStatus = (text, loading=false) => {
+              if (statusTxt) statusTxt.textContent = text || '';
+              statusBox?.classList.toggle('is-loading', !!loading);
+              if (payBtn) payBtn.disabled = !!loading;
+            };
+
+            const showVipSuccess = (msg, redirectUrl) => {
+              const wrap = document.getElementById('vipSuccess');
+              const msgEl = document.getElementById('vipSuccessMsg');
+              const countEl = document.getElementById('vipCount');
+              const goNow = document.getElementById('vipGoNow');
+
+              if (!wrap) {
+                setTimeout(() => window.location.href = redirectUrl, 900);
+                return;
+              }
+
+              msgEl.textContent = msg || "{{ 'Votre paiement a été enregistré. Redirection en cours…'|trans|e('js') }}";
+
+              goNow.href = redirectUrl;
+              goNow.onclick = (e) => {
+                e.preventDefault();
+                window.location.href = redirectUrl;
+              };
+
+              wrap.classList.add('is-open');
+              wrap.setAttribute('aria-hidden', 'false');
+              document.body.style.overflow = 'hidden';
+
+              let sec = 5;
+              countEl.textContent = sec;
+
+              const timer = setInterval(() => {
+                sec--;
+                countEl.textContent = sec;
+                if (sec <= 0) {
+                  clearInterval(timer);
+                  window.location.href = redirectUrl;
+                }
+              }, 5000);
+            };
+
+            const form = document.getElementById('mobilePayForm');
+            if (!form) {
+              console.error('Form #mobilePayForm introuvable');
+            } else {
+              form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const method = (document.getElementById('payMethod')?.value || '').toUpperCase();
+                const phone  = (document.getElementById('payPhone')?.value || '').trim();
+                const planId = parseInt(document.getElementById('payPlan')?.value || '0', 10);
+
+                if (!/^(6|2)\d{8}$/.test(phone)) {
+                  return setStatus("{{ 'Numéro invalide. Exemple : 6XXXXXXXX'|trans|e('js') }}");
+                }
+
+                if (!planId) {
+                  return setStatus("{{ 'Plan manquant (id).'|trans|e('js') }}");
+                }
+
+                setStatus("{{ 'Envoi de la demande…'|trans|e('js') }}", true);
+
+                try {
+                  const res = await postJson(AJAX_PAYMENT_INIT_URL, { method, phone, planId });
+
+                  setStatus(res.message || "{{ 'Paiement effectué avec succès ✅'|trans|e('js') }}", false);
+
+                  showVipSuccess(
+                    res.message || "{{ 'Paiement effectué avec succès ✅'|trans|e('js') }}",
+                    res.redirectUrl || DASHBOARD_URL
+                  );
+
+                } catch (err) {
+                  setStatus(err.message || "{{ 'Erreur serveur'|trans|e('js') }}", false);
+                }
+              });
+            }
+          </script>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

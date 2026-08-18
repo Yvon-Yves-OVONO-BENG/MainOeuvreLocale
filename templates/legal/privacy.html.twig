@@ -1,0 +1,334 @@
+{% extends 'base.html.twig' %}
+{% set seo_description = 'Consultez la politique de confidentialité et de protection des données personnelles de Main d’Œuvre Locale.' %}
+{% block title %}{% trans %}Politique de confidentialité{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "legal/_vip_ui_privacy.html.twig" %}
+
+<div class="privacy-page">
+  <div class="privacy-wrap">
+
+    <div class="privacy-hero">
+      <div>
+        <h1>🔒 {% trans %}Politique de confidentialité{% endtrans %}</h1>
+        <div class="sub">
+          {% trans %}Comment{% endtrans %} <strong>{{ companyName }}</strong> {% trans %}collecte, utilise, protège et partage vos données personnelles.{% endtrans %}
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="privacy-chip">🗓️ {% trans %}Dernière mise à jour :{% endtrans %} {{ lastUpdated|date('d/m/Y') }}</span>
+        <a class="privacy-btn primary" href="{{ path('legal_terms') }}">📜 {% trans %}Termes & Conditions{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div class="privacy-grid">
+
+      {# CONTENT #}
+      <div class="privacy-card">
+        <div class="hd">
+          <div class="fw-bold">{% trans %}Résumé{% endtrans %}</div>
+          <div class="small text-muted">{% trans %}Transparence, sécurité et contrôle utilisateur.{% endtrans %}</div>
+        </div>
+
+        <div class="bd">
+          <div class="callout mb-3">
+            ✅ {% trans %}Vous pouvez demander l’accès, la mise à jour ou la suppression de certaines données :{% endtrans %} <strong>{{ supportEmail }}</strong>.
+          </div>
+
+          <section id="p1" class="sec mb-4">
+            <h2>{% trans %}1. Introduction{% endtrans %}</h2>
+            <p>
+              {% trans %}Depuis les années 2000, les services en ligne n'ont cessé de croître. C'est pour cela que les données personnelles des utilisateurs sont de plus en plus exposées à des risques d'exploitation frauduleuse. Face à ce constat, il est devenu nécessaire de protéger et de sécuriser ces données.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}La confidentialité est essentielle pour protéger les informations personnelles de nos utilisateurs. Sur le site{% endtrans %}
+              <strong>{{ companyName }}</strong>,
+              {% trans %}nous nous engageons à respecter votre vie privée et à gérer vos données personnelles de manière transparente, sécurisée et conforme aux lois en vigueur.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Cette politique de confidentialité explique comment nous collectons, utilisons, protégeons et partageons vos informations. Elle couvre les données recueillies lors de votre navigation sur notre site, de votre inscription à nos services et de votre interaction avec nos fonctionnalités.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="p2" class="sec mb-4">
+            <h2>{% trans %}2. Collecte des données{% endtrans %}</h2>
+            <p>
+              {% trans %}Lorsque vous vous inscrivez sur notre site{% endtrans %}
+              <strong>{{ companyName }}</strong>,
+              {% trans %}voici les informations qui peuvent être collectées :{% endtrans %}
+            </p>
+
+            <h3>{% trans %}2.1. Données personnelles{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Nom et prénom : pour identifier les utilisateurs.{% endtrans %}</li>
+              <li>{% trans %}Adresse e-mail : pour la communication, notamment en cas de mise en relation ou de notifications.{% endtrans %}</li>
+              <li>{% trans %}Numéro de téléphone : pour des échanges rapides ou pour la validation de certaines vérifications.{% endtrans %}</li>
+              <li>{% trans %}Adresse, ville, région ou géolocalisation : pour localiser les demandes et offres de main-d'œuvre.{% endtrans %}</li>
+            </ul>
+
+            <h3>{% trans %}2.2. Données professionnelles{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Expérience professionnelle : pour évaluer la compétence ou l’adéquation des travailleurs.{% endtrans %}</li>
+              <li>{% trans %}Qualifications et compétences : pour mieux orienter les utilisateurs vers des missions adaptées.{% endtrans %}</li>
+              <li>{% trans %}CV et autres documents, comme les diplômes ou lettres de motivation : pour mieux comprendre le profil professionnel des utilisateurs.{% endtrans %}</li>
+            </ul>
+
+            <h3>{% trans %}2.3. Données d’utilisation{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Historique de navigation : pages visitées, temps passé sur le site, afin d’améliorer l’expérience utilisateur.{% endtrans %}</li>
+              <li>{% trans %}Préférences et interactions : clics, favoris et autres actions, pour adapter le contenu aux préférences des utilisateurs.{% endtrans %}</li>
+            </ul>
+
+            <h3>{% trans %}2.4. Données techniques{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Adresse IP et données de connexion : pour la sécurité, la prévention des fraudes et les analyses statistiques.{% endtrans %}</li>
+              <li>{% trans %}Type de navigateur et appareil : pour assurer la compatibilité technique et améliorer l’ergonomie du site.{% endtrans %}</li>
+            </ul>
+
+            <p>
+              {% trans %}Ces informations permettent d'optimiser les services du site, de personnaliser l'expérience utilisateur et d'assurer la sécurité des interactions.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="p3" class="sec mb-4">
+            <h2>{% trans %}3. Comment nous utilisons vos données{% endtrans %}</h2>
+
+            <h3>{% trans %}3.1. Amélioration du service{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Personnalisation de l'expérience utilisateur : les données d’utilisation permettent de proposer des contenus et services adaptés aux préférences des utilisateurs.{% endtrans %}</li>
+              <li>{% trans %}Optimisation des fonctionnalités : les informations techniques et d’utilisation aident à détecter et corriger des problèmes, ainsi qu’à améliorer l’ergonomie et la compatibilité du site.{% endtrans %}</li>
+              <li>{% trans %}Suggestions de missions et de candidats : les données professionnelles aident à faire des recommandations en fonction des compétences, qualifications et besoins exprimés.{% endtrans %}</li>
+            </ul>
+
+            <h3>{% trans %}3.2. Communication{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Notifications : utilisation de l'adresse e-mail ou du numéro de téléphone pour envoyer des notifications sur les opportunités de missions, les mises à jour ou les rappels.{% endtrans %}</li>
+              <li>{% trans %}Assistance et support : contact direct avec les utilisateurs pour répondre aux questions, offrir de l’aide et résoudre des problèmes techniques ou administratifs.{% endtrans %}</li>
+            </ul>
+
+            <h3>{% trans %}3.3. Mise en relation et recrutement{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Mise en relation directe : utilisation des informations personnelles et professionnelles pour faciliter les connexions entre employeurs et travailleurs.{% endtrans %}</li>
+              <li>{% trans %}Validation des profils : vérification des compétences et informations pour garantir la qualité et la crédibilité des profils partagés sur la plateforme.{% endtrans %}</li>
+            </ul>
+
+            <h3>{% trans %}3.4. Sécurité et prévention de la fraude{% endtrans %}</h3>
+            <p>
+              {% trans %}Les informations techniques, comme l’adresse IP, sont utilisées pour détecter les activités suspectes, assurer la sécurité des comptes et prévenir la fraude.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="p4" class="sec mb-4">
+            <h2>{% trans %}4. Partage des informations{% endtrans %}</h2>
+            <p>
+              {% trans %}Pour{% endtrans %} <strong>{{ companyName }}</strong>, {% trans %}les informations peuvent être partagées avec des tiers dans les cas suivants :{% endtrans %}
+            </p>
+
+            <h3>{% trans %}4.1. Partage avec des partenaires de recrutement{% endtrans %}</h3>
+            <p>
+              {% trans %}Les informations personnelles et professionnelles peuvent être partagées avec des entreprises ou employeurs partenaires pour faciliter la mise en relation ou le recrutement, avec l'accord préalable des utilisateurs concernés.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}4.2. Fournisseurs de services{% endtrans %}</h3>
+            <p>
+              {% trans %}Nous faisons appel à des prestataires pour des services comme l'hébergement du site, la sécurité, l'envoi d'e-mails et l’analyse des données. Ces fournisseurs ont accès aux informations uniquement pour fournir ces services et sont tenus de respecter la confidentialité des données.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}4.3. Obligations légales{% endtrans %}</h3>
+            <p>
+              {% trans %}Dans certains cas, nous pouvons être tenus de divulguer des informations personnelles pour respecter la loi ou répondre à une demande des autorités, par exemple dans le cadre de poursuites judiciaires ou d’enquêtes.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}4.4. Partage avec l’autorisation de l’utilisateur{% endtrans %}</h3>
+            <p>
+              {% trans %}Dans certains cas, des informations spécifiques peuvent être partagées avec des tiers uniquement avec le consentement explicite de l’utilisateur, par exemple lors de l’inscription à des offres externes proposées par des partenaires.{% endtrans %}
+            </p>
+
+            <p>
+              {% trans %}En dehors de ces situations,{% endtrans %} <strong>{{ companyName }}</strong> {% trans %}ne vend ni ne loue les informations personnelles des utilisateurs à des tiers.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="p5" class="sec mb-4">
+            <h2>{% trans %}5. Protection des données{% endtrans %}</h2>
+            <p>
+              {% trans %}Pour{% endtrans %} <strong>{{ companyName }}</strong>, {% trans %}la sécurité des données des utilisateurs est une priorité. Nous mettons en place plusieurs mesures pour protéger les informations :{% endtrans %}
+            </p>
+
+            <h3>{% trans %}5.1. Cryptage des données{% endtrans %}</h3>
+            <p>
+              {% trans %}Toutes les données sensibles, y compris les informations personnelles et de connexion, sont chiffrées lors de leur transmission grâce au protocole SSL/TLS afin d’éviter tout accès non autorisé lors des échanges entre les utilisateurs et le site.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}5.2. Accès restreint aux données{% endtrans %}</h3>
+            <p>
+              {% trans %}Seul un nombre limité de personnes autorisées a accès aux données, uniquement dans le cadre de leurs fonctions, comme le support, la sécurité ou la maintenance. Tous les collaborateurs sont soumis à des obligations strictes de confidentialité.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}5.3. Protection des serveurs{% endtrans %}</h3>
+            <p>
+              {% trans %}Nos serveurs sont protégés par des pare-feux et des protocoles de sécurité avancés pour prévenir les intrusions. Nous travaillons également avec des hébergeurs reconnus pour la sécurité de leurs infrastructures.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}5.4. Authentification sécurisée{% endtrans %}</h3>
+            <p>
+              {% trans %}Nous encourageons l’utilisation de mots de passe complexes. Des options d’authentification renforcée peuvent également être proposées pour sécuriser davantage les comptes.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}5.5. Surveillance et détection des menaces{% endtrans %}</h3>
+            <p>
+              {% trans %}Des systèmes de surveillance en temps réel sont mis en place pour détecter rapidement les activités suspectes et prévenir les attaques potentielles. Nous réalisons régulièrement des tests de sécurité et des audits pour identifier et corriger les failles éventuelles.{% endtrans %}
+            </p>
+
+            <p>
+              {% trans %}Des sauvegardes des données sont effectuées régulièrement pour assurer une restauration rapide en cas de problème technique ou de cyberattaque.{% endtrans %}
+            </p>
+
+            <p>
+              {% trans %}Nous mettons en place une politique stricte de conservation des données : les informations personnelles ne sont conservées que le temps nécessaire pour les finalités prévues, puis sont supprimées.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="p6" class="sec mb-4">
+            <h2>{% trans %}6. Droits des utilisateurs{% endtrans %}</h2>
+            <p>
+              {% trans %}Sur{% endtrans %} <strong>{{ companyName }}</strong>, {% trans %}les utilisateurs disposent de plusieurs droits concernant leurs données personnelles. Nous veillons à faciliter l'exercice de ces droits pour garantir leur protection et leur confidentialité.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}6.1. Droit d'accès{% endtrans %}</h3>
+            <p>
+              {% trans %}Les utilisateurs peuvent demander un accès à leurs informations personnelles pour en vérifier l'exactitude ou pour savoir comment elles sont utilisées. Ils ont le droit de recevoir une copie de leurs données dans un format compréhensible.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}6.2. Droit de rectification{% endtrans %}</h3>
+            <p>
+              {% trans %}Si des informations sont inexactes ou incomplètes, les utilisateurs peuvent demander leur mise à jour ou leur correction. Ce droit permet aux utilisateurs de maintenir leurs informations à jour et exactes.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}6.3. Droit de suppression{% endtrans %}</h3>
+            <p>
+              {% trans %}Les utilisateurs ont le droit de demander la suppression de leurs données personnelles, sous réserve de certaines obligations légales ou contractuelles. Dans ce cas, nous supprimons les informations concernées de nos systèmes.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}6.4. Droit à la limitation du traitement{% endtrans %}</h3>
+            <p>
+              {% trans %}Dans certaines situations, les utilisateurs peuvent demander que l’utilisation de leurs données soit limitée, par exemple en cas de contestation de l'exactitude des données. Nous conservons alors les informations, mais les utilisons uniquement pour les finalités convenues.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}6.5. Droit d’opposition{% endtrans %}</h3>
+            <p>
+              {% trans %}Les utilisateurs peuvent s’opposer au traitement de leurs données pour des motifs légitimes, notamment pour des activités de marketing. Cela inclut la possibilité de refuser de recevoir des communications promotionnelles.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}6.6. Droit de retrait du consentement{% endtrans %}</h3>
+            <p>
+              {% trans %}Si le traitement de certaines données est basé sur le consentement, les utilisateurs peuvent retirer leur consentement à tout moment, sans que cela n'affecte la légalité des traitements effectués avant ce retrait.{% endtrans %}
+            </p>
+
+            <p>
+              {% trans %}Pour exercer leurs droits, les utilisateurs peuvent contacter l’équipe via les coordonnées fournies sur le site. Nous nous engageons à répondre à ces demandes dans les plus brefs délais.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="p7" class="sec mb-4">
+            <h2>{% trans %}7. Politique des cookies{% endtrans %}</h2>
+            <p>
+              {% trans %}Sur{% endtrans %} <strong>{{ companyName }}</strong>, {% trans %}nous utilisons des cookies et des technologies similaires pour améliorer l'expérience utilisateur et optimiser le fonctionnement du site.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}7.1. Types de cookies utilisés{% endtrans %}</h3>
+            <ul>
+              <li>{% trans %}Cookies essentiels : ces cookies sont nécessaires au bon fonctionnement du site. Ils permettent, par exemple, de maintenir la session ouverte et de faciliter la navigation entre les pages.{% endtrans %}</li>
+              <li>{% trans %}Cookies de performance et d’analyse : ils nous aident à comprendre comment les utilisateurs interagissent avec le site, comme les pages visitées ou le temps passé, afin d’améliorer les fonctionnalités et l’expérience utilisateur.{% endtrans %}</li>
+              <li>{% trans %}Cookies de fonctionnalité : ces cookies permettent de retenir les préférences des utilisateurs, comme la langue, pour offrir une navigation personnalisée.{% endtrans %}</li>
+              <li>{% trans %}Cookies de publicité et de ciblage : ils peuvent être utilisés dans certains cas pour afficher des publicités pertinentes en fonction des intérêts des utilisateurs, en collaboration avec des partenaires publicitaires.{% endtrans %}</li>
+            </ul>
+
+            <h3>{% trans %}7.2. Utilisation des cookies{% endtrans %}</h3>
+            <p>
+              {% trans %}Les cookies permettent d’améliorer l'expérience utilisateur en personnalisant le contenu, en mémorisant les préférences et en rendant la navigation plus fluide.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}7.3. Gestion des cookies par les utilisateurs{% endtrans %}</h3>
+            <p>
+              {% trans %}Les utilisateurs peuvent gérer les cookies via les paramètres de leur navigateur. Ils peuvent choisir de bloquer certains types de cookies, d’être informés lorsqu’un cookie est installé ou de supprimer les cookies existants.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Sur notre site, un bandeau de consentement aux cookies permet aux utilisateurs d’accepter, de refuser ou de personnaliser les catégories de cookies qu’ils souhaitent autoriser.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}7.4. Retrait du consentement{% endtrans %}</h3>
+            <p>
+              {% trans %}Les utilisateurs peuvent modifier leurs préférences à tout moment via le bandeau de consentement ou les paramètres de cookies disponibles sur le site. Il est également possible de supprimer les cookies via le navigateur, mais cela peut affecter certaines fonctionnalités du site.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="p8" class="sec">
+            <h2>{% trans %}8. Modification de la politique de confidentialité{% endtrans %}</h2>
+            <p>
+              <strong>{{ companyName }}</strong>
+              {% trans %}se réserve le droit de modifier cette politique de confidentialité afin de refléter les évolutions de ses pratiques, de la législation en vigueur ou des fonctionnalités du site.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}8.1. Notification des modifications{% endtrans %}</h3>
+            <p>
+              {% trans %}En cas de modification importante de la politique, notamment en matière de collecte, d’utilisation ou de partage des données, les utilisateurs seront informés par le biais d’une notification visible sur le site ou par e-mail si nécessaire.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}8.2. Mise à jour régulière{% endtrans %}</h3>
+            <p>
+              {% trans %}La politique de confidentialité est révisée périodiquement pour s'assurer qu'elle reste conforme aux lois et qu'elle reflète fidèlement les pratiques de{% endtrans %}
+              <strong>{{ companyName }}</strong>.
+              {% trans %}Chaque version mise à jour inclura la date de la dernière modification pour permettre aux utilisateurs de suivre les changements.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}8.3. Consentement pour certaines modifications{% endtrans %}</h3>
+            <p>
+              {% trans %}Si des modifications nécessitent un consentement explicite, par exemple pour une nouvelle utilisation des données personnelles, nous demanderons l'accord des utilisateurs avant la mise en œuvre de ces changements.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}8.4. Consultation de la politique{% endtrans %}</h3>
+            <p>
+              {% trans %}La dernière version de la politique de confidentialité est toujours disponible sur le site. Les utilisateurs sont invités à consulter régulièrement cette section pour rester informés des éventuels changements.{% endtrans %}
+            </p>
+
+            <p>
+              {% trans %}Ces mesures visent à garantir la transparence et à offrir aux utilisateurs de{% endtrans %}
+              <strong>{{ companyName }}</strong>
+              {% trans %}un contrôle et une compréhension clairs de l’utilisation de leurs données.{% endtrans %}
+            </p>
+          </section>
+        </div>
+      </div>
+
+      {# TOC #}
+      <div class="privacy-toc">
+        <div class="privacy-card">
+          <div class="hd">
+            <p class="toc-title mb-0">{% trans %}Sommaire{% endtrans %}</p>
+            <div class="small text-muted">{% trans %}Navigation rapide{% endtrans %}</div>
+          </div>
+          <div class="bd toc">
+            <a href="#p1">{% trans %}1. Introduction{% endtrans %}</a>
+            <a href="#p2">{% trans %}2. Collecte des données{% endtrans %}</a>
+            <a href="#p3">{% trans %}3. Utilisation des données{% endtrans %}</a>
+            <a href="#p4">{% trans %}4. Partage des informations{% endtrans %}</a>
+            <a href="#p5">{% trans %}5. Protection des données{% endtrans %}</a>
+            <a href="#p6">{% trans %}6. Droits des utilisateurs{% endtrans %}</a>
+            <a href="#p7">{% trans %}7. Politique des cookies{% endtrans %}</a>
+            <a href="#p8">{% trans %}8. Modifications{% endtrans %}</a>
+          </div>
+        </div>
+
+        <div class="privacy-footer">
+          <a class="privacy-btn" href="{{ path('accueil') }}">🏠 {% trans %}Accueil{% endtrans %}</a>
+          <a class="privacy-btn primary" href="{{ path('help_index') }}">💬 {% trans %}Support{% endtrans %}</a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,333 @@
+{#
+  MES OFFRES PUBLIÉES — TABLEAU DYNAMIQUE PREMIUM
+  Les routes existantes sont conservées :
+  tableau_de_bord, job_new, brief_templates_index, job_edit,
+  talent_job_applications.
+#}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Mes offres publiées'|trans }}{% endblock %}
+
+{% block body %}
+    {% include 'job/_vip_ui_mes_jobs.html.twig' %}
+
+    {% set jobRows = rows|default([]) %}
+    {% set offersTotal = jobRows|length %}
+    {% set applicantsTotal = 0 %}
+    {% set applicantsRemaining = 0 %}
+
+    {% for row in jobRows %}
+        {% set applicantsTotal = applicantsTotal + row.applicantsTotal|default(0) %}
+        {% set applicantsRemaining = applicantsRemaining + row.applicantsRemaining|default(0) %}
+    {% endfor %}
+
+    <main
+        class="mol-jobs-page"
+        id="molJobsManager"
+        data-jobs-manager
+        data-bulk-delete-url="{{ path('job_bulk_delete') }}"
+        data-bulk-delete-token="{{ csrf_token('bulk_delete_jobs') }}"
+        data-delete-label="{{ 'Supprimer la sélection'|trans }}"
+        data-delete-loading-label="{{ 'Suppression…'|trans }}"
+        data-empty-search-label="{{ 'Aucune mission ne correspond à votre recherche.'|trans }}"
+    >
+        <div class="mol-jobs-shell">
+            <section class="mol-jobs-hero" aria-labelledby="molJobsTitle">
+                <div class="mol-jobs-hero__copy">
+                    <span class="mol-jobs-eyebrow">
+                        <span aria-hidden="true">▦</span>
+                        {% trans %}Gestion des publications{% endtrans %}
+                    </span>
+
+                    <h1 class="mol-jobs-title" id="molJobsTitle">
+                        {% trans %}Mes offres publiées{% endtrans %}
+                    </h1>
+
+                    <p class="mol-jobs-subtitle">
+                        {% trans %}Recherchez, triez et gérez vos missions ainsi que les candidatures reçues depuis un espace unique.{% endtrans %}
+                    </p>
+                </div>
+
+                <div class="mol-jobs-hero__actions">
+                    <a href="{{ path('tableau_de_bord') }}" class="mol-jobs-btn mol-jobs-btn--secondary" data-job-action data-turbo="false">
+                        <span aria-hidden="true">←</span>
+                        <span>{% trans %}Retour au tableau de bord{% endtrans %}</span>
+                    </a>
+
+                    <a href="{{ path('job_new') }}" class="mol-jobs-btn mol-jobs-btn--primary" data-job-action data-turbo="false">
+                        <span aria-hidden="true">＋</span>
+                        <span>{% trans %}Publier une offre{% endtrans %}</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="mol-jobs-stats" aria-label="{{ 'Résumé des offres'|trans }}">
+                <article class="mol-jobs-stat">
+                    <span class="mol-jobs-stat__icon mol-jobs-stat__icon--blue" aria-hidden="true">📄</span>
+                    <div>
+                        <strong>{{ offersTotal }}</strong>
+                        <span>{% trans %}Offres publiées{% endtrans %}</span>
+                    </div>
+                </article>
+
+                <article class="mol-jobs-stat">
+                    <span class="mol-jobs-stat__icon mol-jobs-stat__icon--violet" aria-hidden="true">👥</span>
+                    <div>
+                        <strong>{{ applicantsTotal }}</strong>
+                        <span>{% trans %}Candidatures reçues{% endtrans %}</span>
+                    </div>
+                </article>
+
+                <article class="mol-jobs-stat">
+                    <span class="mol-jobs-stat__icon mol-jobs-stat__icon--amber" aria-hidden="true">🕒</span>
+                    <div>
+                        <strong>{{ applicantsRemaining }}</strong>
+                        <span>{% trans %}Candidatures non vues{% endtrans %}</span>
+                    </div>
+                </article>
+            </section>
+
+            {% if jobRows|length > 0 %}
+                <section class="mol-jobs-panel" aria-labelledby="molJobsTableTitle">
+                    <header class="mol-jobs-toolbar">
+                        <div class="mol-jobs-toolbar__summary">
+                            <div class="mol-jobs-panel-title" id="molJobsTableTitle">
+                                {% trans %}Toutes mes missions{% endtrans %}
+                            </div>
+                            <div class="mol-jobs-panel-subtitle" id="molJobsResultSummary" aria-live="polite">
+                                {{ offersTotal }} {% trans %}mission(s) disponible(s){% endtrans %}
+                            </div>
+                        </div>
+
+                        <div class="mol-jobs-toolbar__controls">
+                            <div class="mol-jobs-search">
+                                <span class="mol-jobs-search__icon" aria-hidden="true">⌕</span>
+                                <label class="visually-hidden" for="molJobsSearch">{% trans %}Rechercher une mission{% endtrans %}</label>
+                                <input
+                                    type="search"
+                                    id="molJobsSearch"
+                                    class="mol-jobs-search__input"
+                                    placeholder="{{ 'Rechercher une mission, une ville…'|trans }}"
+                                    autocomplete="off"
+                                >
+                                <button type="button" class="mol-jobs-search__clear" id="molJobsSearchClear" aria-label="{{ 'Effacer la recherche'|trans }}" hidden>×</button>
+                            </div>
+
+                            <div class="mol-jobs-per-page">
+                                <label for="molJobsPerPage">{% trans %}Afficher{% endtrans %}</label>
+                                <select id="molJobsPerPage" aria-label="{{ 'Nombre de missions par page'|trans }}">
+                                    <option value="5">5</option>
+                                    <option value="10" selected>10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </header>
+
+                    <div class="mol-jobs-bulkbar" id="molJobsBulkbar" hidden>
+                        <div class="mol-jobs-bulkbar__selection">
+                            <span class="mol-jobs-selection-dot" aria-hidden="true"></span>
+                            <strong id="molJobsSelectedCount">0</strong>
+                            <span>{% trans %}mission(s) sélectionnée(s){% endtrans %}</span>
+                        </div>
+
+                        <button type="button" class="mol-jobs-btn mol-jobs-btn--danger" id="molJobsBulkDelete">
+                            <span aria-hidden="true">🗑️</span>
+                            <span>{% trans %}Supprimer la sélection{% endtrans %}</span>
+                        </button>
+                    </div>
+
+                    <div class="mol-jobs-table-wrap">
+                        <table class="mol-jobs-table">
+                            <thead>
+                                <tr>
+                                    <th class="mol-jobs-check-cell" scope="col">
+                                        <input
+                                            type="checkbox"
+                                            class="mol-jobs-checkbox"
+                                            id="molJobsSelectPage"
+                                            aria-label="{{ 'Sélectionner les missions de cette page'|trans }}"
+                                        >
+                                    </th>
+                                    <th scope="col">
+                                        <button type="button" class="mol-jobs-sort" data-sort-key="title">
+                                            {% trans %}Mission{% endtrans %}
+                                            <span class="mol-jobs-sort__indicator" aria-hidden="true">↕</span>
+                                        </button>
+                                    </th>
+                                    <th scope="col">
+                                        <button type="button" class="mol-jobs-sort" data-sort-key="date">
+                                            {% trans %}Publication{% endtrans %}
+                                            <span class="mol-jobs-sort__indicator" aria-hidden="true">↓</span>
+                                        </button>
+                                    </th>
+                                    <th scope="col">
+                                        <button type="button" class="mol-jobs-sort" data-sort-key="total">
+                                            {% trans %}Candidatures{% endtrans %}
+                                            <span class="mol-jobs-sort__indicator" aria-hidden="true">↕</span>
+                                        </button>
+                                    </th>
+                                    <th scope="col">
+                                        <button type="button" class="mol-jobs-sort" data-sort-key="remaining">
+                                            {% trans %}Non vues{% endtrans %}
+                                            <span class="mol-jobs-sort__indicator" aria-hidden="true">↕</span>
+                                        </button>
+                                    </th>
+                                    <th class="mol-jobs-actions-heading" scope="col">{% trans %}Actions{% endtrans %}</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="molJobsTableBody">
+                                {% for row in jobRows %}
+                                    {% set job = row.job %}
+                                    {% set total = row.applicantsTotal|default(0) %}
+                                    {% set remaining = row.applicantsRemaining|default(0) %}
+                                    {% set title = job.title|default('Offre #'|trans ~ job.id) %}
+                                    {% set city = job.city|default('—') %}
+                                    {% set publishedDate = job.createdAt ? job.createdAt|date('d/m/Y') : '—' %}
+                                    {% set timestamp = job.createdAt ? job.createdAt|date('U') : 0 %}
+                                    {% set searchValue = (title ~ ' ' ~ city ~ ' ' ~ publishedDate)|lower %}
+
+                                    <tr
+                                        data-job-row
+                                        data-job-id="{{ job.id }}"
+                                        data-search="{{ searchValue|e('html_attr') }}"
+                                        data-sort-title="{{ title|lower|e('html_attr') }}"
+                                        data-sort-date="{{ timestamp }}"
+                                        data-sort-total="{{ total }}"
+                                        data-sort-remaining="{{ remaining }}"
+                                    >
+                                        <td class="mol-jobs-check-cell" data-label="{{ 'Sélection'|trans }}">
+                                            <input
+                                                type="checkbox"
+                                                class="mol-jobs-checkbox mol-jobs-row-checkbox"
+                                                value="{{ job.id }}"
+                                                aria-label="{{ ('Sélectionner ' ~ title)|e('html_attr') }}"
+                                            >
+                                        </td>
+
+                                        <td data-label="{{ 'Mission'|trans }}">
+                                            <div class="mol-jobs-offer">
+                                                <span class="mol-jobs-offer__icon" aria-hidden="true">📄</span>
+                                                <div class="mol-jobs-offer__copy">
+                                                    <div class="mol-jobs-offer__title">
+                                                        {{ title }}
+                                                        {% if remaining > 0 %}
+                                                            <span class="mol-jobs-new-badge">{% trans %}Nouveau{% endtrans %}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="mol-jobs-offer__location">📍 {{ city }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td data-label="{{ 'Publication'|trans }}">
+                                            <div class="mol-jobs-date">
+                                                <strong>{{ publishedDate }}</strong>
+                                                <span>{% trans %}Date de publication{% endtrans %}</span>
+                                            </div>
+                                        </td>
+
+                                        <td data-label="{{ 'Candidatures'|trans }}">
+                                            <span class="mol-jobs-count-pill mol-jobs-count-pill--total">
+                                                <span aria-hidden="true">👥</span>
+                                                <strong>{{ total }}</strong>
+                                            </span>
+                                        </td>
+
+                                        <td data-label="{{ 'Non vues'|trans }}">
+                                            <span class="mol-jobs-count-pill {{ remaining > 0 ? 'mol-jobs-count-pill--remaining' : 'mol-jobs-count-pill--empty' }}">
+                                                <span aria-hidden="true">{{ remaining > 0 ? '●' : '✓' }}</span>
+                                                <strong>{{ remaining }}</strong>
+                                            </span>
+                                        </td>
+
+                                        <td class="mol-jobs-actions-cell" data-label="{{ 'Actions'|trans }}">
+                                            <div class="mol-jobs-row-actions">
+                                                <a
+                                                    href="{{ path('job_edit', {slug: job.slug}) }}"
+                                                    class="mol-jobs-action-btn mol-jobs-action-btn--edit"
+                                                    data-job-action
+                                                    data-turbo="false"
+                                                >
+                                                    <span aria-hidden="true">✎</span>
+                                                    <span>{% trans %}Optimiser{% endtrans %}</span>
+                                                </a>
+
+                                                <a
+                                                    href="{{ path('talent_job_applications', {slug: job.slug}) }}"
+                                                    class="mol-jobs-action-btn mol-jobs-action-btn--view"
+                                                    data-job-action
+                                                    data-turbo="false"
+                                                >
+                                                    <span>{% trans %}Voir plus{% endtrans %}</span>
+                                                    <span aria-hidden="true">→</span>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mol-jobs-no-results" id="molJobsNoResults" hidden>
+                        <span aria-hidden="true">⌕</span>
+                        <strong>{% trans %}Aucun résultat{% endtrans %}</strong>
+                        <p>{% trans %}Essayez avec un autre titre, une autre ville ou effacez votre recherche.{% endtrans %}</p>
+                    </div>
+
+                    <footer class="mol-jobs-footer">
+                        <div class="mol-jobs-range" id="molJobsRange" aria-live="polite"></div>
+                        <nav class="mol-jobs-pagination" id="molJobsPagination" aria-label="{{ 'Pagination des missions'|trans }}"></nav>
+                    </footer>
+                </section>
+            {% else %}
+                <section class="mol-jobs-empty">
+                    <span class="mol-jobs-empty__icon" aria-hidden="true">📂</span>
+                    <h2>{% trans %}Aucune offre publiée{% endtrans %}</h2>
+                    <p>{% trans %}Publiez votre première offre ou partez d’un modèle de brief pour recevoir rapidement des candidatures.{% endtrans %}</p>
+                    <div class="mol-jobs-empty__actions">
+                        <a href="{{ path('job_new') }}" class="mol-jobs-btn mol-jobs-btn--primary" data-job-action data-turbo="false">
+                            <span aria-hidden="true">＋</span>
+                            <span>{% trans %}Publier une offre{% endtrans %}</span>
+                        </a>
+                        <a href="{{ path('brief_templates_index') }}" class="mol-jobs-btn mol-jobs-btn--secondary" data-job-action data-turbo="false">
+                            <span aria-hidden="true">🧩</span>
+                            <span>{% trans %}Utiliser un modèle{% endtrans %}</span>
+                        </a>
+                    </div>
+                </section>
+            {% endif %}
+        </div>
+
+        <div class="mol-jobs-modal" id="molJobsDeleteModal" hidden>
+            <button type="button" class="mol-jobs-modal__backdrop" data-modal-close aria-label="{{ 'Fermer'|trans }}"></button>
+            <section class="mol-jobs-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="molJobsDeleteTitle" aria-describedby="molJobsDeleteDescription">
+                <span class="mol-jobs-modal__icon" aria-hidden="true">🗑️</span>
+                <h2 id="molJobsDeleteTitle">{% trans %}Supprimer les missions sélectionnées ?{% endtrans %}</h2>
+                <p id="molJobsDeleteDescription">
+                    {% trans %}Cette action est définitive. Les missions sélectionnées et leurs données associées ne seront plus disponibles.{% endtrans %}
+                </p>
+                <div class="mol-jobs-modal__count">
+                    <strong id="molJobsModalCount">0</strong>
+                    <span>{% trans %}mission(s) concernée(s){% endtrans %}</span>
+                </div>
+                <div class="mol-jobs-modal__actions">
+                    <button type="button" class="mol-jobs-btn mol-jobs-btn--secondary" data-modal-close>
+                        {% trans %}Annuler{% endtrans %}
+                    </button>
+                    <button type="button" class="mol-jobs-btn mol-jobs-btn--danger" id="molJobsConfirmDelete">
+                        <span aria-hidden="true">🗑️</span>
+                        <span>{% trans %}Supprimer définitivement{% endtrans %}</span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <div class="mol-jobs-toast" id="molJobsToast" role="status" aria-live="polite" hidden></div>
+    </main>
+
+    <script src="{{ asset('assets/js/job/mes-jobs.js') }}" defer></script>
+{% endblock %}

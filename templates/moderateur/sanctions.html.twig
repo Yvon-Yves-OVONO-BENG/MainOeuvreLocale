@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Sanctions{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_sanctions.html.twig" %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">🛑 {% trans %}Sanctions{% endtrans %}</div>
+        <div class="hint">{% trans %}Historique des actions de modération sur les comptes / contenus.{% endtrans %}</div>
+      </div>
+
+      <form class="filters" method="get">
+        <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Recherche : email, nom, raison…'|trans }}">
+        <select class="select" name="type">
+          {% for t in ['all','warning','suspend','block','unblock','hide','delete'] %}
+            <option value="{{ t }}" {{ type==t?'selected':'' }}>{{ t|trans }}</option>
+          {% endfor %}
+        </select>
+        <select class="select" name="days">
+          {% for d in [7,14,30,60,90] %}
+            <option value="{{ d }}" {{ days==d?'selected':'' }}>{{ d }}j</option>
+          {% endfor %}
+        </select>
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit==n?'selected':'' }}>{{ n }}/{% trans %}page{% endtrans %}</option>
+          {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+        <a class="btn" href="{{ path('moderateur_sanctions_index') }}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+      <div class="chip">{% trans %}Total :{% endtrans %} {{ total }}</div>
+
+      <div class="grid">
+        <div class="col-6">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Area — Sanctions / jour{% endtrans %}</div>
+                <div class="hint">{% trans %}Volume sur{% endtrans %} {{ days }} {% trans %}jours.{% endtrans %}</div>
+              </div>
+              <span class="chip">📈</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chDaily"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Horizontal Bar — Top types{% endtrans %}</div>
+                <div class="hint">{% trans %}Types de sanctions les plus fréquents.{% endtrans %}</div>
+              </div>
+              <span class="chip">{% trans %}Top{% endtrans %}</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chTop"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Cible{% endtrans %}</th>
+              <th>{% trans %}Type{% endtrans %}</th>
+              <th>{% trans %}Raison{% endtrans %}</th>
+              <th>{% trans %}Par{% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in items %}
+              {% set u = s.targetUser %}
+              {% set pp = u ? u.personalProfile : null %}
+              {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+              <tr>
+                <td>#{{ s.id }}</td>
+                <td>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <img class="avatar" src="{{ photo }}" alt="">
+                    <div>
+                      <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : (u ? u.email : '—') }}</div>
+                      <div class="muted" style="font-size:12px;">{{ u ? u.email : '—' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip">{{ s.type|trans|upper }}</span></td>
+                <td class="muted" style="font-size:12px;">{{ (s.reason ?? '')|slice(0,120) }}{% if (s.reason ?? '')|length > 120 %}…{% endif %}</td>
+                <td class="muted" style="font-size:12px;">{{ s.createdBy ? (s.createdBy.email ?? ('#' ~ s.createdBy.id)) : '—' }}</td>
+                <td class="muted" style="font-size:12px;">{{ s.createdAt ? s.createdAt|date('d/m/Y H:i') : '—' }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted" style="padding:18px;text-align:center;">{% trans %}Aucune sanction{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p==page?'primary':'' }}"
+               href="{{ path('moderateur_sanctions_index', {page:p, limit:limit, q:q, type:type, days:days}) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+  const stats = {{ stats|json_encode|raw }};
+  const labels = stats.daily.labels || [];
+  const values = stats.daily.values || [];
+  const top = stats.topTypes || [];
+  const topLabels = top.map(x => x.label);
+  const topValues = top.map(x => Number(x.value||0));
+
+  new Chart(document.getElementById('chDaily'), {
+    type:'line',
+    data:{ labels, datasets:[{ label:'{{ "Sanctions"|trans|e("js") }}', data: values, tension:.35, fill:true, borderWidth:2, pointRadius:2,
+      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a1').trim() || 'rgba(56,189,248,.30)' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+  });
+
+  new Chart(document.getElementById('chTop'), {
+    type:'bar',
+    data:{ labels: topLabels, datasets:[{ label:'{{ "Occurrences"|trans|e("js") }}', data: topValues, borderWidth:1 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
+  });
+})();
+</script>
+{% endblock %}

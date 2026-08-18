@@ -1,0 +1,138 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Recherche avancée{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_search_advanced.html.twig" %}
+
+{% set q = q|default('') %}
+{% set scope = scope|default('all') %}
+{% set sort = sort|default('recent') %}
+
+<div class="mod-page">
+  <div class="mod-wrap">
+
+    <div class="mod-card">
+      <div class="hd">
+        <div>
+          <div class="mod-title">🧠 {% trans %}Recherche avancée{% endtrans %}</div>
+          <div class="hint">{% trans %}Filtres “VIP” — UI prête, branchement repository ensuite.{% endtrans %}</div>
+        </div>
+        <a class="mod-btn" href="{{ path('moderateur_search', { q: q }) }}">⬅ {% trans %}Retour{% endtrans %}</a>
+      </div>
+
+      <div class="bd">
+
+        <div class="adv-hero">
+          <form method="get" action="{{ path('moderateur_search') }}">
+            <div class="adv-grid">
+
+              <div class="searchbox">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <label class="form-label fw-bold mb-0">{% trans %}Mot-clé{% endtrans %}</label>
+                  <span class="hint">{% trans %}Email, téléphone, ID…{% endtrans %}</span>
+                </div>
+
+                <div class="inputwrap">
+                  <span class="ico">🧠</span>
+                  <input
+                    name="q"
+                    value="{{ q }}"
+                    class="form-control mod-input"
+                    placeholder="{{ 'Ex: user@email.com, +237…, 124, mot-clé…'|trans }}"
+                    autocomplete="off"
+                  >
+                </div>
+              </div>
+
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <label class="form-label fw-bold mb-0">{% trans %}Scope{% endtrans %}</label>
+                  <span class="hint">{% trans %}Périmètre{% endtrans %}</span>
+                </div>
+                <select class="form-select mod-input" name="scope" style="height:52px; font-weight:900;">
+                  <option value="all" {{ scope=='all' ? 'selected' : '' }}>{% trans %}✨ Tout{% endtrans %}</option>
+                  <option value="users" {{ scope=='users' ? 'selected' : '' }}>{% trans %}👤 Users{% endtrans %}</option>
+                  <option value="companies" {{ scope=='companies' ? 'selected' : '' }}>{% trans %}🏢 Companies{% endtrans %}</option>
+                  <option value="reports" {{ scope=='reports' ? 'selected' : '' }}>{% trans %}🚩 Reports{% endtrans %}</option>
+                </select>
+              </div>
+
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <label class="form-label fw-bold mb-0">{% trans %}Triage{% endtrans %}</label>
+                  <span class="hint">{% trans %}Ordre{% endtrans %}</span>
+                </div>
+                <select class="form-select mod-input" name="sort" style="height:52px; font-weight:900;">
+                  <option value="recent" {{ sort=='recent' ? 'selected' : '' }}>{% trans %}⏱️ Plus récent{% endtrans %}</option>
+                  <option value="relevant" {{ sort=='relevant' ? 'selected' : '' }}>{% trans %}🎯 Plus pertinent{% endtrans %}</option>
+                </select>
+              </div>
+
+            </div>
+
+            {# ===== Optional VIP filters (UI only, you can wire later) ===== #}
+            <div class="mt-3">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="fw-bold">{% trans %}Filtres rapides (VIP){% endtrans %}</div>
+                <div class="hint">{% trans %}facultatif • UI prête{% endtrans %}</div>
+              </div>
+
+              <div class="chips">
+                <label class="chip">
+                  <input type="checkbox" name="vip[]" value="has_email" class="d-none">
+                  {% trans %}✅ Email présent{% endtrans %}
+                </label>
+                <label class="chip">
+                  <input type="checkbox" name="vip[]" value="has_phone" class="d-none">
+                  {% trans %}📞 Téléphone présent{% endtrans %}
+                </label>
+                <label class="chip">
+                  <input type="checkbox" name="vip[]" value="recent_7d" class="d-none">
+                  {% trans %}🕒 Activité 7j{% endtrans %}
+                </label>
+                <label class="chip">
+                  <input type="checkbox" name="vip[]" value="flagged" class="d-none">
+                  {% trans %}🚩 Signalé{% endtrans %}
+                </label>
+                <label class="chip">
+                  <input type="checkbox" name="vip[]" value="verified" class="d-none">
+                  {% trans %}🛡️ Vérifié{% endtrans %}
+                </label>
+              </div>
+
+              <div class="hint mt-2">
+               {% trans %}Je vais brancher mes checkboxes plus tard (QueryBuilder).{% endtrans %}
+              </div>
+            </div>
+
+            <div class="mt-3 d-flex gap-2 flex-wrap">
+              <button class="mod-btn mod-btn-primary" type="submit" style="min-width:180px;">
+                {% trans %}Lancer →{% endtrans %}
+              </button>
+              <a class="mod-btn" href="{{ path('moderateur_search_advanced') }}">
+                {% trans %}Réinitialiser{% endtrans %}
+              </a>
+            </div>
+          </form>
+        </div>
+
+        <hr class="my-4" style="border-color: rgba(15,23,42,.10);">
+
+        <div class="adv-foot">
+          <div class="i">✅</div>
+          <div>
+            <div class="fw-bold" style="color: rgba(15,23,42,.92);">{% trans %}Page prête “UX/UI Premium”{% endtrans %}</div>
+            <div class="hint">
+              {% trans %}Ensuite je vais brancher{% endtrans %} <b>scope</b>, <b>sort</b> ({% trans %}et éventuellement{% endtrans %} <b>vip[]</b>)
+              {% trans %}dans mes méthodes repository (QueryBuilder).{% endtrans %}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

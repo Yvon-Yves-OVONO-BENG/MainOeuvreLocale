@@ -1,0 +1,212 @@
+.mol-smart-search {
+  position: relative;
+  overflow: visible !important;
+  z-index: 30;
+}
+
+.mol-smart-search:focus-within {
+  z-index: 1000;
+}
+
+.mol-smart-search__list,
+.mol-smart-search__error {
+  position: fixed;
+  right: auto;
+  display: none;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.mol-smart-search__list {
+  max-height: min(300px, 48vh);
+  padding: 7px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid rgba(15, 45, 86, .14);
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 20px 52px rgba(6, 26, 61, .22);
+  overscroll-behavior: contain;
+}
+
+.mol-smart-search__list.is-open,
+.mol-smart-search__error.is-open {
+  display: block;
+  animation: mol-smart-feedback-in .16s ease-out both;
+}
+
+.mol-smart-search__list.is-above,
+.mol-smart-search__error.is-above {
+  transform-origin: bottom center;
+}
+
+.mol-smart-search__item {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #102a4e;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color .14s ease, color .14s ease;
+}
+
+.mol-smart-search__item:hover,
+.mol-smart-search__item.is-active {
+  background: #eef6ff;
+  color: #064fae;
+}
+
+.mol-smart-search__label {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mol-smart-search__type {
+  flex: 0 0 auto;
+  color: #6c7d91;
+  font-size: 10px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.mol-smart-search__error {
+  min-height: 42px;
+  padding: 10px 13px 10px 38px;
+  border: 1px solid rgba(220, 38, 38, .30);
+  border-radius: 13px;
+  background: rgba(255, 250, 250, .99);
+  color: #b42318;
+  box-shadow: 0 14px 38px rgba(127, 29, 29, .16);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.mol-smart-search__error::before {
+  content: "!";
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: #dc2626;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+[data-smart-keyword].is-invalid,
+[data-smart-location].is-invalid {
+  border-color: #dc3545 !important;
+  background-color: rgba(255, 247, 247, .98) !important;
+  color: #172033 !important;
+  -webkit-text-fill-color: #172033 !important;
+  caret-color: #0b57d0 !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, .12) !important;
+}
+
+[data-smart-keyword].is-invalid::placeholder,
+[data-smart-location].is-invalid::placeholder {
+  color: #6b7280 !important;
+  -webkit-text-fill-color: #6b7280 !important;
+  opacity: 1 !important;
+}
+
+/* Les icônes héritaient aussi du blanc du hero lorsque le champ devenait clair. */
+.mol-smart-search--invalid > i,
+.mol-smart-search--invalid > .fa,
+.mol-smart-search--invalid > .fas,
+.mol-smart-search--invalid > .fa-solid {
+  color: #dc2626 !important;
+  opacity: 1 !important;
+}
+
+/* Chrome/Android WebView peut conserver -webkit-text-fill-color du thème. */
+[data-smart-keyword].is-invalid:-webkit-autofill,
+[data-smart-location].is-invalid:-webkit-autofill {
+  -webkit-text-fill-color: #172033 !important;
+  caret-color: #0b57d0 !important;
+}
+
+.mol-smart-search--shake {
+  animation: mol-smart-shake .28s ease-in-out;
+}
+
+/* Le portail JS place les suggestions directement sous <body> : elles ne sont
+   plus coupées par le hero, les cartes, les sliders ou la bande défilante. */
+.ph-hero-v4,
+.vip-jobs-slider-hero,
+.vip-jobs-hero-search,
+.mol-job-nearby__form,
+.anpub-search {
+  position: relative;
+}
+
+.ph-hero-v4,
+.vip-jobs-slider-hero {
+  z-index: 20;
+}
+
+.vip-jobs-ticker-hero {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes mol-smart-feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px) scale(.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes mol-smart-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+}
+
+@media (max-width: 620px) {
+  .mol-smart-search__list {
+    max-height: min(260px, 42vh);
+    border-radius: 13px;
+  }
+
+  .mol-smart-search__error {
+    padding-top: 9px;
+    padding-bottom: 9px;
+    font-size: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mol-smart-search__list.is-open,
+  .mol-smart-search__error.is-open,
+  .mol-smart-search--shake {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,800 @@
+{# MOL DASHBOARD COMPANY — PREMIUM SAAS V6 #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Entreprise - Tableau de bord'|trans }}{% endblock %}
+
+{% block body %}
+    {% include 'tableau_de_bord_company/_vip_ui.html.twig' %}
+
+    {% set completion = kpi.completion|default(0) %}
+    {% set logoFile = company.photo|default(null) %}
+    {% set logo = logoFile
+        ? asset('uploads/profiles/' ~ logoFile)
+        : asset('uploads/profiles/avatar.png')
+    %}
+    {% set companyName = company.fullName|default('Entreprise'|trans) %}
+    {% set favoritesTotal = favoritesCount|default(kpi.favoritesCount|default(0)) %}
+    {% set favoritedByTotal = favoritedByCount|default(kpi.favoritedByCount|default(0)) %}
+    {% set sentApplicationsTotal = applicationsSentCount|default(
+        kpi.applicationsSent|default(kpi.applicationsCount|default(0))
+    ) %}
+    {% set paymentTotal = paymentsCount|default(payments is defined ? payments|length : 0) %}
+
+    <div class="cmp-dashboard" data-company-dashboard>
+        {# ===================== TOPBAR ===================== #}
+        <header class="cmp-topbar mt-4">
+            <div class="cmp-shell cmp-topbar-inner">
+                <div class="cmp-brand">
+                    <div class="cmp-avatar">
+                        <img src="{{ logo }}" alt="{{ 'Logo'|trans ~ ' ' ~ companyName }}">
+                    </div>
+
+                    <div class="cmp-brand-copy">
+                        <div class="cmp-brand-name">{{ companyName }}</div>
+                        <div class="cmp-brand-subtitle">
+                            {% trans %}Recrutement, publications, candidatures et paiements{% endtrans %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cmp-topbar-actions">
+                    {% if kpi.plan|default(null) %}
+                        <span class="cmp-plan-badge">
+                            <span aria-hidden="true">✦</span>
+                            {{ kpi.plan }}
+                        </span>
+                    {% endif %}
+
+                    <a href="{{ path('profile_edit') }}"
+                       class="cmp-profile-link"
+                       data-turbo="false">
+                        <span aria-hidden="true">⚙️</span>
+                        <span>{% trans %}Profil entreprise{% endtrans %}</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="cmp-shell cmp-main-content">
+            {# ===================== WELCOME ===================== #}
+            <section class="cmp-welcome">
+                <div class="cmp-welcome-copy">
+                    <span class="cmp-eyebrow">{% trans %}Espace entreprise{% endtrans %}</span>
+
+                    <h1>{% trans %}Pilotez votre activité depuis un espace clair et performant.{% endtrans %}</h1>
+
+                    <p>
+                        {% trans %}Publiez vos besoins, gérez vos offres, suivez les candidatures et développez votre visibilité sans multiplier les écrans.{% endtrans %}
+                    </p>
+                </div>
+
+                <aside class="cmp-completion">
+                    <div class="cmp-completion-head">
+                        <div>
+                            <span>{% trans %}Profil complété{% endtrans %}</span>
+                            <strong>{{ completion }}%</strong>
+                        </div>
+
+                        <span class="cmp-status-pill {{ completion >= 80 ? 'is-success' : 'is-progress' }}">
+                            {{ completion >= 80 ? 'Très bon niveau'|trans : 'À compléter'|trans }}
+                        </span>
+                    </div>
+
+                    <div class="cmp-progress"
+                         role="progressbar"
+                         aria-label="{{ 'Profil complété'|trans }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         aria-valuenow="{{ completion }}">
+                        <span style="width: {{ completion > 100 ? 100 : completion }}%"></span>
+                    </div>
+
+                    <a href="{{ path('profile_edit') }}"
+                       class="cmp-text-link"
+                       data-turbo="false">
+                        {% trans %}Améliorer mon profil{% endtrans %}
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </aside>
+            </section>
+
+            {# ===================== ACTIONS REGROUPEES ===================== #}
+            <section class="cmp-section" aria-labelledby="cmp-actions-title">
+                <div class="cmp-section-heading">
+                    <div>
+                        <span class="cmp-section-kicker">{% trans %}Actions principales{% endtrans %}</span>
+                        <h2 id="cmp-actions-title">{% trans %}Tout est regroupé par objectif{% endtrans %}</h2>
+                    </div>
+                </div>
+
+                <div class="cmp-action-grid">
+                    {# 1. PUBLIER #}
+                    <article class="cmp-action-group cmp-action-group--publish">
+                        <div class="cmp-action-group-head">
+                            <span class="cmp-action-group-icon" aria-hidden="true">＋</span>
+                            <div>
+                                <h3>{% trans %}Publier{% endtrans %}</h3>
+                                <p>{% trans %}Créer une nouvelle opportunité{% endtrans %}</p>
+                            </div>
+                        </div>
+
+                        <div class="cmp-action-links">
+                            <a href="{{ path('job_new') }}"
+                               class="cmp-action-link is-primary"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">📄</span>
+                                <span>
+                                    <strong>{% trans %}Publier une mission{% endtrans %}</strong>
+                                    <small>{% trans %}Créer une offre de mission{% endtrans %}</small>
+                                </span>
+                                <span class="cmp-arrow" aria-hidden="true">→</span>
+                            </a>
+
+                            <a href="{{ path('annonce_new') }}"
+                               class="cmp-action-link"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">📣</span>
+                                <span>
+                                    <strong>{% trans %}Publier une annonce{% endtrans %}</strong>
+                                    <small>{% trans %}Présenter un besoin ou un service{% endtrans %}</small>
+                                </span>
+                                <span class="cmp-arrow" aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 2. GERER #}
+                    <article class="cmp-action-group cmp-action-group--manage">
+                        <div class="cmp-action-group-head">
+                            <span class="cmp-action-group-icon" aria-hidden="true">▤</span>
+                            <div>
+                                <h3>{% trans %}Gérer mes publications{% endtrans %}</h3>
+                                <p>{% trans %}Modifier et suivre vos contenus{% endtrans %}</p>
+                            </div>
+                        </div>
+
+                        <div class="cmp-action-links">
+                            <a href="{{ path('talent_publisher_jobs') }}"
+                               class="cmp-action-link"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">📁</span>
+                                <span>
+                                    <strong>{% trans %}Gérer mes missions{% endtrans %}</strong>
+                                    <small>{{ kpi.jobsPublished|default(0) }} {% trans %}mission(s) publiée(s){% endtrans %}</small>
+                                </span>
+                                <span class="cmp-arrow" aria-hidden="true">→</span>
+                            </a>
+
+                            <a href="{{ path('annonce_manage') }}"
+                               class="cmp-action-link"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">📋</span>
+                                <span>
+                                    <strong>{% trans %}Gérer mes annonces{% endtrans %}</strong>
+                                    <small>{% trans %}Modifier, publier ou retirer{% endtrans %}</small>
+                                </span>
+                                <span class="cmp-arrow" aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 3. BOOSTER #}
+                    <article class="cmp-action-group cmp-action-group--boost">
+                        <div class="cmp-action-group-head">
+                            <span class="cmp-action-group-icon" aria-hidden="true">🚀</span>
+                            <div>
+                                <h3>{% trans %}Booster ma visibilité{% endtrans %}</h3>
+                                <p>{% trans %}Mettre en avant votre entreprise{% endtrans %}</p>
+                            </div>
+                        </div>
+
+                        <div class="cmp-action-links">
+                            <a href="{{ path('subscription_plans') }}"
+                               class="cmp-action-link is-boost"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">⚡</span>
+                                <span>
+                                    <strong>{% trans %}Booster mon profil{% endtrans %}</strong>
+                                    <small>{% trans %}Renforcer la visibilité de l’entreprise{% endtrans %}</small>
+                                </span>
+                                <span class="cmp-arrow" aria-hidden="true">→</span>
+                            </a>
+
+                            <a href="{{ path('annonce_boost') }}"
+                               class="cmp-action-link is-boost-alt"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">↗</span>
+                                <span>
+                                    <strong>{% trans %}Booster mes annonces{% endtrans %}</strong>
+                                    <small>{% trans %}Donner la priorité à vos annonces{% endtrans %}</small>
+                                </span>
+                                <span class="cmp-arrow" aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 4. FAVORIS #}
+                    <article class="cmp-action-group cmp-action-group--favorites cmp-action-group--wide">
+                        <div class="cmp-action-group-head">
+                            <span class="cmp-action-group-icon" aria-hidden="true">♥</span>
+                            <div>
+                                <h3>{% trans %}Mes favoris{% endtrans %}</h3>
+                                <p>{% trans %}Vos sélections et les profils intéressés par votre entreprise{% endtrans %}</p>
+                            </div>
+                        </div>
+
+                        <div class="cmp-action-links cmp-action-links--horizontal">
+                            <a href="{{ path('app_favorites_index') }}"
+                               class="cmp-action-link"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">⭐</span>
+                                <span>
+                                    <strong>{% trans %}Mes favoris{% endtrans %}</strong>
+                                    <small>{{ favoritesTotal }} {% trans %}profil(s) sauvegardé(s){% endtrans %}</small>
+                                </span>
+                                <span class="cmp-value">{{ favoritesTotal }}</span>
+                            </a>
+
+                            <a href="{{ path('app_favorites_favorited_by') }}"
+                               class="cmp-action-link"
+                               data-turbo="false">
+                                <span class="cmp-action-link-icon" aria-hidden="true">💛</span>
+                                <span>
+                                    <strong>{% trans %}Qui m’a mis en favori ?{% endtrans %}</strong>
+                                    <small>{% trans %}Entreprises ou talents intéressés{% endtrans %}</small>
+                                </span>
+                                <span class="cmp-value">{{ favoritedByTotal }}</span>
+                            </a>
+                        </div>
+                    </article>
+
+                    {# 5. DEMANDES / CANDIDATURES ENVOYEES #}
+                    <article class="cmp-action-group cmp-action-group--applications cmp-action-group--wide">
+                        <div class="cmp-action-group-head">
+                            <span class="cmp-action-group-icon" aria-hidden="true">📨</span>
+                            <div>
+                                <h3>{% trans %}Mes demandes{% endtrans %}</h3>
+                                <p>{% trans %}Une compagnie peut également postuler aux missions disponibles{% endtrans %}</p>
+                            </div>
+
+                            <span class="cmp-action-count">{{ sentApplicationsTotal }}</span>
+                        </div>
+
+                        <div class="cmp-application-panel">
+                            <div>
+                                <strong>{% trans %}Candidatures envoyées{% endtrans %}</strong>
+                                <p>
+                                    {% trans %}Consultez les missions auxquelles votre compagnie a postulé et suivez leur statut.{% endtrans %}
+                                </p>
+                            </div>
+
+                            <a href="{{ path('talent_applications') }}"
+                               class="cmp-button cmp-button--primary"
+                               data-turbo="false">
+                                {% trans %}Voir mes demandes{% endtrans %}
+                                <span aria-hidden="true">→</span>
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            {# ===================== OUTILS ===================== #}
+            <section class="cmp-section" aria-labelledby="cmp-tools-title">
+                <div class="cmp-section-heading">
+                    <div>
+                        <span class="cmp-section-kicker">{% trans %}Outils{% endtrans %}</span>
+                        <h2 id="cmp-tools-title">{% trans %}Accès rapides{% endtrans %}</h2>
+                    </div>
+                </div>
+
+                <div class="cmp-tool-grid">
+                    <a href="{{ path('brief_templates_index') }}" class="cmp-tool" data-turbo="false">
+                        <span aria-hidden="true">🧩</span>
+                        <strong>{% trans %}Modèles de brief{% endtrans %}</strong>
+                        <small>{% trans %}Créer plus rapidement{% endtrans %}</small>
+                    </a>
+
+                    <a href="{{ path('liste_talents') }}" class="cmp-tool" data-turbo="false">
+                        <span aria-hidden="true">🧑‍💼</span>
+                        <strong>{% trans %}Rechercher des talents{% endtrans %}</strong>
+                        <small>{% trans %}Découvrir les profils disponibles{% endtrans %}</small>
+                    </a>
+
+                    <a href="{{ path('planning') }}" class="cmp-tool" data-turbo="false">
+                        <span aria-hidden="true">🧭</span>
+                        <strong>{% trans %}Pilotage des missions{% endtrans %}</strong>
+                        <small>{% trans %}Organiser votre activité{% endtrans %}</small>
+                    </a>
+
+                    <a href="{{ path('calendar_index') }}" class="cmp-tool" data-turbo="false">
+                        <span aria-hidden="true">🗓️</span>
+                        <strong>{% trans %}Planifier les RDV{% endtrans %}</strong>
+                        <small>{% trans %}Créer un rendez-vous{% endtrans %}</small>
+                    </a>
+
+                    <a href="{{ path('applicant_calendar_index') }}"
+                       class="cmp-tool cmp-tool--badge"
+                       data-turbo="false">
+                        <span aria-hidden="true">📅</span>
+                        <strong>{% trans %}Mes rendez-vous{% endtrans %}</strong>
+                        <small>{% trans %}Suivre les échéances{% endtrans %}</small>
+                        {% if pendingAppointmentsCount|default(0) > 0 %}
+                            <b>{{ pendingAppointmentsCount }}</b>
+                        {% endif %}
+                    </a>
+
+                    <a href="{{ path('company_pipeline') }}" class="cmp-tool" data-turbo="false">
+                        <span aria-hidden="true">🧭</span>
+                        <strong>{% trans %}Pipeline{% endtrans %}</strong>
+                        <small>{% trans %}Suivre les recrutements{% endtrans %}</small>
+                    </a>
+
+                    <a href="{{ path('company_analytics') }}" class="cmp-tool" data-turbo="false">
+                        <span aria-hidden="true">📊</span>
+                        <strong>{% trans %}Analytics{% endtrans %}</strong>
+                        <small>{% trans %}Analyser les performances{% endtrans %}</small>
+                    </a>
+
+                    <button type="button" class="cmp-tool" data-company-chat-open>
+                        <span aria-hidden="true">💬</span>
+                        <strong>{% trans %}Messages{% endtrans %}</strong>
+                        <small>{% trans %}Échanger avec les talents{% endtrans %}</small>
+                        {% set unreadMessages = kpi.unreadMessages|default(kpi.messagesUnread|default(0)) %}
+                        {% if unreadMessages > 0 %}
+                            <b>{{ unreadMessages > 99 ? '99+' : unreadMessages }}</b>
+                        {% endif %}
+                    </button>
+                </div>
+            </section>
+
+            {# ===================== KPI ===================== #}
+            <section class="cmp-metrics" aria-label="{{ 'Indicateurs de performance'|trans }}">
+                <article class="cmp-metric">
+                    <span class="cmp-metric-icon is-blue" aria-hidden="true">📢</span>
+                    <div>
+                        <small>{% trans %}Offres publiées{% endtrans %}</small>
+                        <strong>{{ kpi.jobsPublished|default(0) }}</strong>
+                    </div>
+                </article>
+
+                <article class="cmp-metric">
+                    <span class="cmp-metric-icon is-green" aria-hidden="true">✅</span>
+                    <div>
+                        <small>{% trans %}Offres actives{% endtrans %}</small>
+                        <strong>{{ kpi.activeJobs|default(kpi.jobsActive|default(0)) }}</strong>
+                    </div>
+                </article>
+
+                <article class="cmp-metric">
+                    <span class="cmp-metric-icon is-purple" aria-hidden="true">📨</span>
+                    <div>
+                        <small>{% trans %}Candidatures reçues{% endtrans %}</small>
+                        <strong>{{ kpi.applicationsReceived|default(0) }}</strong>
+                    </div>
+                </article>
+
+                <article class="cmp-metric">
+                    <span class="cmp-metric-icon is-amber" aria-hidden="true">↗</span>
+                    <div>
+                        <small>{% trans %}Taux de réponse{% endtrans %}</small>
+                        <strong>{{ kpi.replyRate|default(0) }}%</strong>
+                    </div>
+                </article>
+            </section>
+
+            {# ===================== ACTIVITE ===================== #}
+            <section class="cmp-content-grid">
+                <div class="cmp-content-main">
+                    {# Offres actives #}
+                    <article class="cmp-card">
+                        <header class="cmp-card-header">
+                            <div>
+                                <span class="cmp-section-kicker">{% trans %}Publications{% endtrans %}</span>
+                                <h2>{% trans %}Mes offres actives{% endtrans %}</h2>
+                                <p>{% trans %}Suivez les offres actuellement visibles et leurs performances.{% endtrans %}</p>
+                            </div>
+
+                            <a href="{{ path('talent_publisher_jobs') }}"
+                               class="cmp-button"
+                               data-turbo="false">
+                                {% trans %}Tout voir{% endtrans %}
+                            </a>
+                        </header>
+
+                        <div class="cmp-responsive-table">
+                            <table class="cmp-table">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans %}Offre{% endtrans %}</th>
+                                        <th>{% trans %}Créée{% endtrans %}</th>
+                                        <th>{% trans %}Performance{% endtrans %}</th>
+                                        <th class="cmp-table-actions">{% trans %}Action{% endtrans %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in tables.myActiveJobs|default([]) %}
+                                        <tr>
+                                            <td data-label="{{ 'Offre'|trans }}">
+                                                <strong>{{ job.title|default('Offre #' ~ job.id) }}</strong>
+                                                <div class="cmp-table-meta">
+                                                    <span>👀 {{ job.views30d|default(0) }}</span>
+                                                    <span>📩 {{ job.apps30d|default(0) }}</span>
+                                                </div>
+                                            </td>
+                                            <td data-label="{{ 'Créée'|trans }}">
+                                                {{ job.createdAt ? job.createdAt|date('d/m/Y') : '—' }}
+                                            </td>
+                                            <td data-label="{{ 'Performance'|trans }}">
+                                                {% set score = job.score|default(job.performance|default(null)) %}
+                                                <span class="cmp-score">{{ score is not null ? score ~ '/100' : '—' }}</span>
+                                            </td>
+                                            <td data-label="{{ 'Action'|trans }}" class="cmp-table-actions">
+                                                <a href="{{ path('talent_job_applications', {slug: job.slug}) }}"
+                                                   class="cmp-button cmp-button--small"
+                                                   data-turbo="false">
+                                                    {% trans %}Voir{% endtrans %}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4">
+                                                <div class="cmp-empty">
+                                                    <span aria-hidden="true">📂</span>
+                                                    <strong>{% trans %}Aucune offre active{% endtrans %}</strong>
+                                                    <p>{% trans %}Publiez une mission pour commencer à recevoir des candidatures.{% endtrans %}</p>
+                                                    <a href="{{ path('job_new') }}"
+                                                       class="cmp-button cmp-button--primary"
+                                                       data-turbo="false">
+                                                        {% trans %}Publier une mission{% endtrans %}
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </article>
+
+                    {# Graphiques #}
+                    <div class="cmp-chart-grid">
+                        <article class="cmp-card cmp-chart-card">
+                            <header class="cmp-card-header">
+                                <div>
+                                    <span class="cmp-section-kicker">{% trans %}30 derniers jours{% endtrans %}</span>
+                                    <h2>{% trans %}Activité des offres{% endtrans %}</h2>
+                                </div>
+                            </header>
+                            <div class="cmp-chart">
+                                <canvas id="chartJobs30d"></canvas>
+                            </div>
+                        </article>
+
+                        <article class="cmp-card cmp-chart-card">
+                            <header class="cmp-card-header">
+                                <div>
+                                    <span class="cmp-section-kicker">{% trans %}Attractivité{% endtrans %}</span>
+                                    <h2>{% trans %}Candidatures par offre{% endtrans %}</h2>
+                                </div>
+                            </header>
+                            <div class="cmp-chart">
+                                <canvas id="chartAppsByJob"></canvas>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <aside class="cmp-content-side">
+                    {# Dernières candidatures #}
+                    <article class="cmp-card">
+                        <header class="cmp-card-header">
+                            <div>
+                                <span class="cmp-section-kicker">{% trans %}Recrutement{% endtrans %}</span>
+                                <h2>{% trans %}Dernières candidatures{% endtrans %}</h2>
+                            </div>
+
+                            <a href="/company/applications"
+                               class="cmp-text-link"
+                               data-turbo="false">
+                                {% trans %}Voir tout{% endtrans %}
+                            </a>
+                        </header>
+
+                        <div class="cmp-list">
+                            {% for application in tables.latestApplications|default([]) %}
+                                <div class="cmp-list-item">
+                                    <span class="cmp-list-avatar" aria-hidden="true">👤</span>
+                                    <div>
+                                        <strong>
+                                            {{ application.job
+                                                ? application.job.title|default('Offre #' ~ application.job.id)
+                                                : 'Offre'|trans
+                                            }}
+                                        </strong>
+                                        <small>
+                                            {% if application.talent|default(null) %}
+                                                {{ application.talent.fullName|default(application.talent.email|default('Candidat'|trans)) }}
+                                            {% else %}
+                                                {% trans %}Candidat{% endtrans %}
+                                            {% endif %}
+                                            {% if application.createdAt|default(null) %}
+                                                · {{ application.createdAt|date('d/m/Y H:i') }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="cmp-empty cmp-empty--compact">
+                                    <span aria-hidden="true">📨</span>
+                                    <strong>{% trans %}Aucune candidature récente{% endtrans %}</strong>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </article>
+
+                    {# Pipeline #}
+                    <article class="cmp-card">
+                        <header class="cmp-card-header">
+                            <div>
+                                <span class="cmp-section-kicker">{% trans %}Suivi{% endtrans %}</span>
+                                <h2>{% trans %}Pipeline recrutement{% endtrans %}</h2>
+                            </div>
+
+                            <a href="{{ path('company_pipeline') }}"
+                               class="cmp-text-link"
+                               data-turbo="false">
+                                {% trans %}Ouvrir{% endtrans %}
+                            </a>
+                        </header>
+
+                        <div class="cmp-pipeline">
+                            <div>
+                                <span>{% trans %}Nouvelles{% endtrans %}</span>
+                                <strong>{{ counts.NEW|default(0) }}</strong>
+                            </div>
+                            <div>
+                                <span>{% trans %}Shortlist{% endtrans %}</span>
+                                <strong>{{ counts.SHORTLIST|default(0) }}</strong>
+                            </div>
+                            <div>
+                                <span>{% trans %}Embauches{% endtrans %}</span>
+                                <strong>{{ counts.ACCEPTED|default(0) }}</strong>
+                            </div>
+                        </div>
+                    </article>
+
+                    {# Compte et sécurité #}
+                    {% set sanctionsTooltip %}
+                        {% if recentActiveSanctions is defined and recentActiveSanctions|length > 0 %}
+                            {% for sanction in recentActiveSanctions %}
+                                <div>
+                                    <strong>{{ sanction.type }}</strong><br>
+                                    <span>
+                                        {{ sanction.reason|length > 110
+                                            ? sanction.reason|slice(0, 110) ~ '…'
+                                            : sanction.reason
+                                        }}
+                                    </span>
+                                    {% if sanction.endsAt %}
+                                        <br>
+                                        <small>{% trans %}Fin :{% endtrans %} {{ sanction.endsAt|date('d/m/Y H:i') }}</small>
+                                    {% endif %}
+                                </div>
+                                {% if not loop.last %}
+                                    <hr style="border-color:rgba(255,255,255,.15);margin:8px 0">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            {% trans %}Aucune sanction active{% endtrans %}
+                        {% endif %}
+                    {% endset %}
+
+                    <article class="cmp-card">
+                        <header class="cmp-card-header">
+                            <div>
+                                <span class="cmp-section-kicker">{% trans %}Compte{% endtrans %}</span>
+                                <h2>{% trans %}Sécurité et réputation{% endtrans %}</h2>
+                            </div>
+                        </header>
+
+                        <div class="cmp-account-links">
+                            <a href="{{ path('review_my_list') }}" data-turbo="false">
+                                <span aria-hidden="true">⭐</span>
+                                <span>
+                                    <strong>{% trans %}Avis reçus{% endtrans %}</strong>
+                                    <small>{{ kpi.rating|default('—') }}/5</small>
+                                </span>
+                            </a>
+
+                            <a href="{{ path('talent_payment_dispute_index') }}"
+                               class="has-count"
+                               data-turbo="false">
+                                <span aria-hidden="true">⚠️</span>
+                                <span>
+                                    <strong>{% trans %}Requêtes paiement{% endtrans %}</strong>
+                                    <small>{% trans %}Suivre les incidents{% endtrans %}</small>
+                                </span>
+                                {% if openPaymentDisputesCount|default(0) > 0 %}
+                                    <b>{{ openPaymentDisputesCount }}</b>
+                                {% endif %}
+                            </a>
+
+                            <a href="{{ path('talent_sanctions_index') }}"
+                               class="has-count"
+                               data-turbo="false"
+                               data-bs-toggle="tooltip"
+                               data-bs-html="true"
+                               data-bs-placement="bottom"
+                               data-bs-custom-class="mol-tooltip"
+                               title="{{ sanctionsTooltip|e('html_attr') }}">
+                                <span aria-hidden="true">🛡️</span>
+                                <span>
+                                    <strong>{% trans %}Sanctions{% endtrans %}</strong>
+                                    <small>{% trans %}État du compte{% endtrans %}</small>
+                                </span>
+                                {% if activeSanctionsCount|default(0) > 0 %}
+                                    <b>{{ activeSanctionsCount }}</b>
+                                {% endif %}
+                            </a>
+                        </div>
+                    </article>
+                </aside>
+            </section>
+
+            {# ===================== PAIEMENTS ===================== #}
+            <section class="cmp-card cmp-payments" aria-labelledby="cmp-payments-title">
+                <header class="cmp-card-header cmp-card-header--payments">
+                    <div class="cmp-payment-heading">
+                        <span class="cmp-payment-heading-icon" aria-hidden="true">💳</span>
+                        <div>
+                            <span class="cmp-section-kicker">{% trans %}Finances{% endtrans %}</span>
+                            <h2 id="cmp-payments-title">{% trans %}Mes paiements & factures{% endtrans %}</h2>
+                            <p>{% trans %}Consultez les opérations et téléchargez les factures disponibles.{% endtrans %}</p>
+                        </div>
+                    </div>
+
+                    <div class="cmp-payment-header-actions">
+                        <span class="cmp-payment-total">
+                            {{ paymentTotal }} {% trans %}paiement(s){% endtrans %}
+                        </span>
+
+                        <a href="{{ path('payments_index') }}"
+                           class="cmp-button"
+                           data-turbo="false">
+                            {% trans %}Voir tous les paiements{% endtrans %}
+                        </a>
+                    </div>
+                </header>
+
+                {% if payments is defined and payments|length > 0 %}
+                    <div class="cmp-responsive-table">
+                        <table class="cmp-table cmp-payment-table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans %}Référence{% endtrans %}</th>
+                                    <th>{% trans %}Mode{% endtrans %}</th>
+                                    <th>{% trans %}Montant{% endtrans %}</th>
+                                    <th>{% trans %}Date{% endtrans %}</th>
+                                    <th>{% trans %}Statut{% endtrans %}</th>
+                                    <th class="cmp-table-actions">{% trans %}Options{% endtrans %}</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for payment in payments %}
+                                    {% set invoice = null %}
+                                    {% if payment.invoice is defined and payment.invoice %}
+                                        {% set invoice = payment.invoice %}
+                                    {% elseif payment.invoices is defined and payment.invoices|length > 0 %}
+                                        {% set invoice = payment.invoices|first %}
+                                    {% endif %}
+
+                                    <tr>
+                                        <td data-label="{{ 'Référence'|trans }}">
+                                            <strong>
+                                                {{ invoice
+                                                    ? invoice.invoiceNumber|default('INV-' ~ invoice.id)
+                                                    : payment.reference|default('PAY-' ~ payment.id)
+                                                }}
+                                            </strong>
+                                        </td>
+
+                                        <td data-label="{{ 'Mode'|trans }}">
+                                            {{ payment.provider is defined and payment.provider
+                                                ? payment.provider.name|default('—')
+                                                : payment.method|default('—')
+                                            }}
+                                        </td>
+
+                                        <td data-label="{{ 'Montant'|trans }}">
+                                            <strong>
+                                                {{ payment.amount is defined and payment.amount is not null
+                                                    ? payment.amount|number_format(0, ',', ' ')
+                                                    : '—'
+                                                }}
+                                                {{ payment.currency|default('FCFA') }}
+                                            </strong>
+                                        </td>
+
+                                        <td data-label="{{ 'Date'|trans }}">
+                                            {{ payment.createdAt is defined and payment.createdAt
+                                                ? payment.createdAt|date('d/m/Y H:i')
+                                                : '—'
+                                            }}
+                                        </td>
+
+                                        <td data-label="{{ 'Statut'|trans }}">
+                                            <span class="cmp-payment-status">
+                                                {{ payment.status is defined and payment.status
+                                                    ? payment.status.name|default(payment.status)
+                                                    : 'Traité'|trans
+                                                }}
+                                            </span>
+                                        </td>
+
+                                        <td data-label="{{ 'Options'|trans }}" class="cmp-table-actions">
+                                            {% if invoice %}
+                                                <div class="cmp-payment-actions">
+                                                    <a href="{{ path('invoice_print', {id: payment.id}) }}"
+                                                       target="_blank"
+                                                       rel="noopener"
+                                                       class="cmp-button cmp-button--small"
+                                                       data-turbo="false">
+                                                        <span aria-hidden="true">👁️</span>
+                                                        {% trans %}Voir{% endtrans %}
+                                                    </a>
+
+                                                    {% if invoice.slug is defined and invoice.slug %}
+                                                        <a href="{{ path('invoice_download', {slug: invoice.slug}) }}"
+                                                           target="_blank"
+                                                           rel="noopener"
+                                                           class="cmp-button cmp-button--small cmp-button--download"
+                                                           data-turbo="false">
+                                                            <span aria-hidden="true">⬇️</span>
+                                                            {% trans %}Télécharger la facture{% endtrans %}
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            {% else %}
+                                                <span class="cmp-unavailable">
+                                                    {% trans %}Facture indisponible{% endtrans %}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="cmp-empty cmp-payment-empty">
+                        <span aria-hidden="true">🧾</span>
+                        <div>
+                            <strong>{% trans %}Aucun paiement pour le moment{% endtrans %}</strong>
+                            <p>
+                                {% trans %}Les paiements et factures de votre entreprise apparaîtront ici dès qu’une opération sera enregistrée.{% endtrans %}
+                            </p>
+                        </div>
+                        <a href="{{ path('payments_index') }}"
+                           class="cmp-button cmp-button--primary"
+                           data-turbo="false">
+                            {% trans %}Ouvrir mes paiements{% endtrans %}
+                        </a>
+                    </div>
+                {% endif %}
+            </section>
+        </main>
+
+        <script type="application/json" id="cmp-applications-chart-data">
+            {{ charts.applicationsByJob|default([])|json_encode|raw }}
+        </script>
+        <script type="application/json" id="cmp-jobs-chart-data">
+            {{ charts.jobsLast30d|default([])|json_encode|raw }}
+        </script>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('assets/js/tableau_de_bord_company/dashboard.js') }}"></script>
+{% endblock %}

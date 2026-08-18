@@ -1,0 +1,1475 @@
+{# templates/chat/_include.html.twig #}
+{# La messagerie reste masquée tant que le nouveau compte n'a pas terminé le choix de profil. #}
+{% if app.user and app.request.attributes.get('_route') != 'profile_type_choice' %}
+    <script>
+        window.MOL_CHAT = window.MOL_CHAT || {};
+        window.MOL_CHAT.baseUrl = "{{ app.request.basePath }}";
+    </script>
+
+    {% include 'chat/_bootstrap.html.twig' %}
+    {% include 'chat/_panel.html.twig' %}
+
+    {# Message d'accueil indépendant du label du bouton : aucun script du tchat ne peut le masquer. #}
+    <div id="molColombeWelcomeMessage" class="mol-colombe-welcome-message" aria-hidden="true" hidden>
+        <button
+            type="button"
+            id="molColombeWelcomeClose"
+            class="mol-colombe-welcome-close"
+            aria-label="{% trans %}Fermer le message de Colombe{% endtrans %}"
+            title="{% trans %}Fermer{% endtrans %}"
+        >
+            <span aria-hidden="true">&times;</span>
+        </button>
+
+        <strong>{% trans %}Bonjour ! Je suis Colombe, votre messagerie instantanée.{% endtrans %}</strong>
+        <small>{% trans %}Mon petit bec me dit que le bon contact vous attend peut-être ici dans le tchat 😊{% endtrans %}</small>
+    </div>
+
+    {% include 'chat/_message_sounds_modal.html.twig' %}
+    {% include 'chat/_block_settings_modal.html.twig' %}
+    {% include 'chat/_group_chat_modal.html.twig' %}
+    {% include 'chat/_group_conversation_modal.html.twig' %}
+
+    <link rel="stylesheet" href="{{ asset('css/mol-chat-premium.css') }}">
+    <style>
+        .mol-chat-fab-label[hidden],
+        #molColombeWelcomeMessage[hidden] {
+            display: none !important;
+        }
+
+        /* Rappel normal, affiché au-dessus de Colombe dans le coin inférieur droit. */
+        #molChatFab .mol-chat-fab-label:not([hidden]) {
+            position: absolute !important;
+            top: auto !important;
+            right: 0 !important;
+            left: auto !important;
+            bottom: calc(100% + 13px) !important;
+            transform: translateY(8px) scale(.97) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 4px !important;
+            width: clamp(280px, 31vw, 410px) !important;
+            max-width: calc(100vw - 28px) !important;
+            box-sizing: border-box !important;
+            padding: 12px 15px !important;
+            overflow: visible !important;
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            text-align: left !important;
+            line-height: 1.3 !important;
+            opacity: 0 !important;
+            transition: opacity .28s ease, transform .34s ease !important;
+        }
+
+        #molChatFab .mol-chat-fab-label:not([hidden]).is-visible {
+            opacity: 1 !important;
+            transform: translateY(0) scale(1) !important;
+        }
+
+        #molChatFab .mol-chat-fab-label:not([hidden])::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            right: 22px;
+            border: 8px solid transparent;
+            border-top-color: #fff;
+            filter: drop-shadow(0 2px 1px rgba(15, 23, 42, .08));
+        }
+
+        #molChatFab .mol-chat-fab-label strong,
+        #molChatFab .mol-chat-fab-label small {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+        }
+
+        #molChatFab .mol-chat-fab-label strong {
+            font-size: 13px !important;
+            line-height: 1.25 !important;
+        }
+
+        #molChatFab .mol-chat-fab-label small {
+            font-size: 11px !important;
+            line-height: 1.35 !important;
+        }
+
+        /* Déplacement de Colombe vers le centre puis retour en bas à droite. */
+        #molChatFab.mol-colombe-welcome-active {
+            transition:
+                right 1.25s cubic-bezier(.22, .75, .2, 1),
+                bottom 1.25s cubic-bezier(.22, .75, .2, 1),
+                transform 1.25s cubic-bezier(.22, .75, .2, 1) !important;
+        }
+
+        #molChatFab.mol-colombe-welcome-center {
+            right: 50% !important;
+            bottom: 50% !important;
+            transform: translate(50%, 50%) scale(1.12) !important;
+        }
+
+        /*
+         * Bulle centrale indépendante du bouton. Elle ne peut plus être masquée
+         * par mol-chat-premium.js pendant les 15 secondes de lecture.
+         */
+        #molColombeWelcomeMessage {
+            position: fixed !important;
+            z-index: 2147483646 !important;
+            left: 50% !important;
+            top: 50% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 7px !important;
+            width: min(570px, calc(100vw - 34px)) !important;
+            max-width: calc(100vw - 34px) !important;
+            box-sizing: border-box !important;
+            padding: 20px 24px !important;
+            border: 1px solid rgba(148, 163, 184, .28) !important;
+            border-radius: 18px !important;
+            background: #fff !important;
+            color: #0f172a !important;
+            box-shadow: 0 24px 65px rgba(15, 23, 42, .24) !important;
+            text-align: center !important;
+            pointer-events: auto !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transform: translate(-50%, calc(-100% - 72px)) translateY(10px) scale(.96) !important;
+            transition: opacity .3s ease, visibility .3s ease, transform .34s ease !important;
+        }
+
+        #molColombeWelcomeMessage.is-visible {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translate(-50%, calc(-100% - 72px)) translateY(0) scale(1) !important;
+        }
+
+
+        /* Croix grise, discrète et lisible sur le bord de la bulle centrale. */
+        #molColombeWelcomeClose {
+            position: absolute !important;
+            top: -14px !important;
+            right: -14px !important;
+            z-index: 5 !important;
+            width: 36px !important;
+            height: 36px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 !important;
+            border: 2px solid #ffffff !important;
+            border-radius: 50% !important;
+            background: #64748b !important;
+            color: #ffffff !important;
+            box-shadow: 0 9px 22px rgba(71, 85, 105, .28) !important;
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            transition: transform .2s ease, background .2s ease, box-shadow .2s ease !important;
+        }
+
+        #molColombeWelcomeClose:hover,
+        #molColombeWelcomeClose:focus-visible {
+            background: #475569 !important;
+            box-shadow: 0 12px 28px rgba(71, 85, 105, .36) !important;
+            transform: scale(1.1) rotate(5deg) !important;
+            outline: none !important;
+        }
+
+        #molColombeWelcomeClose:active {
+            transform: scale(.94) !important;
+        }
+
+        #molColombeWelcomeClose span {
+            display: block !important;
+            margin: 0 !important;
+            color: currentColor !important;
+            font-family: Arial, sans-serif !important;
+            font-size: 25px !important;
+            font-weight: 400 !important;
+            line-height: 30px !important;
+            transform: translateY(-1px) !important;
+        }
+
+        #molColombeWelcomeMessage::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 10px solid transparent;
+            border-top-color: #fff;
+            filter: drop-shadow(0 2px 1px rgba(15, 23, 42, .08));
+        }
+
+        #molColombeWelcomeMessage strong,
+        #molColombeWelcomeMessage small {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+        }
+
+        #molColombeWelcomeMessage strong {
+            font-size: clamp(17px, 2vw, 21px) !important;
+            line-height: 1.3 !important;
+        }
+
+        #molColombeWelcomeMessage small {
+            font-size: clamp(13px, 1.35vw, 15px) !important;
+            line-height: 1.5 !important;
+            color: #475569 !important;
+        }
+
+        /* Le menu général du panneau est placé dans le viewport, jamais au bas de la liste. */
+        #molChatPanelMenu.mol-chat-panel-menu-portal {
+            position: fixed !important;
+            inset: auto !important;
+            z-index: 2147483647 !important;
+            display: none !important;
+            flex-direction: column !important;
+            width: min(280px, calc(100vw - 20px)) !important;
+            min-width: 0 !important;
+            max-width: calc(100vw - 20px) !important;
+            max-height: calc(100dvh - 20px) !important;
+            margin: 0 !important;
+            padding: 8px !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            overscroll-behavior: contain !important;
+            box-sizing: border-box !important;
+            border: 1px solid rgba(148, 163, 184, .28) !important;
+            border-radius: 16px !important;
+            background: #fff !important;
+            box-shadow: 0 20px 52px rgba(15, 23, 42, .24) !important;
+            transform: none !important;
+        }
+
+        #molChatPanelMenu.mol-chat-panel-menu-portal.is-open {
+            display: flex !important;
+        }
+
+        #molChatPanelMenu.mol-chat-panel-menu-portal > button,
+        #molChatPanelMenu.mol-chat-panel-menu-portal > a {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 11px 12px !important;
+            border-radius: 11px !important;
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+            text-align: left !important;
+        }
+
+        /*
+         * Menu d'actions d'une conversation.
+         * Il est géré par un contrôleur unique (plus bas), sans Popper/Bootstrap,
+         * et rendu directement dans <body> pour échapper aux overflow du chat.
+         */
+        .mol-conversation-actions-portal {
+            position: fixed !important;
+            inset: auto !important;
+            display: none !important;
+            width: min(278px, calc(100vw - 20px)) !important;
+            min-width: 0 !important;
+            max-width: calc(100vw - 20px) !important;
+            max-height: calc(100dvh - 20px) !important;
+            box-sizing: border-box !important;
+            margin: 0 !important;
+            padding: 8px !important;
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+            overscroll-behavior: contain !important;
+            border: 1px solid rgba(148, 163, 184, .24) !important;
+            border-radius: 16px !important;
+            background: #fff !important;
+            box-shadow: 0 20px 52px rgba(15, 23, 42, .24) !important;
+            transform: none !important;
+            z-index: 2147483647 !important;
+        }
+
+        .mol-conversation-actions-portal.is-open {
+            display: block !important;
+        }
+
+        .mol-conversation-actions-portal .dropdown-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            padding: 9px 11px !important;
+            border-radius: 11px !important;
+            white-space: nowrap !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+        }
+
+        .mol-conversation-actions-portal .dropdown-item i {
+            flex: 0 0 18px !important;
+            width: 18px !important;
+            margin: 0 !important;
+            text-align: center !important;
+        }
+
+        @media (max-width: 767.98px), (max-height: 520px) {
+            #molChatPanelMenu.is-open,
+            #molChatPanelMenu.mol-chat-panel-menu-portal.is-open {
+                position: fixed !important;
+                display: flex !important;
+                flex-direction: column !important;
+                inset: 10px 10px auto auto !important;
+                left: auto !important;
+                right: max(10px, env(safe-area-inset-right)) !important;
+                top: max(10px, env(safe-area-inset-top)) !important;
+                bottom: auto !important;
+                width: min(280px, calc(100vw - 20px)) !important;
+                min-width: 0 !important;
+                max-width: calc(100vw - 20px) !important;
+                max-height: calc(100dvh - 20px) !important;
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+                transform: none !important;
+                z-index: 2147483647 !important;
+            }
+
+            /*
+             * Menu « 3 points » d'une conversation : sur mobile, il reste
+             * toujours entièrement visible dans le coin supérieur droit.
+             * Ce sélecteur volontairement précis neutralise les anciennes
+             * règles absolute/dropup encore présentes dans la feuille du chat.
+             */
+            .mol-chat-thread .mol-chat-thread-menu.is-open,
+            .mol-chat-thread .mol-chat-thread-menu.is-open.is-dropup {
+                position: fixed !important;
+                inset: auto !important;
+                top: max(10px, env(safe-area-inset-top, 0px)) !important;
+                right: max(10px, env(safe-area-inset-right, 0px)) !important;
+                bottom: auto !important;
+                left: auto !important;
+                width: min(240px, calc(100vw - 20px)) !important;
+                min-width: 0 !important;
+                max-width: calc(100vw - 20px) !important;
+                max-height: calc(100dvh - 20px) !important;
+                margin: 0 !important;
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+                overscroll-behavior: contain !important;
+                box-sizing: border-box !important;
+                transform: none !important;
+                z-index: 2147483647 !important;
+            }
+
+            .mol-chat-thread .mol-chat-thread-menu.is-open .mol-thread-menu-text {
+                white-space: normal !important;
+                overflow: visible !important;
+                overflow-wrap: anywhere !important;
+                text-overflow: clip !important;
+                line-height: 1.25 !important;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #molChatFab .mol-chat-fab-label:not([hidden]) {
+                right: 0 !important;
+                width: min(310px, calc(100vw - 24px)) !important;
+                max-width: calc(100vw - 24px) !important;
+                min-width: 0 !important;
+                gap: 3px !important;
+                padding: 11px 13px !important;
+            }
+
+            #molChatFab .mol-chat-fab-label strong {
+                font-size: 12.5px !important;
+            }
+
+            #molChatFab .mol-chat-fab-label small {
+                font-size: 11px !important;
+                line-height: 1.35 !important;
+            }
+
+            #molColombeWelcomeMessage {
+                width: calc(100vw - 28px) !important;
+                max-width: calc(100vw - 28px) !important;
+                padding: 16px !important;
+                transform: translate(-50%, calc(-100% - 58px)) translateY(10px) scale(.96) !important;
+            }
+
+            #molColombeWelcomeMessage.is-visible {
+                transform: translate(-50%, calc(-100% - 58px)) translateY(0) scale(1) !important;
+            }
+
+            #molColombeWelcomeMessage strong {
+                font-size: 17px !important;
+            }
+
+            #molColombeWelcomeMessage small {
+                font-size: 13px !important;
+                line-height: 1.45 !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #molChatFab.mol-colombe-welcome-active,
+            #molChatFab .mol-chat-fab-label,
+            #molColombeWelcomeMessage {
+                transition-duration: .01ms !important;
+            }
+        }
+    </style>
+    <script type="module">
+        import { EmojiButton } from "https://cdn.jsdelivr.net/npm/@joeattardi/emoji-button@4.6.4/dist/index.js";
+        window.EmojiButton = EmojiButton;
+    </script>
+    <script src="{{ asset('js/mol-chat-premium.js') }}" defer></script>
+
+    <script id="mol-chat-panel-menu-mobile-fix">
+        (() => {
+            if (window.__MOL_CHAT_PANEL_MENU_MOBILE_FIX__) return;
+            window.__MOL_CHAT_PANEL_MENU_MOBILE_FIX__ = true;
+
+            const menuId = 'molChatPanelMenu';
+
+            function viewportBox() {
+                const visual = window.visualViewport;
+
+                return {
+                    left: visual?.offsetLeft || 0,
+                    top: visual?.offsetTop || 0,
+                    width: visual?.width || document.documentElement.clientWidth || window.innerWidth,
+                    height: visual?.height || document.documentElement.clientHeight || window.innerHeight,
+                };
+            }
+
+            function closeMenu() {
+                const menu = document.getElementById(menuId);
+                const toggle = document.querySelector(`[data-mol-menu-toggle="${menuId}"]`);
+
+                menu?.classList.remove('is-open');
+                toggle?.setAttribute('aria-expanded', 'false');
+            }
+
+            function openMenu(toggle, menu) {
+                if (menu.parentElement !== document.body) {
+                    document.body.appendChild(menu);
+                }
+
+                menu.classList.add('mol-chat-panel-menu-portal', 'is-open');
+                menu.style.setProperty('visibility', 'hidden', 'important');
+                menu.style.setProperty('left', '0px', 'important');
+                menu.style.setProperty('top', '0px', 'important');
+
+                const viewport = viewportBox();
+                const margin = 10;
+                const width = Math.max(180, Math.min(280, viewport.width - (margin * 2)));
+
+                menu.style.setProperty('width', `${width}px`, 'important');
+
+                const toggleRect = toggle.getBoundingClientRect();
+                const maxHeight = Math.max(120, viewport.height - (margin * 2));
+                const height = Math.min(Math.ceil(menu.scrollHeight || menu.getBoundingClientRect().height || 240), maxHeight);
+                const rightEdge = viewport.left + viewport.width - margin;
+                const bottomEdge = viewport.top + viewport.height - margin;
+
+                let left = toggleRect.right - width;
+                let top = toggleRect.bottom + 8;
+
+                if (top + height > bottomEdge) {
+                    top = toggleRect.top - height - 8;
+                }
+
+                left = Math.max(viewport.left + margin, Math.min(rightEdge - width, left));
+                top = Math.max(viewport.top + margin, Math.min(bottomEdge - height, top));
+
+                menu.style.setProperty('max-height', `${maxHeight}px`, 'important');
+                menu.style.setProperty('left', `${left}px`, 'important');
+                menu.style.setProperty('top', `${top}px`, 'important');
+                menu.style.setProperty('visibility', 'visible', 'important');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+
+            document.addEventListener('click', (event) => {
+                const target = event.target instanceof Element ? event.target : null;
+                if (!target) return;
+
+                const toggle = target.closest(`[data-mol-menu-toggle="${menuId}"]`);
+                const menu = document.getElementById(menuId);
+
+                if (toggle && menu) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+
+                    if (menu.classList.contains('is-open')) {
+                        closeMenu();
+                    } else {
+                        openMenu(toggle, menu);
+                    }
+
+                    return;
+                }
+
+                if (target.closest(`#${menuId}`)) {
+                    window.setTimeout(closeMenu, 0);
+                    return;
+                }
+
+                closeMenu();
+            }, true);
+
+            window.addEventListener('resize', closeMenu);
+            window.visualViewport?.addEventListener('resize', closeMenu);
+            window.visualViewport?.addEventListener('scroll', closeMenu);
+            document.addEventListener('turbo:before-cache', closeMenu);
+        })();
+    </script>
+
+    <script id="mol-chat-conversation-menu-viewport-failsafe-v4-disabled" type="application/json">
+        (() => {
+            if (window.__MOL_CHAT_CONVERSATION_MENU_VIEWPORT_FAILSAFE_V4__) return;
+            window.__MOL_CHAT_CONVERSATION_MENU_VIEWPORT_FAILSAFE_V4__ = true;
+
+            const MENU_SELECTOR = [
+                '#molChatPanel .dropdown-menu.show',
+                '#molChatToasts .dropdown-menu.show',
+                '#molChatThreadDock .dropdown-menu.show',
+                '#molChatThread .dropdown-menu.show',
+                '.dropdown-menu.show[aria-labelledby^="chatcoversationDropdown-"]',
+                '.dropdown-menu.show[aria-labelledby^="chatconversationDropdown-"]',
+                '.dropdown-menu.show[aria-labelledby="molChatThreadDropdown"]',
+                '.mol-chat-fixed-menu.show',
+                '.mol-chat-portal-menu.show',
+                'body > .mol-chat-conversation-menu-portal.show'
+            ].join(', ');
+
+            const PORTAL_CLASS = 'mol-chat-conversation-menu-portal';
+            const PLACEMENT_STYLES = [
+                'position', 'display', 'visibility', 'inset', 'left', 'right',
+                'top', 'bottom', 'transform', 'width', 'min-width', 'max-width',
+                'max-height', 'margin', 'overflow-x', 'overflow-y', 'z-index'
+            ];
+
+            let scheduled = false;
+
+            function viewportBox() {
+                const visual = window.visualViewport;
+
+                return {
+                    left: visual?.offsetLeft || 0,
+                    top: visual?.offsetTop || 0,
+                    width: visual?.width || document.documentElement.clientWidth || window.innerWidth,
+                    height: visual?.height || document.documentElement.clientHeight || window.innerHeight,
+                };
+            }
+
+            function findToggle(menu) {
+                const labelledBy = String(menu?.getAttribute('aria-labelledby') || '').trim();
+                const labelledToggle = labelledBy ? document.getElementById(labelledBy) : null;
+
+                return labelledToggle
+                    || menu?.__molFinalToggle
+                    || menu?.__molToggle
+                    || menu?.previousElementSibling
+                    || menu?.parentElement?.querySelector?.('[data-mol-chat-dropdown-toggle], [data-bs-toggle="dropdown"], [data-toggle="dropdown"]')
+                    || null;
+            }
+
+            function rememberOrigin(menu) {
+                if (menu.__molConversationMenuOrigin || menu.parentNode === document.body) return;
+
+                menu.__molConversationMenuOrigin = {
+                    parent: menu.parentNode,
+                    nextSibling: menu.nextSibling
+                };
+            }
+
+            function portalize(menu, toggle) {
+                if (!(menu instanceof HTMLElement)) return;
+
+                if (toggle instanceof HTMLElement) {
+                    menu.__molConversationMenuToggle = toggle;
+                }
+
+                rememberOrigin(menu);
+
+                if (menu.parentNode !== document.body) {
+                    document.body.appendChild(menu);
+                }
+
+                menu.classList.add(PORTAL_CLASS);
+            }
+
+            function restoreMenu(menu) {
+                if (!(menu instanceof HTMLElement)) return;
+
+                const origin = menu.__molConversationMenuOrigin;
+
+                if (origin?.parent?.isConnected) {
+                    if (origin.nextSibling?.parentNode === origin.parent) {
+                        origin.parent.insertBefore(menu, origin.nextSibling);
+                    } else {
+                        origin.parent.appendChild(menu);
+                    }
+                }
+
+                PLACEMENT_STYLES.forEach((property) => menu.style.removeProperty(property));
+                menu.classList.remove(PORTAL_CLASS);
+                delete menu.__molConversationMenuOrigin;
+                delete menu.__molConversationMenuToggle;
+            }
+
+            function restoreClosedMenus() {
+                document.querySelectorAll(`body > .${PORTAL_CLASS}:not(.show)`).forEach(restoreMenu);
+            }
+
+            function chatPanelRect() {
+                const panel = document.getElementById('molChatPanel');
+                if (!(panel instanceof HTMLElement)) return null;
+
+                const rect = panel.getBoundingClientRect();
+                return rect.width > 0 && rect.height > 0 ? rect : null;
+            }
+
+            function placeInsideViewport(menu) {
+                if (!(menu instanceof HTMLElement) || !menu.matches(MENU_SELECTOR)) return;
+
+                const viewport = viewportBox();
+                const compactViewport = viewport.width <= 767.98 || viewport.height <= 520;
+                if (!compactViewport) return;
+
+                const margin = 10;
+                const panelGap = 8;
+                const panelRect = chatPanelRect();
+                const viewportRight = viewport.left + viewport.width;
+                const viewportBottom = viewport.top + viewport.height;
+                const toggle = menu.__molConversationMenuToggle || findToggle(menu);
+
+                portalize(menu, toggle);
+
+                let surfaceLeft = viewport.left + margin;
+                let surfaceRight = viewportRight - margin;
+                let surfaceTop = viewport.top + margin;
+                let surfaceBottom = viewportBottom - margin;
+
+                if (panelRect) {
+                    surfaceLeft = Math.max(surfaceLeft, panelRect.left + panelGap);
+                    surfaceRight = Math.min(surfaceRight, panelRect.right - panelGap);
+                    surfaceTop = Math.max(surfaceTop, panelRect.top + panelGap);
+                    surfaceBottom = Math.min(surfaceBottom, panelRect.bottom - panelGap);
+                }
+
+                if (surfaceRight - surfaceLeft < 180) {
+                    surfaceLeft = viewport.left + margin;
+                    surfaceRight = viewportRight - margin;
+                }
+
+                if (surfaceBottom - surfaceTop < 120) {
+                    surfaceTop = viewport.top + margin;
+                    surfaceBottom = viewportBottom - margin;
+                }
+
+                const availableWidth = Math.max(0, surfaceRight - surfaceLeft);
+                const width = Math.min(280, availableWidth);
+                const maxHeight = Math.max(0, surfaceBottom - surfaceTop);
+
+                menu.style.setProperty('position', 'fixed', 'important');
+                menu.style.setProperty('display', 'block', 'important');
+                menu.style.setProperty('visibility', 'hidden', 'important');
+                menu.style.setProperty('inset', 'auto', 'important');
+                menu.style.setProperty('transform', 'none', 'important');
+                menu.style.setProperty('right', 'auto', 'important');
+                menu.style.setProperty('bottom', 'auto', 'important');
+                menu.style.setProperty('width', `${width}px`, 'important');
+                menu.style.setProperty('min-width', '0', 'important');
+                menu.style.setProperty('max-width', `${availableWidth}px`, 'important');
+                menu.style.setProperty('max-height', `${maxHeight}px`, 'important');
+                menu.style.setProperty('margin', '0', 'important');
+                menu.style.setProperty('overflow-x', 'hidden', 'important');
+                menu.style.setProperty('overflow-y', 'auto', 'important');
+                menu.style.setProperty('z-index', '2147483647', 'important');
+
+                const height = Math.min(
+                    Math.ceil(menu.scrollHeight || menu.getBoundingClientRect().height || 300),
+                    maxHeight
+                );
+
+                const minLeft = surfaceLeft;
+                const maxLeft = Math.max(minLeft, surfaceRight - width);
+                const minTop = surfaceTop;
+                const maxTop = Math.max(minTop, surfaceBottom - height);
+
+                /* Même alignement que le menu général validé : bord droit du panneau. */
+                let left = maxLeft;
+                let top = minTop;
+
+                if (toggle instanceof HTMLElement) {
+                    const toggleRect = toggle.getBoundingClientRect();
+                    top = toggleRect.bottom + 8;
+
+                    if (top + height > surfaceBottom) {
+                        top = toggleRect.top - height - 8;
+                    }
+
+                    top = Math.max(minTop, Math.min(maxTop, top));
+                }
+
+                menu.style.setProperty('left', `${left}px`, 'important');
+                menu.style.setProperty('top', `${top}px`, 'important');
+                menu.style.setProperty('visibility', 'visible', 'important');
+
+                menu.querySelectorAll('.dropdown-item').forEach((item) => {
+                    item.style.setProperty('white-space', 'normal', 'important');
+                    item.style.setProperty('overflow-wrap', 'anywhere', 'important');
+                });
+            }
+
+            function placeOpenMenus() {
+                scheduled = false;
+                restoreClosedMenus();
+                document.querySelectorAll(MENU_SELECTOR).forEach(placeInsideViewport);
+            }
+
+            function schedulePlacement() {
+                if (scheduled) return;
+                scheduled = true;
+                window.requestAnimationFrame(placeOpenMenus);
+            }
+
+            const observer = new MutationObserver(schedulePlacement);
+            observer.observe(document.documentElement, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ['class']
+            });
+
+            document.addEventListener('shown.bs.dropdown', (event) => {
+                const toggle = event.target instanceof HTMLElement ? event.target : null;
+                const wrapper = toggle?.closest?.('.dropdown, .dropup, .dropstart, .dropend');
+                const menu = wrapper?.querySelector?.('.dropdown-menu.show')
+                    || document.querySelector(MENU_SELECTOR);
+
+                if (menu instanceof HTMLElement && menu.matches(MENU_SELECTOR)) {
+                    portalize(menu, toggle);
+                }
+
+                schedulePlacement();
+            }, true);
+            document.addEventListener('hidden.bs.dropdown', () => {
+                window.setTimeout(restoreClosedMenus, 0);
+            }, true);
+            document.addEventListener('click', schedulePlacement, true);
+            window.addEventListener('resize', () => {
+                if ((window.visualViewport?.width || window.innerWidth) > 767.98
+                    && (window.visualViewport?.height || window.innerHeight) > 520) {
+                    document.querySelectorAll(`body > .${PORTAL_CLASS}`).forEach(restoreMenu);
+                    return;
+                }
+
+                schedulePlacement();
+            });
+            window.visualViewport?.addEventListener('resize', schedulePlacement);
+            window.visualViewport?.addEventListener('scroll', schedulePlacement);
+            document.addEventListener('turbo:load', schedulePlacement);
+            document.addEventListener('turbo:before-cache', () => {
+                document.querySelectorAll(`body > .${PORTAL_CLASS}`).forEach(restoreMenu);
+            });
+            window.addEventListener('pageshow', schedulePlacement);
+        })();
+    </script>
+
+    <script id="mol-chat-conversation-actions-controller-v6">
+        (() => {
+            if (window.__MOL_CHAT_CONVERSATION_ACTIONS_CONTROLLER_V6__) return;
+            window.__MOL_CHAT_CONVERSATION_ACTIONS_CONTROLLER_V6__ = true;
+
+            const TOGGLE_SELECTOR = [
+                '[data-mol-conversation-actions-toggle="1"]',
+                '#molChatToasts [id^="chatcoversationDropdown-"]',
+                '#molChatToasts [id^="chatconversationDropdown-"]',
+                '#molChatThreadDropdown'
+            ].join(', ');
+
+            const PORTAL_CLASS = 'mol-conversation-actions-portal';
+            const OPEN_CLASS = 'is-open';
+            const POSITION_STYLES = [
+                'position', 'display', 'visibility', 'inset', 'left', 'right',
+                'top', 'bottom', 'transform', 'width', 'min-width', 'max-width',
+                'max-height', 'margin', 'overflow-x', 'overflow-y', 'z-index',
+                'box-sizing'
+            ];
+
+            const state = {
+                menu: null,
+                toggle: null,
+                marker: null,
+                originalStyle: null
+            };
+
+            function viewportBox() {
+                const visual = window.visualViewport;
+
+                return {
+                    left: visual?.offsetLeft || 0,
+                    top: visual?.offsetTop || 0,
+                    width: visual?.width || document.documentElement.clientWidth || window.innerWidth,
+                    height: visual?.height || document.documentElement.clientHeight || window.innerHeight
+                };
+            }
+
+            function clamp(value, min, max) {
+                return Math.max(min, Math.min(max, value));
+            }
+
+            function findToggle(target) {
+                return target instanceof Element ? target.closest(TOGGLE_SELECTOR) : null;
+            }
+
+            function findMenu(toggle) {
+                if (!(toggle instanceof HTMLElement)) return null;
+
+                const labelledBy = String(toggle.id || '').trim();
+                const candidates = document.querySelectorAll(
+                    '.mol-conversation-actions-menu, .dropdown-menu'
+                );
+
+                if (labelledBy) {
+                    for (const candidate of candidates) {
+                        if (candidate.getAttribute('aria-labelledby') === labelledBy) {
+                            return candidate;
+                        }
+                    }
+                }
+
+                return toggle.parentElement?.querySelector?.(
+                    '.mol-conversation-actions-menu, .dropdown-menu'
+                ) || null;
+            }
+
+            function disableBootstrap(toggle, menu) {
+                try {
+                    window.bootstrap?.Dropdown?.getInstance?.(toggle)?.dispose?.();
+                } catch (_) {}
+
+                toggle.removeAttribute('data-bs-toggle');
+                toggle.removeAttribute('data-bs-auto-close');
+                toggle.setAttribute('data-mol-chat-dropdown-toggle', '1');
+                menu.removeAttribute('data-bs-popper');
+                menu.classList.remove('show');
+            }
+
+            function restoreMenu() {
+                const { menu, toggle, marker, originalStyle } = state;
+
+                if (menu instanceof HTMLElement) {
+                    menu.classList.remove(PORTAL_CLASS, OPEN_CLASS, 'show');
+
+                    POSITION_STYLES.forEach((property) => {
+                        menu.style.removeProperty(property);
+                    });
+
+                    if (originalStyle === null) {
+                        menu.removeAttribute('style');
+                    } else {
+                        menu.setAttribute('style', originalStyle);
+                    }
+
+                    if (marker?.parentNode) {
+                        marker.parentNode.insertBefore(menu, marker);
+                        marker.remove();
+                    } else if (menu.parentNode === document.body) {
+                        menu.remove();
+                    }
+                }
+
+                toggle?.setAttribute?.('aria-expanded', 'false');
+
+                state.menu = null;
+                state.toggle = null;
+                state.marker = null;
+                state.originalStyle = null;
+            }
+
+            function getSurfaceRect(toggle) {
+                const surface = toggle.closest(
+                    '#molChatToasts .mol-chat-toast, #molChatThread, #molChatPanel'
+                );
+                const rect = surface?.getBoundingClientRect?.();
+
+                if (rect && rect.width > 0 && rect.height > 0) return rect;
+                return null;
+            }
+
+            function placeMenu(toggle, menu) {
+                const viewport = viewportBox();
+                const viewportRight = viewport.left + viewport.width;
+                const viewportBottom = viewport.top + viewport.height;
+                const margin = 10;
+                const surfaceGap = 8;
+                const surface = getSurfaceRect(toggle);
+
+                let surfaceLeft = viewport.left + margin;
+                let surfaceRight = viewportRight - margin;
+                let surfaceTop = viewport.top + margin;
+                let surfaceBottom = viewportBottom - margin;
+
+                if (surface) {
+                    surfaceLeft = Math.max(surfaceLeft, surface.left + surfaceGap);
+                    surfaceRight = Math.min(surfaceRight, surface.right - surfaceGap);
+                    surfaceTop = Math.max(surfaceTop, surface.top + surfaceGap);
+                    surfaceBottom = Math.min(surfaceBottom, surface.bottom - surfaceGap);
+                }
+
+                if (surfaceRight - surfaceLeft < 180) {
+                    surfaceLeft = viewport.left + margin;
+                    surfaceRight = viewportRight - margin;
+                }
+
+                if (surfaceBottom - surfaceTop < 120) {
+                    surfaceTop = viewport.top + margin;
+                    surfaceBottom = viewportBottom - margin;
+                }
+
+                const availableWidth = Math.max(0, surfaceRight - surfaceLeft);
+                const availableHeight = Math.max(0, surfaceBottom - surfaceTop);
+                const width = Math.min(278, availableWidth);
+                const marker = document.createComment('mol-conversation-menu-origin');
+
+                state.menu = menu;
+                state.toggle = toggle;
+                state.marker = marker;
+                state.originalStyle = menu.getAttribute('style');
+
+                menu.parentNode?.insertBefore(marker, menu);
+                document.body.appendChild(menu);
+
+                menu.classList.remove('show');
+                menu.classList.add(PORTAL_CLASS, OPEN_CLASS);
+                menu.style.setProperty('position', 'fixed', 'important');
+                menu.style.setProperty('display', 'block', 'important');
+                menu.style.setProperty('visibility', 'hidden', 'important');
+                menu.style.setProperty('inset', 'auto', 'important');
+                menu.style.setProperty('left', '0px', 'important');
+                menu.style.setProperty('right', 'auto', 'important');
+                menu.style.setProperty('top', '0px', 'important');
+                menu.style.setProperty('bottom', 'auto', 'important');
+                menu.style.setProperty('transform', 'none', 'important');
+                menu.style.setProperty('width', `${width}px`, 'important');
+                menu.style.setProperty('min-width', '0', 'important');
+                menu.style.setProperty('max-width', `${availableWidth}px`, 'important');
+                menu.style.setProperty('max-height', `${availableHeight}px`, 'important');
+                menu.style.setProperty('margin', '0', 'important');
+                menu.style.setProperty('overflow-x', 'hidden', 'important');
+                menu.style.setProperty('overflow-y', 'auto', 'important');
+                menu.style.setProperty('box-sizing', 'border-box', 'important');
+                menu.style.setProperty('z-index', '2147483647', 'important');
+
+                const height = Math.min(
+                    Math.ceil(menu.scrollHeight || menu.getBoundingClientRect().height || 280),
+                    availableHeight
+                );
+                const toggleRect = toggle.getBoundingClientRect();
+                const minLeft = surfaceLeft;
+                const maxLeft = Math.max(minLeft, surfaceRight - width);
+                const minTop = surfaceTop;
+                const maxTop = Math.max(minTop, surfaceBottom - height);
+
+                let left = surfaceRight - width;
+                let top = toggleRect.bottom + 8;
+
+                if (top + height > surfaceBottom) {
+                    top = toggleRect.top - height - 8;
+                }
+
+                left = clamp(left, minLeft, maxLeft);
+                top = clamp(top, minTop, maxTop);
+
+                menu.style.setProperty('left', `${Math.round(left)}px`, 'important');
+                menu.style.setProperty('top', `${Math.round(top)}px`, 'important');
+                menu.style.setProperty('visibility', 'visible', 'important');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+
+            function toggleConversationMenu(event, toggle) {
+                event?.preventDefault?.();
+                event?.stopPropagation?.();
+                event?.stopImmediatePropagation?.();
+
+                toggle = toggle || findToggle(event?.target);
+                if (!(toggle instanceof HTMLElement)) return false;
+
+                const menu = findMenu(toggle);
+                if (!(menu instanceof HTMLElement)) return false;
+
+                const sameMenuWasOpen = state.menu === menu && menu.classList.contains(OPEN_CLASS);
+                restoreMenu();
+                if (sameMenuWasOpen) return false;
+
+                disableBootstrap(toggle, menu);
+                placeMenu(toggle, menu);
+                return false;
+            }
+
+            /*
+             * Certaines versions de base.html appellent déjà cette fonction.
+             * L'écraser ici remplace leur ancien calcul au lieu de le cumuler.
+             */
+            window.MOLToggleConversationActions = toggleConversationMenu;
+
+            document.addEventListener('click', (event) => {
+                const toggle = findToggle(event.target);
+                if (toggle) {
+                    toggleConversationMenu(event, toggle);
+                    return;
+                }
+
+                if (state.menu?.contains?.(event.target)) return;
+                restoreMenu();
+            }, true);
+
+            document.addEventListener('click', (event) => {
+                if (state.menu?.contains?.(event.target)) {
+                    window.setTimeout(restoreMenu, 0);
+                }
+            });
+
+            window.addEventListener('resize', restoreMenu);
+            window.visualViewport?.addEventListener('resize', restoreMenu);
+            window.visualViewport?.addEventListener('scroll', restoreMenu);
+            document.addEventListener('turbo:before-cache', restoreMenu);
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') restoreMenu();
+            });
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const DISPLAY_EVERY_MS = 60 * 1000;
+            const RECURRING_VISIBLE_MS = 15 * 1000;
+            const CENTER_TRAVEL_MS = 1350;
+            const WELCOME_READ_MS = 15 * 1000;
+            const MESSAGE_FADE_MS = 350;
+            const RETURN_TRAVEL_MS = 1350;
+            const SCRIPT_VERSION = 'v11-colombe-login-center-close-fixed';
+            const STORAGE_PREFIX = 'mol-colombe-login-welcome-user-';
+            const VERSION_STORAGE_KEY = 'mol-colombe-script-version';
+
+            function clearStoredWelcomeKeys() {
+                try {
+                    for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
+                        const key = window.sessionStorage.key(index);
+
+                        if (key && key.indexOf(STORAGE_PREFIX) === 0) {
+                            window.sessionStorage.removeItem(key);
+                        }
+                    }
+                } catch (error) {
+                    /* sessionStorage peut être indisponible. */
+                }
+            }
+
+            /*
+             * Nettoyage AVANT la navigation de déconnexion.
+             * Ainsi, la prochaine connexion déclenche toujours l'accueil central.
+             */
+            if (!window.__molColombeLogoutResetBound) {
+                window.__molColombeLogoutResetBound = true;
+
+                document.addEventListener('click', function (event) {
+                    const logoutLink = event.target.closest(
+                        '[data-mol-chat-reset-session], a[href*="/logout"], a[href*="deconnexion"]'
+                    );
+
+                    if (!logoutLink) return;
+
+                    clearStoredWelcomeKeys();
+
+                    try {
+                        window.sessionStorage.removeItem(VERSION_STORAGE_KEY);
+                    } catch (error) {
+                        /* sessionStorage peut être indisponible. */
+                    }
+
+                    if (window.MOL_COLOMBE_REMINDER) {
+                        window.MOL_COLOMBE_REMINDER.welcomeShownForUser = null;
+                    }
+                }, true);
+            }
+
+            function initColombeReminder(attempt) {
+                attempt = attempt || 0;
+
+                const fab = document.getElementById('molChatFab');
+                const welcomeMessage = document.getElementById('molColombeWelcomeMessage');
+                const welcomeClose = document.getElementById('molColombeWelcomeClose');
+
+                /*
+                 * Certains scripts du chat terminent leur montage après Turbo.
+                 * On réessaie brièvement au lieu d'abandonner définitivement.
+                 */
+                if (!fab || !welcomeMessage || !welcomeClose) {
+                    if (attempt < 40) {
+                        window.setTimeout(function () {
+                            initColombeReminder(attempt + 1);
+                        }, 100);
+                    }
+
+                    return;
+                }
+
+                const panel = document.getElementById('molChatPanel');
+                const label = fab.querySelector('.mol-chat-fab-label');
+
+                window.MOL_COLOMBE_REMINDER = window.MOL_COLOMBE_REMINDER || {};
+                const state = window.MOL_COLOMBE_REMINDER;
+
+                if (state.initializedFab === fab && state.scriptVersion === SCRIPT_VERSION) {
+                    return;
+                }
+
+                state.initializedFab = fab;
+                state.scriptVersion = SCRIPT_VERSION;
+                state.welcomeActive = false;
+                state.welcomeFinishing = false;
+
+                if (state.panelObserver) {
+                    state.panelObserver.disconnect();
+                    state.panelObserver = null;
+                }
+
+                const clearTimer = function (name, isInterval) {
+                    if (!state[name]) return;
+
+                    if (isInterval) {
+                        window.clearInterval(state[name]);
+                    } else {
+                        window.clearTimeout(state[name]);
+                    }
+
+                    state[name] = null;
+                };
+
+                [
+                    'hideTimer',
+                    'startTimer',
+                    'arrivalTimer',
+                    'welcomeTimer',
+                    'fadeTimer',
+                    'landingTimer'
+                ].forEach(function (timerName) {
+                    clearTimer(timerName, false);
+                });
+
+                clearTimer('interval', true);
+
+                const panelIsOpen = function () {
+                    if (!panel) return false;
+
+                    return panel.getAttribute('aria-hidden') === 'false'
+                        || panel.classList.contains('is-open')
+                        || panel.classList.contains('open');
+                };
+
+                const hideRecurringLabel = function () {
+                    clearTimer('hideTimer', false);
+
+                    if (!label) return;
+
+                    label.classList.remove('is-visible');
+                    label.hidden = true;
+                    label.setAttribute('aria-hidden', 'true');
+                };
+
+                const showRecurringLabel = function () {
+                    if (!label) return;
+
+                    if (state.welcomeActive || panelIsOpen() || document.hidden) {
+                        hideRecurringLabel();
+                        return;
+                    }
+
+                    hideRecurringLabel();
+                    label.hidden = false;
+                    label.setAttribute('aria-hidden', 'false');
+
+                    window.requestAnimationFrame(function () {
+                        label.classList.add('is-visible');
+                    });
+
+                    state.hideTimer = window.setTimeout(
+                        hideRecurringLabel,
+                        RECURRING_VISIBLE_MS
+                    );
+                };
+
+                const startRecurringReminder = function () {
+                    clearTimer('interval', true);
+
+                    if (!label) return;
+
+                    state.interval = window.setInterval(
+                        showRecurringLabel,
+                        DISPLAY_EVERY_MS
+                    );
+                };
+
+                const hideWelcomeMessage = function (immediate) {
+                    welcomeMessage.classList.remove('is-visible');
+                    welcomeMessage.setAttribute('aria-hidden', 'true');
+
+                    if (immediate) {
+                        welcomeMessage.hidden = true;
+                    }
+                };
+
+                const finishReturnToCorner = function () {
+                    clearTimer('landingTimer', false);
+
+                    state.landingTimer = window.setTimeout(function () {
+                        fab.classList.remove('mol-colombe-welcome-active');
+                        state.welcomeActive = false;
+                        state.welcomeFinishing = false;
+                        startRecurringReminder();
+                    }, RETURN_TRAVEL_MS);
+                };
+
+                /*
+                 * Fin normale après 15 secondes :
+                 * la bulle disparaît, puis Colombe retourne en bas à droite.
+                 */
+                const finishWelcomeNormally = function () {
+                    if (!state.welcomeActive || state.welcomeFinishing) return;
+
+                    state.welcomeFinishing = true;
+                    clearTimer('welcomeTimer', false);
+                    hideWelcomeMessage(false);
+
+                    state.fadeTimer = window.setTimeout(function () {
+                        welcomeMessage.hidden = true;
+                        fab.classList.remove('mol-colombe-welcome-center');
+                        finishReturnToCorner();
+                    }, MESSAGE_FADE_MS);
+                };
+
+                /*
+                 * Fermeture manuelle :
+                 * la bulle disparaît et Colombe commence immédiatement sa descente.
+                 */
+                const closeWelcomeImmediately = function () {
+                    if (!state.welcomeActive || state.welcomeFinishing) return;
+
+                    state.welcomeFinishing = true;
+                    clearTimer('welcomeTimer', false);
+                    clearTimer('fadeTimer', false);
+
+                    hideWelcomeMessage(true);
+                    fab.classList.remove('mol-colombe-welcome-center');
+                    finishReturnToCorner();
+                };
+
+                const resetWelcomeImmediately = function () {
+                    state.welcomeActive = false;
+                    state.welcomeFinishing = false;
+
+                    [
+                        'startTimer',
+                        'arrivalTimer',
+                        'welcomeTimer',
+                        'fadeTimer',
+                        'landingTimer'
+                    ].forEach(function (timerName) {
+                        clearTimer(timerName, false);
+                    });
+
+                    hideWelcomeMessage(true);
+                    fab.classList.remove(
+                        'mol-colombe-welcome-center',
+                        'mol-colombe-welcome-active'
+                    );
+
+                    startRecurringReminder();
+                };
+
+                const connectedUserId = {{ app.user.id|json_encode|raw }};
+                const welcomeStorageKey = STORAGE_PREFIX + connectedUserId;
+
+                /*
+                 * Une nouvelle version force une seule démonstration.
+                 * Cela élimine l'ancien marqueur bloqué qui empêchait toute animation.
+                 */
+                try {
+                    if (window.sessionStorage.getItem(VERSION_STORAGE_KEY) !== SCRIPT_VERSION) {
+                        clearStoredWelcomeKeys();
+                        window.sessionStorage.setItem(VERSION_STORAGE_KEY, SCRIPT_VERSION);
+                    }
+                } catch (error) {
+                    /* sessionStorage peut être indisponible. */
+                }
+
+                const welcomeWasShown = function () {
+                    try {
+                        return window.sessionStorage.getItem(welcomeStorageKey) === '1';
+                    } catch (error) {
+                        return state.welcomeShownForUser === connectedUserId;
+                    }
+                };
+
+                const rememberWelcome = function () {
+                    state.welcomeShownForUser = connectedUserId;
+
+                    try {
+                        window.sessionStorage.setItem(welcomeStorageKey, '1');
+                    } catch (error) {
+                        /* sessionStorage peut être indisponible. */
+                    }
+                };
+
+                const showFirstWelcome = function () {
+                    if (panelIsOpen()) {
+                        startRecurringReminder();
+                        return;
+                    }
+
+                    rememberWelcome();
+                    state.welcomeActive = true;
+                    state.welcomeFinishing = false;
+                    hideRecurringLabel();
+
+                    /*
+                     * On pose d'abord la transition, puis la position centrale.
+                     * Le navigateur peut ainsi réellement animer le déplacement.
+                     */
+                    fab.classList.add('mol-colombe-welcome-active');
+                    void fab.offsetWidth;
+                    fab.classList.add('mol-colombe-welcome-center');
+
+                    state.arrivalTimer = window.setTimeout(function () {
+                        if (!state.welcomeActive || state.welcomeFinishing) return;
+
+                        welcomeMessage.hidden = false;
+                        welcomeMessage.setAttribute('aria-hidden', 'false');
+
+                        window.requestAnimationFrame(function () {
+                            window.requestAnimationFrame(function () {
+                                if (!state.welcomeActive || state.welcomeFinishing) return;
+
+                                welcomeMessage.classList.add('is-visible');
+
+                                state.welcomeTimer = window.setTimeout(
+                                    finishWelcomeNormally,
+                                    WELCOME_READ_MS
+                                );
+                            });
+                        });
+                    }, CENTER_TRAVEL_MS);
+                };
+
+                hideRecurringLabel();
+                hideWelcomeMessage(true);
+
+                fab.classList.remove(
+                    'mol-colombe-welcome-center',
+                    'mol-colombe-welcome-active'
+                );
+
+                if (welcomeWasShown()) {
+                    startRecurringReminder();
+                } else {
+                    state.startTimer = window.setTimeout(showFirstWelcome, 350);
+                }
+
+                if (welcomeClose.dataset.colombeWelcomeCloseBound !== '1') {
+                    welcomeClose.dataset.colombeWelcomeCloseBound = '1';
+
+                    welcomeClose.addEventListener('click', function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        closeWelcomeImmediately();
+                    });
+                }
+
+                if (fab.dataset.colombeReminderBound !== '1') {
+                    fab.dataset.colombeReminderBound = '1';
+
+                    fab.addEventListener('click', function () {
+                        if (state.welcomeActive) {
+                            resetWelcomeImmediately();
+                        } else {
+                            hideRecurringLabel();
+                        }
+                    });
+                }
+
+                if (panel) {
+                    panel.querySelectorAll('[data-mol-chat-close]').forEach(function (button) {
+                        if (button.dataset.colombeReminderBound === '1') return;
+
+                        button.dataset.colombeReminderBound = '1';
+                        button.addEventListener('click', hideRecurringLabel);
+                    });
+
+                    state.panelObserver = new MutationObserver(function () {
+                        if (!panelIsOpen()) return;
+
+                        if (state.welcomeActive) {
+                            resetWelcomeImmediately();
+                        } else {
+                            hideRecurringLabel();
+                        }
+                    });
+
+                    state.panelObserver.observe(panel, {
+                        attributes: true,
+                        attributeFilter: ['class', 'aria-hidden']
+                    });
+                }
+            }
+
+            function bootColombe() {
+                initColombeReminder(0);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bootColombe, { once: true });
+            } else {
+                bootColombe();
+            }
+
+            document.addEventListener('turbo:load', bootColombe);
+            document.addEventListener('turbo:render', bootColombe);
+            window.addEventListener('pageshow', bootColombe);
+        })();
+    </script>
+{% else %}
+    {# Après une déconnexion, autoriser l'accueil central à la prochaine connexion. #}
+    <script>
+        (function () {
+            try {
+                for (let index = window.sessionStorage.length - 1; index >= 0; index -= 1) {
+                    const key = window.sessionStorage.key(index);
+                    if (
+                        key
+                        && (
+                            key.indexOf('mol-colombe-login-welcome-user-') === 0
+                            || key === 'mol-colombe-script-version'
+                        )
+                    ) {
+                        window.sessionStorage.removeItem(key);
+                    }
+                }
+            } catch (error) {
+                /* sessionStorage peut être indisponible. */
+            }
+
+            if (window.MOL_COLOMBE_REMINDER) {
+                window.MOL_COLOMBE_REMINDER.welcomeShownForUser = null;
+            }
+        })();
+    </script>
+{% endif %}

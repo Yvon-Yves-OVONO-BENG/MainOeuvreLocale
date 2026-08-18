@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Modération contenu{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/moderation/_vip_ui.html.twig' %}
+
+  <div class="mod-shell" data-moderation-page="queue">
+    <div class="mod-container mod-grid">
+
+      <section class="mod-card mod-page-head">
+        <div class="mod-card-inner">
+          <div class="mod-page-head-top">
+            <div class="mod-page-main">
+              <div class="mod-kicker">{% trans %}Modération • File réelle{% endtrans %}</div>
+              <h1 class="mod-page-title">{% trans %}File de modération contenu{% endtrans %}</h1>
+              <p class="mod-page-text">
+                {% trans %}Vue unifiée des offres, messages, avis, signalements et profils nécessitant une attention de modération.{% endtrans %}
+              </p>
+            </div>
+          </div>
+
+          <div class="mod-page-actions">
+            {% include 'admin/moderation/_nav.html.twig' %}
+          </div>
+        </div>
+      </section>
+
+      <section class="mod-grid mod-grid-4">
+        <article class="mod-card mod-kpi">
+          <div class="mod-card-inner">
+            <div class="label">{% trans %}En file{% endtrans %}</div>
+            <div class="value">{{ stats.queue }}</div>
+            <div class="hint">{% trans %}Éléments remontés depuis la base{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="mod-card mod-kpi">
+          <div class="mod-card-inner">
+            <div class="label">{% trans %}Urgents{% endtrans %}</div>
+            <div class="value">{{ stats.urgent }}</div>
+            <div class="hint">{% trans %}High + critical{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="mod-card mod-kpi">
+          <div class="mod-card-inner">
+            <div class="label">{% trans %}Approuvés{% endtrans %}</div>
+            <div class="value">{{ stats.approvedToday }}</div>
+            <div class="hint">{% trans %}Détectés comme approuvés aujourd’hui{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="mod-card mod-kpi">
+          <div class="mod-card-inner">
+            <div class="label">{% trans %}Bloqués / rejetés{% endtrans %}</div>
+            <div class="value">{{ stats.rejectedToday }}</div>
+            <div class="hint">{% trans %}Aujourd’hui{% endtrans %}</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="mod-card">
+        <div class="mod-card-inner">
+          <div class="mod-filters">
+            <div style="flex:2 1 340px;">
+              <input type="search"
+                     class="mod-input"
+                     placeholder="{% trans %}Rechercher type, titre, auteur, extrait...{% endtrans %}"
+                     data-mod-search="queue">
+            </div>
+
+            <div style="flex:1 1 220px;">
+              <select class="mod-select" data-mod-type="queue">
+                <option value="">{% trans %}Tous les types{% endtrans %}</option>
+                <option value="offre">{% trans %}Offre{% endtrans %}</option>
+                <option value="message">{% trans %}Message{% endtrans %}</option>
+                <option value="avis">{% trans %}Avis{% endtrans %}</option>
+                <option value="signalement">{% trans %}Signalement{% endtrans %}</option>
+                <option value="profil">{% trans %}Profil{% endtrans %}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mod-separator"></div>
+
+          <div class="mod-table-wrap">
+            <table class="mod-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>{% trans %}Contenu{% endtrans %}</th>
+                  <th>{% trans %}Source{% endtrans %}</th>
+                  <th>{% trans %}Sévérité{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Date{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in items %}
+                  <tr class="js-mod-queue"
+                      data-mod-text="{{ (item.type ~ ' ' ~ item.title ~ ' ' ~ item.author ~ ' ' ~ item.excerpt ~ ' ' ~ item.source)|lower }}"
+                      data-mod-type="{{ item.type|lower }}">
+                    <td>#{{ item.id }}</td>
+
+                    <td>
+                      <div class="mod-row-title">{{ item.title }}</div>
+                      <div class="mod-row-sub">{{ item.type }} • {{ item.author }}</div>
+                      <div class="mod-row-sub">{{ item.excerpt }}</div>
+                    </td>
+
+                    <td>{{ item.source }}</td>
+
+                    <td>
+                      <span class="mod-badge {{ item.severity }}">
+                        {{ item.severity|upper }}
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="mod-badge {{ item.status }}">
+                        {{ item.status|capitalize }}
+                      </span>
+                    </td>
+
+                    <td>
+                      {{ item.createdAt ? item.createdAt|date('d/m/Y H:i') : '—' }}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="6">
+                      <div class="mod-mini-card">
+                        {% trans %}Aucun élément de modération détecté pour le moment.{% endtrans %}
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-content-moderation.js') }}"></script>
+{% endblock %}

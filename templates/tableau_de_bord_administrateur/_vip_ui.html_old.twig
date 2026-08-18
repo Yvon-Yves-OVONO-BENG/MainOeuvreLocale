@@ -1,0 +1,925 @@
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+	:root{
+		--sa-indigo:#6366f1;
+		--sa-blue:#3b82f6;
+		--sa-cyan:#06b6d4;
+		--sa-violet:#8b5cf6;
+		--sa-emerald:#10b981;
+		--sa-amber:#f59e0b;
+		--sa-rose:#f43f5e;
+		--sa-red:#ef4444;
+
+		--sa-slate-950:#020617;
+		--sa-slate-900:#0f172a;
+		--sa-slate-800:#1e293b;
+		--sa-slate-700:#334155;
+		--sa-slate-600:#475569;
+		--sa-slate-500:#64748b;
+		--sa-slate-400:#94a3b8;
+		--sa-slate-300:#cbd5e1;
+		--sa-slate-200:#e2e8f0;
+		--sa-slate-100:#f1f5f9;
+		--sa-white:#ffffff;
+	}
+
+	.sa-card{
+		border-radius:22px;
+		background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.80));
+		border:1px solid rgba(226,232,240,.88);
+		backdrop-filter:blur(14px);
+		-webkit-backdrop-filter:blur(14px);
+		box-shadow:
+			0 12px 35px rgba(15,23,42,.06),
+			0 2px 10px rgba(15,23,42,.04);
+		transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+	}
+
+	.sa-card:hover{
+		transform:translateY(-2px);
+		box-shadow:
+			0 22px 55px rgba(15,23,42,.10),
+			0 6px 18px rgba(15,23,42,.06);
+		border-color:rgba(199,210,254,.95);
+	}
+
+	.sa-glass{
+		background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.76));
+		border:1px solid rgba(226,232,240,.78);
+		backdrop-filter:blur(16px);
+		-webkit-backdrop-filter:blur(16px);
+		box-shadow:
+			0 12px 35px rgba(15,23,42,.07),
+			0 2px 8px rgba(15,23,42,.04);
+	}
+
+	.sa-card-soft{
+		background:#f8fafc;
+		border:1px solid #e2e8f0;
+		box-shadow: inset 0 1px 0 rgba(255,255,255,.65);
+	}
+
+	.sa-kpi{
+		padding:18px;
+		border-radius:1.5rem;
+	}
+
+	.sa-icon{
+		height:42px;
+		width:42px;
+		display:grid;
+		place-items:center;
+		border-radius:14px;
+		background:linear-gradient(135deg, #eef2ff, #f8fafc);
+		font-size:18px;
+		box-shadow:0 8px 22px rgba(15,23,42,.08);
+		border:1px solid rgba(226,232,240,.8);
+	}
+
+	.sa-btn{
+		display:inline-flex;
+		align-items:center;
+		justify-content:center;
+		gap:.5rem;
+		border-radius:14px;
+		font-weight:800;
+		font-size:12px;
+		transition:all .18s ease;
+	}
+
+	.sa-btn:hover{
+		transform:translateY(-1px);
+	}
+
+	.sa-btn-secondary{
+		padding:.75rem 1rem;
+		border:1px solid rgba(226,232,240,.9);
+		background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(248,250,252,.92));
+		color:var(--sa-slate-800);
+		box-shadow:0 8px 20px rgba(15,23,42,.06);
+	}
+
+	.sa-btn-secondary:hover{
+		background:#fff;
+		box-shadow:0 12px 25px rgba(15,23,42,.08);
+	}
+
+	.sa-btn-danger{
+		padding:.75rem 1rem;
+		border:1px solid rgba(254,205,211,.95);
+		background:linear-gradient(180deg, #fff1f2, #ffe4e6);
+		color:#be123c;
+		box-shadow:0 8px 20px rgba(244,63,94,.10);
+	}
+
+	.sa-chip,
+	.sa-badge{
+		display:inline-flex;
+		align-items:center;
+		justify-content:center;
+		border-radius:999px;
+		font-weight:800;
+		font-size:11px;
+		padding:5px 10px;
+		background:linear-gradient(90deg,#eef2ff,#f8fafc);
+		border:1px solid rgba(226,232,240,.85);
+		color:var(--sa-slate-700);
+	}
+
+	.sa-table thead th{
+		color:var(--sa-slate-500);
+		font-weight:800;
+	}
+
+	.sa-table tbody tr{
+		transition:background .18s ease, transform .18s ease;
+	}
+
+	.sa-table tbody tr:hover{
+		background:rgba(99,102,241,.05);
+	}
+
+	.sa-kpi-line,
+	.sa-mini-progress{
+		height:6px;
+		border-radius:999px;
+		background:rgba(226,232,240,.88);
+		overflow:hidden;
+	}
+
+	.sa-kpi-line span,
+	.sa-mini-progress span{
+		display:block;
+		height:100%;
+		border-radius:999px;
+		animation:saProgress 1.3s ease forwards;
+		transform-origin:left;
+	}
+
+	@keyframes saProgress{
+		from{ transform:scaleX(.25); opacity:.4; }
+		to{ transform:scaleX(1); opacity:1; }
+	}
+
+	.sa-alert{
+		padding:12px;
+		border-radius:16px;
+		border:1px solid rgba(226,232,240,.9);
+		background:#fff;
+		box-shadow:0 8px 20px rgba(15,23,42,.04);
+	}
+
+	.sa-alert-critical{
+		border-color:#fecdd3;
+		background:#fff1f2;
+	}
+
+	.sa-alert-warning{
+		border-color:#fde68a;
+		background:#fffbeb;
+	}
+
+	.sa-alert-info{
+		border-color:#bfdbfe;
+		background:#eff6ff;
+	}
+
+	.sa-ring{
+		--size:120px;
+		position:relative;
+		width:var(--size);
+		height:var(--size);
+		border-radius:50%;
+		background:conic-gradient(#6366f1 calc(var(--score) * 1%), #e2e8f0 0);
+		display:flex;
+		align-items:center;
+		justify-content:center;
+		box-shadow:
+			inset 0 0 15px rgba(0,0,0,.05),
+			0 12px 28px rgba(15,23,42,.08);
+	}
+
+	.sa-ring::before{
+		content:"";
+		position:absolute;
+		width:80px;
+		height:80px;
+		background:#fff;
+		border-radius:50%;
+	}
+
+	.sa-tab-btn{
+		display:inline-flex;
+		align-items:center;
+		gap:6px;
+		padding:9px 14px;
+		font-size:13px;
+		font-weight:800;
+		border-radius:999px;
+		border:1px solid rgba(226,232,240,.9);
+		background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
+		color:var(--sa-slate-600);
+		backdrop-filter:blur(8px);
+		box-shadow:0 2px 8px rgba(15,23,42,.05);
+		transition:all .22s ease;
+	}
+
+	.sa-tab-btn:hover{
+		background:#fff;
+		color:var(--sa-slate-900);
+		transform:translateY(-1px);
+		box-shadow:0 10px 24px rgba(15,23,42,.08);
+	}
+
+	.sa-tab-btn.active{
+		color:#fff;
+		border-color:transparent;
+		background:linear-gradient(135deg, #6366f1, #3b82f6);
+		box-shadow:0 10px 28px rgba(99,102,241,.32);
+	}
+
+	.sa-tab-panel{
+		display:none;
+	}
+
+	.sa-tab-panel.active{
+		display:block;
+		animation:tabFade .3s ease;
+	}
+
+	@keyframes tabFade{
+		from{ opacity:0; transform:translateY(6px); }
+		to{ opacity:1; transform:translateY(0); }
+	}
+
+	.sa-status-dot{
+		display:inline-block;
+		width:9px;
+		height:9px;
+		border-radius:999px;
+	}
+
+	.sa-status-online{ background:#10b981; box-shadow:0 0 0 4px rgba(16,185,129,.15); }
+	.sa-status-warning{ background:#f59e0b; box-shadow:0 0 0 4px rgba(245,158,11,.15); }
+	.sa-status-degraded{ background:#f43f5e; box-shadow:0 0 0 4px rgba(244,63,94,.15); }
+
+	.sa-risk-high{ background:#fff1f2; border-color:#fecdd3; color:#be123c; }
+	.sa-risk-medium{ background:#fffbeb; border-color:#fde68a; color:#b45309; }
+	.sa-risk-low{ background:#ecfdf5; border-color:#a7f3d0; color:#047857; }
+
+	.sa-toast-wrap{
+		position:fixed;
+		right:20px;
+		bottom:20px;
+		z-index:70;
+		display:flex;
+		flex-direction:column;
+		gap:10px;
+	}
+
+	.sa-toast{
+		min-width:260px;
+		max-width:340px;
+		padding:14px 16px;
+		border-radius:18px;
+		border:1px solid rgba(226,232,240,.9);
+		background:rgba(15,23,42,.96);
+		color:#fff;
+		box-shadow:0 18px 44px rgba(2,6,23,.28);
+	}
+
+	#saCommandModal{
+		position:fixed;
+		inset:0;
+		z-index:80;
+		background:rgba(2,6,23,.34);
+		backdrop-filter:blur(10px);
+		-webkit-backdrop-filter:blur(10px);
+	}
+
+	#saCommandBox{
+		animation:saScaleIn .22s ease;
+	}
+
+	@keyframes saScaleIn{
+		from{ opacity:0; transform:scale(.96) translateY(8px); }
+		to{ opacity:1; transform:scale(1) translateY(0); }
+	}
+
+	#globalSearchResults{
+		top:100%;
+		left:0;
+	}
+
+	.sa-section-title{
+		font-size:13px;
+		font-weight:900;
+		letter-spacing:.02em;
+	}
+
+	
+  .sa-soon-toast{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9999;
+    min-width: 260px;
+    max-width: 380px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: .01em;
+    background: rgba(15, 23, 42, .92);
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 20px 50px rgba(2, 6, 23, .35);
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateY(14px) scale(.98);
+    pointer-events: none;
+    transition: all .22s ease;
+  }
+
+  .sa-soon-toast.show{
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+	.sa-btn-success{
+		color:#ecfdf5;
+		background:linear-gradient(180deg, rgba(16,185,129,.24), rgba(16,185,129,.14));
+		border:1px solid rgba(16,185,129,.34);
+		box-shadow:0 14px 34px rgba(16,185,129,.18);
+	}
+
+	.sa-btn-success:hover{
+		transform:translateY(-2px);
+		box-shadow:0 18px 40px rgba(16,185,129,.24);
+	}
+
+	.sa-btn-danger{
+		color:#fff1f2;
+		background:linear-gradient(180deg, rgba(239,68,68,.24), rgba(239,68,68,.14));
+		border:1px solid rgba(239,68,68,.34);
+		box-shadow:0 14px 34px rgba(239,68,68,.18);
+	}
+
+	.sa-btn-danger:hover{
+		transform:translateY(-2px);
+		box-shadow:0 18px 40px rgba(239,68,68,.24);
+	}
+
+	.sa-toast-wrap{
+		position:fixed;
+		top:22px;
+		right:22px;
+		z-index:9999;
+		display:flex;
+		flex-direction:column;
+		gap:12px;
+	}
+
+	.sa-toast{
+		min-width:280px;
+		max-width:420px;
+		padding:14px 16px;
+		border-radius:18px;
+		color:#fff;
+		font-size:14px;
+		font-weight:800;
+		letter-spacing:.01em;
+		border:1px solid rgba(255,255,255,.10);
+		box-shadow:0 20px 50px rgba(2,6,23,.30);
+		backdrop-filter:blur(10px);
+		opacity:0;
+		transform:translateY(-12px);
+		transition:all .22s ease;
+	}
+
+	.sa-toast.show{
+		opacity:1;
+		transform:translateY(0);
+	}
+
+	.sa-toast-success{
+		background:rgba(16,185,129,.92);
+	}
+
+	.sa-toast-warning{
+		background:rgba(245,158,11,.95);
+	}
+
+	.sa-toast-error{
+		background:rgba(239,68,68,.95);
+	}
+</style>
+
+<style>
+	.sa-chip-filter{
+		border:1px solid rgba(148,163,184,.18);
+		background:rgba(255,255,255,.75);
+		color:#334155;
+		cursor:pointer;
+		transition:all .2s ease;
+	}
+
+	.sa-chip-filter.active{
+		background:#e2e8f0;
+		color:#0f172a;
+		font-weight:800;
+		box-shadow:inset 0 0 0 1px rgba(148,163,184,.18);
+	}
+
+	.sa-admin-sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, .55) transparent;
+}
+
+.sa-admin-sidebar-scroll::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sa-admin-sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sa-admin-sidebar-scroll::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, .45);
+    border-radius: 999px;
+}
+
+.sa-admin-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(100, 116, 139, .65);
+}
+
+/* =========================================================
+   RESPONSIVE DASHBOARD — À AJOUTER À LA FIN DU CSS
+   ========================================================= */
+
+/* Empêche les éléments de dépasser horizontalement */
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* Les contenus flex et grid peuvent réellement se réduire */
+.sa-card,
+.sa-glass,
+.sa-card-soft,
+.sa-kpi,
+.sa-tab-panel,
+main,
+section,
+article,
+aside {
+    min-width: 0;
+    max-width: 100%;
+}
+
+/* Ne jamais désactiver les liens et boutons */
+a,
+button,
+input,
+select,
+textarea,
+.sa-btn,
+.sa-tab-btn,
+.sa-chip-filter {
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 2;
+    touch-action: manipulation;
+}
+
+/* Les décorations ne doivent pas bloquer les clics */
+.sa-card::before,
+.sa-card::after,
+.sa-glass::before,
+.sa-glass::after,
+.sa-kpi::before,
+.sa-kpi::after {
+    pointer-events: none !important;
+}
+
+/* Images, graphiques, SVG et vidéos responsifs */
+img,
+svg,
+video,
+canvas {
+    max-width: 100%;
+}
+
+img,
+video {
+    height: auto;
+}
+
+canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Permet aux textes longs de revenir à la ligne */
+.sa-card,
+.sa-glass,
+.sa-card-soft,
+.sa-alert,
+.sa-toast,
+.sa-chip,
+.sa-badge,
+.sa-btn,
+.sa-tab-btn,
+td,
+th {
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+
+/* Les conteneurs flex ne doivent pas pousser la page */
+.flex,
+[class*="flex"] {
+    min-width: 0;
+}
+
+/* =========================================================
+   TABLEAUX RESPONSIFS
+   ========================================================= */
+
+/*
+ * Les cartes contenant directement ou indirectement un tableau
+ * deviennent scrollables horizontalement.
+ */
+.sa-card:has(table),
+.sa-glass:has(table),
+.sa-card-soft:has(table),
+.overflow-table,
+.table-responsive,
+.sa-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x pan-y;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, .65) rgba(226, 232, 240, .55);
+}
+
+/* Scrollbar visible sur Chrome, Edge et Safari */
+.sa-card:has(table)::-webkit-scrollbar,
+.sa-glass:has(table)::-webkit-scrollbar,
+.sa-card-soft:has(table)::-webkit-scrollbar,
+.overflow-table::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar,
+.sa-table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.sa-card:has(table)::-webkit-scrollbar-track,
+.sa-glass:has(table)::-webkit-scrollbar-track,
+.sa-card-soft:has(table)::-webkit-scrollbar-track,
+.overflow-table::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track,
+.sa-table-wrapper::-webkit-scrollbar-track {
+    background: rgba(226, 232, 240, .55);
+    border-radius: 999px;
+}
+
+.sa-card:has(table)::-webkit-scrollbar-thumb,
+.sa-glass:has(table)::-webkit-scrollbar-thumb,
+.sa-card-soft:has(table)::-webkit-scrollbar-thumb,
+.overflow-table::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb,
+.sa-table-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, .65);
+    border-radius: 999px;
+}
+
+/* Conserve la structure horizontale des tableaux */
+.sa-table,
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Les grands tableaux restent scrollables au lieu d'écraser les colonnes */
+.sa-card:has(table) table,
+.sa-glass:has(table) table,
+.sa-card-soft:has(table) table,
+.table-responsive table,
+.sa-table-wrapper table,
+.overflow-table table {
+    min-width: 720px;
+}
+
+/* Cellules lisibles */
+.sa-table th,
+.sa-table td {
+    padding: 12px 14px;
+    vertical-align: middle;
+}
+
+/* La colonne des actions reste utilisable */
+.sa-table td:last-child,
+.sa-table th:last-child {
+    white-space: nowrap;
+}
+
+/* =========================================================
+   TABLETTES
+   ========================================================= */
+
+@media (max-width: 1024px) {
+    .sa-card,
+    .sa-glass {
+        border-radius: 18px;
+    }
+
+    .sa-kpi {
+        padding: 16px;
+        border-radius: 20px;
+    }
+
+    /* Les grilles Tailwind trop larges passent sur deux colonnes */
+    .grid.grid-cols-4,
+    .grid.grid-cols-5,
+    .grid.grid-cols-6,
+    .lg\:grid-cols-4,
+    .xl\:grid-cols-4,
+    .xl\:grid-cols-5,
+    .xl\:grid-cols-6 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    /* Les zones principales avec sidebar restent réductibles */
+    main,
+    .main-content,
+    .dashboard-content,
+    .sa-dashboard-content {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+/* =========================================================
+   MOBILES
+   ========================================================= */
+
+@media (max-width: 767px) {
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Espacement général plus adapté au mobile */
+    main,
+    .main-content,
+    .dashboard-content,
+    .sa-dashboard-content {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    /* Toutes les grandes grilles passent sur une colonne */
+    .grid,
+    .grid.grid-cols-2,
+    .grid.grid-cols-3,
+    .grid.grid-cols-4,
+    .grid.grid-cols-5,
+    .grid.grid-cols-6,
+    .sm\:grid-cols-2,
+    .md\:grid-cols-2,
+    .md\:grid-cols-3,
+    .lg\:grid-cols-2,
+    .lg\:grid-cols-3,
+    .lg\:grid-cols-4,
+    .xl\:grid-cols-4,
+    .xl\:grid-cols-5,
+    .xl\:grid-cols-6 {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    /* Les rangées flex se placent verticalement */
+    .sa-mobile-stack,
+    .sa-card > .flex,
+    .sa-glass > .flex,
+    .sa-card-soft > .flex {
+        flex-wrap: wrap;
+        min-width: 0;
+    }
+
+    .sa-card,
+    .sa-glass,
+    .sa-card-soft {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 16px;
+    }
+
+    /* Désactive le déplacement hover sur écran tactile */
+    .sa-card:hover,
+    .sa-btn:hover,
+    .sa-tab-btn:hover {
+        transform: none;
+    }
+
+    .sa-kpi {
+        width: 100%;
+        padding: 14px;
+        border-radius: 18px;
+    }
+
+    .sa-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 12px;
+        font-size: 16px;
+    }
+
+    /* Boutons plus faciles à toucher */
+    .sa-btn {
+        min-height: 42px;
+        padding: 10px 13px;
+    }
+
+    /* Groupes de boutons responsifs */
+    .sa-actions,
+    .sa-button-group,
+    .actions,
+    .card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .sa-actions .sa-btn,
+    .sa-button-group .sa-btn {
+        flex: 1 1 auto;
+    }
+
+    /* Les onglets défilent horizontalement sans bloquer la page */
+    .sa-tabs,
+    .sa-tab-list,
+    [role="tablist"] {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 4px 2px 10px;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x;
+        scrollbar-width: thin;
+    }
+
+    .sa-tab-btn {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        min-height: 40px;
+        padding: 9px 12px;
+    }
+
+    /* Filtres défilables */
+    .sa-chip-filter {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        min-height: 38px;
+    }
+
+    /* Tableau mobile */
+    .sa-card:has(table),
+    .sa-glass:has(table),
+    .sa-card-soft:has(table),
+    .table-responsive,
+    .sa-table-wrapper,
+    .overflow-table {
+        display: block;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        touch-action: pan-x pan-y !important;
+    }
+
+    .sa-card:has(table) table,
+    .sa-glass:has(table) table,
+    .sa-card-soft:has(table) table,
+    .table-responsive table,
+    .sa-table-wrapper table,
+    .overflow-table table {
+        width: max-content;
+        min-width: 700px;
+        max-width: none;
+    }
+
+    .sa-table th,
+    .sa-table td {
+        padding: 10px 12px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    /* Les toasts ne doivent pas recouvrir toute la largeur */
+    .sa-toast-wrap {
+        top: auto;
+        right: 10px;
+        bottom: 10px;
+        left: 10px;
+        width: auto;
+        pointer-events: none;
+    }
+
+    .sa-toast,
+    .sa-soon-toast {
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+        pointer-events: none;
+    }
+
+    /* Modal responsive, sans bloquer ses propres contrôles */
+    #saCommandModal {
+        padding: 12px;
+        overflow-y: auto;
+    }
+
+    #saCommandBox {
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    #saCommandBox a,
+    #saCommandBox button,
+    #saCommandBox input,
+    #saCommandBox select {
+        pointer-events: auto !important;
+    }
+
+    .sa-ring {
+        --size: 100px;
+    }
+
+    .sa-ring::before {
+        width: 68px;
+        height: 68px;
+    }
+}
+
+/* =========================================================
+   TRÈS PETITS ÉCRANS
+   ========================================================= */
+
+@media (max-width: 420px) {
+    main,
+    .main-content,
+    .dashboard-content,
+    .sa-dashboard-content {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+
+    .sa-card,
+    .sa-glass,
+    .sa-card-soft {
+        border-radius: 14px;
+    }
+
+    .sa-kpi {
+        padding: 12px;
+    }
+
+    .sa-btn {
+        width: 100%;
+    }
+
+    .sa-actions .sa-btn,
+    .sa-button-group .sa-btn {
+        flex: 1 1 100%;
+    }
+
+    .sa-table th,
+    .sa-table td {
+        padding: 9px 10px;
+        font-size: 11px;
+    }
+}
+
+</style>

@@ -1,0 +1,14 @@
+{% if pages > 1 %}
+    <footer class="flex flex-col gap-3 border-t border-slate-200/70 bg-white/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="text-xs font-bold text-slate-500">{% trans with {'%page%': page, '%pages%': pages} %}Page %page% sur %pages%{% endtrans %}</div>
+        <nav class="flex flex-wrap items-center gap-2" aria-label="{{ 'Pagination'|trans }}">
+            {% if page > 1 %}<a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path(routeName, {page: page - 1, perPage: perPage, q: q}) }}">← {% trans %}Précédent{% endtrans %}</a>{% endif %}
+            {% for p in 1..pages %}
+                {% if p == 1 or p == pages or (p >= page - 2 and p <= page + 2) %}
+                    <a class="grid h-9 min-w-9 place-items-center rounded-xl px-2 text-xs font-black {{ p == page ? 'bg-slate-900 text-white' : 'border border-slate-200 bg-white text-slate-700 hover:bg-slate-50' }}" href="{{ path(routeName, {page: p, perPage: perPage, q: q}) }}">{{ p }}</a>
+                {% elseif p == page - 3 or p == page + 3 %}<span class="px-1 text-slate-400">…</span>{% endif %}
+            {% endfor %}
+            {% if page < pages %}<a class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path(routeName, {page: page + 1, perPage: perPage, q: q}) }}">{% trans %}Suivant{% endtrans %} →</a>{% endif %}
+        </nav>
+    </footer>
+{% endif %}

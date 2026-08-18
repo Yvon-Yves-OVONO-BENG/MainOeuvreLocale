@@ -1,0 +1,92 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Modérateur • Contenus sensibles'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_content_suspects.html.twig" %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">🧾 {% trans %}Contenus sensibles{% endtrans %}</div>
+        <div class="hint">{% trans %}File d’annonces suspectes (fraude/spam). À traiter en priorité.{% endtrans %}</div>
+      </div>
+
+      <form method="get" class="filters">
+        <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Recherche : titre, texte, email…'|trans }}">
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit == n ? 'selected' : '' }}>{{ n }}/{% trans %}page{% endtrans %}</option>
+          {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">{% trans %}Rechercher{% endtrans %}</button>
+        <a class="btn" href="{{ path('moderateur_content_suspects') }}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+        <span class="chip warn">⚠️ {% trans %}Suspects :{% endtrans %} {{ total }}</span>
+        <a class="btn" href="{{ path('moderateur_analytics_index') }}">📊 {% trans %}Analytics{% endtrans %}</a>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Job{% endtrans %}</th>
+              <th>{% trans %}Auteur{% endtrans %}</th>
+              <th>{% trans %}Signal{% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+              <th style="text-align:right;">{% trans %}Action{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for j in items %}
+              {% set author = j.createdBy ?? null %}
+              {% set pp = author ? author.personalProfile : null %}
+              {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+              <tr>
+                <td>#{{ j.id }}</td>
+                <td>
+                  <div style="font-weight:950;">{{ j.title ?? ('Job #'|trans ~ j.id) }}</div>
+                  <div style="font-size:12px;color:rgba(15,23,42,.62);margin-top:2px;">
+                    {{ (j.description ?? '')|striptags|slice(0,120) }}{% if (j.description ?? '')|length > 120 %}…{% endif %}
+                  </div>
+                </td>
+                <td>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <img class="avatar" src="{{ photo }}" alt="{{ 'photo'|trans }}">
+                    <div>
+                      <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : (author ? author.email : '—') }}</div>
+                      <div style="font-size:12px;color:rgba(15,23,42,.62);">{{ author ? author.email : '—' }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip warn">🚩 {% trans %}suspect{% endtrans %}</span></td>
+                <td style="font-size:12px;color:rgba(15,23,42,.62);">{{ j.createdAt ? j.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                <td style="text-align:right;">
+                  <a class="btn primary" href="/jobs/{{ j.id }}" target="_blank">{% trans %}Voir{% endtrans %}</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" style="padding:18px;text-align:center;color:rgba(15,23,42,.62);">{% trans %}Aucun contenu suspect{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p == page ? 'primary' : '' }}"
+               href="{{ path('moderateur_content_suspects', {page:p, limit:limit, q:q}) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Modérateur • Analytics'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_analytics_user.html.twig" %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div class="h1">📊 {% trans %}Analytics{% endtrans %}</div>
+      <div class="hint">{% trans %}Suivi qualité & performance modération.{% endtrans %}</div>
+    </div>
+
+    <div class="bd" id="sla">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+        <div>
+          <div style="font-weight:950;">⏱️ {% trans %}SLA — Temps moyen de traitement (14j){% endtrans %}</div>
+          <div class="hint">{% trans %}Basé sur Report: handledAt - createdAt (traités).{% endtrans %}</div>
+        </div>
+        <span class="chip">{% trans %}Moyenne:{% endtrans %} {{ sla.avgHours }}h</span>
+      </div>
+
+      <div class="grid">
+        <div class="col-8">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Area/Line — Temps moyen/jour{% endtrans %}</div>
+                <div class="hint">{% trans %}Heures moyennes de traitement par jour.{% endtrans %}</div>
+              </div>
+              <span class="chip">{% trans %}Avg{% endtrans %}</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chSlaAvg"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-4">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Bar — Volumes traités/jour{% endtrans %}</div>
+                <div class="hint">{% trans %}Nombre de signalements traités.{% endtrans %}</div>
+              </div>
+              <span class="chip">{{ sla.countHandled }} {% trans %}traités{% endtrans %}</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chSlaCount"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+      <script>
+        (() => {
+          const sla = {{ sla|json_encode|raw }};
+          const labels = sla.daily.labels || [];
+          const avg = sla.daily.avgHours || [];
+          const cnt = sla.daily.handledCount || [];
+
+          new Chart(document.getElementById('chSlaAvg'),{
+            type:'line',
+            data:{ labels, datasets:[{ label:'{{ "Heures moyennes"|trans|e("js") }}', data: avg, tension:.35, fill:true, borderWidth:2, pointRadius:2, backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a4').trim() || 'rgba(168,85,247,.26)' }] },
+            options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+          });
+
+          new Chart(document.getElementById('chSlaCount'),{
+            type:'bar',
+            data:{ labels, datasets:[{ label:'{{ "Traités"|trans|e("js") }}', data: cnt, borderWidth:1 }] },
+            options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+          });
+        })();
+      </script>
+    </div>
+  </div>
+</div>
+{% endblock %}

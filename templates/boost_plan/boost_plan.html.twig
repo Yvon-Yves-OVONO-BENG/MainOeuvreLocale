@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Choisir un plan Boost{% endtrans %}{% endblock %}
+
+{% block body %}
+{% include 'boost_plan/_vip_ui.html.twig' %}
+
+<section class="sptb mol-page">
+  <div class="container">
+    <div class="mol-hero mb-4">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+          <h2 class="fw-bold mb-1"><i class="fa fa-bolt text-primary me-2"></i> {% trans %}Booster mon profil{% endtrans %}</h2>
+          <div class="mol-soft">{% trans %}Choisis un plan. Ensuite tu seras redirigé vers la page de paiement.{% endtrans %}</div>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-light rounded-4">
+          <i class="fa fa-arrow-left me-2"></i> {% trans %}Retour{% endtrans %}
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      {% for p in plans %}
+        <div class="col-md-6 col-xl-4">
+          <div class="mol-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="mol-icon"><i class="fa {{ p.icon }}"></i></div>
+                <span class="mol-tag"><i class="fa fa-star"></i> {{ p.tag }}</span>
+              </div>
+
+              <h4 class="fw-bold mt-3 mb-1">{{ p.name }}</h4>
+              <div class="mol-price">{{ p.price|number_format(0, '.', ' ') }} <small class="mol-soft">XAF</small></div>
+
+              <ul class="mol-li">
+                {% for f in p.features %}
+                  <li><i class="fa fa-check-circle"></i> {{ f }}</li>
+                {% endfor %}
+              </ul>
+
+              <div class="d-grid mt-3">
+                <a href="{{ path('payment_boost', {plan: p.name, montant: p.price}) }}" data-turbo="false" class="btn btn-primary rounded-4 fw-bold">
+                  <i class="fa fa-credit-card me-2"></i> {% trans %}Choisir{% endtrans %} {{ p.name }}
+                </a>
+              </div>
+
+              <div class="mol-soft mt-2"><small>{% trans %}Redirection vers le paiement…{% endtrans %}</small></div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</section>
+{% endblock %}

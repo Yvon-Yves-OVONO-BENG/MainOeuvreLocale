@@ -1,0 +1,259 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Offres{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1100px_circle_at_12%_10%,rgba(99,102,241,.10),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.10),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_45%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 space-y-4">
+
+    <div class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <div class="border-b border-slate-200/70 bg-white/60 p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Administration{% endtrans %}</div>
+            <div class="text-2xl font-black tracking-tight text-slate-900">📣 {% trans %}Gestion des offres{% endtrans %}</div>
+            <div class="mt-1 text-sm font-medium text-slate-600">
+              {% trans %}Consulte les offres, filtre les offres actives et accède rapidement aux actions utiles.{% endtrans %}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              ← {% trans %}Tableau de bord{% endtrans %}
+            </a>
+          </div>
+        </div>
+
+        <form method="get" class="mt-4 grid gap-3 lg:grid-cols-12">
+          <div class="lg:col-span-5">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Recherche{% endtrans %}</label>
+            <input
+              type="text"
+              name="q"
+              value="{{ q|default('') }}"
+              class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none placeholder:text-slate-400"
+              placeholder="{% trans %}titre, description, ville, référence...{% endtrans %}"
+            >
+          </div>
+
+          <div class="lg:col-span-3">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Statut{% endtrans %}</label>
+            <select
+              name="status"
+              class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none"
+            >
+              <option value="" {{ status|default('') == '' ? 'selected' : '' }}>{% trans %}Toutes{% endtrans %}</option>
+              <option value="active" {{ status|default('') == 'active' ? 'selected' : '' }}>{% trans %}Actives{% endtrans %}</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Par page{% endtrans %}</label>
+            <select
+              name="perPage"
+              class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none"
+            >
+              <option value="10" {{ perPage|default(10) == 10 ? 'selected' : '' }}>10</option>
+              <option value="20" {{ perPage|default(10) == 20 ? 'selected' : '' }}>20</option>
+              <option value="50" {{ perPage|default(10) == 50 ? 'selected' : '' }}>50</option>
+              <option value="100" {{ perPage|default(10) == 100 ? 'selected' : '' }}>100</option>
+                          </select>
+          </div>
+
+          <div class="lg:col-span-2 flex items-end">
+            <button
+              class="w-full rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2.5 text-xs font-extrabold text-white hover:opacity-95">
+              🔎 {% trans %}Filtrer{% endtrans %}
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <a href="{{ path('admin_jobs_index', {status: 'active'}) }}"
+             class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-extrabold
+             {{ status|default('') == '' ? 'border-indigo-200/70 bg-indigo-50 text-indigo-700' : 'border-slate-200 bg-white text-slate-700' }}">
+            {% trans %}Toutes les offres{% endtrans %}
+          </a>
+
+          <a href="{{ path('admin_jobs_index', {status: 'active'}) }}"
+             class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-extrabold
+             {{ status|default('') == 'active' ? 'border-cyan-200/70 bg-cyan-50 text-cyan-700' : 'border-slate-200 bg-white text-slate-700' }}">
+            {% trans %}Offres actives{% endtrans %}
+          </a>
+
+          <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700">
+            {% trans %}Total :{% endtrans %} {{ total|default(jobs|length) }}
+          </span>
+        </div>
+      </div>
+
+      {% set currentPage = page|default(1) %}
+      {% set currentPerPage = perPage|default(10) %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50/60">
+            <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-extrabold">{% trans %}N°{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Offre{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Créateur{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Expiration{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}État{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Actions{% endtrans %}</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-200/70">
+            {% for job in jobs %}
+              {% set isActive = job.dateExpirationAt and job.dateExpirationAt > date() %}
+              <tr class="hover:bg-indigo-50/20">
+                <td class="px-5 py-3">
+                {{ ((currentPage - 1) * currentPerPage) + loop.index }}
+                </td>
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">
+                    {{ job.title ?? ('Offre #' ~ job.id) }}
+                  </div>
+                  <div class="mt-1 text-xs font-semibold text-slate-500">
+                    {% trans %}Réf :{% endtrans %} {{ job.reference ?? '—' }}
+                  </div>
+                  
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="font-semibold text-slate-800">
+                    {{ job.createdBy ? (job.createdBy.email ?? '—') : '—' }}
+                  </div>
+                </td>
+
+                <td class="px-5 py-3 text-xs font-semibold text-slate-600">
+                  {% if job.dateExpirationAt %}
+                    {{ job.dateExpirationAt|date('d/m/Y H:i') }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-extrabold
+                    {{ isActive
+                      ? 'border-emerald-200/70 bg-emerald-50 text-emerald-700'
+                      : 'border-rose-200/70 bg-rose-50 text-rose-700' }}">
+                    <span class="h-1.5 w-1.5 rounded-full {{ isActive ? 'bg-emerald-500' : 'bg-rose-500' }}"></span>
+                    {% if isActive %}
+                      {% trans %}En cours{% endtrans %}
+                    {% else %}
+                      {% trans %}Expirée{% endtrans %}
+                    {% endif %}
+                  </span>
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="flex gap-2">
+                    <a href="{{ path('job_edit', {slug: job.slug}) }}"
+                       class="inline-flex items-center gap-2 rounded-2xl border border-indigo-200/70 bg-indigo-50 px-3 py-2 text-xs font-extrabold text-indigo-700 hover:bg-indigo-100/60">
+                      ✏️ 
+                    </a>
+
+                    <a href="{{ path('job_detail', {slug: job.slug}) }}"
+                       class="inline-flex items-center gap-2 rounded-2xl border border-cyan-200/70 bg-cyan-50 px-3 py-2 text-xs font-extrabold text-cyan-700 hover:bg-cyan-100/60">
+                      👁️ 
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="7" class="px-5 py-10 text-center text-sm font-semibold text-slate-500">
+                  {% trans %}Aucune offre trouvée.{% endtrans %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 border-t border-slate-200/70 bg-white/60 px-5 py-4">
+        <div class="text-xs font-semibold text-slate-500">
+          {% trans %}Page{% endtrans %} <span class="font-black text-slate-900">{{ page|default(1) }}</span>
+          / <span class="font-black text-slate-900">{{ pages|default(1) }}</span>
+        </div>
+
+        {% set prev = (page|default(1)) > 1 ? (page|default(1)) - 1 : 1 %}
+        {% set next = (page|default(1)) < (pages|default(1)) ? (page|default(1)) + 1 : (pages|default(1)) %}
+
+        <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/70 bg-white/60 px-5 py-4">
+  <div class="text-xs font-semibold text-slate-500">
+    {% trans %}Page{% endtrans %} <span class="font-black text-slate-900">{{ page|default(1) }}</span>
+    / <span class="font-black text-slate-900">{{ pages|default(1) }}</span>
+    · {% trans %}Total :{% endtrans %} <span class="font-black text-slate-900">{{ total|default(jobs|length) }}</span>
+  </div>
+
+  {% set currentPage = page|default(1) %}
+  {% set totalPages = pages|default(1) %}
+  {% set prev = currentPage > 1 ? currentPage - 1 : 1 %}
+  {% set next = currentPage < totalPages ? currentPage + 1 : totalPages %}
+
+  <div class="flex flex-wrap gap-2">
+    <a
+      class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ currentPage <= 1 ? 'pointer-events-none opacity-40' : '' }}"
+      href="{{ path('admin_jobs_index', {
+        status: status|default(''),
+        q: q|default(''),
+        perPage: perPage|default(10),
+        page: prev
+      }) }}">
+      ← {% trans %}Préc{% endtrans %}
+    </a>
+
+    {% for p in 1..totalPages %}
+      {% if totalPages <= 7 or p == 1 or p == totalPages or (p >= currentPage - 1 and p <= currentPage + 1) %}
+        <a
+          class="rounded-2xl border px-3 py-2 text-xs font-extrabold hover:bg-slate-50
+          {{ p == currentPage
+            ? 'border-indigo-200/70 bg-indigo-50 text-indigo-700'
+            : 'border-slate-200 bg-white text-slate-800' }}"
+          href="{{ path('admin_jobs_index', {
+            status: status|default(''),
+            q: q|default(''),
+            perPage: perPage|default(10),
+            page: p
+          }) }}">
+          {{ p }}
+        </a>
+      {% elseif p == currentPage - 2 or p == currentPage + 2 %}
+        <span class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-400">…</span>
+      {% endif %}
+    {% endfor %}
+
+    <a
+      class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ currentPage >= totalPages ? 'pointer-events-none opacity-40' : '' }}"
+      href="{{ path('admin_jobs_index', {
+        status: status|default(''),
+        q: q|default(''),
+        perPage: perPage|default(10),
+        page: next
+      }) }}">
+      {% trans %}Suiv{% endtrans %} →
+    </a>
+  </div>
+</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(() => {
+  const q = document.querySelector('input[name="q"]');
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      q?.focus();
+    }
+  });
+})();
+</script>
+{% endblock %}

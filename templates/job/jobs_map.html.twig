@@ -1,0 +1,110 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Carte des jobs de ma ville{% endtrans %}{% endblock %}
+
+{% block stylesheets %}
+	{{ parent() }}
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+
+{% block body %}
+{% include "job/_vip_ui_job_map.html.twig" %}
+<div class="map-page">
+	<div class="container">
+		<div class="map-shell">
+			<div class="map-head">
+				<div>
+					<div class="h4 fw-bold mb-1">🗺️ {% trans %}Carte des jobs de ma ville{% endtrans %}</div>
+					<div class="text-muted">
+						{% trans %}Ville{% endtrans %} : <strong>{{ city }}</strong> • {{ total|default(0) }} {% trans %}offres{% endtrans %}
+					</div>
+				</div>
+
+				<div class="d-flex gap-2 flex-wrap">
+					<a href="{{ path('jobs_near_me') }}" class="btn btn-sm btn-soft">
+						{% trans %}Voir la liste{% endtrans %}
+					</a>
+					<a href="{{ path('profile_edit') }}" class="btn btn-sm btn-outline-dark rounded-pill">
+						📍 {% trans %}Modifier ma ville{% endtrans %}
+					</a>
+				</div>
+			</div>
+
+			<div class="map-grid">
+				<div class="map-side">
+					{% if jobs|length > 0 %}
+						{% for j in jobs %}
+							<div class="map-item">
+								<div class="map-item-title">{{ j.title ?? 'Offre'|trans }}</div>
+								<div class="map-item-meta">
+									📍 {{ j.city ?? city }}
+									{% if j.profession %} • {{ j.profession.profession }}{% endif %}
+									{% if j.typeJob %} • {{ j.typeJob.typeJob }}{% endif %}
+								</div>
+								<a href="{{ path('job_detail', { slug: j.slug }) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+									{% trans %}Voir l’offre{% endtrans %}
+								</a>
+							</div>
+						{% endfor %}
+					{% else %}
+						<div class="map-empty">
+							<div class="fw-bold mb-2">{% trans %}Aucune offre à afficher{% endtrans %}</div>
+							<div>{% trans %}Aucun job actif n’a été trouvé dans votre ville.{% endtrans %}</div>
+						</div>
+					{% endif %}
+				</div>
+
+				<div>
+					<div id="jobsCityMap"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+	const cityName = {{ city|json_encode|raw }};
+	const totalJobs = {{ total|default(0) }};
+
+	const map = L.map('jobsCityMap').setView([3.8480, 11.5021], 11);
+	const refreshJobsCityMap = () => {
+		window.requestAnimationFrame(() => map.invalidateSize(false));
+		window.setTimeout(() => map.invalidateSize(false), 220);
+	};
+
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; OpenStreetMap'
+	}).addTo(map);
+	refreshJobsCityMap();
+	window.addEventListener('resize', refreshJobsCityMap, {passive:true});
+	window.addEventListener('orientationchange', () => window.setTimeout(refreshJobsCityMap, 300), {passive:true});
+
+	fetch(`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=cm&city=${encodeURIComponent(cityName)}`)
+		.then(response => response.json())
+		.then(data => {
+			if (Array.isArray(data) && data.length > 0) {
+				const lat = parseFloat(data[0].lat);
+				const lon = parseFloat(data[0].lon);
+
+				map.setView([lat, lon], 12);
+
+				L.marker([lat, lon]).addTo(map).bindPopup(
+					`<div style="min-width:220px">
+						<div style="font-weight:800;margin-bottom:6px;">${cityName}</div>
+						<div style="font-size:13px;color:#475569;">${totalJobs} offre(s) dans cette ville</div>
+					</div>`
+				).openPopup();
+
+				L.circle([lat, lon], {
+					radius: 3500
+				}).addTo(map);
+				refreshJobsCityMap();
+			}
+		})
+		.catch(() => {
+			map.setView([3.8480, 11.5021], 11);
+		});
+</script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Mots-clés{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/moderation/_vip_ui.html.twig' %}
+
+  <div class="mod-shell" data-moderation-page="keywords">
+    <div class="mod-container mod-grid">
+
+      <section class="mod-card mod-page-head">
+        <div class="mod-card-inner">
+          <div class="mod-page-head-top">
+            <div class="mod-page-main">
+              <div class="mod-kicker">{% trans %}Modération • Mots-clés{% endtrans %}</div>
+              <h1 class="mod-page-title">{% trans %}Dictionnaire de mots-clés sensibles{% endtrans %}</h1>
+              <p class="mod-page-text">{% trans %}Gère les expressions qui déclenchent un flag, une revue manuelle ou un blocage.{% endtrans %}</p>
+            </div>
+          </div>
+
+          <div class="mod-page-actions">
+            {% include 'admin/moderation/_nav.html.twig' %}
+          </div>
+        </div>
+      </section>
+
+      <section class="mod-card">
+        <div class="mod-card-inner">
+          <div class="mod-filters">
+            <div style="flex:2 1 340px;">
+              <input type="search" class="mod-input" placeholder="{% trans %}Rechercher un mot-clé...{% endtrans %}" data-mod-search="keywords">
+            </div>
+          </div>
+
+          <div class="mod-separator"></div>
+
+          <div class="mod-card-list">
+            {% for keyword in keywords %}
+              <article class="mod-mini-card js-mod-keyword"
+                       data-mod-text="{{ (keyword.term ~ ' ' ~ keyword.category ~ ' ' ~ keyword.action)|lower }}">
+                <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                  <div>
+                    <div class="mod-row-title">{{ keyword.term }}</div>
+                    <div class="mod-row-sub">{{ keyword.category }}</div>
+                    <div class="mod-row-sub">{% trans %}Action :{% endtrans %} {{ keyword.action }}</div>
+                  </div>
+
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <span class="mod-badge {{ keyword.severity }}">{{ keyword.severity|upper }}</span>
+                    <span class="mod-badge neutral">{{ keyword.updatedAt|date('d/m/Y') }}</span>
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-content-moderation.js') }}"></script>
+{% endblock %}

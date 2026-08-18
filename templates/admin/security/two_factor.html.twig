@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • 2FA{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/security/_vip_ui.html.twig' %}
+
+  <div class="sec-shell" data-security-page="2fa">
+    <div class="sec-container sec-grid">
+
+      <section class="sec-card sec-page-head">
+        <div class="sec-card-inner">
+          <div class="sec-page-head-top">
+            <div class="sec-page-main">
+              <div class="sec-kicker">{% trans %}Sécurité • 2FA{% endtrans %}</div>
+              <h1 class="sec-page-title">{% trans %}Double authentification{% endtrans %}</h1>
+              <p class="sec-page-text">{% trans %}État réel du 2FA par utilisateur, avec suivi de l’activation et du dernier challenge.{% endtrans %}</p>
+            </div>
+          </div>
+          <div class="sec-page-actions">{% include 'admin/security/_nav.html.twig' %}</div>
+        </div>
+      </section>
+
+      <section class="sec-grid sec-grid-4">
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Activée{% endtrans %}</div><div class="value">{{ stats.enabled }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}En attente{% endtrans %}</div><div class="value">{{ stats.pending }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Désactivée{% endtrans %}</div><div class="value">{{ stats.disabled }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Politique{% endtrans %}</div><div class="value" style="font-size:1rem;">{{ stats.policy }}</div></div></article>
+      </section>
+
+      <section class="sec-card">
+        <div class="sec-card-inner">
+          <div class="sec-filters">
+            <div style="flex:2 1 360px;">
+              <input type="search" class="sec-input" placeholder="{% trans %}Rechercher un utilisateur...{% endtrans %}" data-sec-search="2fa">
+            </div>
+            <div style="flex:1 1 220px;">
+              <select class="sec-select" data-sec-status="2fa">
+                <option value="">{% trans %}Tous les statuts{% endtrans %}</option>
+                <option value="enabled">{% trans %}Enabled{% endtrans %}</option>
+                <option value="pending">{% trans %}Pending{% endtrans %}</option>
+                <option value="disabled">{% trans %}Disabled{% endtrans %}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sec-separator"></div>
+
+          <div class="sec-table-wrap">
+            <table class="sec-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Utilisateur{% endtrans %}</th>
+                  <th>{% trans %}Rôle{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Dernier challenge{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in users %}
+                  <tr class="js-sec-2fa"
+                      data-sec-text="{{ (u.name ~ ' ' ~ u.email ~ ' ' ~ u.role)|lower }}"
+                      data-sec-status="{{ u.status }}">
+                    <td>
+                      <div class="sec-row-title">{{ u.name }}</div>
+                      <div class="sec-row-sub">{{ u.email }}</div>
+                    </td>
+                    <td>{{ u.role }}</td>
+                    <td><span class="sec-badge {{ u.status }}">{{ u.status|capitalize }}</span></td>
+                    <td>{{ u.lastChallenge ? u.lastChallenge|date('d/m/Y H:i') : '—' }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="4">{% trans %}Aucune donnée 2FA.{% endtrans %}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-security.js') }}"></script>
+{% endblock %}

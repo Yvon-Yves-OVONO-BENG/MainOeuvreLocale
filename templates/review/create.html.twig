@@ -1,0 +1,239 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+{% set profile = target.personalProfile %}
+
+<div class="container py-5">
+
+
+<div class="row justify-content-center">
+
+    <div class="col-lg-10">
+
+        <div class="card review-card border-0 shadow-lg">
+
+            <div class="card-header review-header">
+
+                <div class="d-flex align-items-center">
+
+                    <img
+                        src="{{
+                            profile and profile.photo
+                            ? asset('uploads/profiles/' ~ profile.photo)
+                            : asset('uploads/profiles/avatar.png')
+                        }}"
+                        alt="avatar"
+                        class="review-avatar">
+
+                    <div class="ms-4">
+
+                        <h2 class="mb-1 text-white">
+
+                            {% trans %}Donner un avis à{% endtrans %}
+
+                      
+
+                            {{ profile and profile.fullName
+                                ? profile.fullName
+                                : target.email }}
+
+                        </h2>
+
+                        <p class="mb-0 text-white-50">
+
+                            {% trans %}
+                            Votre retour aide la communauté à identifier les profils les plus fiables et professionnels.
+                            {% endtrans %}
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-body p-5">
+
+                <form method="post">
+
+                    {% for criterion in criteria %}
+
+                        <div class="review-section">
+
+                            <div class="mb-3">
+
+                                <h5 class="fw-bold">
+
+                                    {{ criterion.name }}
+
+                                </h5>
+
+                                <small class="text-muted">
+
+                                    {% trans %}
+                                    Sélectionnez votre niveau de satisfaction
+                                    {% endtrans %}
+
+                                </small>
+
+                            </div>
+
+                            <div class="star-rating" role="radiogroup" aria-label="Note pour {{ criterion.name }}">
+                                {% for star in 1..5 %}
+                                    <label class="star-item" title="{{ star }}/5">
+                                        <input
+                                            type="radio"
+                                            required
+                                            name="criteria_{{ criterion.id }}"
+                                            value="{{ star * 2 }}"
+                                            aria-label="{{ star }} étoile{{ star > 1 ? 's' : '' }} sur 5">
+                                        <span aria-hidden="true"><i class="fa-solid fa-star"></i></span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+
+                            <div class="rating-legend">
+
+                                <span>{% trans %}Très mauvais{% endtrans %}</span>
+                                <span>{% trans %}Excellent{% endtrans %}</span>
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                    <div class="review-comment-card">
+
+                        <label class="form-label fw-bold mb-3">
+
+                            <i class="fa fa-comment-dots me-2"></i>
+
+                            {% trans %}
+                            Commentaire détaillé
+                            {% endtrans %}
+
+                        </label>
+
+                        <textarea
+                            name="comment"
+                            required
+                            rows="7"
+                            maxlength="1000"
+                            class="form-control review-textarea"
+                            placeholder="{% trans %}Décrivez votre expérience avec cette personne...{% endtrans %}"></textarea>
+
+                        <small class="text-muted">
+
+                            {% trans %}
+                            Soyez honnête, respectueux et précis dans votre évaluation.
+                            {% endtrans %}
+
+                        </small>
+
+                    </div>
+
+                    <div class="text-end mt-5">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-lg px-5">
+
+                            <i class="fa fa-paper-plane me-2"></i>
+
+                            {% trans %}
+                            Publier mon avis
+                            {% endtrans %}
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+</div>
+
+<style>
+
+.review-card{
+    border-radius:24px;
+    overflow:hidden;
+}
+
+.review-header{
+    background:linear-gradient(135deg,#0d6efd,#0047b3);
+    padding:35px;
+}
+
+.review-avatar{
+    width:90px;
+    height:90px;
+    object-fit:cover;
+    border-radius:50%;
+    border:4px solid rgba(255,255,255,.25);
+}
+
+.review-section{
+    padding:25px;
+    border:1px solid #edf0f5;
+    border-radius:18px;
+    margin-bottom:25px;
+    background:#fff;
+}
+
+.star-rating{display:flex;flex-direction:row;flex-wrap:nowrap;gap:9px;margin-top:15px}
+.star-item{cursor:pointer;margin:0}
+.star-item input{position:absolute;opacity:0;pointer-events:none}
+.star-item span{width:48px;height:48px;display:grid;place-items:center;font-size:25px;border-radius:14px;transition:.2s ease;background:#f8fafc;border:1px solid #e2e8f0;color:#cbd5e1}
+.star-item:hover span,.star-item:focus-within span{transform:translateY(-2px);border-color:#fbbf24;color:#fbbf24}
+.star-item input:checked + span{background:#fffbeb;border-color:#f59e0b;color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.13);transform:translateY(-2px)}
+@media(max-width:400px){.star-rating{gap:6px}.star-item span{width:42px;height:42px;font-size:22px}}
+
+.rating-legend{
+    display:flex;
+    justify-content:space-between;
+    margin-top:12px;
+    color:#6c757d;
+    font-size:13px;
+}
+
+.review-comment-card{
+    margin-top:40px;
+}
+
+.review-textarea{
+    border-radius:15px;
+    min-height:180px;
+    resize:none;
+}
+
+/* Responsive : les noms longs ne peuvent plus sortir du header. */
+.review-header .d-flex{min-width:0}
+.review-header .ms-4{min-width:0;padding-right:16px}
+.review-header h2,.review-header p{max-width:100%;overflow-wrap:anywhere;word-break:break-word}
+.review-avatar{flex:0 0 90px;min-width:90px}
+
+@media(max-width:400px){
+    .review-header{padding:24px 20px}
+    .review-header .d-flex{flex-direction:column;align-items:flex-start!important;gap:14px}
+    .review-header .ms-4{margin-left:0!important;padding-right:0;width:100%}
+    .review-header h2{font-size:1.35rem;line-height:1.2}
+    .review-avatar{width:80px;height:80px;min-width:80px;flex-basis:80px}
+    .card-body.p-5{padding:22px!important}
+    .review-section{padding:20px}
+}
+
+</style>
+
+{% endblock %}

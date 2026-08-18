@@ -1,0 +1,1415 @@
+{# templates/admin/profession/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Professions{% endblock %}
+
+{% block stylesheets %}
+<style>
+    /* Vos styles existants... */
+    
+    /* Styles spécifiques pour le modal */
+    .modal-custom {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .modal-custom.active {
+        display: flex !important;
+    }
+    
+    .modal-custom .modal-dialog-custom {
+        background: white;
+        border-radius: 15px;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        animation: modalSlideIn 0.3s ease;
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            transform: translateY(-50px) scale(0.9);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .modal-custom .modal-header-custom {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.2rem 1.5rem;
+        border-radius: 15px 15px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-custom .modal-header-custom .btn-close-custom {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
+    
+    .modal-custom .modal-header-custom .btn-close-custom:hover {
+        opacity: 1;
+    }
+    
+    .modal-custom .modal-body-custom {
+        padding: 1.5rem;
+    }
+    
+    .modal-custom .modal-footer-custom {
+        padding: 1rem 1.5rem;
+        background-color: #f8f9fa;
+        border-radius: 0 0 15px 15px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    
+    /* Empêcher le scroll du body quand le modal est ouvert */
+    body.modal-open-custom {
+        overflow: hidden;
+    }
+    
+    
+    /* Styles améliorés pour la photo */
+    .photo-upload-zone {
+        border: 2px dashed #dee2e6;
+        border-radius: 12px;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+        min-height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .photo-upload-zone:hover {
+        border-color: #667eea;
+        background-color: #f0f3ff;
+        transform: translateY(-2px);
+    }
+    
+    .photo-upload-zone.dragover {
+        border-color: #667eea;
+        background-color: #e8edff;
+    }
+    
+    .photo-upload-zone i {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 0.75rem;
+    }
+    
+    .photo-upload-zone .upload-text {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.25rem;
+    }
+    
+    .photo-upload-zone .upload-hint {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    
+    .profession-photo-error {
+        display: none;
+        margin-top: 10px;
+        color: #b91c1c;
+        font-size: .86rem;
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
+    .profession-photo-error.is-visible {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+    }
+
+    .photo-upload-zone.is-invalid {
+        border-color: #dc2626 !important;
+        background: rgba(254, 226, 226, .72) !important;
+        box-shadow: 0 0 0 4px rgba(220, 38, 38, .10);
+        animation: professionPhotoShake .28s ease-in-out;
+    }
+
+    @keyframes professionPhotoShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    /* Prévisualisation photo */
+    .photo-preview-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+    
+    .photo-preview {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 3px solid #e9ecef;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+    
+    .photo-preview:hover {
+        border-color: #667eea;
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-remove-photo {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #dc3545;
+        color: white;
+        border: 2px solid white;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+    
+    .btn-remove-photo:hover {
+        transform: scale(1.1);
+        background: #c82333;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+    }
+    
+    /* Section photo dans le modal */
+    .photo-section {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.25rem;
+        border: 1px solid #e9ecef;
+        min-height: 250px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .photo-section .photo-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.75rem;
+        width: 100%;
+        text-align: center;
+    }
+    
+    .photo-preview-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .photo-preview-container.active {
+        display: flex;
+    }
+    
+    .photo-upload-zone.hidden {
+        display: none;
+    }
+    
+    .photo-info {
+        margin-top: 0.5rem;
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-align: center;
+    }
+    
+    
+    /* Version ultra-grande */
+    .photo-cell {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+    }
+    
+    .no-photo {
+        width: 64px;
+        height: 64px;
+        font-size: 1.4rem;
+        border-radius: 12px;
+    }
+    
+    .img-thumbnail-table {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+    }
+    
+    .photo-tooltip {
+        max-width: 500px;
+        max-height: 500px;
+    }
+    
+    .photo-tooltip img {
+        max-height: 420px;
+    }
+    
+    
+    
+    
+</style>
+
+<style>
+    /* ============================================
+       DESIGN SYSTEM - SAAS PREMIUM++
+       ============================================ */
+    
+    /* Variables */
+    :root {
+        --primary: #4F46E5;
+        --primary-light: #818CF8;
+        --primary-dark: #3730A3;
+        --primary-bg: #EEF2FF;
+        --success: #10B981;
+        --warning: #F59E0B;
+        --danger: #EF4444;
+        --gray-50: #F9FAFB;
+        --gray-100: #F3F4F6;
+        --gray-200: #E5E7EB;
+        --gray-300: #D1D5DB;
+        --gray-400: #9CA3AF;
+        --gray-500: #6B7280;
+        --gray-600: #4B5563;
+        --gray-700: #374151;
+        --gray-800: #1F2937;
+        --gray-900: #111827;
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+        --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+        --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        --radius: 12px;
+        --radius-lg: 16px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================
+       CARD PRINCIPAL
+       ============================================ */
+    .professions-card {
+        background: white;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--gray-200);
+        overflow: hidden;
+        margin-top: 2rem;
+        transition: var(--transition);
+    }
+
+    .professions-card:hover {
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+    }
+
+    /* ============================================
+       HEADER
+       ============================================ */
+    .card-header-premium {
+        padding: 1.25rem 1.5rem;
+        background: white;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .card-header-premium .header-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        letter-spacing: -0.025em;
+    }
+
+    .card-header-premium .header-title .icon-wrapper {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .card-header-premium .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    /* ============================================
+       BOUTONS PREMIUM
+       ============================================ */
+    .btn-premium {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        letter-spacing: -0.01em;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-premium-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    }
+
+    .btn-premium-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45);
+        color: white;
+    }
+
+    .btn-premium-navigation {
+        background: var(--primary-bg);
+        color: var(--primary-dark);
+        border: 1px solid rgba(79, 70, 229, 0.22);
+        box-shadow: none;
+    }
+
+    .btn-premium-navigation:hover {
+        background: #E0E7FF;
+        border-color: rgba(79, 70, 229, 0.4);
+        color: var(--primary-dark);
+        transform: translateY(-2px);
+    }
+
+    .btn-premium-primary:active {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-premium-primary .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.3);
+        transform: scale(0);
+        animation: rippleAnim 0.6s linear;
+        pointer-events: none;
+    }
+
+    @keyframes rippleAnim {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+
+    .btn-premium-danger {
+        background: linear-gradient(135deg, var(--danger), #DC2626);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-premium-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        color: white;
+    }
+
+    .btn-premium-ghost {
+        background: transparent;
+        color: var(--gray-600);
+        border: 1px solid var(--gray-200);
+    }
+
+    .btn-premium-ghost:hover {
+        background: var(--gray-50);
+        border-color: var(--gray-300);
+        color: var(--gray-800);
+    }
+
+    .btn-premium-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+        border-radius: 8px;
+    }
+
+    /* ============================================
+       BARRE DE RECHERCHE
+       ============================================ */
+    .search-wrapper {
+        position: relative;
+        margin-bottom: 1.25rem;
+    }
+
+    .search-wrapper .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray-400);
+        font-size: 0.875rem;
+        pointer-events: none;
+        transition: var(--transition);
+    }
+
+    .search-wrapper .search-input {
+        width: 100%;
+        padding: 0.75rem 1rem 0.75rem 2.75rem;
+        font-size: 0.875rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 12px;
+        background: var(--gray-50);
+        transition: var(--transition);
+        color: var(--gray-800);
+        outline: none;
+    }
+
+    .search-wrapper .search-input:focus {
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+    }
+
+    .search-wrapper .search-input::placeholder {
+        color: var(--gray-400);
+    }
+
+    .search-wrapper .search-shortcut {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--gray-200);
+        color: var(--gray-500);
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* ============================================
+       TOOLBAR
+       ============================================ */
+    .toolbar-premium {
+        display: none;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+        background: var(--primary-bg);
+        border-radius: 12px;
+        margin-bottom: 1.25rem;
+        animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(79, 70, 229, 0.15);
+    }
+
+    .toolbar-premium.active {
+        display: flex;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .toolbar-premium .selected-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-left: 0.5rem;
+    }
+
+    .toolbar-premium .selected-info .count-badge {
+        background: var(--primary);
+        color: white;
+        font-weight: 700;
+        padding: 0.1rem 0.6rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+    }
+
+    /* ============================================
+       TABLEAU PREMIUM
+       ============================================ */
+    .table-premium {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.875rem;
+    }
+
+    .table-premium thead th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--gray-500);
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--gray-200);
+        white-space: nowrap;
+    }
+
+    .table-premium thead th:first-child {
+        border-radius: 10px 0 0 0;
+        padding-left: 1.25rem;
+    }
+
+    .table-premium thead th:last-child {
+        border-radius: 0 10px 0 0;
+        padding-right: 1.25rem;
+    }
+
+    .table-premium tbody tr {
+        transition: var(--transition);
+        border-bottom: 1px solid var(--gray-100);
+        cursor: default;
+    }
+
+    .table-premium tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .table-premium tbody tr:hover {
+        background: var(--gray-50);
+        transform: scale(1.001);
+    }
+
+    .table-premium tbody tr:active {
+        transform: scale(0.999);
+    }
+
+    .table-premium tbody td {
+        padding: 0.75rem 1rem;
+        vertical-align: middle;
+        color: var(--gray-700);
+    }
+
+    .table-premium tbody td:first-child {
+        padding-left: 1.25rem;
+    }
+
+    .table-premium tbody td:last-child {
+        padding-right: 1.25rem;
+    }
+
+    /* ============================================
+       CHECKBOX PREMIUM
+       ============================================ */
+    .checkbox-premium {
+        position: relative;
+        width: 18px;
+        height: 18px;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    .checkbox-premium input {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    .checkbox-premium .checkmark {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 18px;
+        height: 18px;
+        background: white;
+        border: 2px solid var(--gray-300);
+        border-radius: 6px;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .checkbox-premium input:checked + .checkmark {
+        background: var(--primary);
+        border-color: var(--primary);
+        animation: checkPop 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .checkbox-premium input:checked + .checkmark::after {
+        content: '✓';
+        color: white;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .checkbox-premium input:focus + .checkmark {
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+    }
+
+    .checkbox-premium input:disabled + .checkmark {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @keyframes checkPop {
+        0% { transform: scale(0.8); }
+        50% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+    }
+
+    /* ============================================
+       PHOTO CELL
+       ============================================ */
+    .photo-cell-premium {
+        position: relative;
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        overflow: hidden;
+        flex-shrink: 0;
+        border: 2px solid var(--gray-200);
+        transition: var(--transition);
+        background: var(--gray-100);
+        cursor: pointer;
+    }
+
+    .photo-cell-premium:hover {
+        border-color: var(--primary);
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
+        z-index: 2;
+    }
+
+    .photo-cell-premium img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .photo-cell-premium .no-photo {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gray-400);
+        font-size: 1rem;
+        background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+    }
+
+    /* Tooltip photo */
+    .photo-tooltip-premium {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        border-radius: 16px;
+        padding: 8px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        z-index: 9999;
+        max-width: 400px;
+        max-height: 400px;
+        border: 2px solid var(--primary);
+        animation: tooltipPop 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .photo-tooltip-premium img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 10px;
+        max-height: 350px;
+    }
+
+    .photo-tooltip-premium .tooltip-name {
+        display: block;
+        text-align: center;
+        padding: 0.5rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        font-size: 0.85rem;
+        background: var(--gray-50);
+        border-radius: 0 0 8px 8px;
+    }
+
+    @keyframes tooltipPop {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.85);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+
+    /* ============================================
+       BADGES
+       ============================================ */
+    .badge-premium {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        transition: var(--transition);
+    }
+
+    .badge-premium-primary {
+        background: var(--primary-bg);
+        color: var(--primary);
+    }
+
+    .badge-premium-primary .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--primary);
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .badge-premium-success {
+        background: #ECFDF5;
+        color: #065F46;
+    }
+
+    .badge-premium-success .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--success);
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .badge-premium-warning {
+        background: #FFFBEB;
+        color: #92400E;
+    }
+
+    .badge-premium-warning .dot {
+        width: 6px;
+        height: 6px;
+        background: var(--warning);
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .badge-premium-gray {
+        background: var(--gray-100);
+        color: var(--gray-600);
+    }
+
+    /* Jobs badge avec compteur */
+    .jobs-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        min-width: 28px;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .jobs-badge-zero {
+        background: var(--gray-100);
+        color: var(--gray-400);
+    }
+
+    .jobs-badge-low {
+        background: #DBEAFE;
+        color: #1E40AF;
+    }
+
+    .jobs-badge-medium {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .jobs-badge-high {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .jobs-badge .icon {
+        font-size: 0.65rem;
+    }
+
+    /* ============================================
+       ACTIONS
+       ============================================ */
+    .actions-group {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--gray-500);
+        background: transparent;
+        position: relative;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .action-btn .tooltip-action {
+        display: none;
+        position: absolute;
+        bottom: -28px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--gray-800);
+        color: white;
+        font-size: 0.6rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        white-space: nowrap;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+    }
+
+    .action-btn:hover .tooltip-action {
+        display: block;
+    }
+
+    .action-btn-edit:hover {
+        background: #DBEAFE;
+        color: var(--primary);
+    }
+
+    .action-btn-delete:hover {
+        background: #FEE2E2;
+        color: var(--danger);
+    }
+
+    .action-btn-view:hover {
+        background: var(--primary-bg);
+        color: var(--primary);
+    }
+
+    /* ============================================
+       PAGINATION PREMIUM
+       ============================================ */
+    .pagination-premium {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.25rem;
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .pagination-premium .page-btn {
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--gray-600);
+        background: transparent;
+    }
+
+    .pagination-premium .page-btn:hover:not(.active):not(.disabled) {
+        background: var(--gray-100);
+        color: var(--gray-800);
+    }
+
+    .pagination-premium .page-btn.active {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+
+    .pagination-premium .page-btn.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .pagination-premium .page-btn .arrow {
+        font-size: 0.7rem;
+    }
+
+    /* ============================================
+       ÉTAT VIDE
+       ============================================ */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-state .empty-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--gray-100);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+        color: var(--gray-400);
+    }
+
+    .empty-state .empty-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.25rem;
+    }
+
+    .empty-state .empty-desc {
+        color: var(--gray-500);
+        font-size: 0.875rem;
+    }
+
+    /* ============================================
+       SCROLLBAR PERSONNALISÉE
+       ============================================ */
+    .table-responsive {
+        border-radius: 12px;
+        overflow: auto;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: var(--gray-100);
+        border-radius: 3px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: var(--gray-300);
+        border-radius: 3px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb:hover {
+        background: var(--gray-400);
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 768px) {
+        .card-header-premium {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.75rem;
+        }
+
+        .card-header-premium .header-actions {
+            justify-content: stretch;
+        }
+
+        .card-header-premium .header-actions .btn-premium {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .table-premium {
+            font-size: 0.8rem;
+        }
+
+        .table-premium thead th,
+        .table-premium tbody td {
+            padding: 0.5rem 0.6rem;
+        }
+
+        .table-premium tbody td:first-child,
+        .table-premium thead th:first-child {
+            padding-left: 0.8rem;
+        }
+
+        .table-premium tbody td:last-child,
+        .table-premium thead th:last-child {
+            padding-right: 0.8rem;
+        }
+
+        .photo-cell-premium {
+            width: 36px;
+            height: 36px;
+        }
+
+        .search-wrapper .search-shortcut {
+            display: none;
+        }
+
+        .toolbar-premium {
+            flex-wrap: wrap;
+        }
+
+        .toolbar-premium .selected-info {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .pagination-premium .page-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .card-header-premium {
+            padding: 1rem;
+        }
+
+        .card-header-premium .header-title {
+            font-size: 1rem;
+        }
+
+        .table-premium thead th {
+            font-size: 0.65rem;
+        }
+
+        .table-premium tbody td {
+            font-size: 0.75rem;
+        }
+    }
+    
+    /* Dans votre block stylesheets - après .pagination-premium */
+
+/* Suppression des points de liste */
+.pagination-premium {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--gray-200);
+    list-style: none; /* Important */
+    padding-left: 0;  /* Important */
+}
+
+.pagination-premium li {
+    list-style: none; /* Important */
+}
+
+.pagination-premium .page-btn {
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    background: transparent;
+    list-style: none; /* Important */
+}
+
+/* ... le reste des styles ... */
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="professions-card">
+    <!-- HEADER PREMIUM -->
+    <div class="card-header-premium">
+        <div class="header-title">
+            <div class="icon-wrapper">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <span>Gestion des Professions</span>
+            <span style="font-size:0.7rem; font-weight:400; color:var(--gray-400); background:var(--gray-100); padding:0.1rem 0.6rem; border-radius:20px;">
+                <span id="totalCount">0</span>
+            </span>
+        </div>
+        <div class="header-actions">
+            <a href="{{ path('admin_categories_index') }}"
+               class="btn-premium btn-premium-navigation">
+                <i class="fas fa-tags"></i>
+                <span>Catégories</span>
+            </a>
+            <button class="btn-premium btn-premium-primary" onclick="openCreateModal()">
+                <i class="fas fa-plus"></i>
+                <span>Nouvelle Profession</span>
+            </button>
+        </div>
+    </div>
+
+    <div style="padding: 1.25rem 1.5rem;">
+        <!-- RECHERCHE PREMIUM -->
+        <div class="search-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input
+                type="search"
+                id="searchInput"
+                class="search-input"
+                placeholder="Rechercher par nom, description ou catégorie..."
+                oninput="loadData(true)"
+                autocomplete="off"
+            >
+            <span class="search-shortcut">⌘K</span>
+        </div>
+
+        <!-- TOOLBAR PREMIUM -->
+        <div class="toolbar-premium" id="toolbar">
+            <button class="btn-premium btn-premium-danger btn-premium-sm" onclick="deleteSelected()">
+                <i class="fas fa-trash-alt"></i>
+                <span>Supprimer</span>
+            </button>
+            <div class="selected-info">
+                <span class="count-badge" id="selectedCount">0</span>
+                <span>sélectionnée(s)</span>
+            </div>
+        </div>
+
+        <!-- TABLEAU PREMIUM -->
+        <div class="table-responsive">
+            <table class="table-premium">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">
+                            <label class="checkbox-premium">
+                                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                                <span class="checkmark"></span>
+                            </label>
+                        </th>
+                        <th style="width:60px;">Photo</th>
+                        <th>Nom</th>
+                        <th>Description</th>
+                        <th>Catégorie</th>
+                        <th style="text-align:center; width:70px;">Jobs</th>
+                        <th style="width:100px; text-align:center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PAGINATION PREMIUM -->
+        <div class="pagination-premium" id="pagination"></div>
+    </div>
+</div>
+
+<!-- Modal Personnalisé -->
+<div id="professionModal" class="modal-custom">
+    <div class="modal-dialog-custom">
+        <div class="modal-header-custom">
+            <h5 class="modal-title" id="professionModalLabel">
+                <i class="fas fa-plus-circle me-2"></i>Nouvelle Profession
+            </h5>
+            <button type="button" class="btn-close-custom" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="professionForm"
+              enctype="multipart/form-data"
+              onsubmit="saveProfession(event)"
+              data-no-submit-spinner="1"
+              data-turbo="false">
+            <div class="modal-body-custom">
+                <input type="hidden" id="professionId" name="id" value="">
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="professionNom" class="form-label">
+                                <i class="fas fa-briefcase me-1"></i>Nom de la profession <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="professionNom" name="nom" 
+                                   placeholder="Ex: Développeur Web, Designer UX..." required>
+                            <div class="invalid-feedback">
+                                Veuillez saisir un nom de profession
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="professionCategorie" class="form-label">
+                                <i class="fas fa-tag me-1"></i>Catégorie
+                            </label>
+                            <select class="form-select" id="professionCategorie" name="categorie">
+                                <option value="">Sélectionner une catégorie</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="professionDescription" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Description
+                            </label>
+                            <textarea class="form-control" id="professionDescription" name="description" 
+                                      rows="4" placeholder="Description de la profession (optionnel)"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label" for="professionPhoto">
+                                <i class="fas fa-camera me-1"></i>Photo
+                                <span class="text-danger">*</span>
+                            </label>
+                            
+                            <!-- Zone d'upload -->
+                            <div
+                                class="photo-upload-zone"
+                                id="photoUploadZone"
+                                role="button"
+                                tabindex="0"
+                                aria-describedby="professionPhotoHelp professionPhotoError"
+                                onclick="$('#professionPhoto').click()"
+                            >
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p class="mb-1">Cliquez pour uploader</p>
+                                <small class="text-muted" id="professionPhotoHelp">JPG, PNG ou GIF (max 2 Mo). Obligatoire à la création.</small>
+                            </div>
+                            
+                            <!-- Preview -->
+                            <div class="text-center mt-3" id="photoPreviewContainer" style="display: none;">
+                                <img alt="Preview" class="photo-preview" id="photoPreview">
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-2" 
+                                        onclick="removePhoto()">
+                                    <i class="fas fa-times me-1"></i>Supprimer la photo
+                                </button>
+                            </div>
+                            
+                            <input type="file" class="d-none" id="professionPhoto" name="photo"
+                                   accept="image/jpeg,image/png,image/gif" onchange="previewPhoto(this)"
+                                   aria-invalid="false" aria-describedby="professionPhotoHelp professionPhotoError">
+                            <div class="profession-photo-error" id="professionPhotoError" role="alert" aria-live="polite"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">
+                    <i class="fas fa-times me-1"></i>Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" id="btnSaveProfession">
+                    <i class="fas fa-save me-1"></i>Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {#
+       Les URL sont générées par Symfony. Il ne faut jamais les reconstruire
+       depuis window.location : le projet peut être installé à la racine,
+       dans /maindoeuvrelocale/public ou derrière index.php.
+    #}
+    <script>
+        window.ADMIN_PROFESSIONS_CONFIG = {{ {
+            dataUrl: path('admin_professions_data'),
+            categoriesUrl: path('admin_categories_data'),
+            createUrl: path('admin_professions_new'),
+            showUrlTemplate: path('admin_professions_show', {id: 0}),
+            editUrlTemplate: path('admin_professions_edit', {id: 0}),
+            deleteUrlTemplate: path('admin_professions_delete', {id: 0}),
+            batchDeleteUrl: path('admin_professions_batch_delete'),
+            photosBaseUrl: asset('uploads/professions/')
+        }|json_encode|raw }};
+    </script>
+
+    {# Version explicite pour empêcher le navigateur de garder l'ancien JS. #}
+    <script src="{{ asset('js/admin/professions.js') }}?v=20260805-slug-actions-v1"></script>
+    <script src="{{ asset('js/admin/professions-photo-validation.js') }}?v=20260806-1"></script>
+    
+    <script>
+        // Raccourci clavier Ctrl+K pour focus recherche
+        document.addEventListener('keydown', function(e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
+        
+        console.log('Scripts chargés');
+        console.log('typeof loadData :', typeof loadData);
+    </script>
+{% endblock %}

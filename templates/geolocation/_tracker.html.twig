@@ -1,0 +1,59 @@
+{#
+    À inclure une seule fois dans base.html.twig, juste avant </body> :
+    {% include 'geolocation/_tracker.html.twig' %}
+
+    Le navigateur ne suit la position que lorsque le site reste ouvert.
+#}
+{% if app.user
+    and 'ROLE_TALENT' in app.user.roles
+    and app.user.professionalProfile
+    and app.user.professionalProfile.geolocationEnabled
+%}
+    <script>
+        (() => {
+            if (window.__molGeoTrackerStarted || !navigator.geolocation || !window.isSecureContext) {
+                return;
+            }
+
+            window.__molGeoTrackerStarted = true;
+            let lastSentAt = 0;
+
+            navigator.geolocation.watchPosition(
+                async (position) => {
+                    const now = Date.now();
+
+                    // Maximum un envoi toutes les deux minutes.
+                    if (now - lastSentAt < 120000) {
+                        return;
+                    }
+                    lastSentAt = now;
+
+                    try {
+                        await fetch('{{ path('talent_geolocation_update') }}', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                _token: '{{ csrf_token('talent_geolocation_update') }}',
+                                enabled: true,
+                                latitude: position.coords.latitude,
+                                longitude: position.coords.longitude
+                            })
+                        });
+                    } catch (error) {
+                        console.warn('Mise à jour de la position indisponible.', error);
+                    }
+                },
+                () => {},
+                {
+                    enableHighAccuracy: false,
+                    maximumAge: 120000,
+                    timeout: 15000
+                }
+            );
+        })();
+    </script>
+{% endif %}

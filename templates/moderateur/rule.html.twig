@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Règles & Policies{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_rule.html.twig" %}
+
+<div class="mod-page">
+  <div class="mod-wrap">
+
+    <div class="mod-card" id="modRules">
+      <div class="hd">
+        <div>
+          <div class="mod-title">🛡️ {% trans %}Règles & policies{% endtrans %}</div>
+          <div class="hint">{% trans %}Référence rapide : catégories, niveau, consignes — filtrage instant.{% endtrans %}</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="mod-btn" href="{{ path('moderateur_settings') }}">⚙️ {% trans %}Paramètres{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div class="bd">
+
+        {# ===== Toolbar ===== #}
+        <div class="rules-hero">
+          <div class="toolbar">
+            <div class="searchbox">
+              <label class="form-label fw-bold mb-2">{% trans %}Filtrer{% endtrans %}</label>
+
+              <div class="inputwrap">
+                <span class="ico">🔎</span>
+                <input id="ruleFilter" class="form-control mod-input" placeholder="{{ 'Tape: SPAM, fraude, abus…'|trans }}">
+              </div>
+            </div>
+
+            <div class="meta">
+              <span class="pill">{% trans %}Astuce :{% endtrans %} <span class="kbd">spam</span> <span class="kbd">fraude</span> <span class="kbd">abus</span></span>
+              <span class="pill">{% trans %}Résultats :{% endtrans %} <b id="rulesCount">{{ rules|length }}</b></span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4" style="border-color: rgba(15,23,42,.10);">
+
+        {# ===== Grid ===== #}
+        <div class="row g-3" id="rulesGrid">
+          {% for r in rules %}
+            {% set lvl = (r.level|default(''))|lower %}
+            {% set lvlClass = (lvl matches '/high|élev|severe|crit/' ) ? 'lvl-high' : ((lvl matches '/med|moy/' ) ? 'lvl-med' : 'lvl-low') %}
+
+            <div class="col-12 col-lg-6 rule-item"
+                 data-text="{{ (r.code ~ ' ' ~ r.title ~ ' ' ~ r.level ~ ' ' ~ r.desc)|lower }}">
+
+              <div class="rule-card">
+                <div class="rule-hd">
+                  <div style="min-width:0">
+                    <div class="rule-title">
+                      <span class="rule-code">🏷️ {{ r.code }}</span>
+                      <span class="ms-2">{{ r.title }}</span>
+                    </div>
+                    <div class="hint mt-1">{% trans %}Consignes • actions • exemples{% endtrans %}</div>
+                  </div>
+
+                  <div class="rule-level {{ lvlClass }}">
+                    {% trans %}Niveau :{% endtrans %} {{ r.level }}
+                  </div>
+                </div>
+
+                <div class="rule-bd">
+                  <div class="rule-desc">{{ r.desc }}</div>
+                </div>
+              </div>
+
+            </div>
+          {% else %}
+            <div class="col-12">
+              <div class="empty">
+                <div class="fw-bold mb-1">{% trans %}Aucune règle{% endtrans %}</div>
+                <div class="hint">{% trans %}Ajoute des règles dans ta source (array / DB) puis reviens ici.{% endtrans %}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="mt-3 hint">
+          ✅ {% trans %}UI prête. Je vais ensuite : (1) ajouter des tags, (2) une page détail, (3) un export PDF.{% endtrans %}
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const filter = document.getElementById('ruleFilter');
+  const items = document.querySelectorAll('.rule-item');
+  const count = document.getElementById('rulesCount');
+  if(!filter || !items.length) return;
+
+  function refresh(){
+    const q = (filter.value||'').trim().toLowerCase();
+    let visible = 0;
+
+    items.forEach(it=>{
+      const t = (it.dataset.text||'');
+      const ok = (!q || t.includes(q));
+      it.style.display = ok ? '' : 'none';
+      if(ok) visible++;
+    });
+
+    if(count) count.textContent = String(visible);
+  }
+
+  filter.addEventListener('input', refresh);
+  refresh();
+})();
+</script>
+{% endblock %}

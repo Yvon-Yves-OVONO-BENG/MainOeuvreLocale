@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>{{ 'Complétez votre profil'|trans }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f3f4f6;margin:0;padding:0;width:100%;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="660" style="width:100%;max-width:660px;background-color:#eef2f7;border-radius:0;">
+
+          <tr>
+            <td style="padding:18px;">
+
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;background-color:#ffffff;border:1px solid #d9dde5;border-radius:32px;overflow:hidden;">
+                
+                <!-- HEADER -->
+                <tr>
+                  <td style="padding:36px 36px 28px 36px;background:linear-gradient(90deg,#dff2ff 0%,#eaf8ee 100%);border-bottom:1px solid #d9dde5;">
+                    <div style="font-size:28px;line-height:1.2;font-weight:800;color:#0f172a;margin:0 0 10px 0;">
+                      {% trans %}Complétez votre profil ✅{% endtrans %}
+                    </div>
+                    <div style="font-size:16px;line-height:1.5;color:#6b7280;margin:0;">
+                      {% trans %}Visibilité • Confiance • Boost{% endtrans %}
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- BODY -->
+                <tr>
+                  <td style="padding:36px;">
+                    <!-- Salutation : ne jamais afficher l'adresse e-mail comme nom de profil. -->
+                    <p style="margin:0 0 24px 0;font-size:18px;line-height:1.7;color:#1f2937;">
+                      {% if user.publicDisplayName != 'Profil sans nom' %}
+                        {% trans %}Bonjour{% endtrans %} <strong>{{ user.publicDisplayName }}</strong>,
+                      {% else %}
+                        {% trans %}Bonjour,{% endtrans %}
+                      {% endif %}
+                    </p>
+
+                    <p style="margin:0 0 28px 0;font-size:18px;line-height:1.8;color:#1f2937;">
+                      {% trans %}Pour que votre profil soit{% endtrans %} <strong>{% trans %}visible{% endtrans %}</strong> {% trans %}et{% endtrans %} <strong>{% trans %}boosté{% endtrans %}</strong>
+                      {% trans %}sur la plateforme, veuillez compléter votre profil (photo, nom, adresse, etc.).{% endtrans %}
+                    </p>
+
+                    <!-- PRIORITY BOX -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="width:100%;margin:0 0 30px 0;background-color:#f8fafc;border:1px solid #d9dde5;border-radius:26px;">
+                      <tr>
+                        <td style="padding:26px 28px;">
+                          <div style="font-size:18px;line-height:1.4;font-weight:800;color:#0f172a;margin:0 0 14px 0;">
+                            {% trans %}À compléter en priorité :{% endtrans %}
+                          </div>
+
+                          <!-- Champs dynamiques calculés selon Talent, Compagnie ou Particulier. -->
+                          <ul style="margin:0;padding-left:28px;font-size:18px;line-height:1.9;color:#374151;">
+                            {% for missingPart in missingParts|default([]) %}
+                              <li>{{ missingPart|capitalize }}</li>
+                            {% else %}
+                              <li>{% trans %}Informations du profil{% endtrans %}</li>
+                            {% endfor %}
+                          </ul>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- BUTTON -->
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
+                      <tr>
+                        <td align="center" bgcolor="#19a3e5" style="border-radius:22px;">
+                          <a href="{{ profileUrl }}"
+                             style="display:inline-block;padding:20px 34px;font-size:20px;line-height:1.2;font-weight:800;color:#ffffff;text-decoration:none;border-radius:22px;background-color:#19a3e5;">
+                            {% trans %}Compléter mon profil{% endtrans %}
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- FALLBACK LINK -->
+                    <p style="margin:0 0 10px 0;font-size:16px;line-height:1.8;color:#4b5563;">
+                      {% trans %}Si le bouton ne s’affiche pas correctement, copiez ce lien dans votre navigateur :{% endtrans %}
+                    </p>
+
+                    <p style="margin:0 0 8px 0;font-size:16px;line-height:1.8;word-break:break-word;">
+                      <a href="{{ profileUrl }}" style="color:#4f83cc;text-decoration:none;">{{ profileUrl }}</a>
+                    </p>
+                  </td>
+                </tr>
+
+                <!-- FOOTER TOP -->
+                <tr>
+                  <td style="padding:28px 36px;border-top:1px solid #d9dde5;background-color:#fbfbfc;">
+                    <p style="margin:0;font-size:18px;line-height:1.7;color:#374151;">
+                      {% trans %}Merci et à bientôt,{% endtrans %}<br>
+                      <strong>{% trans %}— L’équipe Modération{% endtrans %}</strong>
+                    </p>
+                  </td>
+                </tr>
+
+              </table>
+
+              <!-- FOOTER BOTTOM -->
+              <p style="margin:20px 12px 0 12px;font-size:14px;line-height:1.6;color:#6b7280;text-align:center;">
+                {% trans %}Cet email a été envoyé automatiquement. Merci de ne pas répondre directement.{% endtrans %}
+              </p>
+
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

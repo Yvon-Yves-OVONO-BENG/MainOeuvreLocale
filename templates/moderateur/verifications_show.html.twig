@@ -1,0 +1,203 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Vérification •{% endtrans %} {{ u.email }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_verifications_show.html.twig" %}
+
+{% set isTalent = 'ROLE_TALENT' in u.roles %}
+{% set isComp   = 'ROLE_COMPANY' in u.roles %}
+{% set isPart   = 'ROLE_PARTICULIER' in u.roles %}
+{% set roleLabel = isTalent ? 'Talent'|trans : (isComp ? 'Company'|trans : 'Particulier'|trans) %}
+
+{% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+{% set cniSt = pp ? (pp.cniStatus ?? 'pending') : 'pending' %}
+
+{% set cvSt = '—' %}
+{% if isTalent %}
+  {% if pro and pro.isVerified %}
+    {% set cvSt = 'verified' %}
+  {% elseif pro and (pro.verifiedAt is not null) %}
+    {% set cvSt = 'rejected' %}
+  {% else %}
+    {% set cvSt = 'pending' %}
+  {% endif %}
+{% endif %}
+
+{# conditions “profil validable” #}
+{% set canValidate = (cniSt == 'verified') and (not isTalent or (cvSt == 'verified')) %}
+
+<div class="page">
+  <div class="wrap">
+
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="h1">✅ {% trans %}Vérification profil{% endtrans %}</div>
+          <div class="hint">{{ u.email }} • {% trans %}Rôle :{% endtrans %} <b>{{ roleLabel }}</b></div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="{{ path('moderateur_verifications_index') }}">← {% trans %}Retour{% endtrans %}</a>
+
+          <form method="post" action="{{ path(u.isActive ? 'moderateur_verifications_block' : 'moderateur_verifications_unblock', {id: u.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('verif_' ~ u.id ~ '_block') }}">
+            <button class="btn {{ u.isActive ? 'danger' : '' }}" type="submit">
+              {{ u.isActive ? 'Bloquer'|trans : 'Débloquer'|trans }}
+            </button>
+          </form>
+
+          <form method="post" action="{{ path('moderateur_verifications_validate', {id: u.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('verif_' ~ u.id ~ '_validate') }}">
+            <button class="btn {{ canValidate ? 'good' : 'warn' }}" type="submit" {{ not canValidate ? 'disabled' : '' }}>
+              ✅ {% trans %}Valider profil (100%){% endtrans %}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="grid">
+
+          <div class="box">
+            <div class="label">{% trans %}Infos utilisateur{% endtrans %}</div>
+
+            <div class="userline" style="margin-top:10px;">
+              <img class="avatar" src="{{ photo }}" alt="photo">
+              <div>
+                <div style="font-weight:950;">
+                  {{ pp and pp.fullName ? pp.fullName : u.email }}
+                </div>
+                <div class="muted" style="font-size:12px;margin-top:2px;">
+                  {{ u.email }} • {{ u.phone ?? '' }}
+                </div>
+              </div>
+
+              <span class="chip">{{ roleLabel }}</span>
+              {% if u.isActive %}
+                <span class="chip v">🟢 {% trans %}Actif{% endtrans %}</span>
+              {% else %}
+                <span class="chip r">🔴 {% trans %}Bloqué{% endtrans %}</span>
+              {% endif %}
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="label">{% trans %}Adresse{% endtrans %}</div>
+              <div class="muted" style="margin-top:6px;">
+                {{ pp and pp.adress ? pp.adress : '—' }}{% if pp and pp.city %} • {{ pp.city }}{% endif %}
+              </div>
+            </div>
+
+            {% if isTalent or isPart %}
+              <div style="margin-top:14px;">
+                <div class="label">{% trans %}CNI{% endtrans %}</div>
+
+                <div class="docrow">
+                  <div>
+                    {% if cniSt == 'verified' %}
+                      <span class="chip v">✅ verified</span>
+                    {% elseif cniSt == 'rejected' %}
+                      <span class="chip r">⛔ rejected</span>
+                    {% else %}
+                      <span class="chip p">⏳ pending</span>
+                    {% endif %}
+                    <span class="muted" style="font-size:12px;margin-left:6px;">
+                      {{ pp and pp.cni ? pp.cni : 'aucun fichier'|trans }}
+                    </span>
+                  </div>
+
+                  <div class="actions">
+                    {% if pp and pp.cni %}
+                      <a class="btn" target="_blank" href="{{ path('moderateur_verifications_download', {id: u.id, type:'cni'}) }}">{% trans %}Télécharger{% endtrans %}</a>
+                    {% endif %}
+
+                    <form method="post" action="{{ path('moderateur_verifications_cni_verify', {id: u.id}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('verif_' ~ u.id ~ '_cni') }}">
+                      <button class="btn good" type="submit" {{ (not pp or not pp.cni) ? 'disabled' : '' }}>{% trans %}Vérifier{% endtrans %}</button>
+                    </form>
+
+                    <form method="post" action="{{ path('moderateur_verifications_cni_reject', {id: u.id}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('verif_' ~ u.id ~ '_cni') }}">
+                      <button class="btn danger" type="submit">{% trans %}Rejeter{% endtrans %}</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+            {% if isTalent %}
+              <div style="margin-top:14px;">
+                <div class="label">{% trans %}CV (Talent){% endtrans %}</div>
+
+                <div class="docrow">
+                  <div>
+                    {% if cvSt == 'verified' %}
+                      <span class="chip v">✅ verified</span>
+                    {% elseif cvSt == 'rejected' %}
+                      <span class="chip r">⛔ rejected</span>
+                    {% else %}
+                      <span class="chip p">⏳ pending</span>
+                    {% endif %}
+                    <span class="muted" style="font-size:12px;margin-left:6px;">
+                      {{ pro and pro.cv ? pro.cv : 'aucun fichier'|trans }}
+                    </span>
+                  </div>
+
+                  <div class="actions">
+                    {% if pro and pro.cv %}
+                      <a class="btn" target="_blank" href="{{ path('moderateur_verifications_download', {id: u.id, type:'cv'}) }}">{% trans %}Télécharger{% endtrans %}</a>
+                    {% endif %}
+
+                    <form method="post" action="{{ path('moderateur_verifications_cv_verify', {id: u.id}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('verif_' ~ u.id ~ '_cv') }}">
+                      <button class="btn good" type="submit" {{ (not pro or not pro.cv) ? 'disabled' : '' }}>{% trans %}Vérifier{% endtrans %}</button>
+                    </form>
+
+                    <form method="post" action="{{ path('moderateur_verifications_cv_reject', {id: u.id}) }}">
+                      <input type="hidden" name="_token" value="{{ csrf_token('verif_' ~ u.id ~ '_cv') }}">
+                      <button class="btn danger" type="submit">{% trans %}Rejeter{% endtrans %}</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+
+          </div>
+
+          <div class="box">
+            <div class="label">{% trans %}Checklist modération{% endtrans %}</div>
+            <div class="muted" style="font-size:12px;margin-top:8px;">
+              • {% trans %}Télécharger et comparer CNI / infos{% endtrans %}<br>
+              • {% trans %}Vérifier cohérence (nom, photo, adresse){% endtrans %}<br>
+              {% if isTalent %}• {% trans %}Télécharger CV et vérifier métier/expérience{% endtrans %}<br>{% endif %}
+              • {% trans %}Valider profil (active le 100% dashboard){% endtrans %}
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="label">{% trans %}Raccourcis{% endtrans %}</div>
+              <div class="actions">
+                <a class="btn" href="/moderateur/users/{{ u.id }}">{% trans %}Voir profil (admin){% endtrans %}</a>
+                <a class="btn" href="/moderateur/messages?q={{ u.email }}">{% trans %}Messages{% endtrans %}</a>
+                <a class="btn" href="/moderateur/reports?q={{ u.email }}">{% trans %}Signalements{% endtrans %}</a>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="label">{% trans %}Infos{% endtrans %}</div>
+              <div class="muted" style="font-size:12px;margin-top:6px;">
+                {% trans %}CNI:{% endtrans %} <b>{{ cniSt }}</b><br>
+                {% if isTalent %}{% trans %}CV:{% endtrans %} <b>{{ cvSt }}</b><br>{% endif %}
+                {% trans %}CNI verifiedAt:{% endtrans %} <b>{{ pp and pp.cniVerifiedAt ? pp.cniVerifiedAt|date('d/m/Y H:i') : '—' }}</b><br>
+                {% if isTalent %}{% trans %}CV verifiedAt:{% endtrans %} <b>{{ pro and pro.verifiedAt ? pro.verifiedAt|date('d/m/Y H:i') : '—' }}</b>{% endif %}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

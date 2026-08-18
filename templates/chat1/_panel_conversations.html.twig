@@ -1,0 +1,264 @@
+{% include "chat/_vip_ui.html.twig" %}
+
+
+<div id="molChatPanel" class="mol-chat-panel" aria-hidden="true">
+    <div class="mol-chat-panel__header">
+        <button
+            type="button"
+            class="mol-chat-back d-lg-none"
+            aria-label="{% trans %}Retour{% endtrans %}"
+            onclick="MOLChatClose();"
+        >
+            <i class="bi bi-arrow-left"></i>
+        </button>
+
+        <div>
+            <div class="mol-chat-title">{% trans %}Messages{% endtrans %}</div>
+            <div class="mol-chat-sub">{% trans %}Discussions{% endtrans %}</div>
+        </div>
+
+        <div class="d-flex gap-1">
+            <button
+                type="button"
+                class="btn mol-btn-icon"
+                title="{% trans %}Nouveau message{% endtrans %}"
+                aria-label="{% trans %}Nouveau message{% endtrans %}"
+                onclick="return false;"
+            >
+                <i class="bi bi-pencil-square"></i>
+            </button>
+
+            <div class="dropdown">
+                <button
+                    type="button"
+                    class="btn mol-btn-icon"
+                    id="molChatAction"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="{% trans %}Actions{% endtrans %}"
+                >
+                    <i class="bi bi-three-dots"></i>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="molChatAction">
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="bi bi-check-square fa-fw pe-2"></i>
+                            {% trans %}Tout marquer comme lu{% endtrans %}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="bi bi-gear fa-fw pe-2"></i>
+                            {% trans %}Paramètres{% endtrans %}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="bi bi-bell fa-fw pe-2"></i>
+                            {% trans %}Notifications{% endtrans %}
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="bi bi-volume-up-fill fa-fw pe-2"></i>
+                            {% trans %}Sons{% endtrans %}
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" href="#">
+                            <i class="bi bi-people fa-fw pe-2"></i>
+                            {% trans %}Nouveau groupe{% endtrans %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <button
+                type="button"
+                class="btn mol-btn-icon"
+                title="{% trans %}Fermer{% endtrans %}"
+                aria-label="{% trans %}Fermer{% endtrans %}"
+                onclick="MOLChatClose();"
+            >
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="mol-chat-panel__body">
+        <form class="mol-search" onsubmit="return false;">
+            <i class="bi bi-search mol-search__icon"></i>
+            <input
+                id="molChatSearch"
+                class="form-control mol-search__input"
+                type="search"
+                autocomplete="off"
+                placeholder="{% trans %}Rechercher une conversation...{% endtrans %}"
+            >
+            <span id="molChatSearchMeta" class="mol-search__meta">0</span>
+        </form>
+
+        <ul class="list-unstyled mol-chat-list" id="molChatList">
+            <li class="mol-chat-empty" id="molChatEmptyState">
+                <i class="bi bi-chat-dots"></i>
+                <div>{% trans %}Aucune conversation chargée.{% endtrans %}</div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="mol-toast-dock" id="molToastDock" aria-live="polite" aria-atomic="true"></div>
+
+<script>
+(() => {
+    function MOLNormalizeText(value) {
+        return String(value ?? '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim();
+    }
+
+    function MOLGetConversationSearchText(item) {
+        const name = item.dataset.name || '';
+        const preview = item.querySelector('.text-secondary.text-truncate, .small.text-secondary.text-truncate, .mol-preview')?.textContent || '';
+        const raw = item.textContent || '';
+        return MOLNormalizeText(`${name} ${preview} ${raw}`);
+    }
+
+    function MOLRenderSearchEmpty(message = 'Aucune conversation trouvée.') {
+        const list = document.getElementById('molChatList');
+        if (!list) return;
+
+        let empty = document.getElementById('molChatSearchEmpty');
+
+        if (!empty) {
+            empty = document.createElement('li');
+            empty.id = 'molChatSearchEmpty';
+            empty.className = 'mol-chat-empty';
+            list.appendChild(empty);
+        }
+
+        empty.innerHTML = `
+            <i class="bi bi-search"></i>
+            <div>${message}</div>
+        `;
+        empty.hidden = false;
+    }
+
+    function MOLHideSearchEmpty() {
+        const empty = document.getElementById('molChatSearchEmpty');
+        if (empty) {
+            empty.hidden = true;
+        }
+    }
+
+    function MOLUpdateSearchMeta(visibleCount, activeQuery) {
+        const meta = document.getElementById('molChatSearchMeta');
+        if (!meta) return;
+
+        if (!activeQuery) {
+            meta.style.display = 'none';
+            meta.textContent = '';
+            return;
+        }
+
+        meta.style.display = 'inline-flex';
+        meta.textContent = String(visibleCount);
+    }
+
+    function MOLFilterConversationsLive(query = '') {
+        const list = document.getElementById('molChatList');
+        if (!list) return;
+
+        const normalizedQuery = MOLNormalizeText(query);
+        const items = [...list.querySelectorAll('.mol-chat-item')];
+
+        if (!items.length) {
+            MOLUpdateSearchMeta(0, normalizedQuery);
+            MOLRenderSearchEmpty('{% trans %}Aucune conversation trouvée.{% endtrans %}');
+            return;
+        }
+
+        let visibleCount = 0;
+
+        items.forEach((item) => {
+            const haystack = MOLGetConversationSearchText(item);
+            const match = !normalizedQuery || haystack.includes(normalizedQuery);
+
+            item.hidden = !match;
+            if (match) visibleCount++;
+        });
+
+        const initialEmpty = document.getElementById('molChatEmptyState');
+        if (initialEmpty) {
+            initialEmpty.hidden = items.length > 0;
+        }
+
+        MOLUpdateSearchMeta(visibleCount, normalizedQuery);
+
+        if (visibleCount === 0) {
+            MOLRenderSearchEmpty('{% trans %}Aucune conversation trouvée.{% endtrans %}');
+        } else {
+            MOLHideSearchEmpty();
+        }
+    }
+
+    function MOLBindLiveConversationSearch() {
+        const input = document.getElementById('molChatSearch');
+        if (!input || input.__molSearchBound) return;
+
+        input.__molSearchBound = true;
+
+        input.addEventListener('input', (e) => {
+            MOLFilterConversationsLive(e.target.value || '');
+        });
+
+        input.addEventListener('search', (e) => {
+            MOLFilterConversationsLive(e.target.value || '');
+        });
+    }
+
+    function MOLPatchConversationRenderer() {
+        if (typeof window.MOLChatRenderConversations !== 'function' || window.__MOL_RENDER_PATCHED__) return;
+
+        const original = window.MOLChatRenderConversations;
+        window.__MOL_RENDER_PATCHED__ = true;
+
+        window.MOLChatRenderConversations = function(items) {
+            original(items);
+
+            const list = document.getElementById('molChatList');
+            const initialEmpty = document.getElementById('molChatEmptyState');
+
+            if (list) {
+                const renderedItems = [...list.querySelectorAll('.mol-chat-item')];
+                if (initialEmpty) {
+                    initialEmpty.hidden = renderedItems.length > 0;
+                }
+            }
+
+            const currentQuery = document.getElementById('molChatSearch')?.value || '';
+            MOLFilterConversationsLive(currentQuery);
+        };
+    }
+
+    function MOLInitPremiumConversationSearch() {
+        MOLBindLiveConversationSearch();
+        MOLPatchConversationRenderer();
+
+        const currentQuery = document.getElementById('molChatSearch')?.value || '';
+        MOLFilterConversationsLive(currentQuery);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', MOLInitPremiumConversationSearch);
+    } else {
+        MOLInitPremiumConversationSearch();
+    }
+
+    window.MOLFilterConversationsLive = MOLFilterConversationsLive;
+})();
+</script>

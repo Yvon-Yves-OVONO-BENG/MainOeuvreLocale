@@ -1,0 +1,327 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Planning • Particulier{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "planning/_vip_ui.html.twig" %}
+
+<div class="pc-page">
+  <div class="container">
+
+    {# HERO #}
+    <section class="pc-card pc-hero mb-4">
+      <div class="in">
+        <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+          <div class="min-w-0">
+            <div class="d-flex flex-wrap gap-2 mb-2">
+              <span class="pc-chip">🗓️ {% trans %}Planning{% endtrans %}</span>
+              <span class="pc-chip">📌 {% trans %}Deadlines{% endtrans %}</span>
+              <span class="pc-chip">💬 {% trans %}Relances{% endtrans %}</span>
+              <span class="pc-chip">⭐ {% trans %}SaaS VIP{% endtrans %}</span>
+            </div>
+            <h1 class="pc-title">{% trans %}Pilotage de mes missions & relances{% endtrans %}</h1>
+            <p class="pc-sub">
+              {% trans %}Centralise les échéances de tes jobs, les conversations à relancer et les actions de la semaine.{% endtrans %}
+            </p>
+          </div>
+
+          
+        </div>
+      </div>
+    </section>
+
+    {# KPI #}
+    <section class="row g-3 mb-4">
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="pc-card-soft pc-kpi">
+          <div class="d-flex align-items-start justify-content-between gap-2">
+            <div>
+              <div class="lbl">{% trans %}Deadlines aujourd’hui{% endtrans %}</div>
+              <div class="val">{{ stats.deadlinesToday }}</div>
+              <div class="hint">{% trans %}Missions à surveiller maintenant{% endtrans %}</div>
+            </div>
+            <div class="pc-icon">🔥</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="pc-card-soft pc-kpi">
+          <div class="d-flex align-items-start justify-content-between gap-2">
+            <div>
+              <div class="lbl">{% trans %}Deadlines 7 jours{% endtrans %}</div>
+              <div class="val">{{ stats.deadlinesWeek }}</div>
+              <div class="hint">{% trans %}Prochaines échéances à venir{% endtrans %}</div>
+            </div>
+            <div class="pc-icon">🗂️</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="pc-card-soft pc-kpi">
+          <div class="d-flex align-items-start justify-content-between gap-2">
+            <div>
+              <div class="lbl">{% trans %}Jobs expirés{% endtrans %}</div>
+              <div class="val">{{ stats.overdueJobs }}</div>
+              <div class="hint">{% trans %}À clôturer / prolonger / corriger{% endtrans %}</div>
+            </div>
+            <div class="pc-icon">⏰</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-xl-3">
+        <div class="pc-card-soft pc-kpi">
+          <div class="d-flex align-items-start justify-content-between gap-2">
+            <div>
+              <div class="lbl">{% trans %}Relances suggérées{% endtrans %}</div>
+              <div class="val">{{ stats.relances }}</div>
+              <div class="hint">
+                {% trans with {'%days%': relanceDays} %}Inactives depuis %days% jours+{% endtrans %}
+              </div>
+            </div>
+            <div class="pc-icon">📣</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="row g-4">
+      {# COLONNE GAUCHE #}
+      <div class="col-12 col-xl-8">
+
+        {# Timeline agenda #}
+        <div class="pc-card mb-4">
+          <div class="pc-section-head">
+            <div>
+              <p class="t mb-0">🧭 {% trans %}Agenda intelligent{% endtrans %}</p>
+              <div class="s">{% trans %}Vue consolidée : deadlines + relances à traiter{% endtrans %}</div>
+            </div>
+            <span class="pc-badge">
+              {% trans with {'%count%': agenda|length} %}%count% élément(s){% endtrans %}
+            </span>
+          </div>
+
+          {% if agenda is not empty %}
+            <div class="pc-list pc-timeline">
+              {% for item in agenda %}
+                <div class="pc-step">
+                  <div class="dot">{{ item.icon }}</div>
+                  <div class="box">
+                    <div class="d-flex flex-wrap align-items-start justify-content-between gap-2">
+                      <div class="min-w-0">
+                        <div class="d-flex flex-wrap gap-2 align-items-center">
+                          <span class="pc-badge pc-tone-{{ item.tone }}">{{ item.subtitle }}</span>
+                          {% if item.reference %}
+                            <span class="pc-badge">{% trans %}Réf:{% endtrans %} {{ item.reference }}</span>
+                          {% endif %}
+                          {% if item.city %}
+                            <span class="pc-badge">📍 {{ item.city }}</span>
+                          {% endif %}
+                        </div>
+                        <p class="ttl mt-2 mb-0">{{ item.title }}</p>
+                        <div class="sub">
+                          {{ item.date ? item.date|date('d/m/Y H:i') : '—' }}
+                        </div>
+                      </div>
+
+                      {% if item.url %}
+                        {% if item.subtitle == 'Deadline aujourd’hui' or item.subtitle == 'Deadline à venir' %}
+                          <a href="{{ path('job_edit', {slug: item.slug}) }}" class="btn btn-sm btn-outline-dark rounded-3 fw-bold">
+                            {% trans %}Editer{% endtrans %}
+                          </a>
+                        {% else %}
+                          <a type="button" onclick="MOLChatOpen()" class="btn btn-sm btn-outline-dark rounded-3 fw-bold">
+                            {% trans %}Ouvrir{% endtrans %}
+                          </a>
+                        {% endif %}
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="pc-empty">
+              {% trans %}Aucun élément dans l’agenda pour le moment. Tu es à jour ✅{% endtrans %}
+            </div>
+          {% endif %}
+        </div>
+
+        {# Deadlines aujourd'hui + semaine #}
+        <div class="row g-4">
+          <div class="col-12 col-lg-6">
+            <div class="pc-card h-100">
+              <div class="pc-section-head">
+                <div>
+                  <p class="t mb-0">🔥 {% trans %}Aujourd’hui{% endtrans %}</p>
+                  <div class="s">{% trans %}Missions dont la date limite tombe aujourd’hui{% endtrans %}</div>
+                </div>
+              </div>
+
+              {% if jobsToday is not empty %}
+                <div class="pc-list">
+                  {% for j in jobsToday %}
+                    <div class="pc-item">
+                      <div class="min-w-0">
+                        <p class="ttl">{{ j.title ?: ('Mission #' ~ j.id) }}</p>
+                        <div class="sub">
+                          {% if j.reference %}<span class="fw-semibold">{% trans %}Réf{% endtrans %} {{ j.reference }}</span> • {% endif %}
+                          {{ j.city ?: 'Ville non précisée'|trans }}
+                          {% if j.dateExpirationAt %} • {% trans %}Expire à{% endtrans %} {{ j.dateExpirationAt|date('H:i') }}{% endif %}
+                        </div>
+                      </div>
+                      <a href="{{ path('job_edit', {slug: j.slug}) }}" class="btn btn-sm btn-outline-dark rounded-3 fw-bold">{% trans %}Voir{% endtrans %}</a>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="pc-empty">{% trans %}Aucune deadline aujourd’hui 🎉{% endtrans %}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-12 col-lg-6">
+            <div class="pc-card h-100">
+              <div class="pc-section-head">
+                <div>
+                  <p class="t mb-0">🗂️ {% trans %}Prochains 7 jours{% endtrans %}</p>
+                  <div class="s">{% trans %}Prépare tes actions avant l’échéance{% endtrans %}</div>
+                </div>
+              </div>
+
+              {% if jobsUpcoming is not empty %}
+                <div class="pc-list">
+                  {% for j in jobsUpcoming %}
+                    <div class="pc-item">
+                      <div class="min-w-0">
+                        <p class="ttl">{{ j.title ?: ('Mission #' ~ j.id) }}</p>
+                        <div class="sub">
+                          {% if j.reference %}<span class="fw-semibold">{% trans %}Réf{% endtrans %} {{ j.reference }}</span> • {% endif %}
+                          {{ j.city ?: 'Ville non précisée'|trans }} •
+                          {{ j.dateExpirationAt ? j.dateExpirationAt|date('d/m/Y H:i') : '—' }}
+                        </div>
+                      </div>
+                      <a href="{{ path('calendar_index') }}" class="btn btn-sm btn-outline-primary rounded-3 fw-bold">{% trans %}Planifier{% endtrans %}</a>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="pc-empty">{% trans %}Aucune échéance dans les 7 prochains jours.{% endtrans %}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# COLONNE DROITE #}
+      <div class="col-12 col-xl-4">
+        <div class="pc-card mb-4">
+          <div class="pc-section-head">
+            <div>
+              <p class="t mb-0">⚡ {% trans %}Actions rapides{% endtrans %}</p>
+              <div class="s">{% trans %}Raccourcis utiles pour gérer vite{% endtrans %}</div>
+            </div>
+          </div>
+          <div class="pc-list pc-side-actions">
+            <a href="{{ path('job_new') }}">
+              <span>➕ {% trans %}Publier une mission{% endtrans %}</span>
+              <span>→</span>
+            </a>
+            <a href="{{ path('annonce_new') }}">
+              <span>📣 {% trans %}Publier une annonce{% endtrans %}</span>
+              <span>→</span>
+            </a>
+            <a href="{{ path('brief_templates_index') }}">
+              <span>🧩 {% trans %}Utiliser un modèle de brief{% endtrans %}</span>
+              <span>→</span>
+            </a>
+            <a type="button" onclick="MOLChatOpen()">
+              <span>💬 {% trans %}Ouvrir la messagerie{% endtrans %}</span>
+              <span>→</span>
+            </a>
+            <a href="{{ path('contacts_index') }}">
+              <span>📇 {% trans %}Voir mes contacts{% endtrans %}</span>
+              <span>→</span>
+            </a>
+            <a href="{{ path('talent_publisher_jobs') }}">
+              <span>📁 {% trans %}Gérer mes missions{% endtrans %}</span>
+              <span>→</span>
+            </a>
+            <a href="{{ path('annonce_manage') }}">
+              <span>📋 {% trans %}Gérer mes annonces{% endtrans %}</span>
+              <span>→</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="pc-card mb-4">
+          <div class="pc-section-head">
+            <div>
+              <p class="t mb-0">📣 {% trans %}Conversations à relancer{% endtrans %}</p>
+              <div class="s">
+                {% trans with {'%days%': relanceDays} %}Inactives depuis %days% jours ou plus{% endtrans %}
+              </div>
+            </div>
+            <span class="pc-badge pc-tone-warning">{{ relanceConversations|length }}</span>
+          </div>
+
+          {% if relanceConversations is not empty %}
+            <div class="pc-list">
+              {% for c in relanceConversations %}
+                {% set other = c.getOtherParticipant(me) %}
+                {% set last = c.lastMessageAt ?: c.createdAt %}
+                <div class="pc-item">
+                  <div class="min-w-0">
+                    <p class="ttl">{{ other ? other.userIdentifier : 'Contact' }}</p>
+                    <div class="sub">
+                      {% trans %}Dernière activité :{% endtrans %}
+                      {{ last ? last|date('d/m/Y H:i') : '—' }}
+                    </div>
+                    {% if c.professionalProfile %}
+                      <div class="pc-mini mt-1">{% trans %}Profil talent lié à la conversation{% endtrans %}</div>
+                    {% endif %}
+                  </div>
+                  <a onclick="MOLChatOpen()" class="btn btn-sm btn-outline-warning rounded-3 fw-bold">{% trans %}Relancer{% endtrans %}</a>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="pc-empty">{% trans %}Aucune relance urgente. Très bon suivi 👌🏽{% endtrans %}</div>
+          {% endif %}
+        </div>
+
+        <div class="pc-card">
+          <div class="pc-section-head">
+            <div>
+              <p class="t mb-0">⏰ {% trans %}Jobs expirés{% endtrans %}</p>
+              <div class="s">{% trans %}À clôturer, prolonger ou republier{% endtrans %}</div>
+            </div>
+            <span class="pc-badge pc-tone-danger">{{ jobsOverdue|length }}</span>
+          </div>
+
+          {% if jobsOverdue is not empty %}
+            <div class="pc-list">
+              {% for j in jobsOverdue|slice(0, 8) %}
+                <div class="pc-item">
+                  <div class="min-w-0">
+                    <p class="ttl">{{ j.title ?: ('Mission #' ~ j.id) }}</p>
+                    <div class="sub">
+                      {% if j.reference %}{{ j.reference }} • {% endif %}
+                      {% trans %}Expiré le{% endtrans %} {{ j.dateExpirationAt ? j.dateExpirationAt|date('d/m/Y H:i') : '—' }}
+                    </div>
+                  </div>
+                  <a href="{{ path('job_edit', {slug: j.slug}) }}" class="btn btn-sm btn-outline-danger rounded-3 fw-bold">{% trans %}Traiter{% endtrans %}</a>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="pc-empty">{% trans %}Aucun job expiré. Nickel ✅{% endtrans %}</div>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

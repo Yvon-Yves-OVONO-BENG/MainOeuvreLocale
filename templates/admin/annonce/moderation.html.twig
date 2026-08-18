@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modération des annonces{% endblock %}
+
+{% block body %}
+<style>
+    .anmod-page{--navy:#071a38;--blue:#155eef;--green:#13a66b;--amber:#e99a12;max-width:1420px;margin:0 auto;padding:28px 14px 72px;color:#15233e}.anmod-hero{position:relative;overflow:hidden;border-radius:28px;padding:30px;background:linear-gradient(125deg,#06172f,#123e83 58%,#087b9f);box-shadow:0 24px 70px rgba(6,23,47,.23);color:#fff}.anmod-hero:after{content:"";position:absolute;right:-100px;top:-150px;width:350px;height:350px;border-radius:50%;background:rgba(245,185,66,.16)}.anmod-hero-in{position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}.anmod-eyebrow{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 11px;background:rgba(255,255,255,.1);font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.1em}.anmod-hero h1{font-size:clamp(26px,4vw,39px);font-weight:950;letter-spacing:-.035em;margin:12px 0 6px}.anmod-hero p{margin:0;color:rgba(255,255,255,.75);font-size:13px}.anmod-hero-badge{display:flex;align-items:center;gap:12px;padding:14px 17px;border-radius:18px;background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.17)}.anmod-hero-badge b{font-size:25px}.anmod-hero-badge small{display:block;color:rgba(255,255,255,.68)}
+    .anmod-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin:18px 0}.anmod-kpi{padding:17px;border:1px solid #e1e8f2;border-radius:18px;background:#fff;box-shadow:0 10px 35px rgba(17,39,79,.06)}.anmod-kpi span{display:block;color:#78879c;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.anmod-kpi b{display:block;margin-top:4px;color:#102a54;font-size:25px;font-weight:950}.anmod-shell{border:1px solid #e1e8f2;border-radius:24px;background:#fff;box-shadow:0 18px 55px rgba(17,39,79,.08);overflow:hidden}.anmod-tools{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:18px 20px;border-bottom:1px solid #e8edf4}.anmod-search{position:relative;flex:1;max-width:570px;min-width:250px}.anmod-search i{position:absolute;left:15px;top:50%;transform:translateY(-50%);color:#8190a5}.anmod-search input{width:100%;height:45px;border:1px solid #dce4ef;border-radius:14px;background:#f8fafd;padding:0 14px 0 42px;outline:0}.anmod-search input:focus{background:#fff;border-color:#6aa1ff;box-shadow:0 0 0 4px rgba(21,94,239,.09)}.anmod-limit{height:43px;border:1px solid #dce4ef;border-radius:13px;background:#fff;padding:0 12px;color:#485973;font-size:12px;font-weight:800}.anmod-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}.anmod-table{width:100%;min-width:900px;border-collapse:collapse}.anmod-table th{padding:13px 14px;background:#f5f8fc;border-bottom:1px solid #e4eaf2;color:#63728a;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.09em;text-align:left;white-space:nowrap}.anmod-table td{padding:14px;border-bottom:1px solid #edf1f6;color:#53627a;font-size:11px;vertical-align:middle}.anmod-table tr:hover td{background:#fbfdff}.anmod-title{max-width:300px}.anmod-title strong{display:block;color:#122c55;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.anmod-title small{display:block;margin-top:4px}.anmod-author{display:flex;align-items:center;gap:9px;max-width:240px}.anmod-avatar{width:35px;height:35px;border-radius:11px;overflow:hidden;display:grid;place-items:center;background:#eaf1ff;color:#155eef}.anmod-avatar img{width:100%;height:100%;object-fit:cover}.anmod-author div{min-width:0}.anmod-author strong,.anmod-author small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.anmod-author strong{color:#273b5d}.anmod-status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 9px;font-size:9px;font-weight:900}.anmod-status:before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}.anmod-status.published{background:#e8f9f1;color:#08794b}.anmod-status.pending{background:#fff5d9;color:#9d6700}.anmod-status.draft{background:#f0f2f6;color:#697588}.anmod-switch{position:relative;width:48px;height:27px;display:inline-block}.anmod-switch input{opacity:0;width:0;height:0}.anmod-slider{position:absolute;inset:0;border-radius:999px;background:#ccd5e2;cursor:pointer;transition:.2s}.anmod-slider:before{content:"";position:absolute;width:21px;height:21px;left:3px;top:3px;border-radius:50%;background:#fff;box-shadow:0 2px 7px rgba(0,0,0,.2);transition:.2s}.anmod-switch input:checked+.anmod-slider{background:linear-gradient(135deg,#13a66b,#087e71)}.anmod-switch input:checked+.anmod-slider:before{transform:translateX(21px)}.anmod-switch input:disabled+.anmod-slider{opacity:.42;cursor:not-allowed}.anmod-view{width:34px;height:34px;display:grid;place-items:center;border:1px solid #dfe6f0;border-radius:11px;background:#fff;color:#53637c;text-decoration:none}.anmod-view:hover{color:#155eef;background:#f2f6ff;border-color:#bdd2ff}.anmod-empty{padding:55px;text-align:center;color:#7d8ba0}.anmod-pager{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-top:1px solid #e8edf4;background:#fbfcfe}.anmod-info{font-size:11px;color:#76859b;font-weight:750}.anmod-page-actions{display:flex;align-items:center;gap:7px}.anmod-page-btn{border:1px solid #dce4ef;border-radius:10px;background:#fff;padding:8px 10px;color:#42526d;font-size:10px;font-weight:850}.anmod-page-btn:disabled{opacity:.4}.anmod-page-num{min-width:58px;padding:8px 10px;border-radius:10px;background:#edf3ff;color:#155eef;font-size:10px;font-weight:950;text-align:center}@media(max-width:900px){.anmod-kpis{grid-template-columns:1fr 1fr}}@media(max-width:560px){.anmod-kpis{grid-template-columns:1fr}.anmod-pager{flex-direction:column}.anmod-hero{padding:24px 20px}}
+    .anmod-actions{display:flex;align-items:center;gap:6px}.anmod-edit{width:34px;height:34px;display:grid;place-items:center;border:1px solid #f2d989;border-radius:11px;background:#fff8df;color:#9a6200;text-decoration:none}.anmod-edit:hover{color:#fff;background:#d58a00;border-color:#d58a00}
+</style>
+
+{% set requestedCount = annonces|filter(a => a.afficherMaintenant and not a.publier)|length %}
+{% set publishedCount = annonces|filter(a => a.afficherMaintenant and a.publier)|length %}
+{% set draftCount = annonces|filter(a => not a.afficherMaintenant)|length %}
+{% set canSeePublisher = is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+
+<main class="anmod-page mt-4">
+    <section class="anmod-hero">
+        <div class="anmod-hero-in">
+            <div><span class="anmod-eyebrow"><i class="fa-solid fa-shield-halved"></i> Centre de confiance</span><h1>Modération des annonces</h1><p>Validez uniquement les publications conformes, utiles et suffisamment précises.</p></div>
+            <div class="anmod-hero-badge"><i class="fa-solid fa-hourglass-half fa-xl"></i><div><b id="pendingHeroCount">{{ requestedCount }}</b><small>en attente d’appréciation</small></div></div>
+        </div>
+    </section>
+
+    <div class="anmod-kpis">
+        <div class="anmod-kpi"><span>Total annonces</span><b>{{ annonces|length }}</b></div>
+        <div class="anmod-kpi"><span>À examiner</span><b id="pendingKpiCount">{{ requestedCount }}</b></div>
+        <div class="anmod-kpi"><span>Publiées</span><b id="publishedKpiCount">{{ publishedCount }}</b></div>
+        <div class="anmod-kpi"><span>Hors affichage</span><b>{{ draftCount }}</b></div>
+    </div>
+
+    <section class="anmod-shell" id="annonceModeration">
+        <div class="anmod-tools">
+            <div class="anmod-search"><i class="fa-solid fa-magnifying-glass"></i><input id="moderationSearch" type="search" placeholder="Rechercher un auteur, une annonce ou une ville…" autocomplete="off"></div>
+            <select class="anmod-limit" id="moderationLimit" aria-label="Nombre de lignes">{% for size in [10, 15, 20, 30, 50] %}<option value="{{ size }}">{{ size }} par page</option>{% endfor %}</select>
+        </div>
+
+        <div class="anmod-table-wrap">
+            <table class="anmod-table">
+                <thead><tr><th>Auteur</th><th>Annonce</th><th>État</th><th>Publier</th><th>Création</th><th>Publication</th>{% if canSeePublisher %}<th>Publié par</th>{% endif %}<th>Actions</th></tr></thead>
+                <tbody id="moderationRows">
+                {% for annonce in annonces %}
+                    {% set owner = annonce.user %}{% set personal = owner ? owner.personalProfile : null %}{% set status = annonce.publier and annonce.afficherMaintenant ? 'published' : (annonce.afficherMaintenant ? 'pending' : 'draft') %}
+                    <tr class="js-moderation-row" data-id="{{ annonce.id }}" data-status="{{ status }}">
+                        <td><div class="anmod-author"><div class="anmod-avatar">{% if personal and personal.photo %}<img src="{{ asset('uploads/profiles/' ~ personal.photo) }}" alt="">{% else %}<i class="fa-solid fa-user"></i>{% endif %}</div><div><strong>{{ personal ? personal.fullName : owner.email }}</strong><small>{{ owner.email }}</small></div></div></td>
+                        <td class="anmod-title"><strong title="{{ annonce.titre }}">{{ annonce.titre }}</strong><small><i class="fa-solid fa-location-dot me-1"></i>{{ annonce.ville }}</small></td>
+                        <td><span class="anmod-status {{ status }} js-mod-status">{{ status == 'published' ? 'Publiée' : (status == 'pending' ? 'En attente' : 'Brouillon') }}</span></td>
+                        <td><label class="anmod-switch" title="{{ annonce.afficherMaintenant ? 'Publier / retirer' : 'Affichage non demandé' }}"><input class="js-publish-toggle" type="checkbox" {{ annonce.publier ? 'checked' : '' }} {{ not annonce.afficherMaintenant ? 'disabled' : '' }} data-url="{{ path('admin_annonce_toggle_publish', {slug: annonce.slug}) }}" data-token="{{ csrf_token('annonce_publish_' ~ annonce.id) }}"><span class="anmod-slider"></span></label></td>
+                        <td>{{ annonce.dateCreation|date('d/m/Y') }}<br><small>{{ annonce.dateCreation|date('H:i') }}</small></td>
+                        <td class="js-publication-date">{{ annonce.datePublication ? annonce.datePublication|date('d/m/Y H:i') : '—' }}</td>
+                        {% if canSeePublisher %}<td class="js-publisher">{{ annonce.publiePar ? annonce.publiePar.email : '—' }}</td>{% endif %}
+                        <td><div class="anmod-actions"><a class="anmod-edit" href="{{ path('admin_annonce_edit', {slug: annonce.slug}) }}" title="Modifier l’annonce" data-turbo="false"><i class="fa-solid fa-pen"></i></a><a class="anmod-view" href="{{ path('annonce_show', {slug: annonce.slug}) }}" title="Voir l’annonce" data-turbo="false"><i class="fa-regular fa-eye"></i></a></div></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="anmod-empty" id="moderationEmpty" {{ annonces is not empty ? 'hidden' : '' }}><i class="fa-regular fa-folder-open fa-2x mb-3"></i><div>Aucune annonce à afficher.</div></div>
+        <div class="anmod-pager"><span class="anmod-info" id="moderationInfo">0 annonce</span><div class="anmod-page-actions"><button class="anmod-page-btn" id="moderationPrev" type="button"><i class="fa-solid fa-chevron-left"></i> Précédent</button><span class="anmod-page-num" id="moderationPage">1</span><button class="anmod-page-btn" id="moderationNext" type="button">Suivant <i class="fa-solid fa-chevron-right"></i></button></div></div>
+    </section>
+</main>
+
+<script>
+(function () {
+    const root = document.getElementById('annonceModeration');
+    if (!root || root.dataset.ready === '1') return;
+    root.dataset.ready = '1';
+    const tbody = document.getElementById('moderationRows'), search = document.getElementById('moderationSearch'), limitEl = document.getElementById('moderationLimit'), empty = document.getElementById('moderationEmpty'), info = document.getElementById('moderationInfo'), pageEl = document.getElementById('moderationPage'), prev = document.getElementById('moderationPrev'), next = document.getElementById('moderationNext');
+    let page = 1;
+    const rows = () => Array.from(tbody.querySelectorAll('.js-moderation-row'));
+    const normalize = value => (value || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const filtered = () => { const q = normalize(search.value.trim()); return rows().filter(row => !q || normalize(row.textContent).includes(q)); };
+
+    function updateKpis() {
+        const pending = rows().filter(row => row.dataset.status === 'pending').length;
+        const published = rows().filter(row => row.dataset.status === 'published').length;
+        document.getElementById('pendingHeroCount').textContent = pending;
+        document.getElementById('pendingKpiCount').textContent = pending;
+        document.getElementById('publishedKpiCount').textContent = published;
+    }
+    function render() {
+        const list = filtered(), limit = parseInt(limitEl.value, 10), pages = Math.max(1, Math.ceil(list.length / limit));
+        page = Math.min(Math.max(1, page), pages);
+        const start = (page - 1) * limit, visible = new Set(list.slice(start, start + limit));
+        rows().forEach(row => row.hidden = !visible.has(row));
+        empty.hidden = list.length > 0;
+        info.textContent = list.length ? `${start + 1} à ${Math.min(start + limit, list.length)} sur ${list.length} annonce${list.length > 1 ? 's' : ''}` : '0 annonce';
+        pageEl.textContent = `${page} / ${pages}`; prev.disabled = page <= 1; next.disabled = page >= pages;
+    }
+    async function post(url, params) {
+        const response = await fetch(url, {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'}, body:params.toString()});
+        let data = {}; try { data = await response.json(); } catch (e) {}
+        if (!response.ok || !data.success) throw new Error(data.message || 'Une erreur est survenue.');
+        return data;
+    }
+    function popup(options) { if (window.Swal) return Swal.fire(options); if (options.showCancelButton) return Promise.resolve({isConfirmed:confirm(options.text || 'Confirmer ?')}); alert(options.text || options.title); return Promise.resolve({isConfirmed:true}); }
+    search.addEventListener('input', () => { page = 1; render(); }); limitEl.addEventListener('change', () => { page = 1; render(); }); prev.addEventListener('click', () => { page--; render(); }); next.addEventListener('click', () => { page++; render(); });
+
+    tbody.addEventListener('change', async event => {
+        const toggle = event.target.closest('.js-publish-toggle'); if (!toggle) return;
+        const previous = !toggle.checked, row = toggle.closest('.js-moderation-row');
+        if (toggle.checked) {
+            const answer = await popup({icon:'question', title:'Publier cette annonce ?', text:'Elle deviendra immédiatement visible sur la page d’accueil.', showCancelButton:true, confirmButtonText:'Publier', cancelButtonText:'Annuler', confirmButtonColor:'#13a66b'});
+            if (!answer.isConfirmed) { toggle.checked = false; return; }
+        }
+        toggle.disabled = true;
+        try {
+            const data = await post(toggle.dataset.url, new URLSearchParams({_token:toggle.dataset.token, enabled:toggle.checked ? '1' : '0'}));
+            row.dataset.status = data.status;
+            const badge = row.querySelector('.js-mod-status'); badge.className = `anmod-status ${data.status} js-mod-status`; badge.textContent = data.published ? 'Publiée' : 'En attente';
+            row.querySelector('.js-publication-date').textContent = data.datePublication || '—';
+            const publisher = row.querySelector('.js-publisher'); if (publisher && Object.prototype.hasOwnProperty.call(data, 'publiePar')) publisher.textContent = data.publiePar || '—';
+            updateKpis();
+            await popup({icon:'success', title:data.published ? 'Annonce publiée' : 'Annonce retirée', text:data.message, confirmButtonColor:'#155eef'});
+        } catch (error) { toggle.checked = previous; await popup({icon:'error', title:'Action impossible', text:error.message, confirmButtonColor:'#d3344c'}); }
+        finally { toggle.disabled = false; }
+    });
+    updateKpis(); render();
+})();
+</script>
+{% endblock %}

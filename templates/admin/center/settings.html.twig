@@ -1,0 +1,79 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Paramètres{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/center/_vip_ui.html.twig' %}
+
+  <div class="ctr-shell">
+    <div class="ctr-container ctr-grid">
+
+      <section class="ctr-card ctr-head">
+        <div class="ctr-card-inner">
+          <div class="ctr-head-top">
+            <div>
+              <div class="ctr-kicker">{% trans %}Centre d’administration • Paramètres{% endtrans %}</div>
+              <h1 class="ctr-title">{% trans %}Paramètres plateforme{% endtrans %}</h1>
+              <p class="ctr-text">
+                {% trans %}Centralise la configuration globale de la plateforme, la sécurité, la modération, la finance et les réglages support.{% endtrans %}
+              </p>
+            </div>
+          </div>
+
+          {% include 'admin/center/_nav.html.twig' %}
+        </div>
+      </section>
+
+      <section class="ctr-grid ctr-grid-3">
+        <article class="ctr-card ctr-kpi">
+          <div class="ctr-card-inner">
+            <div class="label">{% trans %}Groupes{% endtrans %}</div>
+            <div class="value">{{ stats.groups }}</div>
+            <div class="hint">{% trans %}Blocs configurables{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="ctr-card ctr-kpi">
+          <div class="ctr-card-inner">
+            <div class="label">{% trans %}Sensibles{% endtrans %}</div>
+            <div class="value">{{ stats.sensitive }}</div>
+            <div class="hint">{% trans %}Zones à forte vigilance{% endtrans %}</div>
+          </div>
+        </article>
+
+        <article class="ctr-card ctr-kpi">
+          <div class="ctr-card-inner">
+            <div class="label">{% trans %}Dernière mise à jour{% endtrans %}</div>
+            <div class="value" style="font-size:1rem">{{ stats.lastUpdate|date('d/m/Y H:i') }}</div>
+            <div class="hint">{% trans %}État de configuration{% endtrans %}</div>
+          </div>
+        </article>
+      </section>
+
+      <section class="ctr-card">
+        <div class="ctr-card-inner">
+          <div class="ctr-card-list">
+            {% for group in groups %}
+              <article class="ctr-mini-card">
+                <div class="ctr-row-title">{{ group.icon }} {{ group.title }}</div>
+                <div class="ctr-row-sub">{{ group.description }}</div>
+
+                <div class="ctr-separator"></div>
+
+                <div class="ctr-card-list">
+                  {% for item in group.items %}
+                    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                      <div class="ctr-row-sub">{{ item.label }}</div>
+                      <span class="ctr-badge neutral">{{ item.value }}</span>
+                    </div>
+                  {% endfor %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+{% endblock %}

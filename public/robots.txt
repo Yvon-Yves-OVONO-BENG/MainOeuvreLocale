@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+
+# Espaces privés et endpoints techniques
+Disallow: /admin
+Disallow: /moderateur
+Disallow: /api
+Disallow: /ajax
+Disallow: /chat
+Disallow: /tableau-de-bord
+Disallow: /parametres
+Disallow: /paiement
+Disallow: /notifications
+Disallow: /mes-
+
+Sitemap: https://www.maindoeuvrelocale.com/sitemap.xml

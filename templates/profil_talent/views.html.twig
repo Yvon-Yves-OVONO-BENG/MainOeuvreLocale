@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Qui a vu mon profil ?{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "profil_talent/_vip_ui_views.html.twig" %}
+
+<div class="container vip-page">
+  <div class="vip-shell">
+    <div class="vip-hero">
+      <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div>
+          <h2 class="vip-title">{% trans %}Qui a vu mon profil ?{% endtrans %}</h2>
+          <div class="vip-sub">{% trans %}Derniers visiteurs et date/heure de visite.{% endtrans %}</div>
+        </div>
+
+        <div class="vip-hero-actions">
+          <a class="vip-btn" href="{{ path('talent_profile_views_privacy') }}">🔒 {% trans %}Confidentialité{% endtrans %}</a>
+          <a class="vip-btn vip-btn--primary" href="{{ path('tableau_de_bord') }}">← {% trans %}Retour{% endtrans %}</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="vip-body">
+      <div class="vip-topgrid">
+        <div class="vip-stat">
+          <div>
+            <div class="vip-stat__label">{% trans %}Total des vues{% endtrans %}</div>
+            <div class="vip-stat__value">{{ totalViews ?? 0 }}</div>
+          </div>
+          <div class="vip-pill">👀 {% trans %}Vues{% endtrans %}</div>
+        </div>
+
+        <div class="vip-toolbar">
+          <div class="vip-search">
+            <span class="vip-search__icon">🔎</span>
+            <input id="vipSearch" type="text" placeholder="{% trans %}Rechercher un visiteur…{% endtrans %}">
+          </div>
+
+          <a class="vip-btn" href="{{ path('talent_profile_views') }}">↻ {% trans %}Actualiser{% endtrans %}</a>
+        </div>
+      </div>
+
+      {% if privacyEnabled %}
+        <div class="vip-privacy">
+          <div class="vip-privacy__title">{% trans %}Confidentialité activée{% endtrans %}</div>
+          <div class="vip-privacy__text">
+            {% trans %}Vous avez choisi de masquer la liste de vos visiteurs. Vous pouvez désactiver cette option dans “Confidentialité”.{% endtrans %}
+          </div>
+        </div>
+      {% else %}
+        <div class="vip-list" id="vipList">
+          {% if views is empty %}
+            <div class="vip-empty">
+              <div class="vip-empty__title">{% trans %}Aucun visiteur pour le moment{% endtrans %}</div>
+              <div class="vip-empty__text">{% trans %}Les personnes qui consultent votre profil apparaîtront ici.{% endtrans %}</div>
+            </div>
+          {% endif %}
+
+          {% for pv in views %}
+            {% set v = pv.viewer ?? null %}
+            {% set fullName = v ? (v.fullName ?? v.username ?? v.email ?? ('Visiteur'|trans)) : ('Visiteur'|trans) %}
+            {% set initials = fullName|slice(0,1)|upper %}
+            {% set photo = null %}
+
+            {% if v and attribute(v, 'personalProfile') is defined and v.personalProfile and attribute(v.personalProfile, 'photo') is defined and v.personalProfile.photo %}
+              {% set photo = asset('uploads/profiles/' ~ v.personalProfile.photo) %}
+            {% endif %}
+
+            <div class="vip-card vip-item" data-search="{{ fullName|lower }}">
+              <div class="vip-card__left">
+                <div class="vip-avatar">
+                  {% if photo %}
+                    <img src="{{ photo }}" alt="{{ fullName }}">
+                  {% else %}
+                    {{ initials }}
+                  {% endif %}
+                </div>
+
+                <div class="vip-main">
+                  <div class="vip-name">{{ fullName }}</div>
+
+                  <div class="vip-meta">
+                    {% if v and attribute(v, 'profession') is defined and v.profession %}
+                      {{ v.profession }}
+                    {% else %}
+                      {% trans %}Visite de votre profil{% endtrans %}
+                    {% endif %}
+                  </div>
+
+                  <div class="vip-badges">
+                    <span class="vip-badge vip-badge--blue">👁 {% trans %}A consulté votre profil{% endtrans %}</span>
+
+                    {% if v and attribute(v, 'city') is defined and v.city %}
+                      <span class="vip-badge">📍 {{ v.city }}</span>
+                    {% endif %}
+
+                    {% if v and attribute(v, 'email') is defined and v.email %}
+                      <span class="vip-badge vip-badge--green">✉ {{ v.email }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="vip-right">
+                <div class="vip-time">🕒 {{ pv.createdAt ? pv.createdAt|date('d/m/Y H:i') : '—' }}</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const input = document.getElementById('vipSearch');
+    const items = document.querySelectorAll('.vip-item');
+    if(!input) return;
+
+    input.addEventListener('input', function(){
+      const q = (this.value || '').trim().toLowerCase();
+      items.forEach(el => {
+        const hay = (el.getAttribute('data-search') || '');
+        el.style.display = hay.includes(q) ? '' : 'none';
+      });
+    });
+  })();
+</script>
+{% endblock %}

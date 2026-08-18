@@ -1,0 +1,207 @@
+{# Loader commun des boutons « Voir l'annonce ». #}
+<style id="molViewAnnouncementSpinnerStyles">
+  .mol-view-loader-active {
+    position: relative !important;
+    isolation: isolate;
+    overflow: hidden !important;
+    gap: 7px !important;
+    cursor: wait !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    transform: none !important;
+  }
+
+  .mol-view-loader-active::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: -80%;
+    bottom: -80%;
+    left: -45%;
+    width: 34%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .30), transparent);
+    transform: skewX(-20deg);
+    animation: molViewButtonShimmer 1.05s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .mol-view-loader__spinner {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    flex: 0 0 17px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+  }
+
+  .mol-view-loader__spinner::before,
+  .mol-view-loader__spinner::after {
+    content: "";
+    position: absolute;
+    border-radius: inherit;
+  }
+
+  .mol-view-loader__spinner::before {
+    inset: 0;
+    border: 2px solid rgba(255, 255, 255, .28);
+    border-top-color: #fff;
+    border-right-color: #fff;
+    animation: molViewSpinnerOuter .70s linear infinite;
+  }
+
+  .mol-view-loader__spinner::after {
+    inset: 4px;
+    border: 2px solid transparent;
+    border-bottom-color: rgba(255, 255, 255, .96);
+    animation: molViewSpinnerInner .52s linear infinite;
+  }
+
+  .mol-view-loader__label {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    color: inherit;
+    font: inherit;
+    letter-spacing: .035em;
+    white-space: nowrap;
+  }
+
+  @keyframes molViewSpinnerOuter {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes molViewSpinnerInner {
+    to { transform: rotate(-360deg); }
+  }
+
+  @keyframes molViewButtonShimmer {
+    0% { left: -45%; }
+    68%, 100% { left: 125%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mol-view-loader-active::after { animation: none; }
+
+    .mol-view-loader__spinner::before,
+    .mol-view-loader__spinner::after {
+      animation-duration: 1.4s;
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    if (window.__molViewAnnouncementLoaderBound) {
+      return;
+    }
+
+    window.__molViewAnnouncementLoaderBound = true;
+
+    function normalizeLabel(value) {
+      return (value || '')
+        .replace(/[’`]/g, "'")
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLocaleUpperCase();
+    }
+
+    function isViewAnnouncementButton(link) {
+      if (link.hasAttribute('data-mol-view-announcement')) {
+        return true;
+      }
+
+      const label = normalizeLabel(link.textContent);
+      return [
+        "VOIR L'ANNONCE",
+        "VOIR L'OFFRE",
+        'VIEW THE AD',
+        'VIEW AD',
+        'VIEW THE OFFER',
+        'VIEW OFFER',
+        'VIEW JOB',
+        'SEE THE AD',
+        'SEE THE OFFER'
+      ].some(function (expectedLabel) {
+        return label.includes(expectedLabel);
+      });
+    }
+
+    function loadingLabel() {
+      const language = (document.documentElement.lang || 'fr').toLowerCase();
+      return language.startsWith('en') ? 'OPENING…' : 'OUVERTURE…';
+    }
+
+    function startLoading(link) {
+      if (link.dataset.molViewLoading === '1') {
+        return false;
+      }
+
+      const width = Math.ceil(link.getBoundingClientRect().width);
+      link.dataset.molViewLoading = '1';
+      link.dataset.molViewOriginalHtml = link.innerHTML;
+
+      if (width > 0) {
+        link.style.width = width + 'px';
+        link.style.minWidth = width + 'px';
+      }
+
+      link.classList.add('mol-view-loader-active');
+      link.setAttribute('aria-busy', 'true');
+      link.setAttribute('aria-disabled', 'true');
+      link.innerHTML =
+        '<span class="mol-view-loader__spinner" aria-hidden="true"></span>' +
+        '<span class="mol-view-loader__label">' + loadingLabel() + '</span>';
+
+      return true;
+    }
+
+    function resetLoadingButtons() {
+      document.querySelectorAll('[data-mol-view-loading="1"]').forEach(function (link) {
+        if (Object.prototype.hasOwnProperty.call(link.dataset, 'molViewOriginalHtml')) {
+          link.innerHTML = link.dataset.molViewOriginalHtml;
+        }
+
+        delete link.dataset.molViewLoading;
+        delete link.dataset.molViewOriginalHtml;
+        link.style.removeProperty('width');
+        link.style.removeProperty('min-width');
+        link.classList.remove('mol-view-loader-active');
+        link.removeAttribute('aria-busy');
+        link.removeAttribute('aria-disabled');
+      });
+    }
+
+    document.addEventListener('click', function (event) {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        !(event.target instanceof Element)
+      ) {
+        return;
+      }
+
+      const link = event.target.closest('a[href]');
+      if (
+        !link ||
+        link.hasAttribute('download') ||
+        link.target === '_blank' ||
+        !isViewAnnouncementButton(link)
+      ) {
+        return;
+      }
+
+      if (!startLoading(link)) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }, true);
+
+    window.addEventListener('pageshow', resetLoadingButtons);
+    document.addEventListener('turbo:before-cache', resetLoadingButtons);
+  })();
+</script>

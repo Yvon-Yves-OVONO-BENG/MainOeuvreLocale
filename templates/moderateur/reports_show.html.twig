@@ -1,0 +1,121 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Signalement'|trans }} #{{ r.id }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_reports_show.html.twig" %}
+
+<div class="page">
+  <div class="wrap">
+
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="h1">{% trans %}Signalement{% endtrans %} #{{ r.id }}</div>
+          <div class="muted" style="font-size:12px;margin-top:4px;">
+            {% trans %}Créé le{% endtrans %} {{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '—' }}
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <a class="btn ghost" href="{{ path('moderateur_reports_index', {status: r.status}) }}">{% trans %}← Retour{% endtrans %}</a>
+
+          <form method="post" action="{{ path('moderateur_reports_toggle_delete', {id:r.id}) }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('rep_action_' ~ r.id) }}">
+            <button class="btn warn" type="submit">{{ r.supprimer ? 'Retirer “à supprimer”'|trans : 'Marquer “à supprimer”'|trans }}</button>
+          </form>
+
+          {% if r.status != 'resolved' %}
+            <form method="post" action="{{ path('moderateur_reports_resolve', {id:r.id}) }}">
+              <input type="hidden" name="_token" value="{{ csrf_token('rep_action_' ~ r.id) }}">
+              <button class="btn good" type="submit">✅ {% trans %}Marquer traité{% endtrans %}</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ path('moderateur_reports_reopen', {id:r.id}) }}">
+              <input type="hidden" name="_token" value="{{ csrf_token('rep_action_' ~ r.id) }}">
+              <button class="btn" type="submit">↩️ {% trans %}Rouvrir{% endtrans %}</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="grid">
+          <div class="box">
+            <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start;">
+              <div>
+                <div style="font-weight:950;">{% trans %}Détails{% endtrans %}</div>
+                <div class="muted" style="font-size:12px;margin-top:2px;">{% trans %}Raison & métadonnées{% endtrans %}</div>
+              </div>
+              <div>
+                {% if r.status == 'open' %}
+                  <span class="chip open">{% trans %}OPEN{% endtrans %}</span>
+                {% elseif r.status == 'resolved' %}
+                  <span class="chip resolved">{% trans %}RESOLVED{% endtrans %}</span>
+                {% else %}
+                  <span class="chip canceled">{{ r.status|upper }}</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="muted" style="font-size:12px;">{% trans %}Reporter{% endtrans %}</div>
+              <div style="font-weight:900;">{{ r.reporter ? (r.reporter.email ?? ('#' ~ r.reporter.id)) : '—' }}</div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="muted" style="font-size:12px;">{% trans %}Compte signalé{% endtrans %}</div>
+              <div style="font-weight:900;">{{ r.targetUser ? (r.targetUser.email ?? ('#' ~ r.targetUser.id)) : '—' }}</div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="muted" style="font-size:12px;">{% trans %}Catégorie{% endtrans %}</div>
+              <div style="font-weight:900;">{{ r.categorie ? r.categorie.label : '—' }}</div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="muted" style="font-size:12px;">{% trans %}Raison{% endtrans %}</div>
+              <div style="margin-top:6px; padding:12px; border-radius:16px; background: rgba(15,23,42,.03); border:1px solid rgba(15,23,42,.08);">
+                {{ r.reason }}
+              </div>
+            </div>
+
+            <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+              <span class="chip">🧑‍⚖️ {% trans %}Traité par:{% endtrans %} {{ r.handledBy ? (r.handledBy.email ?? '#') : '—' }}</span>
+              <span class="chip">🕒 {% trans %}Traité le:{% endtrans %} {{ r.handledAt ? r.handledAt|date('d/m/Y H:i') : '—' }}</span>
+            </div>
+          </div>
+
+          <div class="box">
+            <div style="font-weight:950;">{% trans %}Historique rapide{% endtrans %}</div>
+            <div class="muted" style="font-size:12px;margin-top:2px;">{% trans %}Autres signalements sur ce compte{% endtrans %}</div>
+
+            <div style="margin-top:10px;">
+              {% for x in related %}
+                <a href="{{ path('moderateur_reports_show', {slug:x.slug}) }}" style="display:block; text-decoration:none; color:inherit; padding:10px 0; border-bottom:1px solid rgba(15,23,42,.08);">
+                  <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <div style="font-weight:900;">#{{ x.id }}</div>
+                    <div class="muted" style="font-size:12px;">{{ x.createdAt ? x.createdAt|date('d/m H:i') : '—' }}</div>
+                  </div>
+                  <div class="muted" style="font-size:12px; margin-top:4px;">
+                    {{ x.reason|slice(0,120) }}{{ x.reason|length > 120 ? '…' : '' }}
+                  </div>
+                </a>
+              {% else %}
+                <div class="muted" style="padding:10px 0;">{% trans %}Aucun autre signalement récent.{% endtrans %}</div>
+              {% endfor %}
+            </div>
+
+            <div style="margin-top:10px;">
+              <a class="btn" href="{{ path('profil_talent', {
+                slug: r.targetUser ? r.targetUser.personalProfile.slug : 'unknown'
+                }) }}">🔎 {% trans %}Rechercher ce compte{% endtrans %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

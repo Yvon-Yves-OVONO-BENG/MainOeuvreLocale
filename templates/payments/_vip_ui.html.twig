@@ -1,0 +1,151 @@
+
+<style>
+  /* ===== VIP SaaS Modern ===== */
+  .pay-wrap{
+    background:
+      radial-gradient(900px circle at 8% 0%, rgba(13,110,253,.12), transparent 55%),
+      radial-gradient(900px circle at 92% 12%, rgba(32,201,151,.12), transparent 55%),
+      linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.70));
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 22px;
+    box-shadow: 0 16px 50px rgba(0,0,0,.06);
+    overflow: hidden;
+  }
+  .pay-head{
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+  }
+  .pay-title{ font-weight: 900; letter-spacing:-.02em; font-size: 18px; }
+  .pay-sub{ color: rgba(15,23,42,.65); font-size: 12px; margin-top: 2px;}
+  .pay-actions{ display:flex; gap:10px; align-items:center; justify-content:flex-end; flex-wrap:wrap; }
+  .pay-search{
+    display:flex; align-items:center; gap:8px;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.75);
+    border-radius: 999px;
+    padding: 8px 10px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.04);
+    min-width: 280px;
+  }
+  .pay-search input{
+    border:0; outline:0; background: transparent;
+    width: 100%;
+    font-size: 13px;
+  }
+  .pay-btn{
+    border: 1px solid rgba(0,0,0,.08);
+    background: #0b5ed7;
+    color: #fff;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 12px;
+    text-decoration:none;
+    box-shadow: 0 14px 30px rgba(13,110,253,.18);
+    white-space:nowrap;
+  }
+  .pay-btn:hover{ filter: brightness(.98); color:#fff; }
+  .pay-body{ padding: 14px 18px 18px; }
+
+  .pay-kpis{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 12px;
+  }
+  .pay-kpi{
+    background: rgba(255,255,255,.72);
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 16px;
+    padding: 10px 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.04);
+  }
+  .pay-kpi .k1{ font-size: 11px; color: rgba(15,23,42,.62); }
+  .pay-kpi .k2{ font-size: 16px; font-weight: 900; margin-top: 2px; }
+
+  .pay-scroll{ overflow:auto; border-radius: 16px; border: 1px solid rgba(0,0,0,.06); background: rgba(255,255,255,.76); }
+  .pay-table{ width:100%; min-width: 860px; border-collapse: collapse; }
+  .pay-table th{
+    text-align:left; font-size: 12px; padding: 12px 14px;
+    color: rgba(15,23,42,.65);
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    background: rgba(248,250,252,.72);
+    position: sticky; top: 0; z-index: 1;
+  }
+  .pay-table td{
+    padding: 12px 14px; font-size: 13px;
+    border-bottom: 1px solid rgba(0,0,0,.06);
+    vertical-align: middle;
+  }
+  .pay-table tr:hover td{ background: rgba(2,6,23,.02); }
+  .pill{
+    display:inline-flex; align-items:center; gap:7px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(2,6,23,.03);
+    border: 1px solid rgba(0,0,0,.06);
+    font-weight: 800;
+    font-size: 12px;
+    white-space:nowrap;
+  }
+  .muted{ color: rgba(15,23,42,.62); font-size: 12px; }
+  .amt{ font-weight: 900; letter-spacing: -.01em; }
+  .dl{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(13,110,253,.10);
+    border: 1px solid rgba(13,110,253,.20);
+    font-weight: 900;
+    font-size: 12px;
+    text-decoration:none;
+    color: #0b5ed7;
+    white-space:nowrap;
+  }
+  .dl:hover{ background: rgba(13,110,253,.14); color:#084298; }
+  .dl.disabled{
+    pointer-events:none; opacity:.45;
+    background: rgba(2,6,23,.06);
+    border-color: rgba(0,0,0,.08);
+    color: rgba(2,6,23,.6);
+  }
+
+  .pay-foot{
+    margin-top: 12px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .pager{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .pg{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-width: 34px; height: 34px;
+    padding: 0 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.75);
+    text-decoration:none;
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(2,6,23,.85);
+  }
+  .pg:hover{ background: rgba(248,250,252,.95); }
+  .pg.on{
+    background: rgba(13,110,253,.12);
+    border-color: rgba(13,110,253,.30);
+    color: #0b5ed7;
+  }
+  .empty{
+    padding: 34px 16px;
+    text-align:center;
+    border: 1px dashed rgba(0,0,0,.12);
+    border-radius: 18px;
+    background: rgba(255,255,255,.70);
+  }
+  .empty .t1{ font-weight: 1000; font-size: 16px; }
+  .empty .t2{ margin-top: 6px; color: rgba(15,23,42,.65); font-size: 13px; }
+
+  @media (max-width: 768px){
+    .pay-head{ flex-direction: column; align-items: stretch; }
+    .pay-actions{ justify-content: space-between; }
+    .pay-search{ width: 100%; min-width: 0; }
+    .pay-table{ min-width: 760px; }
+  }
+</style>

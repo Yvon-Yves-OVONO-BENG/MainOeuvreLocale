@@ -1,0 +1,1647 @@
+{% extends 'base.html.twig' %}
+{% block title %}Super Admin — Cloud Console{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% include "tableau_de_bord_super_administrateur/_vip_ui.html.twig" %}
+
+{% set envLabel = environment|default('PROD') %}
+{% set ops = ops|default({
+  'uptime': 99.98,
+  'latency': 182,
+  'errorRate': 0.24,
+  'cpu': 46,
+  'ram': 63,
+  'storage': 71,
+  'queueDepth': 148,
+  'cronSuccess': 98,
+  'backupStatus': 'OK',
+  'securityScore': 91,
+  'openIncidents': 2,
+  'deploymentsToday': 6,
+  'apiCallsToday': 128420,
+  'failedPayments': 3,
+  'activeSubscriptions': 184,
+  'mrr': 2450000,
+  'gmv': 18600000
+}) %}
+
+{% set alertsData = alerts|default([
+  {'level':'critical','title':'Pic d’échecs paiement', 'meta':'3 transactions refusées en 20 min', 'time':'Il y a 4 min'},
+  {'level':'warning','title':'File emails en hausse', 'meta':'Queue notification > 120 jobs', 'time':'Il y a 11 min'},
+  {'level':'info','title':'Nouvelle demande KYC', 'meta':'7 entreprises à valider', 'time':'Il y a 19 min'}
+]) %}
+
+{% set supportTickets = supportTickets|default([
+  {'id':'TCK-2419','subject':'Compte bloqué après paiement', 'priority':'Haute', 'status':'Ouvert'},
+  {'id':'TCK-2418','subject':'Entreprise non validée', 'priority':'Moyenne', 'status':'En cours'},
+  {'id':'TCK-2417','subject':'Erreur publication offre', 'priority':'Basse', 'status':'Nouveau'}
+]) %}
+
+{% set serviceStatus = serviceStatus|default([
+  {'name':'API Gateway','status':'online','latency':'84ms','uptime':'99.99%'},
+  {'name':'Auth / Login','status':'online','latency':'68ms','uptime':'99.98%'},
+  {'name':'Jobs Engine','status':'degraded','latency':'221ms','uptime':'99.71%'},
+  {'name':'Payments','status':'online','latency':'143ms','uptime':'99.95%'},
+  {'name':'Mail Queue','status':'warning','latency':'312ms','uptime':'99.61%'},
+  {'name':'Storage','status':'online','latency':'37ms','uptime':'99.99%'}
+]) %}
+
+{% set recentAuditLogs = recentAuditLogs|default([
+  {'actor':'superadmin@main.local','action':'Modification rôles staff','target':'Admin #14','createdAt': null},
+  {'actor':'system','action':'Backup full snapshot terminé','target':'cluster-prod-01','createdAt': null},
+  {'actor':'moderator@main.local','action':'Signalement traité','target':'Report #888','createdAt': null},
+  {'actor':'billing@main.local','action':'Abonnement activé','target':'Company #120','createdAt': null}
+]) %}
+
+{% set pendingKyc = pendingKyc|default([
+  {'companyName':'BTP Horizon','city':'Douala','risk':'Moyen'},
+  {'companyName':'Nova Services','city':'Yaoundé','risk':'Faible'},
+  {'companyName':'Kamer RH','city':'Bafoussam','risk':'Élevé'}
+]) %}
+
+{% set failedPayments = failedPayments|default([
+  {'ref':'PAY-10021','amount':25000,'method':'Mobile Money','reason':'Solde insuffisant'},
+  {'ref':'PAY-10020','amount':15000,'method':'Carte','reason':'3DS refusé'},
+  {'ref':'PAY-10019','amount':5000,'method':'Orange Money','reason':'Timeout PSP'}
+]) %}
+
+{% set payoutQueue = payoutQueue|default([
+  {'beneficiary':'Talent #441','amount':18000,'status':'À valider'},
+  {'beneficiary':'Talent #338','amount':24000,'status':'En attente'},
+  {'beneficiary':'Talent #114','amount':32000,'status':'Prêt'}
+]) %}
+
+{% set plansData = plansData|default([
+  {'name':'Starter','count':64,'mrr':320000},
+  {'name':'Pro','count':81,'mrr':1215000},
+  {'name':'Business','count':29,'mrr':725000},
+  {'name':'Enterprise','count':10,'mrr':190000}
+]) %}
+
+{% set backupsData = backupsData|default([
+  {'name':'Daily snapshot','target':'db-prod','status':'Success','date':'Aujourd’hui 02:10'},
+  {'name':'Assets backup','target':'object-storage','status':'Success','date':'Aujourd’hui 01:35'},
+  {'name':'Logs archive','target':'cold-storage','status':'Running','date':'Aujourd’hui 00:45'}
+]) %}
+
+
+<div class="sa-shell sa-grid-bg">
+  <div class="sa-orb bg-indigo-500/50 w-[340px] h-[340px] -top-24 -left-16"></div>
+  <div class="sa-orb bg-cyan-400/40 w-[280px] h-[280px] top-32 right-0"></div>
+  <div class="sa-orb bg-emerald-400/30 w-[280px] h-[280px] bottom-0 left-1/3"></div>
+
+  <div id="saSidebarBackdrop" class="sa-sidebar-backdrop"></div>
+
+  <div class="flex min-h-screen">
+    {# ========================= SIDEBAR ========================= #}
+    <aside id="saSidebar" class="hidden lg:flex lg:w-80 p-5">
+      <div class="sa-glass rounded-[2rem] w-full p-4 sa-border-gradient">
+        <div class="flex items-center gap-3">
+          <div class="h-12 w-12 rounded-2xl grid place-items-center text-white text-xl"
+               style="background:linear-gradient(135deg, var(--sa-indigo), var(--sa-cyan)); box-shadow:0 16px 40px rgba(109,124,255,.30);">
+            👑
+          </div>
+          <div>
+            <div class="font-bold text-lg">Main d’Œuvre Locale</div>
+            <div class="text-xs text-slate-300">Super Admin • Cloud Console</div>
+          </div>
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <div class="sa-card-soft rounded-2xl p-3">
+            <div class="text-[11px] text-slate-400 uppercase tracking-wider">Environnement</div>
+            <div class="mt-1 font-semibold">{{ envLabel }}</div>
+          </div>
+          <div class="sa-card-soft rounded-2xl p-3">
+            <div class="text-[11px] text-slate-400 uppercase tracking-wider">Uptime</div>
+            <div class="mt-1 font-semibold">{{ ops.uptime }}%</div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <span class="sa-pill">🟢 Système stable</span>
+          <span class="sa-pill">🛡️ Sécurité active</span>
+          <span class="sa-pill">💳 {{ ops.failedPayments ?? 0 }} échecs paiement</span>
+        </div>
+
+        <div class="mt-6">
+          <div class="text-[11px] uppercase tracking-[0.22em] text-slate-400 mb-2 px-1">Pilotage</div>
+          <nav class="space-y-2">
+            <a href="{{ path('tableau_de_bord_super_administrateur') }}" class="sa-sidebar-link sa-active" data-search-item="dashboard synthèse console overview cockpit">
+              <span class="sa-icon">📊</span>
+              <span class="flex-1">
+                <div class="font-semibold">Accueil</div>
+                <div class="text-xs text-slate-400">Vue 360° & orchestration</div>
+              </span>
+            </a>
+
+            <a href="{{ path('admin_users_index') }}" class="sa-sidebar-link" data-search-item="utilisateurs users comptes profils">
+              <span class="sa-icon">👥</span>
+              <span class="flex-1">
+                <div class="font-semibold">Utilisateurs</div>
+                <div class="text-xs text-slate-400">Tous comptes & activité</div>
+              </span>
+              <span class="text-xs text-slate-400">{{ kpi.totalUsers ?? 0 }}</span>
+            </a>
+
+            <a href="{{ path('admin_companies_index') }}" class="sa-sidebar-link" data-search-item="entreprises companies conformité kyc b2b">
+              <span class="sa-icon">🏢</span>
+              <span class="flex-1">
+                <div class="font-semibold">Entreprises</div>
+                <div class="text-xs text-slate-400">KYC, conformité, qualité</div>
+              </span>
+              <span class="text-xs text-slate-400">{{ kpi.totalCompanies ?? 0 }}</span>
+            </a>
+
+            <a href="{{ path('admin_individuals_index') }}" class="sa-sidebar-link" data-search-item="talents profils compétences">
+              <span class="sa-icon">🧑‍💼</span>
+              <span class="flex-1">
+                <div class="font-semibold">Particuliers</div>
+                <div class="text-xs text-slate-400">Qualité & employabilité</div>
+              </span>
+              <span class="text-xs text-slate-400">{{ kpi.totalTalents ?? 0 }}</span>
+            </a>
+
+            <a href="{{ path('admin_talents_index') }}" class="sa-sidebar-link" data-search-item="talents profils compétences">
+              <span class="sa-icon">🧑‍💼</span>
+              <span class="flex-1">
+                <div class="font-semibold">Talents</div>
+                <div class="text-xs text-slate-400">Qualité & employabilité</div>
+              </span>
+              <span class="text-xs text-slate-400">{{ kpi.totalTalents ?? 0 }}</span>
+            </a>
+
+            <a href="{{ path('admin_jobs_index') }}" class="sa-sidebar-link" data-search-item="offres jobs recrutements matching">
+              <span class="sa-icon">📄</span>
+              <span class="flex-1">
+                <div class="font-semibold">Offres & matching</div>
+                <div class="text-xs text-slate-400">Publications, taux de succès</div>
+              </span>
+              <span class="text-xs text-slate-400">{{ kpi.totalJobs ?? 0 }}</span>
+            </a>
+
+            <a href="{{ path('admin_annonces_moderation') }}" class="sa-sidebar-link" data-search-item="annonces moderation publications services" data-turbo="false">
+              <span class="sa-icon">📢</span>
+              <span class="flex-1">
+                <div class="font-semibold">Modération annonces</div>
+                <div class="text-xs text-slate-400">Validation avant publication</div>
+              </span>
+              <span class="text-xs text-amber-300">À valider</span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="mt-6">
+          <div class="text-[11px] uppercase tracking-[0.22em] text-slate-400 mb-2 px-1">Gouvernance</div>
+          <nav class="space-y-2">
+            <a href="/super-admin/moderation" class="sa-sidebar-link" data-search-item="modération signalements sécurité fraude">
+              <span class="sa-icon">🛡️</span>
+              <span class="flex-1">
+                <div class="font-semibold">Trust & Safety</div>
+                <div class="text-xs text-slate-400">Fraude, abus, identité</div>
+              </span>
+            </a>
+
+            <a href="/super-admin/billing" class="sa-sidebar-link" data-search-item="billing finance paiement abonnement revenus">
+              <span class="sa-icon">💳</span>
+              <span class="flex-1">
+                <div class="font-semibold">Billing & revenus</div>
+                <div class="text-xs text-slate-400">MRR, plans, facturation</div>
+              </span>
+            </a>
+
+            <a href="/super-admin/payouts" class="sa-sidebar-link" data-search-item="payouts reversements wallet retraits">
+              <span class="sa-icon">💸</span>
+              <span class="flex-1">
+                <div class="font-semibold">Payouts</div>
+                <div class="text-xs text-slate-400">Reversements & file d’attente</div>
+              </span>
+            </a>
+
+            <a href="/super-admin/audit" class="sa-sidebar-link" data-search-item="audit logs conformité traçabilité">
+              <span class="sa-icon">🧾</span>
+              <span class="flex-1">
+                <div class="font-semibold">Audit & logs</div>
+                <div class="text-xs text-slate-400">Traçabilité des actions</div>
+              </span>
+            </a>
+
+            <a href="/super-admin/roles" class="sa-sidebar-link" data-search-item="rôles permissions accès staff">
+              <span class="sa-icon">🔐</span>
+              <span class="flex-1">
+                <div class="font-semibold">Rôles & permissions</div>
+                <div class="text-xs text-slate-400">RBAC & accès sensibles</div>
+              </span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="mt-6">
+          <div class="text-[11px] uppercase tracking-[0.22em] text-slate-400 mb-2 px-1">Cloud & opérations</div>
+          <nav class="space-y-2">
+            <a href="/super-admin/infra" class="sa-sidebar-link" data-search-item="infra cloud serveurs api queues ops">
+              <span class="sa-icon">☁️</span>
+              <span class="flex-1">
+                <div class="font-semibold">Infra & observabilité</div>
+                <div class="text-xs text-slate-400">Latence, erreurs, capacité</div>
+              </span>
+            </a>
+
+            <a href="/super-admin/backups" class="sa-sidebar-link" data-search-item="backups sauvegarde snapshots disaster recovery">
+              <span class="sa-icon">🗄️</span>
+              <span class="flex-1">
+                <div class="font-semibold">Backups</div>
+                <div class="text-xs text-slate-400">Snapshots & restauration</div>
+              </span>
+            </a>
+
+            <a href="/super-admin/feature-flags" class="sa-sidebar-link" data-search-item="feature flags déploiement expérimentation">
+              <span class="sa-icon">🚩</span>
+              <span class="flex-1">
+                <div class="font-semibold">Feature Flags</div>
+                <div class="text-xs text-slate-400">Rollouts & tests contrôlés</div>
+              </span>
+            </a>
+
+            <a href="/super-admin/support" class="sa-sidebar-link" data-search-item="support tickets assistance client">
+              <span class="sa-icon">🎧</span>
+              <span class="flex-1">
+                <div class="font-semibold">Support</div>
+                <div class="text-xs text-slate-400">Tickets & SLA</div>
+              </span>
+            </a>
+          </nav>
+        </div>
+
+        <div class="sa-divider my-5"></div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" class="sa-btn sa-btn-primary text-sm" data-sa-action="Maintenance mode">
+            ⚙️ Maintenance
+          </button>
+          <button type="button" class="sa-btn sa-btn-secondary text-sm" data-sa-action="Nouvelle sauvegarde">
+            💾 Backup
+          </button>
+          <button type="button" class="sa-btn sa-btn-secondary text-sm" data-sa-action="Purger le cache">
+            🧹 Cache
+          </button>
+          <button type="button" class="sa-btn sa-btn-danger text-sm" data-sa-action="Stopper les payouts">
+            ⛔ Payouts
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    {# MOBILE SIDEBAR #}
+    <aside id="saSidebarMobile" class="sa-mobile-sidebar lg:hidden p-4">
+      <div class="sa-glass rounded-[2rem] h-full overflow-y-auto sa-scroll p-4">
+        <div class="flex items-center justify-between">
+          <div class="font-bold text-lg">Menu console</div>
+          <button type="button" id="saCloseSidebar" class="sa-btn sa-btn-secondary text-sm px-3 py-2">✕</button>
+        </div>
+
+        <div class="mt-4 space-y-2">
+          <a href="{{ path('tableau_de_bord_super_administrateur') }}" class="sa-sidebar-link sa-active"><span class="sa-icon">📊</span><span>Dashboard</span></a>
+          <a href="/super-admin/users" class="sa-sidebar-link"><span class="sa-icon">👥</span><span>Utilisateurs</span></a>
+          <a href="/super-admin/companies" class="sa-sidebar-link"><span class="sa-icon">🏢</span><span>Entreprises</span></a>
+          <a href="/super-admin/talents" class="sa-sidebar-link"><span class="sa-icon">🧑‍💼</span><span>Talents</span></a>
+          <a href="/super-admin/jobs" class="sa-sidebar-link"><span class="sa-icon">📄</span><span>Offres</span></a>
+          <a href="{{ path('admin_annonces_moderation') }}" class="sa-sidebar-link" data-turbo="false"><span class="sa-icon">📢</span><span>Annonces</span></a>
+          <a href="/super-admin/moderation" class="sa-sidebar-link"><span class="sa-icon">🛡️</span><span>Trust & Safety</span></a>
+          <a href="/super-admin/billing" class="sa-sidebar-link"><span class="sa-icon">💳</span><span>Billing</span></a>
+          <a href="/super-admin/infra" class="sa-sidebar-link"><span class="sa-icon">☁️</span><span>Infra</span></a>
+          <a href="/super-admin/backups" class="sa-sidebar-link"><span class="sa-icon">🗄️</span><span>Backups</span></a>
+          <a href="/super-admin/audit" class="sa-sidebar-link"><span class="sa-icon">🧾</span><span>Audit</span></a>
+        </div>
+      </div>
+    </aside>
+
+    {# ========================= MAIN ========================= #}
+    <main class="flex-1 p-4 md:p-6 lg:p-7">
+      {# TOPBAR #}
+      <section class="sa-glass rounded-[2rem] p-4 md:p-5 sa-border-gradient">
+        <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+          <div class="flex items-start gap-3">
+            <button type="button" id="saOpenSidebar" class="lg:hidden sa-btn sa-btn-secondary px-3 py-2">☰</button>
+
+            <div class="h-12 w-12 rounded-2xl grid place-items-center text-xl text-white"
+                 style="background:linear-gradient(135deg, rgba(109,124,255,.95), rgba(38,198,255,.88)); box-shadow:0 16px 40px rgba(109,124,255,.28);">
+              ☁️
+            </div>
+
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">Super Admin Cloud Console</h1>
+                <span class="sa-chip">ENV {{ envLabel }}</span>
+                <span class="sa-chip">API {{ ops.latency }}ms</span>
+                <span class="sa-chip">Uptime {{ ops.uptime }}%</span>
+              </div>
+              <div class="mt-1 text-sm text-slate-300">
+                Gouvernance • Sécurité • Billing • Trust & Safety • Infra • Observabilité
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col lg:flex-row gap-3 lg:items-center">
+            <div class="relative">
+              <input id="saGlobalSearch"
+                     type="text"
+                     class="sa-search w-full lg:w-[360px] rounded-2xl pl-11 pr-4 py-3 text-sm outline-none"
+                     placeholder="Rechercher : user, entreprise, payout, incident, API, audit...">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">⌕</span>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button type="button" id="saOpenCommand" class="sa-btn sa-btn-secondary">
+                ⌘K Commandes
+              </button>
+              <a href="{{ path('tableau_de_bord_super_administrateur') }}" class="sa-btn sa-btn-secondary">
+                ↻ Rafraîchir
+              </a>
+              <a href="/super-admin/export" class="sa-btn sa-btn-secondary">
+                ⤓ Export
+              </a>
+              <button type="button" class="sa-btn sa-btn-primary" data-sa-action="Bridge vers centre de contrôle">
+                🚀 Action rapide
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <span class="sa-pill">👥 {{ kpi.totalUsers ?? 0 }} utilisateurs</span>
+          <span class="sa-pill">🧑‍💼 {{ kpi.totalTalents ?? 0 }} talents</span>
+          <span class="sa-pill">🏢 {{ kpi.totalCompanies ?? 0 }} entreprises</span>
+          <span class="sa-pill">📄 {{ kpi.totalJobs ?? 0 }} offres</span>
+          <span class="sa-pill">🚨 {{ kpi.activeReports ?? 0 }} signalements</span>
+          <span class="sa-pill">💰 {{ ops.mrr|number_format(0, '.', ' ') }} XAF MRR</span>
+          <span class="sa-pill">🕒 <span id="saLiveClock">--:--:--</span></span>
+        </div>
+      </section>
+
+      {# HERO KPI #}
+      <section class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-8 gap-3">
+        <div class="sa-card sa-kpi" data-search-item="utilisateurs users comptes croissance">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">Utilisateurs</div>
+              <div class="mt-2 text-3xl font-extrabold" data-count="{{ kpi.totalUsers ?? 0 }}">{{ kpi.totalUsers ?? 0 }}</div>
+              <div class="mt-2 text-xs text-emerald-300">+12.4% ce mois</div>
+            </div>
+            <div class="sa-icon">👥</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:72%; background:linear-gradient(90deg, var(--sa-cyan), var(--sa-indigo));"></span></div>
+        </div>
+
+        <div class="sa-card sa-kpi" data-search-item="revenus billing mrr abonnement saas">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">MRR</div>
+              <div class="mt-2 text-3xl font-extrabold" data-count="{{ ops.mrr ?? 0 }}">{{ (ops.mrr ?? 0)|number_format(0, '.', ' ') }}</div>
+              <div class="mt-2 text-xs text-emerald-300">+8.1% vs période précédente</div>
+            </div>
+            <div class="sa-icon">💰</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:81%; background:linear-gradient(90deg, var(--sa-violet), var(--sa-indigo));"></span></div>
+        </div>
+
+        <div class="sa-card sa-kpi" data-search-item="gmv volume business transactions">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">GMV</div>
+              <div class="mt-2 text-3xl font-extrabold">{{ (ops.gmv ?? 0)|number_format(0, '.', ' ') }}</div>
+              <div class="mt-2 text-xs text-slate-300">Volume total transactions</div>
+            </div>
+            <div class="sa-icon">🏦</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:64%; background:linear-gradient(90deg, var(--sa-emerald), var(--sa-cyan));"></span></div>
+        </div>
+
+        <div class="sa-card sa-kpi" data-search-item="jobs matching recrutements">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">Offres</div>
+              <div class="mt-2 text-3xl font-extrabold">{{ kpi.totalJobs ?? 0 }}</div>
+              <div class="mt-2 text-xs text-slate-300">Pipeline de recrutement</div>
+            </div>
+            <div class="sa-icon">📄</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:58%; background:linear-gradient(90deg, var(--sa-amber), var(--sa-rose));"></span></div>
+        </div>
+
+        <div class="sa-card sa-kpi" data-search-item="uptime disponibilité observabilité">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">Uptime</div>
+              <div class="mt-2 text-3xl font-extrabold">{{ ops.uptime }}%</div>
+              <div class="mt-2 text-xs text-emerald-300">SLA plateforme stable</div>
+            </div>
+            <div class="sa-icon">🟢</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:96%; background:linear-gradient(90deg, var(--sa-emerald), #7effc3);"></span></div>
+        </div>
+
+        <div class="sa-card sa-kpi" data-search-item="api latence performance cloud">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">API latency</div>
+              <div class="mt-2 text-3xl font-extrabold">{{ ops.latency }}ms</div>
+              <div class="mt-2 text-xs text-slate-300">Temps de réponse moyen</div>
+            </div>
+            <div class="sa-icon">⚡</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:49%; background:linear-gradient(90deg, var(--sa-cyan), #7de6ff);"></span></div>
+        </div>
+
+        <div class="sa-card sa-kpi" data-search-item="incidents sécurité reports">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">Incidents ouverts</div>
+              <div class="mt-2 text-3xl font-extrabold">{{ ops.openIncidents ?? 0 }}</div>
+              <div class="mt-2 text-xs text-rose-300">À surveiller immédiatement</div>
+            </div>
+            <div class="sa-icon">🚨</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:22%; background:linear-gradient(90deg, var(--sa-rose), var(--sa-red));"></span></div>
+        </div>
+
+        <div class="sa-card sa-kpi" data-search-item="abonnements actifs saas plans billing">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-xs uppercase tracking-wider text-slate-400">Abonnés actifs</div>
+              <div class="mt-2 text-3xl font-extrabold">{{ ops.activeSubscriptions ?? 0 }}</div>
+              <div class="mt-2 text-xs text-slate-300">Plans payants en cours</div>
+            </div>
+            <div class="sa-icon">📦</div>
+          </div>
+          <div class="mt-4 sa-kpi-line"><span style="width:74%; background:linear-gradient(90deg, var(--sa-violet), var(--sa-cyan));"></span></div>
+        </div>
+      </section>
+
+      {# COMMAND / ALERT / SCORE #}
+      <section class="mt-5 grid grid-cols-1 xl:grid-cols-12 gap-3">
+        <div class="sa-glass rounded-[1.75rem] p-4 xl:col-span-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold text-lg">Security posture</div>
+              <div class="text-sm text-slate-300">Niveau global de confiance plateforme</div>
+            </div>
+            <span class="sa-chip">Live</span>
+          </div>
+
+          <div class="mt-5 flex flex-col md:flex-row items-center gap-5">
+            <div class="sa-ring" style="--score: {{ ops.securityScore ?? 91 }}">
+              <div class="relative z-10 text-center">
+                <div class="text-3xl font-extrabold">{{ ops.securityScore ?? 91 }}</div>
+                <div class="text-xs text-slate-400">/100</div>
+              </div>
+            </div>
+
+            <div class="flex-1 w-full space-y-3">
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-slate-300">2FA staff</span>
+                  <b>93%</b>
+                </div>
+                <div class="sa-mini-progress"><span style="width:93%"></span></div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-slate-300">KYC entreprises</span>
+                  <b>79%</b>
+                </div>
+                <div class="sa-mini-progress"><span style="width:79%"></span></div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-slate-300">Audit coverage</span>
+                  <b>98%</b>
+                </div>
+                <div class="sa-mini-progress"><span style="width:98%"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sa-glass rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="actions rapides maintenance cloud billing moderation">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold text-lg">Control center</div>
+              <div class="text-sm text-slate-300">Actions d’exploitation super admin</div>
+            </div>
+            <span class="sa-chip">Ops</span>
+          </div>
+
+          <div class="mt-4 grid grid-cols-2 gap-2">
+            <button type="button" class="sa-btn sa-btn-secondary" data-sa-action="Valider entreprises KYC">✅ Valider KYC</button>
+            <button type="button" class="sa-btn sa-btn-secondary" data-sa-action="Réindexer moteur de recherche">🔎 Réindexer</button>
+            <button type="button" class="sa-btn sa-btn-secondary" data-sa-action="Redémarrer queue notifications">📨 Restart queue</button>
+            <button type="button" class="sa-btn sa-btn-secondary" data-sa-action="Relancer webhooks">🪝 Webhooks</button>
+            <button type="button" class="sa-btn sa-btn-secondary" data-sa-action="Générer rapport d’audit">🧾 Audit report</button>
+            <button type="button" class="sa-btn sa-btn-danger" data-sa-action="Basculer en maintenance">⛔ Maintenance</button>
+          </div>
+
+          <div class="mt-4 grid grid-cols-3 gap-2">
+            <div class="sa-card-soft rounded-2xl p-3">
+              <div class="text-xs text-slate-400">Deploys</div>
+              <div class="mt-1 font-bold">{{ ops.deploymentsToday ?? 0 }}</div>
+            </div>
+            <div class="sa-card-soft rounded-2xl p-3">
+              <div class="text-xs text-slate-400">API calls</div>
+              <div class="mt-1 font-bold">{{ ops.apiCallsToday|number_format(0, '.', ' ') }}</div>
+            </div>
+            <div class="sa-card-soft rounded-2xl p-3">
+              <div class="text-xs text-slate-400">Queue depth</div>
+              <div class="mt-1 font-bold">{{ ops.queueDepth ?? 0 }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sa-glass rounded-[1.75rem] p-4 xl:col-span-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="font-bold text-lg">Alertes intelligentes</div>
+              <div class="text-sm text-slate-300">Ce qui nécessite une attention immédiate</div>
+            </div>
+            <a href="/super-admin/incidents" class="sa-chip">Voir tout</a>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            {% for a in alertsData %}
+              <div class="sa-alert
+                {% if a.level == 'critical' %}sa-alert-critical{% elseif a.level == 'warning' %}sa-alert-warning{% else %}sa-alert-info{% endif %}">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="font-semibold">{{ a.title }}</div>
+                    <div class="text-sm text-slate-300 mt-1">{{ a.meta }}</div>
+                  </div>
+                  <span class="text-[11px] text-slate-300 whitespace-nowrap">{{ a.time }}</span>
+                </div>
+              </div>
+            {% else %}
+              <div class="text-sm text-slate-400">Aucune alerte.</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      {# TABS #}
+      <section class="mt-5">
+        <div class="flex flex-wrap gap-2">
+          <button type="button" class="sa-tab-btn active" data-tab-btn="overview">📊 Overview</button>
+          <button type="button" class="sa-tab-btn" data-tab-btn="security">🛡️ Security</button>
+          <button type="button" class="sa-tab-btn" data-tab-btn="finance">💳 Finance</button>
+          <button type="button" class="sa-tab-btn" data-tab-btn="ops">☁️ Cloud & Ops</button>
+        </div>
+      </section>
+
+      {# ========================= OVERVIEW TAB ========================= #}
+      <section class="mt-5 sa-tab-panel active" data-tab-panel="overview">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-7" data-search-item="inscriptions croissance acquisition">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Croissance & inscriptions</div>
+                <div class="text-sm text-slate-300">Acquisition, activation et tendance mensuelle</div>
+              </div>
+              <div class="flex gap-2">
+                <span class="sa-chip">30j</span>
+                <span class="sa-chip">90j</span>
+                <span class="sa-chip">12m</span>
+              </div>
+            </div>
+            <div class="mt-4">
+              <canvas id="chartSignups" height="110"></canvas>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="répartition utilisateurs company talent particulier staff">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Répartition utilisateurs</div>
+                <div class="text-sm text-slate-300">Company • Talent • Particulier • Staff</div>
+              </div>
+              <a href="/super-admin/users" class="sa-chip">Détails</a>
+            </div>
+
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+              <canvas id="chartUsersSplit" height="190"></canvas>
+
+              <div class="space-y-3">
+                <div class="flex justify-between text-sm"><span class="text-slate-300">Company</span><b>{{ charts.usersSplit.company ?? 0 }}</b></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-300">Talent</span><b>{{ charts.usersSplit.talent ?? 0 }}</b></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-300">Particulier</span><b>{{ charts.usersSplit.particulier ?? 0 }}</b></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-300">Staff</span><b>{{ charts.usersSplit.staff ?? 0 }}</b></div>
+
+                <div class="pt-2 grid grid-cols-2 gap-2">
+                  <div class="sa-card-soft rounded-2xl p-3">
+                    <div class="text-xs text-slate-400">Activation</div>
+                    <div class="mt-1 font-bold">68%</div>
+                  </div>
+                  <div class="sa-card-soft rounded-2xl p-3">
+                    <div class="text-xs text-slate-400">Retention</div>
+                    <div class="mt-1 font-bold">54%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="offres recrutements performance matching">
+            <div class="font-bold text-lg">Offres vs recrutements</div>
+            <div class="text-sm text-slate-300">Capacité à convertir la demande en placement</div>
+            <div class="mt-4">
+              <canvas id="chartJobs" height="170"></canvas>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="modération reports abus fraude">
+            <div class="font-bold text-lg">Trust & Safety</div>
+            <div class="text-sm text-slate-300">Typologie des signalements actifs</div>
+            <div class="mt-4">
+              <canvas id="chartModeration" height="170"></canvas>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="zones villes régions heatmap activité">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Top zones</div>
+                <div class="text-sm text-slate-300">Régions / villes les plus actives</div>
+              </div>
+              <a href="/super-admin/analytics/geo" class="sa-chip">Explorer</a>
+            </div>
+
+            <div class="mt-4 overflow-x-auto sa-scroll">
+              <table class="w-full sa-table text-sm">
+                <thead>
+                  <tr>
+                    <th class="text-left">Zone</th>
+                    <th class="text-left">Users</th>
+                    <th class="text-left">Offres</th>
+                    <th class="text-left">Reports</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for z in charts.topZones|default([]) %}
+                    <tr data-search-item="zone {{ z.name }}">
+                      <td>{{ z.name }}</td>
+                      <td>{{ z.users }}</td>
+                      <td>{{ z.jobs }}</td>
+                      <td><span class="sa-chip">{{ z.reports }}</span></td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="4" class="text-slate-400 py-4">Aucune donnée zones</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 grid grid-cols-1 xl:grid-cols-12 gap-3">
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="derniers comptes nouveaux utilisateurs">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Derniers comptes créés</div>
+                <div class="text-sm text-slate-300">Inspection rapide & actions</div>
+              </div>
+              <a href="/super-admin/users" class="sa-chip">Voir tout</a>
+            </div>
+
+            <div class="mt-4 overflow-x-auto sa-scroll">
+              <table class="w-full sa-table text-sm">
+                <thead>
+                  <tr>
+                    <th class="text-left">Email</th>
+                    <th class="text-left">Créé</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for u in latestUsers|default([]) %}
+                    <tr data-search-item="user {{ u.email }}">
+                      <td>{{ u.email }}</td>
+                      <td>{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '-' }}</td>
+                      <td class="text-right">
+                        <div class="inline-flex gap-2">
+                          <a href="/super-admin/users/{{ u.id }}" class="sa-chip">Inspecter</a>
+                          <button type="button" class="sa-chip" data-sa-action="Bloquer user #{{ u.id }}">Bloquer</button>
+                        </div>
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="3" class="text-slate-400 py-4">Aucun compte récent</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="entreprises kyc pending attente validation">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Entreprises à valider</div>
+                <div class="text-sm text-slate-300">Conformité & onboarding business</div>
+              </div>
+              <a href="/super-admin/companies/pending" class="sa-chip">Valider</a>
+            </div>
+
+            <div class="mt-4 overflow-x-auto sa-scroll">
+              <table class="w-full sa-table text-sm">
+                <thead>
+                  <tr>
+                    <th class="text-left">Entreprise</th>
+                    <th class="text-left">Ville</th>
+                    <th class="text-left">Risque</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for c in pendingCompanies|default([]) %}
+                    <tr data-search-item="entreprise {{ c.companyName }} {{ c.city }}">
+                      <td>{{ c.companyName }}</td>
+                      <td>{{ c.city }}</td>
+                      <td><span class="sa-chip">Pending</span></td>
+                    </tr>
+                  {% else %}
+                    {% for c in pendingKyc %}
+                      <tr data-search-item="entreprise {{ c.companyName }} {{ c.city }}">
+                        <td>{{ c.companyName }}</td>
+                        <td>{{ c.city }}</td>
+                        <td>
+                          <span class="sa-chip
+                            {% if c.risk == 'Élevé' %}sa-risk-high{% elseif c.risk == 'Moyen' %}sa-risk-medium{% else %}sa-risk-low{% endif %}">
+                            {{ c.risk }}
+                          </span>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-3" data-search-item="support tickets sla aide clients">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Support & SLA</div>
+                <div class="text-sm text-slate-300">File de tickets priorisés</div>
+              </div>
+              <a href="/super-admin/support" class="sa-chip">Support</a>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              {% for t in supportTickets %}
+                <div class="sa-card-soft rounded-2xl p-3" data-search-item="ticket {{ t.id }} {{ t.subject }}">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="font-semibold">{{ t.id }}</div>
+                      <div class="text-sm text-slate-300 mt-1">{{ t.subject }}</div>
+                    </div>
+                    <span class="sa-chip">{{ t.priority }}</span>
+                  </div>
+                  <div class="mt-2 text-xs text-slate-400">Statut : {{ t.status }}</div>
+                </div>
+              {% else %}
+                <div class="text-sm text-slate-400">Aucun ticket.</div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# ========================= SECURITY TAB ========================= #}
+      <section class="mt-5 sa-tab-panel" data-tab-panel="security">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="sécurité modération signalements fraude">
+            <div class="font-bold text-lg">Matrice de modération</div>
+            <div class="text-sm text-slate-300">Spam, abus, fraude, identité, autres</div>
+            <div class="mt-4">
+              <canvas id="chartModerationSecurity" height="220"></canvas>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="événements sécurité login otp ip access">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Événements sécurité</div>
+                <div class="text-sm text-slate-300">Anomalies récentes</div>
+              </div>
+              <span class="sa-chip">Live</span>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              <div class="sa-alert sa-alert-warning">
+                <div class="font-semibold">Tentatives de login multiples</div>
+                <div class="text-sm text-slate-300 mt-1">8 essais échoués sur 2 comptes staff.</div>
+              </div>
+              <div class="sa-alert sa-alert-info">
+                <div class="font-semibold">Webhook paiement retardé</div>
+                <div class="text-sm text-slate-300 mt-1">Latence PSP > seuil de 2 min.</div>
+              </div>
+              <div class="sa-alert sa-alert-critical">
+                <div class="font-semibold">Suspicion de double compte</div>
+                <div class="text-sm text-slate-300 mt-1">IP / device fingerprint similaire sur 3 profils.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-3" data-search-item="compliance conformité 2fa audit kyc">
+            <div class="font-bold text-lg">Conformité</div>
+            <div class="text-sm text-slate-300">Check-list de gouvernance</div>
+
+            <div class="mt-4 space-y-3">
+              <div class="flex items-center justify-between"><span class="text-slate-300">2FA staff</span><span class="sa-chip">93%</span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-300">KYC entreprises</span><span class="sa-chip">79%</span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-300">Logs sensibles</span><span class="sa-chip">98%</span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-300">Webhooks signés</span><span class="sa-chip">100%</span></div>
+              <div class="flex items-center justify-between"><span class="text-slate-300">Backups encryptés</span><span class="sa-chip">Oui</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-3 grid grid-cols-1 xl:grid-cols-12 gap-3">
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="audit logs historique traçabilité actions">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Audit trail</div>
+                <div class="text-sm text-slate-300">Historique des actions sensibles</div>
+              </div>
+              <a href="/super-admin/audit" class="sa-chip">Audit</a>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              {% for log in recentAuditLogs %}
+                <div class="sa-card-soft rounded-2xl p-3" data-search-item="audit {{ log.actor }} {{ log.action }} {{ log.target }}">
+                  <div class="font-semibold">{{ log.action }}</div>
+                  <div class="text-sm text-slate-300 mt-1">{{ log.actor }} → {{ log.target }}</div>
+                  <div class="text-xs text-slate-400 mt-1">
+                    {{ log.createdAt ? log.createdAt|date('d/m/Y H:i') : 'Récemment' }}
+                  </div>
+                </div>
+              {% else %}
+                <div class="text-sm text-slate-400">Aucun log récent.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="kyc review entreprise validation identité">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Queue KYC / conformité</div>
+                <div class="text-sm text-slate-300">Vérifications prioritaires</div>
+              </div>
+              <a href="/super-admin/companies/pending" class="sa-chip">Ouvrir</a>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              {% for c in pendingKyc %}
+                <div class="sa-card-soft rounded-2xl p-3" data-search-item="kyc {{ c.companyName }} {{ c.city }}">
+                  <div class="flex items-center justify-between gap-3">
+                    <div>
+                      <div class="font-semibold">{{ c.companyName }}</div>
+                      <div class="text-sm text-slate-300 mt-1">{{ c.city }}</div>
+                    </div>
+                    <span class="sa-chip
+                      {% if c.risk == 'Élevé' %}sa-risk-high{% elseif c.risk == 'Moyen' %}sa-risk-medium{% else %}sa-risk-low{% endif %}">
+                      {{ c.risk }}
+                    </span>
+                  </div>
+                </div>
+              {% else %}
+                <div class="text-sm text-slate-400">Aucune file KYC.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-3" data-search-item="permissions accès staff roles">
+            <div class="font-bold text-lg">Accès sensibles</div>
+            <div class="text-sm text-slate-300">Contrôle d’exposition administrative</div>
+
+            <div class="mt-4 space-y-3">
+              <div class="sa-card-soft rounded-2xl p-3">
+                <div class="text-xs text-slate-400">Super admins</div>
+                <div class="mt-1 font-bold">3</div>
+              </div>
+              <div class="sa-card-soft rounded-2xl p-3">
+                <div class="text-xs text-slate-400">Admins back-office</div>
+                <div class="mt-1 font-bold">9</div>
+              </div>
+              <div class="sa-card-soft rounded-2xl p-3">
+                <div class="text-xs text-slate-400">Modérateurs actifs</div>
+                <div class="mt-1 font-bold">17</div>
+              </div>
+              <button type="button" class="sa-btn sa-btn-secondary w-full mt-1" data-sa-action="Revue des permissions">
+                🔐 Revue permissions
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# ========================= FINANCE TAB ========================= #}
+      <section class="mt-5 sa-tab-panel" data-tab-panel="finance">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-7" data-search-item="revenus mrr arr abonnement billing plans">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Revenus SaaS</div>
+                <div class="text-sm text-slate-300">MRR, upsell, stabilité abonnements</div>
+              </div>
+              <div class="flex gap-2">
+                <span class="sa-chip">MRR</span>
+                <span class="sa-chip">ARR</span>
+              </div>
+            </div>
+            <div class="mt-4">
+              <canvas id="chartRevenue" height="115"></canvas>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="plans abonnements pricing">
+            <div class="font-bold text-lg">Mix des plans</div>
+            <div class="text-sm text-slate-300">Répartition de la base d’abonnés</div>
+
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+              <canvas id="chartPlans" height="200"></canvas>
+
+              <div class="space-y-3">
+                {% for p in plansData %}
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-300">{{ p.name }}</span>
+                    <div class="text-right">
+                      <div class="font-bold">{{ p.count }}</div>
+                      <div class="text-xs text-slate-400">{{ p.mrr|number_format(0, '.', ' ') }} XAF</div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="paiements échoués payments failed">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Paiements échoués</div>
+                <div class="text-sm text-slate-300">À relancer ou investiguer</div>
+              </div>
+              <a href="/super-admin/payments/failures" class="sa-chip">Ouvrir</a>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              {% for p in failedPayments %}
+                <div class="sa-card-soft rounded-2xl p-3" data-search-item="paiement {{ p.ref }} {{ p.method }} {{ p.reason }}">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="font-semibold">{{ p.ref }}</div>
+                      <div class="text-sm text-slate-300 mt-1">{{ p.method }} • {{ p.reason }}</div>
+                    </div>
+                    <span class="sa-chip">{{ p.amount|number_format(0, '.', ' ') }}</span>
+                  </div>
+                </div>
+              {% else %}
+                <div class="text-sm text-slate-400">Aucun paiement échoué.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="payouts reversements wallet">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Queue payouts</div>
+                <div class="text-sm text-slate-300">Reversements à approuver</div>
+              </div>
+              <a href="/super-admin/payouts" class="sa-chip">Payouts</a>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              {% for p in payoutQueue %}
+                <div class="sa-card-soft rounded-2xl p-3" data-search-item="payout {{ p.beneficiary }} {{ p.status }}">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="font-semibold">{{ p.beneficiary }}</div>
+                      <div class="text-sm text-slate-300 mt-1">{{ p.status }}</div>
+                    </div>
+                    <span class="sa-chip">{{ p.amount|number_format(0, '.', ' ') }}</span>
+                  </div>
+                </div>
+              {% else %}
+                <div class="text-sm text-slate-400">Aucun payout en attente.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="factures revenus récents latest payments">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Derniers paiements</div>
+                <div class="text-sm text-slate-300">Traçabilité monétique</div>
+              </div>
+              <a href="/super-admin/payments" class="sa-chip">Voir tout</a>
+            </div>
+
+            <div class="mt-4 overflow-x-auto sa-scroll">
+              <table class="w-full sa-table text-sm">
+                <thead>
+                  <tr>
+                    <th class="text-left">Montant</th>
+                    <th class="text-left">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for p in latestPayments|default([]) %}
+                    <tr data-search-item="paiement {{ p.amount }}">
+                      <td>{{ p.amount is defined ? p.amount|number_format(0, '.', ' ') : '-' }}</td>
+                      <td>{{ p.createdAt is defined and p.createdAt ? p.createdAt|date('d/m/Y H:i') : '-' }}</td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="2" class="text-slate-400 py-4">Aucun paiement récent</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {# ========================= OPS TAB ========================= #}
+      <section class="mt-5 sa-tab-panel" data-tab-panel="ops">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-7" data-search-item="observabilité cloud api latency performance infra">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Santé plateforme</div>
+                <div class="text-sm text-slate-300">Latence, erreurs, disponibilité</div>
+              </div>
+              <span class="sa-chip">Observabilité</span>
+            </div>
+            <div class="mt-4">
+              <canvas id="chartHealth" height="115"></canvas>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="ressources cpu ram storage queues">
+            <div class="font-bold text-lg">Capacité cloud</div>
+            <div class="text-sm text-slate-300">CPU, RAM, storage, cron, queues</div>
+
+            <div class="mt-4 space-y-4">
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-slate-300">CPU</span><b>{{ ops.cpu }}%</b>
+                </div>
+                <div class="sa-mini-progress"><span style="width:{{ ops.cpu }}%"></span></div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-slate-300">RAM</span><b>{{ ops.ram }}%</b>
+                </div>
+                <div class="sa-mini-progress"><span style="width:{{ ops.ram }}%"></span></div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-slate-300">Storage</span><b>{{ ops.storage }}%</b>
+                </div>
+                <div class="sa-mini-progress"><span style="width:{{ ops.storage }}%"></span></div>
+              </div>
+
+              <div>
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="text-slate-300">Cron success</span><b>{{ ops.cronSuccess }}%</b>
+                </div>
+                <div class="sa-mini-progress"><span style="width:{{ ops.cronSuccess }}%"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-6" data-search-item="services microservices api queue auth storage">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Services & micro-modules</div>
+                <div class="text-sm text-slate-300">État temps réel des briques critiques</div>
+              </div>
+              <a href="/super-admin/infra/services" class="sa-chip">Services</a>
+            </div>
+
+            <div class="mt-4 overflow-x-auto sa-scroll">
+              <table class="w-full sa-table text-sm">
+                <thead>
+                  <tr>
+                    <th class="text-left">Service</th>
+                    <th class="text-left">Statut</th>
+                    <th class="text-left">Latence</th>
+                    <th class="text-left">Uptime</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for s in serviceStatus %}
+                    <tr data-search-item="service {{ s.name }} {{ s.status }}">
+                      <td>{{ s.name }}</td>
+                      <td>
+                        {% if s.status == 'online' %}
+                          <span class="inline-flex items-center gap-2"><span class="sa-status-dot sa-status-online"></span> Online</span>
+                        {% elseif s.status == 'warning' %}
+                          <span class="inline-flex items-center gap-2"><span class="sa-status-dot sa-status-warning"></span> Warning</span>
+                        {% else %}
+                          <span class="inline-flex items-center gap-2"><span class="sa-status-dot sa-status-degraded"></span> Degraded</span>
+                        {% endif %}
+                      </td>
+                      <td>{{ s.latency }}</td>
+                      <td>{{ s.uptime }}</td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="4" class="text-slate-400 py-4">Aucune donnée service.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-3" data-search-item="backups snapshots restauration disaster recovery">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="font-bold text-lg">Backups</div>
+                <div class="text-sm text-slate-300">Statut & restauration</div>
+              </div>
+              <a href="/super-admin/backups" class="sa-chip">Backups</a>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              {% for b in backupsData %}
+                <div class="sa-card-soft rounded-2xl p-3" data-search-item="backup {{ b.name }} {{ b.target }} {{ b.status }}">
+                  <div class="font-semibold">{{ b.name }}</div>
+                  <div class="text-sm text-slate-300 mt-1">{{ b.target }}</div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <span class="sa-chip">{{ b.status }}</span>
+                    <span class="text-xs text-slate-400">{{ b.date }}</span>
+                  </div>
+                </div>
+              {% else %}
+                <div class="text-sm text-slate-400">Aucune donnée backup.</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="sa-card rounded-[1.75rem] p-4 xl:col-span-3" data-search-item="api endpoints trafic webhooks">
+            <div class="font-bold text-lg">Top APIs</div>
+            <div class="text-sm text-slate-300">Endpoints les plus sollicités</div>
+
+            <div class="mt-4 space-y-3">
+              <div class="sa-card-soft rounded-2xl p-3">
+                <div class="flex justify-between gap-3">
+                  <span>/api/jobs/search</span><b>48k</b>
+                </div>
+              </div>
+              <div class="sa-card-soft rounded-2xl p-3">
+                <div class="flex justify-between gap-3">
+                  <span>/api/auth/login</span><b>31k</b>
+                </div>
+              </div>
+              <div class="sa-card-soft rounded-2xl p-3">
+                <div class="flex justify-between gap-3">
+                  <span>/api/payments/webhook</span><b>9k</b>
+                </div>
+              </div>
+              <button type="button" class="sa-btn sa-btn-secondary w-full" data-sa-action="Voir métriques API">
+                📡 Metrics API
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+{# ========================= COMMAND PALETTE ========================= #}
+<div id="saCommandModal" class="sa-command-modal">
+  <div class="w-full max-w-2xl sa-glass rounded-[2rem] p-4 md:p-5 sa-border-gradient">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <div class="font-bold text-lg">Command Center</div>
+        <div class="text-sm text-slate-300">Raccourcis super administrateur</div>
+      </div>
+      <button type="button" id="saCloseCommand" class="sa-btn sa-btn-secondary px-3 py-2">Esc</button>
+    </div>
+
+    <div class="mt-4">
+      <input id="saCommandInput"
+             type="text"
+             class="sa-search w-full rounded-2xl px-4 py-3 text-sm outline-none"
+             placeholder="Tape une commande ou une action...">
+    </div>
+
+    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+      <button type="button" class="sa-card-soft rounded-2xl p-4 text-left hover:bg-white/10 transition" data-sa-action="Ouvrir la file KYC">
+        <div class="font-semibold">✅ Ouvrir la file KYC</div>
+        <div class="text-sm text-slate-300 mt-1">Entreprises à vérifier et valider</div>
+      </button>
+
+      <button type="button" class="sa-card-soft rounded-2xl p-4 text-left hover:bg-white/10 transition" data-sa-action="Générer rapport financier">
+        <div class="font-semibold">💳 Générer rapport financier</div>
+        <div class="text-sm text-slate-300 mt-1">MRR, revenus, paiements, payouts</div>
+      </button>
+
+      <button type="button" class="sa-card-soft rounded-2xl p-4 text-left hover:bg-white/10 transition" data-sa-action="Purger le cache applicatif">
+        <div class="font-semibold">🧹 Purger le cache</div>
+        <div class="text-sm text-slate-300 mt-1">Nettoyer les couches applicatives</div>
+      </button>
+
+      <button type="button" class="sa-card-soft rounded-2xl p-4 text-left hover:bg-white/10 transition" data-sa-action="Voir incident manager">
+        <div class="font-semibold">🚨 Incident manager</div>
+        <div class="text-sm text-slate-300 mt-1">Piloter les incidents critiques</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="saToastWrap" class="sa-toast-wrap"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+  const root = document.documentElement;
+
+  function saToast(message) {
+    const wrap = document.getElementById('saToastWrap');
+    const el = document.createElement('div');
+    el.className = 'sa-toast';
+    el.innerHTML = `<div class="font-semibold">Action console</div><div class="text-sm mt-1 text-slate-300">${message}</div>`;
+    wrap.appendChild(el);
+    setTimeout(() => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(8px)';
+      el.style.transition = '.25s ease';
+      setTimeout(() => el.remove(), 260);
+    }, 2600);
+  }
+
+  function bindActions() {
+    document.querySelectorAll('[data-sa-action]').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const action = this.getAttribute('data-sa-action');
+        saToast(`À brancher côté backend : ${action}`);
+      });
+    });
+  }
+
+  bindActions();
+
+  const tabs = document.querySelectorAll('[data-tab-btn]');
+  const panels = document.querySelectorAll('[data-tab-panel]');
+
+  tabs.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.getAttribute('data-tab-btn');
+      tabs.forEach(b => b.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const panel = document.querySelector(`[data-tab-panel="${key}"]`);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  const sidebarBtn = document.getElementById('saOpenSidebar');
+  const sidebar = document.getElementById('saSidebarMobile');
+  const sidebarBackdrop = document.getElementById('saSidebarBackdrop');
+  const closeSidebar = document.getElementById('saCloseSidebar');
+
+  function openSidebar() {
+    sidebar?.classList.add('open');
+    sidebarBackdrop?.classList.add('open');
+  }
+  function closeSidebarFn() {
+    sidebar?.classList.remove('open');
+    sidebarBackdrop?.classList.remove('open');
+  }
+
+  sidebarBtn?.addEventListener('click', openSidebar);
+  closeSidebar?.addEventListener('click', closeSidebarFn);
+  sidebarBackdrop?.addEventListener('click', closeSidebarFn);
+
+  const cmdModal = document.getElementById('saCommandModal');
+  const cmdOpen = document.getElementById('saOpenCommand');
+  const cmdClose = document.getElementById('saCloseCommand');
+  const cmdInput = document.getElementById('saCommandInput');
+
+  function openCommand() {
+    cmdModal?.classList.add('open');
+    setTimeout(() => cmdInput?.focus(), 30);
+  }
+  function closeCommand() {
+    cmdModal?.classList.remove('open');
+  }
+
+  cmdOpen?.addEventListener('click', openCommand);
+  cmdClose?.addEventListener('click', closeCommand);
+  cmdModal?.addEventListener('click', function (e) {
+    if (e.target === cmdModal) closeCommand();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openCommand();
+    }
+    if (e.key === 'Escape') closeCommand();
+    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      document.getElementById('saGlobalSearch')?.focus();
+    }
+  });
+
+  const globalSearch = document.getElementById('saGlobalSearch');
+  const searchableItems = document.querySelectorAll('[data-search-item]');
+
+  globalSearch?.addEventListener('input', function () {
+    const q = this.value.trim().toLowerCase();
+    searchableItems.forEach(el => {
+      const hay = (el.getAttribute('data-search-item') || '').toLowerCase();
+      if (!q || hay.includes(q)) {
+        el.style.display = '';
+      } else {
+        el.style.display = 'none';
+      }
+    });
+  });
+
+  function updateClock() {
+    const el = document.getElementById('saLiveClock');
+    if (!el) return;
+    const d = new Date();
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mm = String(d.getMinutes()).padStart(2, '0');
+    const ss = String(d.getSeconds()).padStart(2, '0');
+    el.textContent = `${hh}:${mm}:${ss}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const raw = parseInt((el.getAttribute('data-count') || '0').replace(/\s+/g, ''), 10) || 0;
+    const duration = 900;
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / duration, 1);
+      const v = Math.floor(raw * p);
+      el.textContent = new Intl.NumberFormat('fr-FR').format(v);
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  });
+
+  const defaultMonths = ["Jan","Fév","Mar","Avr","Mai","Juin","Juil","Aoû","Sep","Oct","Nov","Déc"];
+
+  const signupsRaw = {{ charts.signupsByMonth|default([])|json_encode|raw }};
+  const signupsLabels = signupsRaw.length ? signupsRaw.map(x => x.ym) : defaultMonths;
+  const signupsValues = signupsRaw.length ? signupsRaw.map(x => parseInt(x.c, 10) || 0) : [14, 19, 24, 28, 35, 46, 42, 58, 63, 69, 74, 88];
+
+  const split = {{ charts.usersSplit|default({'company':34,'talent':48,'particulier':22,'staff':8})|json_encode|raw }};
+  const jobs = {{ charts.jobsVsRecruits|default({'jobs':128,'recruited':76})|json_encode|raw }};
+  const mod = {{ charts.moderation|default({'spam':12,'abuse':8,'fraud':6,'identity':4,'other':7})|json_encode|raw }};
+
+  const revenueRaw = {{ charts.revenueSeries|default([])|json_encode|raw }};
+  const revenueLabels = revenueRaw.length ? revenueRaw.map(x => x.label) : defaultMonths;
+  const revenueValues = revenueRaw.length ? revenueRaw.map(x => parseInt(x.value, 10) || 0) : [420000, 560000, 640000, 720000, 980000, 1100000, 1210000, 1340000, 1460000, 1710000, 2030000, 2450000];
+
+  const healthRaw = {{ charts.healthSeries|default([])|json_encode|raw }};
+  const healthLabels = healthRaw.length ? healthRaw.map(x => x.label) : ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+  const latencyValues = healthRaw.length ? healthRaw.map(x => parseInt(x.latency, 10) || 0) : [180, 176, 191, 169, 174, 186, 182];
+  const errorValues = healthRaw.length ? healthRaw.map(x => parseFloat(x.errors) || 0) : [0.22, 0.18, 0.31, 0.15, 0.19, 0.26, 0.24];
+
+  const plans = {{ plansData|default([])|json_encode|raw }};
+  const planLabels = plans.length ? plans.map(x => x.name) : ['Starter','Pro','Business','Enterprise'];
+  const planValues = plans.length ? plans.map(x => parseInt(x.count, 10) || 0) : [64, 81, 29, 10];
+
+  const gridColor = 'rgba(255,255,255,.07)';
+  const labelColor = '#cfe0f8';
+
+  const commonOptions = {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: labelColor, boxWidth: 10, usePointStyle: true } },
+      tooltip: {
+        backgroundColor: 'rgba(8,12,24,.96)',
+        borderColor: 'rgba(255,255,255,.10)',
+        borderWidth: 1,
+        titleColor: '#fff',
+        bodyColor: '#dce8fa',
+        padding: 12
+      }
+    },
+    scales: {
+      x: { ticks: { color: labelColor }, grid: { color: gridColor } },
+      y: { ticks: { color: labelColor }, grid: { color: gridColor } }
+    }
+  };
+
+  const elSignups = document.getElementById('chartSignups');
+  if (elSignups) {
+    new Chart(elSignups, {
+      type: 'line',
+      data: {
+        labels: signupsLabels,
+        datasets: [{
+          label: 'Inscriptions',
+          data: signupsValues,
+          borderColor: '#6d7cff',
+          backgroundColor: 'rgba(109,124,255,.18)',
+          fill: true,
+          tension: .35,
+          pointRadius: 2,
+          pointBackgroundColor: '#c5d1ff'
+        }]
+      },
+      options: commonOptions
+    });
+  }
+
+  const elSplit = document.getElementById('chartUsersSplit');
+  if (elSplit) {
+    new Chart(elSplit, {
+      type: 'doughnut',
+      data: {
+        labels: ['Company', 'Talent', 'Particulier', 'Staff'],
+        datasets: [{
+          data: [split.company || 0, split.talent || 0, split.particulier || 0, split.staff || 0],
+          backgroundColor: ['#6d7cff', '#26c6ff', '#1fd28b', '#f7b84b'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        cutout: '68%'
+      }
+    });
+  }
+
+  const elJobs = document.getElementById('chartJobs');
+  if (elJobs) {
+    new Chart(elJobs, {
+      type: 'bar',
+      data: {
+        labels: ['Offres', 'Recrutés'],
+        datasets: [{
+          label: 'Volume',
+          data: [jobs.jobs || 0, jobs.recruited || 0],
+          backgroundColor: ['rgba(38,198,255,.75)', 'rgba(31,210,139,.75)'],
+          borderRadius: 12,
+          borderSkipped: false
+        }]
+      },
+      options: commonOptions
+    });
+  }
+
+  const elMod = document.getElementById('chartModeration');
+  if (elMod) {
+    new Chart(elMod, {
+      type: 'radar',
+      data: {
+        labels: ['Spam', 'Abus', 'Fraude', 'Identité', 'Autres'],
+        datasets: [{
+          label: 'Signalements',
+          data: [mod.spam || 0, mod.abuse || 0, mod.fraud || 0, mod.identity || 0, mod.other || 0],
+          borderColor: '#ff6d8a',
+          backgroundColor: 'rgba(255,109,138,.18)',
+          pointBackgroundColor: '#ffd8e1'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: {
+          r: {
+            grid: { color: gridColor },
+            angleLines: { color: gridColor },
+            pointLabels: { color: labelColor },
+            ticks: { backdropColor: 'transparent', color: labelColor }
+          }
+        }
+      }
+    });
+  }
+
+  const elModSecurity = document.getElementById('chartModerationSecurity');
+  if (elModSecurity) {
+    new Chart(elModSecurity, {
+      type: 'polarArea',
+      data: {
+        labels: ['Spam', 'Abus', 'Fraude', 'Identité', 'Autres'],
+        datasets: [{
+          data: [mod.spam || 0, mod.abuse || 0, mod.fraud || 0, mod.identity || 0, mod.other || 0],
+          backgroundColor: ['rgba(109,124,255,.65)', 'rgba(38,198,255,.65)', 'rgba(255,109,138,.65)', 'rgba(247,184,75,.65)', 'rgba(31,210,139,.65)'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: labelColor } } },
+        scales: {
+          r: {
+            grid: { color: gridColor },
+            ticks: { backdropColor: 'transparent', color: labelColor },
+            pointLabels: { color: labelColor }
+          }
+        }
+      }
+    });
+  }
+
+  const elRevenue = document.getElementById('chartRevenue');
+  if (elRevenue) {
+    new Chart(elRevenue, {
+      type: 'line',
+      data: {
+        labels: revenueLabels,
+        datasets: [{
+          label: 'MRR',
+          data: revenueValues,
+          borderColor: '#1fd28b',
+          backgroundColor: 'rgba(31,210,139,.16)',
+          fill: true,
+          tension: .35,
+          pointRadius: 2
+        }]
+      },
+      options: commonOptions
+    });
+  }
+
+  const elPlans = document.getElementById('chartPlans');
+  if (elPlans) {
+    new Chart(elPlans, {
+      type: 'doughnut',
+      data: {
+        labels: planLabels,
+        datasets: [{
+          data: planValues,
+          backgroundColor: ['#6d7cff', '#26c6ff', '#1fd28b', '#f7b84b'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        cutout: '64%'
+      }
+    });
+  }
+
+  const elHealth = document.getElementById('chartHealth');
+  if (elHealth) {
+    new Chart(elHealth, {
+      type: 'line',
+      data: {
+        labels: healthLabels,
+        datasets: [
+          {
+            label: 'Latency ms',
+            data: latencyValues,
+            borderColor: '#26c6ff',
+            backgroundColor: 'rgba(38,198,255,.14)',
+            fill: true,
+            tension: .35,
+            yAxisID: 'y'
+          },
+          {
+            label: 'Error rate %',
+            data: errorValues,
+            borderColor: '#ff6d8a',
+            backgroundColor: 'rgba(255,109,138,.08)',
+            tension: .35,
+            yAxisID: 'y1'
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { labels: { color: labelColor, boxWidth: 10, usePointStyle: true } }
+        },
+        scales: {
+          x: { ticks: { color: labelColor }, grid: { color: gridColor } },
+          y: {
+            position: 'left',
+            ticks: { color: labelColor },
+            grid: { color: gridColor }
+          },
+          y1: {
+            position: 'right',
+            ticks: { color: labelColor },
+            grid: { drawOnChartArea: false, color: gridColor }
+          }
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

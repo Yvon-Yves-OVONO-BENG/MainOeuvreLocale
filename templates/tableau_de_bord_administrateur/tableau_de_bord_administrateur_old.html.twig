@@ -1,0 +1,2521 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{% trans %}Tableau de bord administrateur{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "tableau_de_bord_administrateur/_vip_ui.html.twig" %}
+
+	{% set envLabel = environment|default('PROD') %}
+	{% set ops = ops|default({
+		'uptime': 99.98,
+		'latency': 182,
+		'errorRate': 0.24,
+		'cpu': 46,
+		'ram': 63,
+		'storage': 71,
+		'queueDepth': 148,
+		'cronSuccess': 98,
+		'backupStatus': 'OK',
+		'securityScore': 91,
+		'openIncidents': 2,
+		'deploymentsToday': 6,
+		'apiCallsToday': 128420,
+		'failedPayments': 3,
+		'activeSubscriptions': 184,
+		'mrr': 2450000,
+		'gmv': 18600000
+	}) %}
+
+	{% set plansData = plansData|default([]) %}
+
+	<script>
+		tailwind.config = {
+			darkMode: 'class',
+			theme: {
+				extend: {
+					boxShadow: {
+						soft: '0 18px 55px rgba(2,6,23,.10)',
+						soft2: '0 12px 35px rgba(2,6,23,.08)',
+						soft3: '0 8px 18px rgba(2,6,23,.08)'
+					}
+				}
+			}
+		}
+	</script>
+
+	<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),radial-gradient(900px_circle_at_22%_88%,rgba(16,185,129,.10),transparent_55%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)] text-slate-900">
+		<div class="mx-auto max-w-[1440px] px-4 py-6 lg:py-8">
+			<div class="grid gap-6 lg:grid-cols-[290px,1fr]">
+
+				<aside class="lg:sticky lg:top-6 lg:self-start">
+					<div class="sa-card shadow-[0_20px_60px_rgba(15,23,42,.12)] overflow-hidden rounded-3xl backdrop-blur-xl border border-slate-200/60 bg-white/80">
+						
+						<div class="p-5 bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.18),transparent_60%),radial-gradient(700px_circle_at_85%_15%,rgba(6,182,212,.14),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,255,255,.75))] border-b border-slate-200/70">
+							<div class="flex items-start justify-between gap-3">
+								<div class="flex items-center gap-3">
+									<div class="h-11 w-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 text-white grid place-items-center shadow-[0_18px_35px_rgba(79,70,229,.35)] ring-1 ring-white/40">
+										<span class="text-lg">🛡️</span>
+									</div>
+									<div>
+										<div class="text-sm font-extrabold tracking-tight text-slate-900">Admin Console</div>
+										<div class="text-xs font-medium text-slate-500">Main d’Oeuvre Local</div>
+									</div>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="p-3">
+							{% set nav = [
+								{'href': path('tableau_de_bord'),'label':'Tableau de bord'|trans,'icon':'🏠','badge':'Accueil'|trans,'active':true},
+								{'href': path('admin_categories_index'), 'label':'Catégories'|trans, 'icon':'🏷️', 'badge': (kpi.categories ?? '-')},
+                                {'href': path('admin_professions_index'), 'label':'Professions'|trans, 'icon':'💼', 'badge': (kpi.professions ?? '-')},
+								{'href': path('admin_talents_index'), 'label':'Talents'|trans,'icon':'🧑‍🔧','badge': (kpi.talents ?? '-')},
+								{'href': path('admin_companies_index'), 'label':'Compagnies'|trans,'icon':'🏢','badge': (kpi.companies ?? '-')},
+								{'href': path('admin_individuals_index'), 'label':'Particuliers'|trans,'icon':'🧑‍💼','badge': (kpi.individuals ?? '-')},
+								{'href': path('admin_moderators_index'), 'label':'Modérateurs'|trans,'icon':'🧿','badge': (kpi.moderators ?? '-')},
+								{'href': path('admin_jobs_moderation'), 'label':'Modération Offres'|trans,'icon':'📣','badge': (kpi.pendingModerationJobs ?? 0),'warn':true},
+								{'href': path('admin_annonces_moderation'), 'label':'Modération Annonces'|trans,'icon':'📢','badge':'À valider'|trans,'warn':true},
+								{'href': path('admin_jobs_index'), 'label':'Offres'|trans,'icon':'📣','badge': (kpi.activeJobs ?? '-')},
+								{'href': path('moderateur_verifications_index'),'label':'Vérifications'|trans,'icon':'✅','badge': (kpi.pendingVerifications ?? (kpi.pendingProfiles ?? '-')),'warn':true},
+								{'href': path('admin_harassment_investigate'), 'label':'Harcèlement'|trans,'icon':'🚨','badge': (kpi.harassmentOpen ?? 0),'danger':true},
+								{'href': path('moderateur_reports_index'), 'label':'Signalements'|trans,'icon':'🚨','badge': (kpi.pendingReports ?? '-'),'danger':true},
+								{'href': path('admin_payment_dispute_index'), 'label':'Litiges'|trans,'icon':'💳','badge': (securityEvents|length),'danger':true},
+								{'href': path('admin_kyc_rules'), 'label':'Règles KYC'|trans,'icon':'🧠','badge': (kpi.rules ?? '-'),'danger':true},
+								{'href': path('admin_sanction_index'),'label':'Sanctions'|trans,'icon':'🧾','badge': (kpi.sanctions ?? 0)|number_format(0, ',', ' '),'warn':true},
+								{'href': path('admin_invoices_index'),'label':'Paiements du jour'|trans,'icon':'💳','badge': (kpi.paymentsToday ?? 0)|number_format(0, ',', ' ')},
+								{'href': path('admin_moderation_queue'),'label':'Modération contenu'|trans,'icon':'🧹','badge':'Auto'},
+								{'href': path('admin_newsletter_index'),'label':'Alertes offres'|trans,'icon':'🔔','badge':'Auto'},
+								{'href': path('admin_audit_index'),'label':'Audit & logs'|trans,'icon':'🧾','badge':'Logs'},
+								{'href': path('admin_support_new'),'label':'Support'|trans,'icon':'🎧','badge': (kpi.openTickets ?? '-')}
+							] %}
+
+							<nav class="space-y-1 py-0.5">
+								{% for item in nav %}
+									{% set isActive = item.active ?? false %}
+									{% set badgeClass =
+										(item.danger ?? false)
+										? 'border-rose-200/70 bg-rose-50 text-rose-700'
+										: ((item.warn ?? false)
+										? 'border-amber-200/70 bg-amber-50 text-amber-700'
+										: 'border-slate-200 bg-white text-slate-700')
+									%}
+
+									<a href="{{ item.href }}" class="group flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 transition-all duration-200 ease-out
+										{{ isActive
+										? 'border-indigo-200/70 bg-[linear-gradient(135deg,rgba(99,102,241,.14),rgba(59,130,246,.10))] shadow-sm'
+										: 'border-transparent hover:border-indigo-200/60 hover:bg-indigo-50/40 hover:shadow-sm' }}" data-turbo="false">
+
+										<span class="flex items-center gap-2">
+											<span class="h-7 w-7 rounded-lg border border-slate-200/70 bg-white/80 grid place-items-center text-[12px] shadow-sm group-hover:scale-105 transition">
+												{{ item.icon }}
+											</span>
+
+											<span class="text-[12.5px] leading-[1.05] font-semibold text-slate-800">
+												{{ item.label }}
+											</span>
+										</span>
+
+										<span class="inline-flex items-center rounded-full border px-2 py-[2px] text-[10.5px] font-extrabold {{ badgeClass }} shadow-sm">
+											{{ item.badge }}
+										</span>
+									</a>
+								{% endfor %}
+							</nav>
+
+							<div class="mt-5 rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_10px_30px_rgba(15,23,42,.06)] backdrop-blur">
+								<div class="flex items-center justify-between">
+									<div class="text-sm font-extrabold">{% trans %}Actions rapides{% endtrans %}</div>
+									<span class="text-[11px] font-bold text-slate-500">Ops</span>
+								</div>
+
+								<div class="mt-3 grid grid-cols-2 gap-2">
+									<a href="{{ path('moderateur_verifications_index') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-3 py-2.5 text-xs font-extrabold text-white shadow-[0_10px_25px_rgba(79,70,229,.35)] hover:opacity-95 transition">
+										✅ {% trans %}Valider{% endtrans %}
+									</a>
+
+									<a href="{{ path('admin_harassment_investigate') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50 shadow-sm transition">
+										🚨 {% trans %}Traiter{% endtrans %}
+									</a>
+
+									<a href="{{ path('job_new') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50 shadow-sm transition">
+										➕ {% trans %}Offre{% endtrans %}
+									</a>
+
+									<a href="{{ path('admin_annonces_moderation') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-extrabold text-amber-800 hover:bg-amber-100 shadow-sm transition" data-turbo="false">
+										📢 {% trans %}Annonces{% endtrans %}
+									</a>
+
+									<a href="{{ path('admin_broadcast_index') }}" class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50 shadow-sm transition">
+										📢 Broadcast
+									</a>
+								</div>
+							</div>
+
+							<div class="mt-4 rounded-3xl border border-slate-200/70 bg-white/70 p-4 backdrop-blur">
+								<div class="text-xs font-semibold text-slate-500">
+									{% trans %}Centre d’administration{% endtrans %}
+								</div>
+
+								<div class="mt-1 text-sm font-extrabold tracking-tight">
+									{% trans %}Sécurité • Qualité • Finance • Support{% endtrans %}
+								</div>
+
+								<div class="mt-3 flex flex-wrap gap-2">
+									<a href="{{ path('admin_settings_index') }}" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50 shadow-sm transition">
+										⚙️ {% trans %}Paramètres{% endtrans %}
+									</a>
+
+									<a href="{{ path('admin_backups_index') }}" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50 shadow-sm transition">
+										🗄️ Backups
+									</a>
+
+									<a href="{{ path('admin_integrations_index') }}" class="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50 shadow-sm transition">
+										🔌 {% trans %}Intégrations{% endtrans %}
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</aside>
+
+				<main class="space-y-6">
+					
+					<section class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft overflow-hidden">
+						<div class="p-5 bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.16),transparent_60%),radial-gradient(800px_circle_at_90%_30%,rgba(6,182,212,.12),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.72))]">
+							<div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+								<div>
+									<h1 class="mt-1 text-3xl sm:text-4xl font-black tracking-tight text-slate-900">🛡️ {% trans %}Administration{% endtrans %}</h1>
+									<p class="mt-2 max-w-2xl text-sm font-medium text-slate-600">
+										{% trans %}Gestion complète : utilisateurs, contenus, modération, paiements, support, sécurité & contrôle qualité.{% endtrans %}
+									</p>
+
+									<div class="mt-5 flex flex-wrap gap-2.5">
+										<span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700">
+											👥 {% trans %}Connectés:{% endtrans %} {{ kpi.onlineUsers ?? '-' }}
+										</span>
+										<span class="inline-flex items-center gap-2 rounded-full border border-cyan-200/70 bg-cyan-50 px-3 py-1.5 text-[11px] font-extrabold text-cyan-700">
+											✨ {% trans %}Inscriptions (24h):{% endtrans %} {{ kpi.signups24h ?? '-' }}
+										</span>
+										<span class="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-rose-50 px-3 py-1.5 text-[11px] font-extrabold text-rose-700">
+											🚨 {% trans %}Incidents:{% endtrans %} {{ kpi.incidentsOpen ?? 0 }}
+										</span>
+										<span class="inline-flex items-center gap-2 rounded-full border border-cyan-200/70 bg-cyan-50 px-3 py-1.5 text-[11px] font-extrabold text-cyan-700">
+											💰 {{ (kpi.mrr ?? 0)|number_format(0, ',', ' ') }} XAF RMR
+										</span>
+										{# <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-700">
+											🕒 <span id="saLiveClock" class="font-mono">--:--:--</span>
+										</span> #}
+									</div>
+								</div>
+
+								<div class="flex flex-wrap gap-3">
+									<a href="{{ path('admin_broadcast_index') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-3 py-2 text-xs font-extrabold text-white shadow-soft2 hover:opacity-95">
+										📢 {% trans %}Notifier tout le monde{% endtrans %}
+									</a>
+
+									
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<div class="sticky top-4 z-50">
+						<div class="sa-card px-5 py-3 rounded-3xl border border-slate-200/60 bg-[linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.75))] backdrop-blur-xl shadow-[0_12px_40px_rgba(15,23,42,.08)]">
+							<div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+								
+
+								<div class="flex flex-wrap items-center gap-2">
+									<a href="{{ path('admin_users_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200/70 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-800 shadow-[0_6px_20px_rgba(15,23,42,.06)] hover:bg-white hover:shadow-[0_10px_30px_rgba(15,23,42,.08)] transition">
+										👥 {% trans %}Tous les utilisateurs{% endtrans %}
+									</a>
+
+									<a href="{{ path('admin_audit_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200/70 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-800 shadow-[0_6px_20px_rgba(15,23,42,.06)] hover:bg-white hover:shadow-[0_10px_30px_rgba(15,23,42,.08)] transition">
+										🧾 {% trans %}Audit{% endtrans %}
+									</a>
+
+									<a type="button" onclick="MOLChatOpen()" class="relative inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-3 py-2 text-xs font-extrabold text-white shadow-[0_10px_30px_rgba(15,23,42,.25)] hover:opacity-95 transition">
+										💬 {% trans %}Messages{% endtrans %}
+										<span class="absolute -right-2 -top-2 min-w-[22px] rounded-full bg-rose-500 px-1.5 py-1 text-[11px] font-black text-white shadow-[0_6px_18px_rgba(244,63,94,.45)] text-center animate-pulse">
+											{{ kpi.unreadAdminMessages ?? 0 }}
+										</span>
+									</a>
+
+									<a href="{{ path('moderateur_verifications_index') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-3 py-2 text-xs font-extrabold text-white shadow-[0_10px_30px_rgba(79,70,229,.35)] hover:opacity-95 transition">
+										✅ {% trans %}Vérifier profils{% endtrans %}
+									</a>
+
+									<a href="{{ path('moderateur_reports_index', {status: 'open'}) }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 px-3 py-2 text-xs font-extrabold text-white shadow-[0_10px_30px_rgba(244,63,94,.35)] hover:opacity-95 transition">
+										🚨 {% trans %}Urgences{% endtrans %}
+									</a>
+									<a id="saOpenCommand" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm hover:bg-slate-50 cursor-pointer">
+										⌘ {% trans %}Commandes{% endtrans %}
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+						{% set kpis = [
+							{'label':'Comptes actifs'|trans,'value': (kpi.activeAccounts ?? 0), 'icon':'✅', 'href':path('admin_users_index'), 'meta': ('+' ~ (kpi.activeDelta7d ?? 0) ~ ' / 7j'), 'tone':'indigo'},
+							{'label':'Comptes bloqués'|trans,'value': (kpi.blockedAccounts ?? 0), 'icon':'⛔', 'href': path('admin_users_index'), 'meta':'Fraude / abus'|trans, 'tone':'rose'},
+							{'label':'Offres actives'|trans,'value': (kpi.activeJobs ?? 0), 'icon':'📣', 'href': path('admin_jobs_index', {status: 'active'}), 'meta':'Qualité & conformité'|trans, 'tone':'cyan'},
+							{'label':'Signalements ouverts'|trans,'value': (kpi.pendingReports ?? 0), 'icon':'🚨', 'href':path('moderateur_reports_index'), 'meta': ('SLA: ' ~ (kpi.slaHours ?? '—')), 'tone':'amber'}
+						] %}
+
+						{% for c in kpis %}
+							{% set ring =
+								c.tone == 'rose'
+								? 'from-rose-500/15 to-orange-500/10'
+								: (c.tone == 'cyan'
+									? 'from-cyan-500/15 to-sky-500/10'
+									: (c.tone == 'amber'
+									? 'from-amber-500/15 to-yellow-500/10'
+									: 'from-indigo-500/15 to-blue-500/10'))
+							%}
+
+							<div class="sa-card shadow-soft3 overflow-hidden">
+								<div class="p-4 bg-gradient-to-br {{ ring }}">
+									<div class="flex items-start justify-between gap-3">
+										<div>
+											<div class="text-xs font-semibold text-slate-500">{{ c.label }}</div>
+											<div class="mt-1 text-4xl font-black tracking-tight text-slate-900">{{ c.value }}</div>
+										</div>
+										<div class="h-11 w-11 rounded-2xl border border-slate-200/70 bg-white/80 grid place-items-center text-lg">
+											{{ c.icon }}
+										</div>
+									</div>
+
+									<div class="mt-3 flex items-center justify-between gap-3">
+										<a href="{{ c.href }}" class="text-xs font-extrabold text-indigo-700 hover:underline">{% trans %}Ouvrir{% endtrans %}</a>
+										<span class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-extrabold text-slate-600">
+											{{ c.meta }}
+										</span>
+									</div>
+								</div>
+							</div>
+						{% endfor %}
+					</section>
+
+					<section class="mt-5 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-8 gap-3">
+						<div class="sa-card sa-kpi" data-search-item="utilisateurs users comptes croissance">
+							{% set usersCurrent = kpi.usersCurrentMonthCount ?? 0 %}
+							{% set usersPrevious = kpi.usersPreviousMonthCount ?? 0 %}
+							{% set usersDelta = kpi.usersCurrentMonthDelta ?? 0 %}
+
+							{% if usersPrevious > 0 %}
+								{% set usersProgress = ((usersCurrent / usersPrevious) * 100) %}
+								{% if usersProgress > 100 %}
+									{% set usersProgress = 100 %}
+								{% endif %}
+							{% else %}
+								{% set usersProgress = usersCurrent > 0 ? 100 : 0 %}
+							{% endif %}
+
+							<div class="flex items-start justify-between">
+								<div>
+									<div class="text-xs uppercase tracking-wider text-slate-400">
+										{% trans %}Utilisateurs{% endtrans %}
+									</div>
+
+									<div class="mt-2 flex items-end gap-2">
+										<div class="text-3xl font-extrabold" data-count="{{ usersCurrent }}">
+											{{ usersCurrent }}
+										</div>
+
+										<div class="mb-1 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-extrabold text-slate-600">
+											{{ usersCurrent }}/{{ usersPrevious }}
+										</div>
+									</div>
+
+									<div class="mt-2 text-[11px] text-slate-500">
+										{% trans %}Ce mois / mois dernier{% endtrans %}
+									</div>
+
+									<div class="mt-2 text-xs {{ usersDelta >= 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+										{{ usersDelta >= 0 ? '+' : '' }}{{ usersDelta|number_format(1, ',', ' ') }}%
+										{% trans %}vs mois dernier{% endtrans %}
+									</div>
+								</div>
+
+								<div class="sa-icon">👥</div>
+							</div>
+
+							<div class="mt-4">
+								<div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-1">
+									<span>{% trans %}Progression{% endtrans %}</span>
+									<span>{{ usersProgress|number_format(0, ',', ' ') }}%</span>
+								</div>
+
+								<div class="mt-1 sa-kpi-line bg-slate-200/80">
+									<span
+										style="
+											width: {{ usersProgress }}%;
+											background:
+												linear-gradient(
+													90deg,
+													#ef4444 0%,
+													#f97316 35%,
+													#f59e0b 60%,
+													#84cc16 80%,
+													#10b981 100%
+												);
+										">
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="sa-card sa-kpi" data-search-item="revenus billing mrr abonnement saas">
+							<div class="flex items-start justify-between">
+								<div>
+									<div class="text-xs uppercase tracking-wider text-slate-400">{% trans %}RMR{% endtrans %}</div>
+
+									<div class="mt-1 text-[11px] text-slate-500">
+										{% trans %}Revenu mensuel récurrent{% endtrans %}
+									</div>
+
+									<div class="mt-2 text-3xl font-extrabold" data-count="{{ kpi.mrr ?? 0 }}">
+										{{ (kpi.mrr ?? 0)|number_format(0, ',', ' ') }}
+									</div>
+
+									{% set mrrDelta = kpi.mrrDelta ?? 0 %}
+									<div class="mt-2 text-xs {{ mrrDelta >= 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+										{{ mrrDelta >= 0 ? '+' : '' }}{{ mrrDelta|number_format(1, ',', ' ') }}%
+										{% trans %}vs période précédente{% endtrans %}
+									</div>
+								</div>
+
+								<div class="sa-icon">💰</div>
+							</div>
+
+							<div class="mt-4 sa-kpi-line">
+								<span style="width:{{ kpi.mrrProgress ?? 0 }}%; background:linear-gradient(90deg, var(--sa-violet), var(--sa-indigo));"></span>
+							</div>
+						</div>
+
+						<div class="sa-card sa-kpi" data-search-item="vbtt valeur brute totale transactions plateforme gmv volume business transactions">
+							<div class="flex items-start justify-between">
+								<div>
+									<div class="text-xs uppercase tracking-wider text-slate-400 flex items-center gap-2">
+										<span>{% trans %}VBTT{% endtrans %}</span>
+										
+									</div>
+
+									<div class="mt-1 text-[11px] text-slate-500">
+										{% trans %}Valeur brute totale des transactions effectuées sur la plateforme{% endtrans %}
+									</div>
+
+									<div class="mt-2 text-3xl font-extrabold" data-count="{{ kpi.gmvStats.gmv ?? 0 }}">
+										{{ (kpi.gmvStats.gmv ?? 0)|number_format(0, ',', ' ') }}
+									</div>
+								</div>
+
+								<div class="sa-icon">🏦</div>
+							</div>
+
+							<div class="mt-4 sa-kpi-line">
+								<span style="width:100%; background:linear-gradient(90deg, var(--sa-emerald), var(--sa-cyan));"></span>
+							</div>
+						</div>
+
+
+						<div class="sa-card sa-kpi" data-search-item="jobs matching recrutements">
+							{% set jobsCurrent = kpi.jobsCurrentMonthCount ?? 0 %}
+							{% set jobsPrevious = kpi.jobsPreviousMonthCount ?? 0 %}
+							{% set jobsDelta = kpi.jobsCurrentMonthDelta ?? 0 %}
+
+							{% if jobsPrevious > 0 %}
+								{% set jobsProgress = ((jobsCurrent / jobsPrevious) * 100) %}
+								{% if jobsProgress > 100 %}
+									{% set jobsProgress = 100 %}
+								{% endif %}
+							{% else %}
+								{% set jobsProgress = jobsCurrent > 0 ? 100 : 0 %}
+							{% endif %}
+
+							<div class="flex items-start justify-between">
+								<div>
+									<div class="text-xs uppercase tracking-wider text-slate-400">{% trans %}Offres{% endtrans %}</div>
+
+									<div class="mt-2 flex items-end gap-2">
+										<div class="text-3xl font-extrabold">{{ jobsCurrent }}</div>
+
+										<div class="mb-1 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-extrabold text-slate-600">
+											{{ jobsCurrent }}/{{ jobsPrevious }}
+										</div>
+									</div>
+
+									<div class="mt-2 text-[11px] text-slate-500">
+										{% trans %}Ce mois / mois dernier{% endtrans %}
+									</div>
+
+									<div class="mt-2 text-xs {{ jobsDelta >= 0 ? 'text-emerald-500' : 'text-rose-500' }}">
+										{{ jobsDelta >= 0 ? '+' : '' }}{{ jobsDelta|number_format(1, ',', ' ') }}%
+										{% trans %}vs mois dernier{% endtrans %}
+									</div>
+								</div>
+
+								<div class="sa-icon">📄</div>
+							</div>
+
+							<div class="mt-4">
+								<div class="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-1">
+									<span>{% trans %}Progression{% endtrans %}</span>
+									<span>{{ jobsProgress|number_format(0, ',', ' ') }}%</span>
+								</div>
+
+								<div class="mt-1 sa-kpi-line bg-slate-200/80">
+									<span
+										style="
+											width: {{ jobsProgress }}%;
+											background: linear-gradient(90deg, #ef4444 0%, #f97316 35%, #f59e0b 60%, #84cc16 80%, #10b981 100%);
+										">
+									</span>
+								</div>
+							</div>
+						</div>
+
+						<a href="{{ path('admin_uptime_index') }}" class="block sa-card sa-kpi" data-search-item="uptime disponibilité observabilité">
+							<div class="flex items-start justify-between">
+								<div>
+									<div class="text-xs uppercase tracking-wider text-slate-400">Uptime</div>
+									<div class="mt-2 text-3xl font-extrabold">{{ ops.uptime|default(0)|number_format(2, ',', ' ') }}%</div>
+									<div class="mt-2 text-xs text-emerald-500">{% trans %}SLA plateforme stable{% endtrans %}</div>
+								</div>
+								<div class="sa-icon">🟢</div>
+							</div>
+							<div class="mt-4 sa-kpi-line">
+								<span style="width: {{ ops.uptime|default(0) > 100 ? 100 : ops.uptime|default(0) }}%; background:linear-gradient(90deg, var(--sa-emerald), #7effc3);"></span>
+							</div>
+						</a>
+
+						<a href="{{ path('admin_api_latency_index') }}" class="block sa-card sa-kpi" data-search-item="api latence performance cloud">
+							<div class="flex items-start justify-between">
+								<div>
+									<div class="text-xs uppercase tracking-wider text-slate-400">API latency</div>
+									<div class="mt-2 text-3xl font-extrabold">{{ kpi.latency|default(0) }}ms</div>
+									<div class="mt-2 text-xs text-slate-500">{% trans %}Temps de réponse moyen{% endtrans %}</div>
+								</div>
+								<div class="sa-icon">⚡</div>
+							</div>
+							<div class="mt-4 sa-kpi-line">
+								{% set latency = kpi.latency|default(0) %}
+								{% set latencyBar = latency <= 100 ? 90 : (latency <= 200 ? 70 : (latency <= 400 ? 45 : 20)) %}
+								<span style="width:{{ latencyBar }}%; background:linear-gradient(90deg, var(--sa-cyan), #7de6ff);"></span>
+							</div>
+						</a>
+
+					</section>
+
+					<section class="mt-5 grid grid-cols-1 xl:grid-cols-12 gap-3">
+						<a href="{{ path('admin_security_posture_index') }}" class="block sa-glass rounded-[1.75rem] p-4 xl:col-span-4">
+							<div class="flex items-center justify-between">
+								<div>
+									<div class="font-bold text-lg">Security posture</div>
+									<div class="text-sm text-slate-500">{% trans %}Niveau global de confiance plateforme{% endtrans %}</div>
+								</div>
+								<span class="sa-chip">Live</span>
+							</div>
+
+							<div class="mt-5 flex flex-col md:flex-row items-center gap-5">
+								<div class="sa-ring" style="--score: {{ kpi.securityPosture.score ?? 0 }}">
+									<div class="relative z-10 text-center">
+										<div class="text-3xl font-extrabold">{{ kpi.securityPosture.score ?? 0 }}</div>
+										<div class="text-xs text-slate-400">/100</div>
+									</div>
+								</div>
+
+								<div class="flex-1 w-full space-y-3">
+									<div>
+										<div class="flex justify-between text-sm mb-1">
+											<span class="text-slate-500">{{ kpi.securityPosture.metrics.twoFactorStaff.label ?? '2FA staff' }}</span>
+											<b>{{ kpi.securityPosture.metrics.twoFactorStaff.rate ?? 0 }}%</b>
+										</div>
+										<div class="sa-mini-progress"><span style="width:{{ kpi.securityPosture.metrics.twoFactorStaff.rate ?? 0 }}%"></span></div>
+									</div>
+
+									<div>
+										<div class="flex justify-between text-sm mb-1">
+											<span class="text-slate-500">{{ kpi.securityPosture.metrics.kycCompanies.label ?? 'KYC entreprises' }}</span>
+											<b>{{ kpi.securityPosture.metrics.kycCompanies.rate ?? 0 }}%</b>
+										</div>
+										<div class="sa-mini-progress"><span style="width:{{ kpi.securityPosture.metrics.kycCompanies.rate ?? 0 }}%"></span></div>
+									</div>
+
+									<div>
+										<div class="flex justify-between text-sm mb-1">
+											<span class="text-slate-500">{{ kpi.securityPosture.metrics.auditCoverage.label ?? 'Audit coverage' }}</span>
+											<b>{{ kpi.securityPosture.metrics.auditCoverage.rate ?? 0 }}%</b>
+										</div>
+										<div class="sa-mini-progress"><span style="width:{{ kpi.securityPosture.metrics.auditCoverage.rate ?? 0 }}%"></span></div>
+									</div>
+								</div>
+							</div>
+						</a>
+
+						<div class="sa-glass rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="actions rapides maintenance cloud billing moderation">
+							<div class="flex items-center justify-between">
+								<div>
+									<div class="font-bold text-lg">Control center</div>
+									<div class="text-sm text-slate-500">{% trans %}Actions d’exploitation super admin{% endtrans %}</div>
+								</div>
+								<span class="sa-chip">Ops</span>
+							</div>
+
+							<div class="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3" data-admin-placeholder-actions>
+								<a href="{{ path('admin_kyc_rules') }}" class="sa-btn sa-btn-secondary">
+									{% trans %}✅ KYC{% endtrans %}
+								</a>
+
+								<button type="button" class="sa-btn sa-btn-secondary" data-soon-label="{% trans %}Réindexer{% endtrans %}">
+									{% trans %}🔎 Réindexer{% endtrans %}
+								</button>
+
+								<button type="button" class="sa-btn sa-btn-secondary" data-soon-label="{% trans %}Restart queue{% endtrans %}">
+									{% trans %}📨 Restart queue{% endtrans %}
+								</button>
+
+								<button type="button" class="sa-btn sa-btn-secondary" data-soon-label="{% trans %}Webhooks{% endtrans %}">
+									{% trans %}🪝 Webhooks{% endtrans %}
+								</button>
+
+								<a href="{{ path('admin_audit_index') }}" class="sa-btn sa-btn-secondary">
+									🧾 {% trans %}Audit{% endtrans %}
+								</a>
+
+								<form method="post" action="{{ path('admin_platform_toggle_maintenance') }}" class="m-0">
+									<input type="hidden" name="_token" value="{{ csrf_token('toggle_maintenance') }}">
+
+									<button
+										type="submit"
+										class="sa-btn {{ maintenanceEnabled ? 'sa-btn-success' : 'sa-btn-danger' }}"
+									>
+										{% if maintenanceEnabled %}
+											✅ {% trans %}Rouvrir le site{% endtrans %}
+										{% else %}
+											⛔ {% trans %}Mettre le site en maintenance{% endtrans %}
+										{% endif %}
+									</button>
+								</form>
+							</div>
+							
+							<div id="saSoonToast" class="sa-soon-toast" aria-live="polite"></div>
+						</div>
+
+						<div class="sa-glass rounded-[1.75rem] p-4 xl:col-span-4">
+							<div class="flex items-center justify-between">
+								<div>
+									<div class="font-bold text-lg">{% trans %}Alertes intelligentes{% endtrans %}</div>
+									<div class="text-sm text-slate-500">{% trans %}Ce qui nécessite une attention immédiate{% endtrans %}</div>
+								</div>
+								<a href="{{ path('admin_security_incidents') }}" class="sa-chip">{% trans %}Voir{% endtrans %}</a>
+							</div>
+
+							<div class="mt-4 space-y-3">
+								{% for a in alertsData %}
+									<div class="sa-alert {% if a.level == 'critical' %}sa-alert-critical{% elseif a.level == 'warning' %}sa-alert-warning{% else %}sa-alert-info{% endif %}">
+										<div class="flex items-start justify-between gap-3">
+											<div>
+												<div class="font-semibold">{{ a.title|trans }}</div>
+												<div class="text-sm text-slate-500 mt-1">{{ a.meta|trans }}</div>
+											</div>
+											<span class="text-[11px] text-slate-400 whitespace-nowrap">{{ a.time|trans }}</span>
+										</div>
+									</div>
+								{% else %}
+									<div class="text-sm text-slate-400">{% trans %}Aucune alerte.{% endtrans %}</div>
+								{% endfor %}
+							</div>
+						</div>
+					</section>
+
+					<section class="mt-5">
+						<div class="flex flex-wrap gap-2">
+							<button type="button" class="sa-tab-btn active" data-tab-btn="overview">📊 {% trans %}Vue d’ensemble{% endtrans %}</button>
+							<button type="button" class="sa-tab-btn" data-tab-btn="security">🛡️ {% trans %}Sécurité{% endtrans %}</button>
+							<button type="button" class="sa-tab-btn" data-tab-btn="finance">💳 {% trans %}Finance{% endtrans %}</button>
+							<button type="button" class="sa-tab-btn" data-tab-btn="ops">☁️ {% trans %}Cloud & Ops{% endtrans %}</button>
+						</div>
+					</section>
+
+					<section class="mt-5 sa-tab-panel active" data-tab-panel="overview">
+						<div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-7" data-search-item="inscriptions croissance acquisition">
+								<div class="flex items-center justify-between gap-3 flex-wrap">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Croissance & inscriptions{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}Acquisition, activation et tendance mensuelle{% endtrans %}</div>
+									</div>
+
+									<div class="flex gap-2" data-growth-range-switcher>
+										<button type="button" class="sa-chip sa-chip-filter" data-range="30">30j</button>
+										<button type="button" class="sa-chip sa-chip-filter" data-range="90">90j</button>
+										<button type="button" class="sa-chip sa-chip-filter active" data-range="12">12m</button>
+									</div>
+								</div>
+
+								<div class="mt-3 flex items-center gap-3">
+									<div class="text-sm text-slate-500">{% trans %}Inscriptions{% endtrans %}</div>
+									<div class="text-xl font-extrabold text-slate-900">{{ growthStats.signups|default(0) }}</div>
+									<div class="text-sm font-bold {% if growthStats.delta|default(0) >= 0 %}text-emerald-600{% else %}text-rose-600{% endif %}">
+										{{ growthStats.delta|default(0) >= 0 ? '+' : '' }}{{ growthStats.delta|default(0) }}%
+									</div>
+								</div>
+
+								<div class="mt-4 h-[320px]">
+									<canvas id="chartSignups"></canvas>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="répartition utilisateurs company talent particulier staff">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Répartition utilisateurs{% endtrans %}</div>
+										<div class="text-sm text-slate-500">Company • Talent • {% trans %}Particulier{% endtrans %} • Staff</div>
+									</div>
+									<a href="{{ path('admin_users_index') }}" class="sa-chip">{% trans %}Détails{% endtrans %}</a>
+								</div>
+
+								<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+									<div class="h-[220px]">
+										<canvas id="chartUsersSplit"></canvas>
+									</div>
+
+									<div class="space-y-3">
+										<div class="flex justify-between text-sm"><span class="text-slate-500">Company</span><b>{{ usersSplit.company ?? 0 }}</b></div>
+										<div class="flex justify-between text-sm"><span class="text-slate-500">Talent</span><b>{{ usersSplit.talent ?? 0 }}</b></div>
+										<div class="flex justify-between text-sm"><span class="text-slate-500">{% trans %}Particulier{% endtrans %}</span><b>{{ usersSplit.particulier ?? 0 }}</b></div>
+										<div class="flex justify-between text-sm"><span class="text-slate-500">Staff</span><b>{{ usersSplit.staff ?? 0 }}</b></div>
+
+										<div class="pt-2 grid grid-cols-2 gap-2">
+											<div class="sa-card-soft rounded-2xl p-3">
+												<div class="text-xs text-slate-400">{% trans %}Activation{% endtrans %}</div>
+												<div class="mt-1 font-bold">{{ activationRate }}%</div>
+											</div>
+											<div class="sa-card-soft rounded-2xl p-3">
+												<div class="text-xs text-slate-400">Retention</div>
+												<div class="mt-1 font-bold">{{ retentionRate }}%</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="offres recrutements performance matching">
+								<div class="font-bold text-lg">{% trans %}Offres vs recrutements{% endtrans %}</div>
+								<div class="text-sm text-slate-500">{% trans %}Capacité à convertir la demande en placement{% endtrans %}</div>
+								<div class="mt-4 h-[220px]">
+									<canvas id="chartJobs"></canvas>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="modération reports abus fraude">
+								<div class="font-bold text-lg">Trust & Safety</div>
+								<div class="text-sm text-slate-500">{% trans %}Typologie des signalements actifs{% endtrans %}</div>
+								<div class="mt-4 h-[220px]">
+									<canvas id="chartModeration"></canvas>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="zones villes activité connexions">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Top zones{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}Top 10 des villes les plus connectées{% endtrans %}</div>
+									</div>
+									<a href="{{ path('admin_audit_index') }}" class="sa-chip">{% trans %}Explorer{% endtrans %}</a>
+								</div>
+
+								<div class="mt-4 overflow-x-auto sa-scroll">
+									<table class="w-full sa-table text-sm">
+										<thead>
+											<tr>
+												<th class="text-left">N°</th>
+												<th class="text-left">{% trans %}Ville{% endtrans %}</th>
+												<th class="text-left">{% trans %}Utilisateurs connectés{% endtrans %}</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for z in topZones|default([]) %}
+												<tr data-search-item="zone {{ z.name }}">
+													<td>{{ loop.index }}</td>
+													<td class="font-semibold text-slate-800">{{ z.name }}</td>
+													<td>
+														<span class="sa-chip">{{ z.users }}</span>
+													</td>
+												</tr>
+											{% else %}
+												<tr>
+													<td colspan="3" class="text-slate-400 py-4">{% trans %}Aucune donnée zones{% endtrans %}</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="mt-5 sa-tab-panel" data-tab-panel="security">
+						<div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="sécurité modération signalements fraude">
+								<div class="font-bold text-lg">{% trans %}Matrice de modération{% endtrans %}</div>
+								<div class="text-sm text-slate-500">{% trans %}Spam, abus, fraude, identité, autres{% endtrans %}</div>
+								<div class="mt-4 h-[260px]">
+									<canvas id="chartModerationSecurity"></canvas>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="événements sécurité login otp ip access">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Événements sécurité{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}Anomalies récentes{% endtrans %}</div>
+									</div>
+									<span class="sa-chip"> <a href="{{ path ('admin_payment_dispute_index')}}">{% trans %}Tout voir{% endtrans %}</a> </span>
+								</div>
+
+								<div class="mt-4 space-y-3">
+									{% for event in securityEvents|default([]) %}
+										<div class="sa-alert
+											{% if event.level == 'critical' %}
+												sa-alert-critical
+											{% elseif event.level == 'warning' %}
+												sa-alert-warning
+											{% else %}
+												sa-alert-info
+											{% endif %}
+										">
+											<div class="font-semibold">{{ event.title|trans }}</div>
+											<div class="text-sm text-slate-500 mt-1">{{ event.meta|trans }}</div>
+										</div>
+									{% else %}
+										<div class="text-sm text-slate-400">{% trans %}Aucun événement de sécurité récent.{% endtrans %}</div>
+									{% endfor %}
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-3" data-search-item="compliance conformité 2fa audit kyc">
+								<div class="font-bold text-lg">{% trans %}Conformité{% endtrans %}</div>
+								<div class="text-sm text-slate-500">{% trans %}Check-list de gouvernance{% endtrans %}</div>
+
+								<div class="mt-4 space-y-3">
+									<div class="flex items-center justify-between">
+										<span class="text-slate-500">2FA staff</span>
+										<span class="sa-chip">{{ complianceChecklist.twoFactorStaff.rate ?? 0 }}%</span>
+									</div>
+
+									<div class="flex items-center justify-between">
+										<span class="text-slate-500">KYC {% trans %}entreprises{% endtrans %}</span>
+										<span class="sa-chip">{{ complianceChecklist.kycCompanies.rate ?? 0 }}%</span>
+									</div>
+
+									<div class="flex items-center justify-between">
+										<span class="text-slate-500">{% trans %}Logs sensibles{% endtrans %}</span>
+										<span class="sa-chip">{{ complianceChecklist.sensitiveLogs.rate ?? 0 }}%</span>
+									</div>
+
+									<div class="flex items-center justify-between">
+										<span class="text-slate-500">{% trans %}Webhooks signés{% endtrans %}</span>
+										<span class="sa-chip">{{ complianceChecklist.signedWebhooks.rate ?? 0 }}%</span>
+									</div>
+
+									<div class="flex items-center justify-between">
+										<span class="text-slate-500">{% trans %}Backups encryptés{% endtrans %}</span>
+										<span class="sa-chip">
+											{% if complianceChecklist.encryptedBackups.allEncrypted ?? false %}
+												{% trans %}Oui{% endtrans %}
+											{% else %}
+												{% trans %}Non{% endtrans %}
+											{% endif %}
+										</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="mt-3 grid grid-cols-1 xl:grid-cols-12 gap-3">
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-5" data-search-item="connexions utilisateurs sessions login userlog">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Dernières connexions{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}Historique récent des connexions utilisateurs{% endtrans %}</div>
+									</div>
+									<a href="{{ path('admin_audit_index') }}" class="sa-chip">{% trans %}Voir plus{% endtrans %}</a>
+								</div>
+
+								<div class="mt-4 space-y-3">
+									{% for log in recentConnections %}
+										<div class="sa-card-soft rounded-2xl p-3"
+											data-search-item="connexion {{ log.user ? log.user.email : 'utilisateur inconnu' }} {{ log.ip }} {{ log.ville }}">
+
+											<div class="font-semibold">
+												{{ log.user ? (log.user.fullName ?? log.user.email ?? ('Utilisateur #' ~ log.user.id)) : ('Utilisateur inconnu'|trans) }}
+											</div>
+
+											<div class="text-sm text-slate-500 mt-1">
+												{{ log.ip }}
+												{% if log.ville %}
+													• {{ log.ville }}
+												{% endif %}
+												{% if log.country %}
+													• {{ log.country.name ?? log.country }}
+												{% endif %}
+											</div>
+
+											<div class="text-xs text-slate-400 mt-1">
+												{% if log.browser %}
+													{{ log.browser.browser ?? log.browser }}
+												{% endif %}
+												{% if log.operatingSystem %}
+													• {{ log.operatingSystem.operatingSystem ?? log.operatingSystem }}
+												{% endif %}
+												{% if log.deviceType %}
+													• {{ log.deviceType.deviceType ?? log.deviceType }}
+												{% endif %}
+											</div>
+
+											<div class="text-xs text-slate-400 mt-1">
+												{{ log.logedAt ? log.logedAt|date('d/m/Y H:i') : ('Récemment'|trans) }}
+											</div>
+										</div>
+									{% else %}
+										<div class="text-sm text-slate-400">{% trans %}Aucune connexion récente.{% endtrans %}</div>
+									{% endfor %}
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="kyc review entreprise validation identité">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Queue KYC / conformité{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}Vérifications prioritaires{% endtrans %}</div>
+									</div>
+									<a href="{{ path('admin_companies_pending_index') }}" class="sa-chip">{% trans %}Ouvrir{% endtrans %}</a>
+								</div>
+
+								{# ===== KYC ===== #}
+								<div class="mt-4 space-y-3">
+									{% if pendingKyc is not empty %}
+										{% for c in pendingKyc %}
+											<div class="sa-card-soft rounded-2xl p-3">
+												<div class="flex items-center justify-between gap-3">
+													<div>
+														<div class="font-semibold">{{ c.companyName }}</div>
+														<div class="text-sm text-slate-500 mt-1">{{ c.city }}</div>
+													</div>
+
+													<div class="flex items-center gap-2">
+														<span class="sa-chip">{{ c.risk }}</span>
+
+														{% if c.id is defined and c.id %}
+															<a href="{{ path('admin_company_kyc_show', {id: c.id}) }}" class="sa-chip">
+																{% trans %}Ouvrir{% endtrans %}
+															</a>
+														{% endif %}
+													</div>
+												</div>
+											</div>
+										{% endfor %}
+									{% else %}
+										<div class="sa-card-soft rounded-2xl p-3 text-sm text-slate-500">
+											{% trans %}Aucun dossier KYC en attente.{% endtrans %}
+										</div>
+									{% endif %}
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-3" data-search-item="permissions accès staff roles super admin admin moderateur company particulier talent">
+								<div class="font-bold text-lg">{% trans %}Accès sensibles{% endtrans %}</div>
+								<div class="text-sm text-slate-500">{% trans %}Contrôle d’exposition administrative{% endtrans %}</div>
+
+								<div class="mt-4 space-y-3">
+									<div class="sa-card-soft rounded-2xl p-3">
+										<div class="text-xs text-slate-400">ROLE_SUPER_ADMIN</div>
+										<div class="mt-1 font-bold">{{ roleCounts.superAdmin|number_format(0, ',', ' ') }}</div>
+									</div>
+
+									<div class="sa-card-soft rounded-2xl p-3">
+										<div class="text-xs text-slate-400">ROLE_ADMIN</div>
+										<div class="mt-1 font-bold">{{ roleCounts.admin|number_format(0, ',', ' ') }}</div>
+									</div>
+
+									<div class="sa-card-soft rounded-2xl p-3">
+										<div class="text-xs text-slate-400">ROLE_MODERATEUR</div>
+										<div class="mt-1 font-bold">{{ roleCounts.moderateur|number_format(0, ',', ' ') }}</div>
+									</div>
+
+									<div class="sa-card-soft rounded-2xl p-3">
+										<div class="text-xs text-slate-400">ROLE_COMPANY</div>
+										<div class="mt-1 font-bold">{{ roleCounts.company|number_format(0, ',', ' ') }}</div>
+									</div>
+
+									<div class="sa-card-soft rounded-2xl p-3">
+										<div class="text-xs text-slate-400">ROLE_PARTICULIER</div>
+										<div class="mt-1 font-bold">{{ roleCounts.particulier|number_format(0, ',', ' ') }}</div>
+									</div>
+
+									<div class="sa-card-soft rounded-2xl p-3">
+										<div class="text-xs text-slate-400">ROLE_TALENT</div>
+										<div class="mt-1 font-bold">{{ roleCounts.talent|number_format(0, ',', ' ') }}</div>
+									</div>
+
+									<a href="{{ path('admin_permissions_index') }}" class="sa-btn sa-btn-secondary w-full mt-1 inline-flex items-center justify-center">
+										🔐 {% trans %}Revue permissions{% endtrans %}
+									</a>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="mt-5 sa-tab-panel" data-tab-panel="finance">
+						<div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-12" data-search-item="revenus mrr arr abonnement billing plans">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Revenus SaaS{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}RMR, upsell, stabilité abonnements{% endtrans %}</div>
+									</div>
+									<div class="flex gap-2">
+										<span class="sa-chip">{% trans %}RMR : Revenue mensuel récurrent{% endtrans %}</span>
+									</div>
+								</div>
+
+								<div class="mt-4 h-[320px]">
+									<canvas id="chartRevenue"></canvas>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-6" data-search-item="plans abonnements pricing">
+								<div class="font-bold text-lg">{% trans %}Mix des plans{% endtrans %}</div>
+								<div class="text-sm text-slate-500">{% trans %}Répartition de la base d’abonnés{% endtrans %}</div>
+
+								<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+									<div class="h-[220px]">
+										<canvas id="chartPlans"></canvas>
+									</div>
+
+									<div class="space-y-3">
+										{% for p in plansData %}
+											<div class="flex items-center justify-between text-sm">
+												<span class="text-slate-500">{{ p.name }}</span>
+												<div class="text-right">
+													<div class="font-bold">{{ p.count|number_format(0, ',', ' ') }}</div>
+													<div class="text-xs text-slate-400">{{ p.total|number_format(0, ',', ' ') }} XAF</div>
+												</div>
+											</div>
+										{% else %}
+											<div class="text-sm text-slate-400">{% trans %}Aucune donnée plan.{% endtrans %}</div>
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-6" data-search-item="providers momo om carte bancaire paiements">
+								<div class="font-bold text-lg">{% trans %}Mix des providers{% endtrans %}</div>
+								<div class="text-sm text-slate-500">{% trans %}Répartition des paiements réussis par fournisseur{% endtrans %}</div>
+
+								<div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+									<div class="h-[220px]">
+										<canvas id="chartProviders"></canvas>
+									</div>
+
+									<div class="space-y-3">
+										{% for p in providerData %}
+											<div class="flex items-center justify-between text-sm">
+												<span class="text-slate-500">{{ p.name }}</span>
+												<div class="text-right">
+													<div class="font-bold">{{ p.count|number_format(0, ',', ' ') }}</div>
+													<div class="text-xs text-slate-400">{{ p.total|number_format(0, ',', ' ') }} XAF</div>
+												</div>
+											</div>
+										{% else %}
+											<div class="text-sm text-slate-400">{% trans %}Aucune donnée provider.{% endtrans %}</div>
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="paiements échoués payments failed">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Paiements échoués{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}3 dernières transactions à relancer ou investiguer{% endtrans %}</div>
+									</div>
+									<a href="{{ path('admin_payments_failures_index') }}" class="sa-chip">{% trans %}Ouvrir{% endtrans %}</a>
+								</div>
+
+								<div class="mt-4 space-y-3">
+									{% for p in latestFailedPayments %}
+										<div class="sa-card-soft rounded-2xl p-3" data-search-item="paiement {{ p.id }} {{ p.provider }} {{ p.userEmail }} {{ p.status }}">
+											<div class="flex items-start justify-between gap-3">
+												<div>
+													<div class="font-semibold">#{{ p.id }} • {{ p.userEmail }}</div>
+													<div class="text-sm text-slate-500 mt-1">{{ p.provider }} • {{ p.plan }} • {{ p.status }}</div>
+													<div class="text-xs text-slate-400 mt-1">
+														{{ p.paidAt ? p.paidAt|date('d/m/Y H:i') : '-' }}
+													</div>
+												</div>
+
+												<span class="sa-chip">{{ p.amount|number_format(0, ',', ' ') }} {{ p.currency }}</span>
+											</div>
+										</div>
+									{% else %}
+										<div class="text-sm text-slate-400">{% trans %}Aucun paiement échoué récent.{% endtrans %}</div>
+									{% endfor %}
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="payouts reversements wallet">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">Queue payouts</div>
+										<div class="text-sm text-slate-500">{% trans %}Reversements à approuver{% endtrans %}</div>
+									</div>
+									<a href="{{ path('admin_payments_index') }}" class="sa-chip">Payouts</a>
+								</div>
+
+								<div class="mt-4 space-y-3">
+									{% for p in payoutQueue|default([]) %}
+										<div class="sa-card-soft rounded-2xl p-3" data-search-item="payout {{ p.beneficiary|default('') }} {{ p.status|default('') }}">
+											<div class="flex items-start justify-between gap-3">
+												<div>
+													<div class="font-semibold">{{ p.beneficiary|default('—') }}</div>
+													<div class="text-sm text-slate-500 mt-1">{{ p.status|default('—') }}</div>
+												</div>
+												<span class="sa-chip">{{ (p.amount|default(0))|number_format(0, ',', ' ') }}</span>
+											</div>
+										</div>
+									{% else %}
+										<div class="text-sm text-slate-400">{% trans %}Aucun payout en attente.{% endtrans %}</div>
+									{% endfor %}
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="factures revenus récents latest payments">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Derniers paiements{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}Traçabilité monétique{% endtrans %}</div>
+									</div>
+									<a href="{{ path('admin_payments_index') }}" class="sa-chip">{% trans %}Voir tout{% endtrans %}</a>
+								</div>
+
+								<div class="mt-4 overflow-x-auto sa-scroll">
+									<table class="w-full text-sm">
+										<thead class="bg-slate-50/80 backdrop-blur">
+											<tr class="border-b border-slate-200/70">
+												<th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
+													{% trans %}Montant{% endtrans %}
+												</th>
+												<th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
+													{% trans %}Date{% endtrans %}
+												</th>
+												<th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">
+													{% trans %}Facture{% endtrans %}
+												</th>
+											</tr>
+										</thead>
+
+										<tbody class="divide-y divide-slate-100 bg-white">
+											{% for p in latestPayments|default([]) %}
+												<tr class="transition hover:bg-slate-50/70" data-search-item="paiement {{ p.amount|default('') }}">
+													<td class="px-4 py-4">
+														{# <div class="inline-flex items-center rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-black text-emerald-700 ring-1 ring-emerald-100"> #}
+															{{ p.amount is defined and p.amount ? p.amount|number_format(0, ',', ' ') : '-' }} XAF
+														{# </div> #}
+													</td>
+
+													<td class="px-4 py-4">
+														<div class="font-semibold text-slate-800">
+															{{ p.paidAt is defined and p.paidAt ? p.paidAt|date('d/m/Y') : '-' }}
+														</div>
+														<div class="mt-1 text-xs text-slate-500">
+															{{ p.paidAt is defined and p.paidAt ? p.paidAt|date('H:i') : '' }}
+														</div>
+													</td>
+
+													<td class="px-4 py-4">
+														{% if p.invoice is defined and p.invoice %}
+															<a
+																href="{{ path('invoice_download', {slug: p.invoices[0].slug}) }}"
+																class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+															>
+																📥 
+															</a>
+														{% elseif p.invoices is defined and p.invoices|length > 0 %}
+															<a
+																href="{{ path('invoice_download', {slug: p.invoices[0].slug}) }}"
+																class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+															>
+																📥 
+															</a>
+														{% else %}
+															<span class="inline-flex items-center rounded-2xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-400">
+																{% trans %}Indisponible{% endtrans %}
+															</span>
+														{% endif %}
+													</td>
+												</tr>
+											{% else %}
+												<tr>
+													<td colspan="3" class="px-4 py-8 text-center text-sm font-semibold text-slate-400">
+														{% trans %}Aucun paiement récent{% endtrans %}
+													</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="mt-5 sa-tab-panel" data-tab-panel="ops">
+						<div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-8" data-search-item="tendances utilisateurs inscriptions roles talent particulier company">
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="font-bold text-lg">{% trans %}Tendances utilisateurs{% endtrans %}</div>
+										<div class="text-sm text-slate-500">{% trans %}Inscriptions quotidiennes par rôle{% endtrans %}</div>
+									</div>
+									<span class="sa-chip">{% trans %}Observabilité{% endtrans %}</span>
+								</div>
+								<div class="mt-4 h-[400px]">
+									<canvas id="chartHealth"></canvas>
+								</div>
+							</div>
+
+							<div class="sa-card rounded-[1.75rem] p-4 xl:col-span-4" data-search-item="api endpoints trafic webhooks">
+								<div class="font-bold text-lg">Top APIs</div>
+								<div class="text-sm text-slate-500">{% trans %}Endpoints les plus sollicités{% endtrans %}</div>
+
+								<div class="mt-4 space-y-3">
+									{% for api in topApis|default([]) %}
+										<div class="sa-card-soft rounded-2xl p-3" data-search-item="api {{ api.endpoint }}">
+											<div class="flex items-start justify-between gap-3">
+												<div>
+													<div class="font-semibold">{{ api.endpoint }}</div>
+													<div class="text-xs text-slate-400 mt-1">
+														{{ api.avgMs|number_format(0, ',', ' ') }} ms • {{ api.errorRate|number_format(1, ',', ' ') }}% erreurs
+													</div>
+												</div>
+
+												<b>
+													{% if api.hits >= 1000 %}
+														{{ (api.hits / 1000)|number_format(1, ',', ' ') }}k
+													{% else %}
+														{{ api.hits|number_format(0, ',', ' ') }}
+													{% endif %}
+												</b>
+											</div>
+										</div>
+									{% else %}
+										<div class="text-sm text-slate-400">{% trans %}Aucune métrique API disponible.{% endtrans %}</div>
+									{% endfor %}
+
+									<a href="{{ path('admin_api_metrics_index') }}" class="sa-btn sa-btn-secondary w-full inline-flex items-center justify-center">
+										📡 Metrics API
+									</a>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="grid gap-4 xl:grid-cols-3">
+						<div class="space-y-4 xl:col-span-2">
+							<div class="rounded-3xl border border-amber-200/70 bg-amber-50/70 backdrop-blur-xl shadow-soft3 p-4">
+								<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+									<div>
+										<div class="text-sm font-extrabold text-slate-900">🧠 {% trans %}Centre d’opérations{% endtrans %}</div>
+										<div class="mt-1 text-sm font-medium text-slate-600">
+											{% trans %}Priorités : profils pro à valider, offres signalées, paiements en litige, tickets support.{% endtrans %}
+										</div>
+									</div>
+									<div class="flex flex-wrap gap-3">
+										<a href="{{ path('moderateur_verifications_index') }}" class="inline-flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-xs font-extrabold text-slate-900 border border-amber-200/70 shadow-soft3 hover:bg-amber-50">
+											✅ {% trans %}Vérifs{% endtrans %}
+										</a>
+										<a href="{{ path('moderateur_reports_index', {status: 'open'}) }}" class="inline-flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-xs font-extrabold text-rose-700 border border-rose-200/70 shadow-soft3 hover:bg-rose-50">
+											🚨 {% trans %}Abus{% endtrans %}
+										</a>
+										<a href="{{ path('admin_payment_dispute_index') }}" class="inline-flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-xs font-extrabold text-slate-900 border border-amber-200/70 shadow-soft3 hover:bg-amber-50">
+											💳 {% trans %}Litiges{% endtrans %}
+										</a>
+										<a href="{{ path('admin_backups_index') }}" class="inline-flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-xs font-extrabold text-slate-900 border border-amber-200/70 shadow-soft3 hover:bg-amber-50">
+											🗄️ {% trans %}Backups{% endtrans %}
+										</a>
+									</div>
+								</div>
+							</div>
+
+							<div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft overflow-hidden">
+								<div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+									<div class="flex items-center justify-between gap-3">
+										<div>
+											<div class="text-sm font-extrabold text-slate-900">📈 {% trans %}Activité (30 jours){% endtrans %}</div>
+											<div class="text-xs font-semibold text-slate-500">{% trans %}Inscriptions • tendance • monitoring{% endtrans %}</div>
+										</div>
+										<span class="inline-flex items-center gap-2 rounded-full border border-cyan-200/70 bg-cyan-50 px-2.5 py-1 text-[11px] font-extrabold text-cyan-700">
+											<span class="h-1.5 w-1.5 rounded-full bg-cyan-500"></span>
+											Analytics
+										</span>
+									</div>
+								</div>
+
+								<div class="p-4">
+									<div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-soft3 h-[300px]">
+										<canvas id="chartSignups30d"></canvas>
+									</div>
+								</div>
+
+								<div class="px-5 py-3 border-t border-slate-200/70 bg-white/60 flex flex-wrap items-center justify-between gap-2">
+									<span class="text-[11px] font-semibold text-slate-500">{% trans %}Source : analytics interne{% endtrans %}</span>
+									<a href="{{ path('admin_analytics_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">
+										📊 {% trans %}Ouvrir Analytics{% endtrans %}
+									</a>
+								</div>
+							</div>
+
+							{# <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft overflow-hidden">
+								<div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+									<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+										<div>
+											<div class="text-sm font-extrabold text-slate-900">👤 {% trans %}Utilisateurs récents{% endtrans %}</div>
+											<div class="text-xs font-semibold text-slate-500">{% trans %}Dernières inscriptions • contrôle rapide{% endtrans %}</div>
+										</div>
+										<div class="flex flex-wrap gap-3">
+											<a href="{{ path('admin_users_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">
+												{% trans %}Tout voir{% endtrans %}
+											</a>
+										</div>
+									</div>
+								</div>
+
+								<div class="overflow-x-auto">
+									<table class="min-w-full text-sm sa-table">
+										<thead class="bg-slate-50/70 backdrop-blur">
+											<tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+												<th class="px-5 py-3 font-extrabold">{% trans %}Compte{% endtrans %}</th>
+												<th class="px-5 py-3 font-extrabold">{% trans %}Statut{% endtrans %}</th>
+												<th class="px-5 py-3 font-extrabold">{% trans %}Créé{% endtrans %}</th>
+												<th class="px-5 py-3 font-extrabold">{% trans %}Actions{% endtrans %}</th>
+											</tr>
+										</thead>
+										<tbody class="divide-y divide-slate-200/70">
+											{% for u in latestUsers %}
+												<tr class="hover:bg-indigo-50/20">
+													<td class="px-5 py-3">
+														<div class="flex items-center gap-3">
+															<img class="h-9 w-9 rounded-2xl border border-slate-200 bg-slate-50 object-cover" src="{{ asset('uploads/profiles/' ~ (u.personalProfile.photo ?? 'avatar.png')) }}" alt="">
+															<div>
+																<div class="font-bold text-slate-900">{{ u.email }}</div>
+																<div class="text-xs font-semibold text-slate-500">
+																	{{ u.phone ?? '—' }}
+																</div>
+															</div>
+														</div>
+													</td>
+
+													<td class="px-5 py-3">
+														{% if u.isActive %}
+															<span class="inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700">
+																<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+																{% trans %}Actif{% endtrans %}
+															</span>
+														{% else %}
+															<span class="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-rose-50 px-2.5 py-1 text-[11px] font-extrabold text-rose-700">
+																<span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
+																{% trans %}Bloqué{% endtrans %}
+															</span>
+														{% endif %}
+													</td>
+
+													<td class="px-5 py-3 text-xs font-semibold text-slate-500">
+														{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '-' }}
+													</td>
+
+													<td class="px-5 py-3">
+														<div class="flex flex-wrap gap-3">
+															{% if u.personalProfile %}
+																<a href="{{ path('moderateur_verifications_show_slug', {slug: u.personalProfile.slug}) }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">
+																	👁️ {% trans %}Voir{% endtrans %}
+																</a>
+															{% else %}
+																<span class="text-xs text-slate-500">{% trans %}Cet utilisateur n’a pas encore complété son profil.{% endtrans %}</span>
+															{% endif %}
+
+															<a href="{{ path('moderateur_verifications_block', {id: u.id}) }}" class="inline-flex items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 shadow-soft3 hover:bg-rose-100/60">
+																⛔
+															</a>
+														</div>
+													</td>
+												</tr>
+											{% else %}
+												<tr>
+													<td colspan="5" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucun utilisateur récent{% endtrans %}</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+
+								<div class="px-5 py-3 border-t border-slate-200/70 bg-white/60 flex flex-wrap items-center justify-between gap-2">
+									<span class="text-[11px] font-semibold text-slate-500">{% trans %}Recherche & filtres avancés disponibles{% endtrans %}</span>
+									<a href="{{ path('moderateur_verifications_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">
+										👥 {% trans %}Gestion utilisateurs{% endtrans %}
+									</a>
+								</div>
+							</div> #}
+
+							<div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft overflow-hidden">
+								<div class="px-5 py-4 border-b border-slate-200/70 bg-white/60 flex items-center justify-between gap-3">
+									<div>
+										<div class="text-sm font-extrabold text-slate-900">🚨 {% trans %}File de traitement{% endtrans %}</div>
+										<div class="text-xs font-semibold text-slate-500">{% trans %}Signalements & offres signalées{% endtrans %}</div>
+									</div>
+									<span class="inline-flex items-center rounded-full border border-rose-200/70 bg-rose-50 px-2.5 py-1 text-[11px] font-extrabold text-rose-700">
+										{{ kpi.pendingReports ?? 0 }} open
+									</span>
+								</div>
+
+								<div class="overflow-x-auto">
+									<table class="min-w-full text-sm sa-table">
+										<thead class="bg-slate-50/70 backdrop-blur">
+											<tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+												<th class="px-5 py-3 font-extrabold">{% trans %}Type{% endtrans %}</th>
+												<th class="px-5 py-3 font-extrabold">{% trans %}Objet{% endtrans %}</th>
+												<th class="px-5 py-3 font-extrabold">{% trans %}Priorité{% endtrans %}</th>
+												<th class="px-5 py-3 font-extrabold">{% trans %}Action{% endtrans %}</th>
+											</tr>
+										</thead>
+										<tbody class="divide-y divide-slate-200/70">
+											{% for r in flaggedJobs %}
+												<tr class="hover:bg-rose-50/20">
+													<td class="px-5 py-3">
+														<span class="inline-flex items-center gap-2 rounded-full border border-amber-200/70 bg-amber-50 px-2.5 py-1 text-[11px] font-extrabold text-amber-700">
+															<span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+															Report
+														</span>
+													</td>
+
+													<td class="px-5 py-3">
+														<div class="font-bold text-slate-900">
+															{% if r.targetJob is defined and r.targetJob %}
+																{{ r.targetJob.title ?? ('Job #' ~ r.targetJob.id) }}
+															{% else %}
+																{{ r.title ?? ('Signalement #' ~ r.id) }}
+															{% endif %}
+														</div>
+														<div class="text-xs font-semibold text-slate-500">
+															{{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '' }}
+														</div>
+													</td>
+
+													<td class="px-5 py-3">
+														<span class="inline-flex items-center rounded-full border border-rose-200/70 bg-rose-50 px-2.5 py-1 text-[11px] font-extrabold text-rose-700">
+															{% trans %}Haute{% endtrans %}
+														</span>
+													</td>
+
+													<td class="px-5 py-3">
+														<a href="{{ path('admin_harassment_investigate') }}" class="inline-flex items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 shadow-soft3 hover:bg-rose-100/60">
+															{% trans %}Traiter{% endtrans %}
+														</a>
+													</td>
+												</tr>
+											{% else %}
+												<tr>
+													<td colspan="4" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucune alerte{% endtrans %}</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+
+								<div class="px-5 py-3 border-t border-slate-200/70 bg-white/60 flex flex-wrap items-center justify-between gap-2">
+									<a href="{{ path('moderateur_reports_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">
+										📌 {% trans %}Tous les signalements{% endtrans %}
+									</a>
+									<a href="{{ path('moderateur_reports_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">
+										🚩 {% trans %}Offres signalées{% endtrans %}
+									</a>
+								</div>
+							</div>
+						</div>
+
+						{# <div class="space-y-4">
+							<div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft overflow-hidden">
+								<div class="px-5 py-4 border-b border-slate-200/70 bg-white/60 flex items-center justify-between gap-3">
+									<div>
+										<div class="text-sm font-extrabold text-slate-900">✅ {% trans %}Vérifications{% endtrans %}</div>
+										<div class="text-xs font-semibold text-slate-500">{% trans %}Profils professionnels{% endtrans %}</div>
+									</div>
+									<span class="inline-flex items-center rounded-full border border-amber-200/70 bg-amber-50 px-2.5 py-1 text-[11px] font-extrabold text-amber-700">
+										{{ pendingProProfiles|length }}
+									</span>
+								</div>
+
+								<div class="overflow-x-auto">
+									<table class="min-w-full text-sm sa-table">
+										<thead class="bg-slate-50/70 backdrop-blur">
+											<tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+												<th class="px-5 py-3 font-extrabold">{% trans %}Profil{% endtrans %}</th>
+												<th class="px-5 py-3 font-extrabold">Exp</th>
+												<th class="px-5 py-3 font-extrabold">{% trans %}Action{% endtrans %}</th>
+											</tr>
+										</thead>
+										<tbody class="divide-y divide-slate-200/70">
+											{% for pp in pendingProProfiles %}
+												<tr class="hover:bg-amber-50/20">
+													<td class="px-5 py-3">
+														<div class="font-bold text-slate-900">{{ pp.user ? (pp.user.email ?? '—') : '—' }}</div>
+														<div class="text-xs font-semibold text-slate-500">
+															ID: {{ pp.id }} • {{ pp.createdAt ? pp.createdAt|date('d/m/Y') : '' }}
+														</div>
+													</td>
+													<td class="px-5 py-3">
+														<span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-extrabold text-slate-700">
+															{{ pp.experienceYears ?? 0 }} {% trans %}an{% endtrans %}{{ (pp.experienceYears ?? 0) > 1 ? 's' : '' }}
+														</span>
+													</td>
+													<td class="px-5 py-3">
+														<a href="{{ path('moderateur_verifications_show_slug', {slug: pp.user.personalProfile.slug })}}" class="inline-flex items-center gap-2 rounded-2xl border border-indigo-200/70 bg-indigo-50 px-3 py-2 text-xs font-extrabold text-indigo-700 shadow-soft3 hover:bg-indigo-100/60">
+															{% trans %}Examiner{% endtrans %}
+														</a>
+													</td>
+												</tr>
+											{% else %}
+												<tr>
+													<td colspan="3" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucun{% endtrans %}</td>
+												</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+
+								<div class="px-5 py-3 border-t border-slate-200/70 bg-white/60 flex flex-wrap items-center justify-between gap-2">
+									<a href="{{ path('moderateur_verifications_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">
+										📥 {% trans %}File complète{% endtrans %}
+									</a>
+								</div>
+							</div>
+
+							<div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft p-5">
+								<div class="flex items-center justify-between gap-3">
+									<div>
+										<div class="text-sm font-extrabold text-slate-900">💳 {% trans %}Paiements & facturation{% endtrans %}</div>
+										<div class="text-xs font-semibold text-slate-500">{% trans %}Transactions • factures • abonnements{% endtrans %}</div>
+									</div>
+									<span class="inline-flex items-center rounded-full border border-cyan-200/70 bg-cyan-50 px-2.5 py-1 text-[11px] font-extrabold text-cyan-700">
+										{{ kpi.paymentsToday ?? 0 }} {% trans %}aujourd’hui{% endtrans %}
+									</span>
+								</div>
+
+								<div class="mt-4 flex items-start justify-between gap-3">
+									<div>
+										<div class="text-xs font-semibold text-slate-500">{% trans %}Revenus (30j){% endtrans %}</div>
+										<div class="mt-1 text-xl font-black tracking-tight text-slate-900">{{ kpi.revenue30d ?? '—' }}</div>
+									</div>
+									<span class="inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700">
+										<span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+										OK
+									</span>
+								</div>
+
+								<div class="mt-4 h-2.5 w-full rounded-full border border-slate-200 bg-slate-50 overflow-hidden">
+									<div class="h-full rounded-full bg-gradient-to-r from-indigo-600 to-cyan-500" style="width: {{ kpi.billingHealthPct ?? 72 }}%;"></div>
+								</div>
+
+								<div class="mt-4 flex flex-wrap gap-2">
+									<a href="{{ path('admin_payments_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Transactions{% endtrans %}</a>
+									<a href="{{ path('admin_invoices_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Factures{% endtrans %}</a>
+									<a href="{{ path('admin_payment_dispute_index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 shadow-soft3 hover:bg-rose-100/60">{% trans %}Litiges{% endtrans %}</a>
+									<a href="{{ path('admin_subscriptions_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Abonnements{% endtrans %}</a>
+								</div>
+							</div>
+
+							<div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft p-5">
+								<div class="flex items-center justify-between gap-3">
+									<div>
+										<div class="text-sm font-extrabold text-slate-900">🎧 {% trans %}Support & tickets{% endtrans %}</div>
+										<div class="text-xs font-semibold text-slate-500">SLA • templates • {% trans %}suivi{% endtrans %}</div>
+									</div>
+									<span class="inline-flex items-center rounded-full border border-amber-200/70 bg-amber-50 px-2.5 py-1 text-[11px] font-extrabold text-amber-700">
+										{{ kpi.openTickets ?? 0 }} {% trans %}ouverts{% endtrans %}
+									</span>
+								</div>
+
+								<div class="mt-4">
+									<div class="text-xs font-semibold text-slate-500">{% trans %}Temps moyen de réponse{% endtrans %}</div>
+									<div class="mt-1 text-xl font-black tracking-tight text-slate-900">{{ kpi.avgFirstResponse ?? '—' }}</div>
+								</div>
+
+								<div class="mt-4 flex flex-wrap gap-2">
+									<a href="{{ path('admin_support_new') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-3 py-2 text-xs font-extrabold text-white shadow-soft2 hover:opacity-95">➕ {% trans %}Ticket{% endtrans %}</a>
+									<a href="{{ path('admin_support_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Boîte support{% endtrans %}</a>
+									<a href="{{ path('admin_faq_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">FAQ</a>
+									<a href="{{ path('admin_templates_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">Templates</a>
+								</div>
+							</div>
+
+							<div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft p-5">
+								<div class="flex items-center justify-between gap-3">
+									<div>
+										<div class="text-sm font-extrabold text-slate-900">🔒 {% trans %}Sécurité & accès{% endtrans %}</div>
+										<div class="text-xs font-semibold text-slate-500">RBAC • sessions • {% trans %}incidents{% endtrans %}</div>
+									</div>
+									<span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-extrabold text-slate-700">RBAC</span>
+								</div>
+
+								<div class="mt-4 flex flex-wrap gap-2">
+									<a href="{{ path('admin_roles_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Rôles{% endtrans %}</a>
+									<a href="{{ path('admin_permissions_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Permissions{% endtrans %}</a>
+									<a href="{{ path('admin_sessions_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Sessions actives{% endtrans %}</a>
+									<a href="{{ path('admin_security_incidents') }}" class="inline-flex items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 shadow-soft3 hover:bg-rose-100/60">{% trans %}Incidents{% endtrans %}</a>
+									<a href="{{ path('admin_2fa_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">2FA</a>
+								</div>
+
+								<div class="mt-3 text-xs font-semibold text-slate-500">
+									✔ {% trans %}Journalisation{% endtrans %} • ✔ {% trans %}blocage IP{% endtrans %} • ✔ {% trans %}détection abus{% endtrans %} • ✔ {% trans %}limites rate{% endtrans %}
+								</div>
+							</div>
+
+							<div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft p-5">
+								<div class="flex items-center justify-between gap-3">
+									<div>
+										<div class="text-sm font-extrabold text-slate-900">🧹 {% trans %}Modération contenu{% endtrans %}</div>
+										<div class="text-xs font-semibold text-slate-500">{% trans %}Offres • messages • avis • médias{% endtrans %}</div>
+									</div>
+									<span class="inline-flex items-center rounded-full border border-rose-200/70 bg-rose-50 px-2.5 py-1 text-[11px] font-extrabold text-rose-700">
+										{{ kpi.moderationQueue ?? 0 }}
+									</span>
+								</div>
+
+								<div class="mt-4 flex flex-wrap gap-2">
+									<a href="{{ path('admin_content_moderation_index') }}" class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-3 py-2 text-xs font-extrabold text-white shadow-soft2 hover:opacity-95">{% trans %}File{% endtrans %}</a>
+									<a href="{{ path('admin_keywords_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Mots-clés{% endtrans %}</a>
+									<a href="{{ path('admin_spam_index') }}" class="sa-btn inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-800 shadow-soft3 hover:bg-slate-50">{% trans %}Anti-spam{% endtrans %}</a>
+									<a href="{{ path('admin_bans_index') }}" class="inline-flex items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 shadow-soft3 hover:bg-rose-100/60">{% trans %}Bannissements{% endtrans %}</a>
+								</div>
+
+								<div class="mt-3 text-xs font-semibold text-slate-500">
+									{% trans %}Images • descriptions • messages • offres • avis • commentaires{% endtrans %}
+								</div>
+							</div>
+						</div> #}
+					</section>
+
+					<section class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-soft overflow-hidden">
+						<div class="px-5 py-4 border-b border-slate-200/70 bg-white/60 flex items-center justify-between gap-3">
+							<div>
+								<div class="text-sm font-extrabold text-slate-900">🧩 Admin Toolkit</div>
+								<div class="text-xs font-semibold text-slate-500">{% trans %}Raccourcis essentiels • administration complète{% endtrans %}</div>
+							</div>
+						</div>
+
+						<div class="p-5">
+							<div class="flex flex-wrap gap-3">
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_talents_index') }}">🧑‍🔧 {% trans %}Talents{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_companies_index') }}">🏢 {% trans %}Compagnies{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_individuals_index') }}">🧑‍💼 {% trans %}Particuliers{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_moderators_index') }}">🧿 {% trans %}Modérateurs{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_jobs_index') }}">📣 {% trans %}Offres{% endtrans %}</a>
+								<a class="rounded-full border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-extrabold text-amber-800 hover:bg-amber-100" href="{{ path('admin_annonces_moderation') }}">📢 {% trans %}Annonces{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="javascript:void(0);">⭐ {% trans %}Avis & notes{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="javascript:void(0);">❤️ {% trans %}Favoris{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_subscriptions_index') }}">➕ {% trans %}Abonnements{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" type="button" onclick="MOLChatOpen()">🔔 {% trans %}Notifications{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_broadcast_index') }}">📢 Broadcast</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_analytics_index') }}">📊 {% trans %}Analytics{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_audit_index') }}">🧾 {% trans %}Audit{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_backups_index') }}">🗄️ Backups</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_integrations_index') }}">🔌 {% trans %}Intégrations{% endtrans %}</a>
+								<a class="rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-extrabold text-slate-700 hover:bg-slate-50" href="{{ path('admin_settings_index') }}">⚙️ {% trans %}Paramètres{% endtrans %}</a>
+							</div>
+						</div>
+					</section>
+				</main>
+			</div>
+		</div>
+
+		<div id="saCommandModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+			<div id="saCommandBox" class="w-full max-w-2xl bg-white rounded-3xl p-6 shadow-2xl">
+				<div class="flex items-center justify-between">
+					<div>
+						<div class="font-bold text-lg text-slate-900">Command Center</div>
+						<div class="text-sm text-slate-500">{% trans %}Raccourcis super administrateur{% endtrans %}</div>
+					</div>
+
+					<button id="saCloseCommand" class="px-3 py-1 text-sm rounded-lg border border-slate-200 hover:bg-slate-100">
+						X
+					</button>
+				</div>
+
+				<div class="mt-5">
+					<input id="saCommandInput" type="text" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="{{ 'Tape une commande ou une action...'|trans }}">
+				</div>
+
+				<div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+					<button class="rounded-xl border border-slate-200 p-4 text-left hover:bg-slate-50 transition" data-sa-action="kyc">
+						<div class="font-semibold text-slate-900">✅ {% trans %}Ouvrir la file KYC{% endtrans %}</div>
+						<div class="text-sm text-slate-500 mt-1">{% trans %}Entreprises à vérifier et valider{% endtrans %}</div>
+					</button>
+
+					<button class="rounded-xl border border-slate-200 p-4 text-left hover:bg-slate-50 transition" data-sa-action="finance">
+						<div class="font-semibold text-slate-900">💳 {% trans %}Générer rapport financier{% endtrans %}</div>
+						<div class="text-sm text-slate-500 mt-1">RMR, {% trans %}revenus{% endtrans %}, {% trans %}paiements{% endtrans %}</div>
+					</button>
+
+					<button class="rounded-xl border border-slate-200 p-4 text-left hover:bg-slate-50 transition" data-sa-action="cache">
+						<div class="font-semibold text-slate-900">🧹 {% trans %}Purger le cache{% endtrans %}</div>
+						<div class="text-sm text-slate-500 mt-1">{% trans %}Nettoyer les couches applicatives{% endtrans %}</div>
+					</button>
+
+					<button class="rounded-xl border border-slate-200 p-4 text-left hover:bg-slate-50 transition" data-sa-action="incident">
+						<div class="font-semibold text-slate-900">🚨 Incident manager</div>
+						<div class="text-sm text-slate-500 mt-1">{% trans %}Piloter les incidents critiques{% endtrans %}</div>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="sa-toast-wrap" id="saToastWrap">
+			{% for message in app.flashes('success') %}
+				<div class="sa-toast sa-toast-success">{{ message }}</div>
+			{% endfor %}
+
+			{% for message in app.flashes('warning') %}
+				<div class="sa-toast sa-toast-warning">{{ message }}</div>
+			{% endfor %}
+
+			{% for message in app.flashes('error') %}
+				<div class="sa-toast sa-toast-error">{{ message }}</div>
+			{% endfor %}
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+	<script>
+		const revenueLabels = {{ revenueChart.labels|default([])|json_encode|raw }};
+		const revenueValues = {{ revenueChart.mrr|default([])|json_encode|raw }};
+	</script>
+
+	<script>
+		const subscriptionPlanLabels = {{ subscriptionPlanLabels|default([])|json_encode|raw }};
+		const subscriptionPlanValues = {{ subscriptionPlanValues|default([])|json_encode|raw }};
+	</script>
+
+	<script>
+		const providerLabels = {{ providerLabels|default([])|json_encode|raw }};
+		const providerValues = {{ providerValues|default([])|json_encode|raw }};
+	</script>
+
+	<script>
+		const userTrendLabels = {{ userTrendChart.labels|default([])|json_encode|raw }};
+		const userTrendTalent = {{ userTrendChart.talent|default([])|json_encode|raw }};
+		const userTrendParticulier = {{ userTrendChart.particulier|default([])|json_encode|raw }};
+		const userTrendCompany = {{ userTrendChart.company|default([])|json_encode|raw }};
+	</script>
+
+	<script>
+		(function () {
+			const searchInput = document.getElementById('adminSearch');
+			const resultsBox = document.getElementById('globalSearchResults');
+			const resultsContent = document.getElementById('searchResultsContent');
+			const commandModal = document.getElementById('saCommandModal');
+			const openCommandBtn = document.getElementById('saOpenCommand');
+			const closeCommandBtn = document.getElementById('saCloseCommand');
+			const commandInput = document.getElementById('saCommandInput');
+			const toastWrap = document.getElementById('saToastWrap');
+			const searchUrl = '{{ path('admin_search_global') }}';
+
+			function saToast(message) {
+				if (!toastWrap) return;
+				const el = document.createElement('div');
+				el.className = 'sa-toast sa-toast-success show';
+				el.innerHTML = `<div class="font-semibold">{% trans %}Action console{% endtrans %}</div><div class="text-sm mt-1 text-slate-300">${message}</div>`;
+				toastWrap.appendChild(el);
+
+				setTimeout(() => {
+					el.style.opacity = '0';
+					el.style.transform = 'translateY(8px)';
+					el.style.transition = '.25s ease';
+					setTimeout(() => el.remove(), 260);
+				}, 2600);
+			}
+
+			document.querySelectorAll('[data-sa-action]').forEach(btn => {
+				btn.addEventListener('click', function () {
+					const action = this.getAttribute('data-sa-action');
+					saToast(`{% trans %}À brancher côté backend :{% endtrans %} ${action}`);
+				});
+			});
+
+			function openCommandModal() {
+				if (!commandModal) return;
+				commandModal.classList.remove('hidden');
+				commandModal.classList.add('flex');
+				setTimeout(() => commandInput && commandInput.focus(), 30);
+			}
+
+			function closeCommandModal() {
+				if (!commandModal) return;
+				commandModal.classList.add('hidden');
+				commandModal.classList.remove('flex');
+			}
+
+			openCommandBtn && openCommandBtn.addEventListener('click', openCommandModal);
+			closeCommandBtn && closeCommandBtn.addEventListener('click', closeCommandModal);
+
+			commandModal && commandModal.addEventListener('click', function (e) {
+				if (e.target === commandModal) closeCommandModal();
+			});
+
+			document.addEventListener('keydown', function (e) {
+				if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+					e.preventDefault();
+					searchInput && searchInput.focus();
+				}
+
+				if (e.key === 'Escape') {
+					closeCommandModal();
+					resultsBox && resultsBox.classList.add('hidden');
+				}
+			});
+
+			document.addEventListener('click', function (e) {
+				if (!resultsBox || !searchInput) return;
+				if (!resultsBox.contains(e.target) && e.target !== searchInput) {
+					resultsBox.classList.add('hidden');
+				}
+			});
+
+			const tabs = document.querySelectorAll('[data-tab-btn]');
+			const panels = document.querySelectorAll('[data-tab-panel]');
+
+			tabs.forEach(btn => {
+				btn.addEventListener('click', function () {
+					const key = this.dataset.tabBtn;
+					tabs.forEach(b => b.classList.remove('active'));
+					panels.forEach(panel => panel.classList.remove('active'));
+					this.classList.add('active');
+					const target = document.querySelector('[data-tab-panel="' + key + '"]');
+					if (target) target.classList.add('active');
+				});
+			});
+
+			function updateClock() {
+				const el = document.getElementById('saLiveClock');
+				if (!el) return;
+				const d = new Date();
+				const hh = String(d.getHours()).padStart(2, '0');
+				const mm = String(d.getMinutes()).padStart(2, '0');
+				const ss = String(d.getSeconds()).padStart(2, '0');
+				el.textContent = `${hh}:${mm}:${ss}`;
+			}
+			updateClock();
+			setInterval(updateClock, 1000);
+
+			document.querySelectorAll('[data-count]').forEach(el => {
+				const raw = parseInt((el.getAttribute('data-count') || '0').replace(/\s+/g, ''), 10) || 0;
+				const duration = 900;
+				const start = performance.now();
+
+				function tick(now) {
+					const p = Math.min((now - start) / duration, 1);
+					const v = Math.floor(raw * p);
+					el.textContent = new Intl.NumberFormat('fr-FR').format(v);
+					if (p < 1) requestAnimationFrame(tick);
+				}
+				requestAnimationFrame(tick);
+			});
+
+			async function runGlobalSearch(q) {
+				try {
+					const response = await fetch(`${searchUrl}?q=${encodeURIComponent(q)}`, {
+						headers: { 'X-Requested-With': 'XMLHttpRequest' }
+					});
+					const data = await response.json();
+
+					function section(title, icon, items) {
+						if (!items || items.length === 0) return '';
+						let html = `<div class="border-b last:border-none"><div class="px-4 py-2 text-[11px] font-extrabold text-slate-500 bg-slate-50">${icon} ${title}</div>`;
+						items.forEach(item => {
+							const label = item.label || item.email || item.nom || item.title || item.reference || '—';
+							const url = item.url || '#';
+							html += `<a href="${url}" class="flex items-center justify-between px-4 py-2 text-sm hover:bg-indigo-50"><span>${label}</span></a>`;
+						});
+						html += `</div>`;
+						return html;
+					}
+
+					let html = '';
+					html += section('{% trans %}Utilisateurs{% endtrans %}', '👤', data.users);
+					html += section('{% trans %}Entreprises{% endtrans %}', '🏢', data.companies);
+					html += section('{% trans %}Offres{% endtrans %}', '📣', data.jobs);
+					html += section('{% trans %}Transactions{% endtrans %}', '💳', data.transactions);
+					html += section('{% trans %}Tickets{% endtrans %}', '🎫', data.tickets);
+
+					resultsContent.innerHTML = html || `<div class="px-4 py-4 text-sm text-slate-500">{% trans %}Aucun résultat{% endtrans %}</div>`;
+					resultsBox.classList.remove('hidden');
+				} catch (e) {
+					resultsContent.innerHTML = `<div class="px-4 py-4 text-sm text-rose-600">{% trans %}Erreur lors de la recherche globale{% endtrans %}</div>`;
+					resultsBox.classList.remove('hidden');
+				}
+			}
+
+			searchInput && searchInput.addEventListener('input', function () {
+				const q = this.value.trim();
+				if (q.length < 2) {
+					resultsBox && resultsBox.classList.add('hidden');
+					return;
+				}
+				runGlobalSearch(q);
+			});
+
+			const defaultMonths = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Aoû", "Sep", "Oct", "Nov", "Déc"];
+			const gridColor = 'rgba(148,163,184,.18)';
+			const labelColor = '#64748b';
+
+			const commonOptions = {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						labels: {
+							color: labelColor,
+							boxWidth: 10,
+							usePointStyle: true
+						}
+					},
+					tooltip: {
+						backgroundColor: '#ffffff',
+						titleColor: '#0f172a',
+						bodyColor: '#475569',
+						borderColor: 'rgba(226,232,240,.95)',
+						borderWidth: 1,
+						padding: 12
+					}
+				},
+				scales: {
+					x: { ticks: { color: labelColor }, grid: { color: gridColor } },
+					y: { ticks: { color: labelColor }, grid: { color: gridColor }, beginAtZero: true }
+				}
+			};
+
+			const raw30d = {{ charts.signups30d|default([])|json_encode|raw }};
+			const labels30d = raw30d.map(x => x.d);
+			const data30d = raw30d.map(x => parseInt(x.c, 10) || 0);
+
+			const chart30d = document.getElementById('chartSignups30d');
+			if (chart30d) {
+				new Chart(chart30d, {
+					type: 'line',
+					data: {
+						labels: labels30d,
+						datasets: [{
+							label: '{% trans %}Inscriptions{% endtrans %}',
+							data: data30d,
+							tension: .35,
+							fill: true,
+							pointRadius: 2,
+							pointHoverRadius: 4,
+							borderWidth: 2,
+							borderColor: '#6366f1',
+							backgroundColor: 'rgba(99,102,241,.12)'
+						}]
+					},
+					options: commonOptions
+				});
+			}
+
+			const split = {{ usersSplit|default({'company':0,'talent':0,'particulier':0,'staff':0})|json_encode|raw }};
+			const jobs = {{ chartJobVsRecruits.jobsVsRecruits|default({'jobs':0,'recruited':0})|json_encode|raw }};
+			const mod = {{ chartsModeration|default({'spam':0,'abuse':0,'fraud':0,'identity':0,'other':0})|json_encode|raw }};
+			const revenueChartLabels = Array.isArray(revenueLabels) ? revenueLabels : [];
+			const revenueChartValues = Array.isArray(revenueValues) ? revenueValues : [];
+			const healthRaw = {{ charts.healthSeries|default([])|json_encode|raw }};
+			const healthLabels = healthRaw.length ? healthRaw.map(x => x.label) : ["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+			const latencyValues = healthRaw.length ? healthRaw.map(x => parseInt(x.latency, 10) || 0) : [180,176,191,169,174,186,182];
+			const errorValues = healthRaw.length ? healthRaw.map(x => parseFloat(x.errors) || 0) : [0.22,0.18,0.31,0.15,0.19,0.26,0.24];
+			const plans = {{ plansData|default([])|json_encode|raw }};
+			const planLabels = plans.length ? plans.map(x => x.name) : ['Starter', 'Pro', 'Business', 'Enterprise'];
+			const planValues = plans.length ? plans.map(x => parseInt(x.count, 10) || 0) : [64,81,29,10];
+
+			const elSplit = document.getElementById('chartUsersSplit');
+			if (elSplit) {
+				new Chart(elSplit, {
+					type: 'doughnut',
+					data: {
+						labels: ['Company','Talent','Particulier','Staff'],
+						datasets: [{
+							data: [split.company || 0, split.talent || 0, split.particulier || 0, split.staff || 0],
+							backgroundColor: ['#6366f1','#06b6d4','#10b981','#f59e0b'],
+							borderWidth: 0
+						}]
+					},
+					options: {
+						responsive: true,
+						plugins: { legend: { display: false } },
+						cutout: '68%'
+					}
+				});
+			}
+
+			const elJobs = document.getElementById('chartJobs');
+			if (elJobs) {
+				if (elJobs._chartInstance) {
+					elJobs._chartInstance.destroy();
+				}
+
+				elJobs._chartInstance = new Chart(elJobs, {
+					type: 'bar',
+					data: {
+						labels: ['{% trans %}Offres{% endtrans %}', '{% trans %}Recrutés{% endtrans %}'],
+						datasets: [{
+							label: '{% trans %}Volume{% endtrans %}',
+							data: [
+								parseInt(jobs.jobs ?? 0, 10),
+								parseInt(jobs.recruited ?? 0, 10)
+							],
+							backgroundColor: [
+								'rgba(56,189,248,.80)',
+								'rgba(45,212,191,.80)'
+							],
+							borderRadius: 16,
+							borderSkipped: false,
+							maxBarThickness: 90
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								display: true,
+								labels: {
+									color: '#64748b',
+									boxWidth: 10,
+									usePointStyle: true
+								}
+							},
+							tooltip: {
+								backgroundColor: '#ffffff',
+								titleColor: '#0f172a',
+								bodyColor: '#475569',
+								borderColor: 'rgba(226,232,240,.95)',
+								borderWidth: 1,
+								padding: 12
+							}
+						},
+						scales: {
+							x: {
+								ticks: { color: '#64748b' },
+								grid: { display: false }
+							},
+							y: {
+								beginAtZero: true,
+								ticks: {
+									color: '#64748b',
+									precision: 0
+								},
+								grid: { color: 'rgba(148,163,184,.18)' }
+							}
+						}
+					}
+				});
+			}
+
+			const elModSecurity = document.getElementById('chartModerationSecurity');
+			if (elModSecurity) {
+				new Chart(elModSecurity, {
+					type: 'polarArea',
+					data: {
+						labels: ['{% trans %}Spam{% endtrans %}','{% trans %}Abus{% endtrans %}','{% trans %}Fraude{% endtrans %}','{% trans %}Identité{% endtrans %}','{% trans %}Autres{% endtrans %}'],
+						datasets: [{
+							data: [mod.spam || 0, mod.abuse || 0, mod.fraud || 0, mod.identity || 0, mod.other || 0],
+							backgroundColor: ['rgba(99,102,241,.65)','rgba(6,182,212,.65)','rgba(244,63,94,.65)','rgba(245,158,11,.65)','rgba(16,185,129,.65)'],
+							borderWidth: 0
+						}]
+					},
+					options: {
+						responsive: true,
+						plugins: { legend: { labels: { color: labelColor } } },
+						scales: { r: { grid: { color: gridColor }, ticks: { backdropColor: 'transparent', color: labelColor }, pointLabels: { color: labelColor } } }
+					}
+				});
+			}
+
+			const elRevenue = document.getElementById('chartRevenue');
+
+			if (elRevenue) {
+				new Chart(elRevenue, {
+					type: 'line',
+					data: {
+						labels: revenueChartLabels,
+						datasets: [
+							{
+								label: 'RMR',
+								data: revenueChartValues,
+								borderColor: '#10b981',
+								backgroundColor: 'rgba(16,185,129,.12)',
+								fill: true,
+								tension: 0.35,
+								pointRadius: 2
+							}
+						]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								display: true,
+								labels: {
+									color: labelColor,
+									boxWidth: 10,
+									usePointStyle: true
+								}
+							},
+							tooltip: {
+								backgroundColor: '#ffffff',
+								titleColor: '#0f172a',
+								bodyColor: '#475569',
+								borderColor: 'rgba(226,232,240,.95)',
+								borderWidth: 1,
+								padding: 12,
+								callbacks: {
+									label: function(context) {
+										return context.dataset.label + ': ' + Number(context.raw).toLocaleString('fr-FR') + ' XAF';
+									}
+								}
+							}
+						},
+						scales: {
+							x: {
+								ticks: { color: labelColor },
+								grid: { color: gridColor }
+							},
+							y: {
+								beginAtZero: true,
+								ticks: {
+									color: labelColor,
+									callback: function(value) {
+										return Number(value).toLocaleString('fr-FR');
+									}
+								},
+								grid: { color: gridColor }
+							}
+						}
+					}
+				});
+			}
+
+
+			const elPlans = document.getElementById('chartPlans');
+			if (elPlans) {
+				new Chart(elPlans, {
+					type: 'doughnut',
+					data: {
+						labels: subscriptionPlanLabels,
+						datasets: [{
+							data: subscriptionPlanValues,
+							backgroundColor: ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#8b5cf6'],
+							borderWidth: 0
+						}]
+					},
+					options: {
+						responsive: true,
+						plugins: { legend: { display: false } },
+						cutout: '64%'
+					}
+				});
+			}
+
+			const elProviders = document.getElementById('chartProviders');
+
+			if (elProviders) {
+				new Chart(elProviders, {
+					type: 'doughnut',
+					data: {
+						labels: providerLabels,
+						datasets: [{
+							data: providerValues,
+							backgroundColor: ['#10b981', '#f59e0b', '#3b82f6'],
+							borderWidth: 0
+						}]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: { display: false },
+							tooltip: {
+								callbacks: {
+									label: function(context) {
+										return context.label + ': ' + Number(context.raw).toLocaleString('fr-FR');
+									}
+								}
+							}
+						},
+						cutout: '64%'
+					}
+				});
+			}
+
+			const elHealth = document.getElementById('chartHealth');
+			if (elHealth) {
+				new Chart(elHealth, {
+					type: 'line',
+					data: {
+						labels: userTrendLabels,
+						datasets: [
+							{
+								label: 'TALENTS',
+								data: userTrendTalent,
+								borderColor: '#06b6d4',
+								backgroundColor: 'rgba(6,182,212,.10)',
+								fill: false,
+								tension: 0.35,
+								pointRadius: 2,
+								pointHoverRadius: 4,
+								borderWidth: 3
+							},
+							{
+								label: 'PARTICULIERS',
+								data: userTrendParticulier,
+								borderColor: '#10b981',
+								backgroundColor: 'rgba(16,185,129,.10)',
+								fill: false,
+								tension: 0.35,
+								pointRadius: 2,
+								pointHoverRadius: 4,
+								borderWidth: 3
+							},
+							{
+								label: 'ENTREPRISES',
+								data: userTrendCompany,
+								borderColor: '#6366f1',
+								backgroundColor: 'rgba(99,102,241,.10)',
+								fill: false,
+								tension: 0.35,
+								pointRadius: 2,
+								pointHoverRadius: 4,
+								borderWidth: 3
+							}
+						]
+					},
+					options: {
+						responsive: true,
+						maintainAspectRatio: false,
+						plugins: {
+							legend: {
+								labels: {
+									color: labelColor,
+									boxWidth: 10,
+									usePointStyle: true
+								}
+							},
+							tooltip: {
+								backgroundColor: '#ffffff',
+								titleColor: '#0f172a',
+								bodyColor: '#475569',
+								borderColor: 'rgba(226,232,240,.95)',
+								borderWidth: 1,
+								padding: 12
+							}
+						},
+						scales: {
+							x: {
+								ticks: { color: labelColor },
+								grid: { color: gridColor }
+							},
+							y: {
+								beginAtZero: true,
+								ticks: {
+									color: labelColor,
+									precision: 0
+								},
+								grid: { color: gridColor }
+							}
+						}
+					}
+				});
+			}
+
+		})();
+	</script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+		const root = document.querySelector('[data-admin-placeholder-actions]');
+		const toast = document.getElementById('saSoonToast');
+
+		if (!root || !toast) return;
+
+		let toastTimer = null;
+
+		function showToast(message) {
+			toast.textContent = message;
+			toast.classList.add('show');
+
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(() => {
+			toast.classList.remove('show');
+			}, 2200);
+		}
+
+		root.querySelectorAll('[data-soon-label]').forEach((button) => {
+			button.addEventListener('click', function () {
+			const label = this.getAttribute('data-soon-label') || 'Cette fonctionnalité';
+			showToast(label + ' : bientôt disponible');
+			});
+		});
+		});
+	</script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const toasts = document.querySelectorAll('.sa-toast');
+
+			toasts.forEach((toast, index) => {
+				setTimeout(() => {
+					toast.classList.add('show');
+				}, 120 + (index * 120));
+
+				setTimeout(() => {
+					toast.classList.remove('show');
+					setTimeout(() => {
+						toast.remove();
+					}, 250);
+				}, 3200 + (index * 150));
+			});
+		});
+	</script>
+
+	<script>
+		const mod = {{ chartsModeration|default({
+			'spam': 0,
+			'abuse': 0,
+			'fraud': 0,
+			'identity': 0,
+			'other': 0
+		})|json_encode|raw }};
+
+		const elMod = document.getElementById('chartModeration');
+		if (elMod) {
+			if (elMod._chartInstance) {
+				elMod._chartInstance.destroy();
+			}
+
+			elMod._chartInstance = new Chart(elMod, {
+				type: 'radar',
+				data: {
+					labels: [
+						'{% trans %}Spam{% endtrans %}',
+						'{% trans %}Abus{% endtrans %}',
+						'{% trans %}Fraude{% endtrans %}',
+						'{% trans %}Identité{% endtrans %}',
+						'{% trans %}Autres{% endtrans %}'
+					],
+					datasets: [{
+						label: '{% trans %}Signalements{% endtrans %}',
+						data: [
+							Number(mod.spam || 0),
+							Number(mod.abuse || 0),
+							Number(mod.fraud || 0),
+							Number(mod.identity || 0),
+							Number(mod.other || 0)
+						],
+						borderColor: '#f472b6',
+						backgroundColor: 'rgba(244,114,182,.12)',
+						pointBackgroundColor: '#f472b6',
+						pointBorderColor: '#f472b6',
+						pointHoverBackgroundColor: '#f472b6',
+						pointHoverBorderColor: '#f472b6',
+						borderWidth: 3
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							display: true,
+							labels: {
+								color: '#64748b',
+								boxWidth: 12,
+								usePointStyle: false
+							}
+						},
+						tooltip: {
+							backgroundColor: 'rgba(15,23,42,.95)',
+							titleColor: '#fff',
+							bodyColor: '#e2e8f0',
+							padding: 12
+						}
+					},
+					scales: {
+						r: {
+							beginAtZero: true,
+							suggestedMin: 0,
+							angleLines: {
+								color: 'rgba(148,163,184,.18)'
+							},
+							grid: {
+								color: 'rgba(148,163,184,.18)'
+							},
+							pointLabels: {
+								color: '#64748b',
+								font: {
+									size: 13,
+									weight: '600'
+								}
+							},
+							ticks: {
+								precision: 0,
+								stepSize: 2,
+								color: '#94a3b8',
+								backdropColor: 'transparent'
+							}
+						}
+					}
+				}
+			});
+		}
+	</script>
+
+	{# Croissance & inscriptions #}
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			const canvas = document.getElementById('chartSignups');
+			const switcher = document.querySelector('[data-growth-range-switcher]');
+
+			if (!canvas || !switcher || typeof Chart === 'undefined') return;
+
+			const signupChartData = {{ signupChartData|default({
+				'30': {'labels': [], 'signups': []},
+				'90': {'labels': [], 'signups': []},
+				'12': {'labels': [], 'signups': []}
+			})|json_encode|raw }};
+
+			const source = {
+				'30': signupChartData['30'] || { labels: [], signups: [] },
+				'90': signupChartData['90'] || { labels: [], signups: [] },
+				'12': signupChartData['12'] || { labels: [], signups: [] }
+			};
+
+			const has12 = Array.isArray(source['12'].labels) && source['12'].labels.length > 0;
+			const has30 = Array.isArray(source['30'].labels) && source['30'].labels.length > 0;
+			const defaultRange = has12 ? '12' : (has30 ? '30' : '90');
+
+			const ctx = canvas.getContext('2d');
+
+			if (canvas._chartInstance) {
+				canvas._chartInstance.destroy();
+			}
+
+			const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+			gradient.addColorStop(0, 'rgba(59,130,246,0.20)');
+			gradient.addColorStop(1, 'rgba(59,130,246,0.02)');
+
+			const chart = new Chart(ctx, {
+				type: 'line',
+				data: {
+					labels: [],
+					datasets: [{
+						label: 'Inscriptions',
+						data: [],
+						borderColor: '#2563eb',
+						backgroundColor: gradient,
+						fill: true,
+						borderWidth: 4,
+						tension: 0.38,
+						pointRadius: 4,
+						pointHoverRadius: 6,
+						pointBackgroundColor: '#2563eb',
+						pointHoverBackgroundColor: '#2563eb'
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					plugins: {
+						legend: {
+							display: true,
+							position: 'top',
+							labels: {
+								usePointStyle: true,
+								boxWidth: 10,
+								color: '#334155',
+								font: {
+									size: 13,
+									weight: '700'
+								}
+							}
+						},
+						tooltip: {
+							backgroundColor: 'rgba(15,23,42,.95)',
+							titleColor: '#fff',
+							bodyColor: '#e2e8f0',
+							padding: 12
+						}
+					},
+					scales: {
+						x: {
+							grid: { display: false },
+							ticks: { color: '#94a3b8' }
+						},
+						y: {
+							beginAtZero: true,
+							ticks: {
+								color: '#94a3b8',
+								precision: 0
+							},
+							grid: { color: 'rgba(148,163,184,.18)' }
+						}
+					}
+				}
+			});
+
+			canvas._chartInstance = chart;
+
+			function applyRange(range) {
+				const payload = source[range] || { labels: [], signups: [] };
+
+				chart.data.labels = Array.isArray(payload.labels) ? payload.labels : [];
+				chart.data.datasets[0].data = Array.isArray(payload.signups) ? payload.signups : [];
+				chart.update();
+
+				switcher.querySelectorAll('[data-range]').forEach((btn) => {
+					btn.classList.toggle('active', btn.dataset.range === range);
+				});
+			}
+
+			applyRange(defaultRange);
+
+			switcher.querySelectorAll('[data-range]').forEach((btn) => {
+				btn.addEventListener('click', function () {
+					applyRange(this.dataset.range);
+				});
+			});
+
+			document.querySelectorAll('[data-tab-btn]').forEach((btn) => {
+				btn.addEventListener('click', function () {
+					if (this.dataset.tabBtn === 'overview') {
+						setTimeout(() => {
+							chart.resize();
+							chart.update();
+						}, 100);
+					}
+				});
+			});
+		});
+	</script>
+{% endblock %}

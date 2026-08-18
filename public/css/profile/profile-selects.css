@@ -1,0 +1,187 @@
+/* =========================================================
+   profile-selects.css
+   Select2 + TomSelect pays / selects simples
+   ========================================================= */
+
+/* --- Select2 Bootstrap-ish + UX --- */
+.select2-container .select2-selection--multiple{
+    min-height: 44px;
+    border: 1px solid rgba(15,23,42,.10) !important;
+    border-radius: 14px !important;
+    padding: 6px 10px;
+    background: #fff;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice{
+    border: 1px solid rgba(13,110,253,.20);
+    background: rgba(13,110,253,.08);
+    color: #0d6efd;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-weight: 800;
+    margin-top: 6px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+    color: #0d6efd;
+    margin-right: 6px;
+    font-weight: 900;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field{
+    margin-top: 6px;
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected]{
+    background: #0d6efd;
+}
+
+.select2-dropdown{
+    border-radius: 14px !important;
+    overflow: hidden;
+    border: 1px solid rgba(15,23,42,.12) !important;
+    box-shadow: 0 20px 40px rgba(2,6,23,.10);
+}
+
+.select2-container .select2-selection--single{
+    height: 40px !important;
+    border: 1px solid rgba(15,23,42,.12) !important;
+    border-radius: 12px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered{
+    line-height: 40px !important;
+    padding-left: 12px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow{
+    height: 40px !important;
+    right: 10px !important;
+}
+
+.select2-search__field{
+    border-radius: 10px !important;
+}
+
+/* TomSelect général + country */
+.ts-wrapper {
+    width: 100%;
+}
+
+.ts-control {
+    min-height: 44px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(15, 23, 42, .12) !important;
+    box-shadow: 0 10px 24px rgba(2, 6, 23, .06);
+    padding: 10px 12px !important;
+    gap: 8px !important;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: rgba(13,110,253,.45) !important;
+    box-shadow: 0 0 0 4px rgba(13,110,253,.12), 0 10px 24px rgba(2, 6, 23, .06) !important;
+}
+
+.ts-control .item,
+.ts-control input {
+    font-size: 14px !important;
+}
+
+.ts-dropdown {
+    border-radius: 10px !important;
+    border: 1px solid #ced4da !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08) !important;
+    overflow: hidden !important;
+    margin-top: 4px !important;
+    z-index: 9999 !important;
+}
+
+.ts-dropdown .ts-dropdown-content {
+    padding: 6px !important;
+}
+
+.ts-dropdown .ts-control {
+    box-shadow: none !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(15, 23, 42, .10) !important;
+    padding: 8px 10px !important;
+    margin: 8px !important;
+}
+
+.ts-dropdown .option {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 12px !important;
+    border-radius: 12px !important;
+    margin: 4px 6px !important;
+    line-height: 1.2 !important;
+    font-size: 14px !important;
+}
+
+.ts-dropdown .option:hover {
+    background: rgba(13,110,253,.08) !important;
+}
+
+.ts-dropdown .option.active,
+.ts-dropdown .active {
+    background: rgba(13,110,253,.12) !important;
+    color: #1f3b73;
+}
+
+.mol-flag {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex: 0 0 16px;
+    box-shadow: 0 6px 14px rgba(2,6,23,.10);
+}
+
+.ts-dropdown .option[data-value=""] {
+    opacity: .7;
+    font-style: italic;
+}
+
+.ts-dropdown .ts-dropdown-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.ts-dropdown .ts-dropdown-content::-webkit-scrollbar-thumb {
+    background: rgba(15,23,42,.15);
+    border-radius: 999px;
+}
+
+select.mol-country-select.tomselected,
+select.mol-country-select.ts-hidden-accessible {
+    display: none !important;
+}
+
+.ts-wrapper.single .ts-control {
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 10px !important;
+    border: 1px solid #ced4da !important;
+    background: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 12px !important;
+    font-size: 14px !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+}
+
+.ts-control .item {
+    line-height: 36px !important;
+}
+
+.ts-control input {
+    font-size: 14px !important;
+}
+
+.ts-wrapper.focus .ts-control {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.2rem rgba(13,110,253,.15) !important;
+}

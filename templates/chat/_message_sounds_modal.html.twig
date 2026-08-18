@@ -1,0 +1,736 @@
+<div
+    class="modal fade mol-message-sounds-modal"
+    id="molMessageSoundsModal"
+    tabindex="-1"
+    aria-labelledby="molMessageSoundsModalTitle"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content mol-sound-modal-content">
+            <div class="mol-sound-modal-head">
+                <div>
+                    <h5 class="modal-title" id="molMessageSoundsModalTitle">
+                        <i class="bi bi-volume-up-fill"></i>
+                        {% trans %}Sons des messages{% endtrans %}
+                    </h5>
+                    <p>{% trans %}Choisissez le son joué lorsqu’un nouveau message arrive.{% endtrans %}</p>
+                </div>
+
+                <button
+                    type="button"
+                    class="mol-sound-close"
+                    data-bs-dismiss="modal"
+                    aria-label="{{ 'Fermer'|trans }}"
+                >
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div class="mol-sound-modal-body">
+                <div class="mol-sound-switch-row">
+                    <div>
+                        <strong>{% trans %}Activer les sons{% endtrans %}</strong>
+                        <small>{% trans %}Recevoir une alerte sonore pour les nouveaux messages.{% endtrans %}</small>
+                    </div>
+
+                    <label class="mol-sound-switch">
+                        <input type="checkbox" id="molSoundEnabled">
+                        <span></span>
+                    </label>
+                </div>
+
+                <div class="mol-sound-grid" id="molSoundOptions">
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="soft">
+                        <span class="mol-sound-option-icon"><i class="bi bi-chat-dots-fill"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Soft pop{% endtrans %}</strong>
+                            <small>{% trans %}Son doux et discret{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="crystal">
+                        <span class="mol-sound-option-icon"><i class="bi bi-gem"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Crystal{% endtrans %}</strong>
+                            <small>{% trans %}Clair et premium{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="bubble">
+                        <span class="mol-sound-option-icon"><i class="bi bi-circle-half"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Bubble{% endtrans %}</strong>
+                            <small>{% trans %}Léger et moderne{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="ding">
+                        <span class="mol-sound-option-icon"><i class="bi bi-bell-fill"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Ding{% endtrans %}</strong>
+                            <small>{% trans %}Notification classique{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="success">
+                        <span class="mol-sound-option-icon"><i class="bi bi-check-circle-fill"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Success{% endtrans %}</strong>
+                            <small>{% trans %}Son positif et court{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="alert">
+                        <span class="mol-sound-option-icon"><i class="bi bi-lightning-charge-fill"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Alert{% endtrans %}</strong>
+                            <small>{% trans %}Plus visible{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="none">
+                        <span class="mol-sound-option-icon"><i class="bi bi-volume-mute-fill"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Aucun son{% endtrans %}</strong>
+                            <small>{% trans %}Mode silencieux{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mol-sound-modal-footer">
+                <button type="button" class="mol-sound-btn mol-sound-btn-light" id="molSoundPreviewBtn">
+                    <i class="bi bi-play-fill"></i>
+                    {% trans %}Tester{% endtrans %}
+                </button>
+
+                <button type="button" class="mol-sound-btn mol-sound-btn-primary" id="molSoundSaveBtn">
+                    <i class="bi bi-check2-circle"></i>
+                    {% trans %}Enregistrer{% endtrans %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .mol-message-sounds-modal {
+        z-index: 2147483647 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 2147483646 !important;
+    }
+
+    .mol-sound-modal-content {
+        border: 0 !important;
+        border-radius: 24px !important;
+        overflow: hidden !important;
+        box-shadow: 0 32px 90px rgba(15, 23, 42, .28) !important;
+        background: #ffffff !important;
+    }
+
+    .mol-sound-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 22px 22px 14px;
+        border-bottom: 1px solid rgba(148, 163, 184, .18);
+        background:
+            radial-gradient(circle at 15% 10%, rgba(37, 99, 235, .12), transparent 30%),
+            linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    .mol-sound-modal-head h5 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #0f172a;
+        font-size: 1.08rem;
+        font-weight: 950;
+        letter-spacing: -.02em;
+    }
+
+    .mol-sound-modal-head h5 i {
+        color: #2563eb;
+    }
+
+    .mol-sound-modal-head p {
+        margin: 6px 0 0;
+        color: #64748b;
+        font-size: .88rem;
+        line-height: 1.45;
+    }
+
+    .mol-sound-close {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, .06);
+        color: #334155;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    .mol-sound-close:hover {
+        background: rgba(15, 23, 42, .1);
+    }
+
+    .mol-sound-modal-body {
+        padding: 18px 22px 8px;
+    }
+
+    .mol-sound-switch-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px;
+        border: 1px solid rgba(148, 163, 184, .2);
+        border-radius: 18px;
+        background: #f8fafc;
+        margin-bottom: 14px;
+    }
+
+    .mol-sound-switch-row strong {
+        display: block;
+        color: #0f172a;
+        font-weight: 900;
+        font-size: .95rem;
+    }
+
+    .mol-sound-switch-row small {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: .78rem;
+    }
+
+    .mol-sound-switch {
+        position: relative;
+        width: 54px;
+        height: 30px;
+        min-width: 54px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .mol-sound-switch input {
+        display: none;
+    }
+
+    .mol-sound-switch span {
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: #cbd5e1;
+        transition: .18s ease;
+    }
+
+    .mol-sound-switch span::before {
+        content: "";
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        left: 3px;
+        top: 3px;
+        border-radius: 50%;
+        background: #ffffff;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, .2);
+        transition: .18s ease;
+    }
+
+    .mol-sound-switch input:checked + span {
+        background: #2563eb;
+    }
+
+    .mol-sound-switch input:checked + span::before {
+        transform: translateX(24px);
+    }
+
+    .mol-sound-grid {
+        display: grid;
+        gap: 10px;
+        max-height: min(420px, 55vh);
+        overflow: auto;
+        padding-right: 2px;
+    }
+
+    .mol-sound-option {
+        width: 100%;
+        border: 1px solid rgba(148, 163, 184, .2);
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) 28px;
+        align-items: center;
+        gap: 12px;
+        text-align: left;
+        cursor: pointer;
+        transition: background .16s ease, border-color .16s ease, transform .16s ease, box-shadow .16s ease;
+    }
+
+    .mol-sound-option:hover {
+        background: #f8fafc;
+        border-color: rgba(37, 99, 235, .26);
+        transform: translateY(-1px);
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .07);
+    }
+
+    .mol-sound-option.is-active {
+        background: #eff6ff;
+        border-color: rgba(37, 99, 235, .35);
+    }
+
+    .mol-sound-option-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: #eef4ff;
+        color: #2563eb;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.05rem;
+    }
+
+    .mol-sound-option-text {
+        min-width: 0;
+    }
+
+    .mol-sound-option-text strong {
+        display: block;
+        color: #0f172a;
+        font-size: .92rem;
+        font-weight: 950;
+        line-height: 1.2;
+    }
+
+    .mol-sound-option-text small {
+        display: block;
+        margin-top: 3px;
+        color: #64748b;
+        font-size: .76rem;
+        line-height: 1.25;
+    }
+
+    .mol-sound-option-check {
+        width: 26px;
+        height: 26px;
+        border-radius: 999px;
+        background: #2563eb;
+        color: #fff;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: .9rem;
+    }
+
+    .mol-sound-option.is-active .mol-sound-option-check {
+        display: inline-flex;
+    }
+
+    .mol-sound-modal-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 22px 22px;
+        border-top: 1px solid rgba(148, 163, 184, .16);
+        background: #ffffff;
+    }
+
+    .mol-sound-btn {
+        min-height: 42px;
+        border: 0;
+        border-radius: 14px;
+        padding: 0 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 900;
+        cursor: pointer;
+    }
+
+    .mol-sound-btn-light {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .mol-sound-btn-light:hover {
+        background: #e2e8f0;
+    }
+
+    .mol-sound-btn-primary {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 12px 26px rgba(37, 99, 235, .22);
+    }
+
+    .mol-sound-btn-primary:hover {
+        background: #1d4ed8;
+    }
+
+    @media (max-width: 575.98px) {
+        .mol-sound-modal-head,
+        .mol-sound-modal-body,
+        .mol-sound-modal-footer {
+            padding-left: 16px;
+            padding-right: 16px;
+        }
+
+        .mol-sound-modal-footer {
+            flex-direction: column;
+        }
+
+        .mol-sound-btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    (() => {
+        if (window.__MOL_MESSAGE_SOUNDS_MODAL_READY__) return;
+        window.__MOL_MESSAGE_SOUNDS_MODAL_READY__ = true;
+
+        const STORAGE_SELECTED = 'mol_chat_selected_sound';
+        const STORAGE_ENABLED = 'mol_chat_sounds_enabled';
+        const STORAGE_PANEL_ENABLED = 'mol_chat_panel_message_sounds_enabled';
+
+        const SOUND_DEFAULT = 'soft';
+
+        const SOUND_PATTERNS = {
+            soft: [
+                { frequency: 740, duration: 0.055, delay: 0, gain: 0.055 },
+                { frequency: 980, duration: 0.07, delay: 0.06, gain: 0.04 }
+            ],
+            crystal: [
+                { frequency: 880, duration: 0.06, delay: 0, gain: 0.045 },
+                { frequency: 1320, duration: 0.08, delay: 0.065, gain: 0.035 }
+            ],
+            bubble: [
+                { frequency: 460, duration: 0.06, delay: 0, gain: 0.055 },
+                { frequency: 620, duration: 0.06, delay: 0.055, gain: 0.045 }
+            ],
+            ding: [
+                { frequency: 1046.5, duration: 0.13, delay: 0, gain: 0.05 }
+            ],
+            success: [
+                { frequency: 660, duration: 0.07, delay: 0, gain: 0.05 },
+                { frequency: 880, duration: 0.08, delay: 0.07, gain: 0.045 },
+                { frequency: 1174, duration: 0.1, delay: 0.15, gain: 0.035 }
+            ],
+            alert: [
+                { frequency: 900, duration: 0.055, delay: 0, gain: 0.055 },
+                { frequency: 700, duration: 0.055, delay: 0.07, gain: 0.05 },
+                { frequency: 900, duration: 0.06, delay: 0.14, gain: 0.045 }
+            ],
+            none: []
+        };
+
+        let audioContext = null;
+
+        function qs(id) {
+            return document.getElementById(id);
+        }
+
+        function getAudioContext() {
+            if (!audioContext) {
+                const Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return null;
+                audioContext = new Ctx();
+            }
+
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().catch(() => {});
+            }
+
+            return audioContext;
+        }
+
+        function getSelectedSound() {
+            return localStorage.getItem(STORAGE_SELECTED) || SOUND_DEFAULT;
+        }
+
+        function setSelectedSound(name) {
+            const value = SOUND_PATTERNS[name] ? name : SOUND_DEFAULT;
+            localStorage.setItem(STORAGE_SELECTED, value);
+            refreshSoundUi();
+            return value;
+        }
+
+        function isEnabled() {
+            return localStorage.getItem(STORAGE_ENABLED) !== '0';
+        }
+
+        function setEnabled(enabled) {
+            localStorage.setItem(STORAGE_ENABLED, enabled ? '1' : '0');
+            localStorage.setItem(STORAGE_PANEL_ENABLED, enabled ? '1' : '0');
+            window.MOL_CHAT_SOUND_ENABLED = enabled;
+            refreshSoundUi();
+        }
+
+        function playTone(frequency, duration, delay, gainValue) {
+            const ctx = getAudioContext();
+
+            if (!ctx) return;
+
+            const start = ctx.currentTime + delay;
+            const oscillator = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, start);
+
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.exponentialRampToValueAtTime(gainValue, start + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+
+            oscillator.connect(gain);
+            gain.connect(ctx.destination);
+
+            oscillator.start(start);
+            oscillator.stop(start + duration + 0.02);
+        }
+
+        function playSound(name, force = false) {
+            const soundName = name || getSelectedSound();
+
+            if (!force && !isEnabled()) return;
+            if (soundName === 'none') return;
+
+            const pattern = SOUND_PATTERNS[soundName] || SOUND_PATTERNS[SOUND_DEFAULT];
+
+            pattern.forEach((item) => {
+                playTone(item.frequency, item.duration, item.delay, item.gain);
+            });
+        }
+
+        function playSelected(force = false) {
+            playSound(getSelectedSound(), force);
+        }
+
+        function closeChatMenus() {
+            try {
+                window.MOLChatPanelMenu?.close?.();
+            } catch (_) {}
+
+            document
+                .querySelectorAll('#molChatPanelMenu, #molChatPanelMenuRescue, .mol-chat-menu, .mol-panel-menu')
+                .forEach((menu) => {
+                    menu.classList.remove('is-open', 'show');
+                    menu.setAttribute('aria-hidden', 'true');
+
+                    if (menu.id === 'molChatPanelMenuRescue') {
+                        menu.style.display = 'none';
+                    }
+                });
+
+            document
+                .querySelectorAll('[aria-expanded="true"]')
+                .forEach((btn) => {
+                    if (
+                        btn.matches('#molChatPanelOptionsBtn') ||
+                        btn.matches('[data-mol-menu-toggle]') ||
+                        btn.matches('[data-mol-chat-dropdown-toggle]')
+                    ) {
+                        btn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+        }
+
+        function openModal() {
+            const modal = qs('molMessageSoundsModal');
+
+            if (!modal) {
+                console.warn('[MOL] Modale sons introuvable : #molMessageSoundsModal');
+                return;
+            }
+
+            refreshSoundUi();
+            closeChatMenus();
+
+            if (window.bootstrap?.Modal) {
+                window.bootstrap.Modal.getOrCreateInstance(modal).show();
+                return;
+            }
+
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            modal.removeAttribute('aria-hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function closeModal() {
+            const modal = qs('molMessageSoundsModal');
+
+            if (!modal) return;
+
+            if (window.bootstrap?.Modal) {
+                window.bootstrap.Modal.getOrCreateInstance(modal).hide();
+                return;
+            }
+
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('modal-open');
+        }
+
+        function refreshSoundUi() {
+            const selected = getSelectedSound();
+            const enabled = isEnabled();
+            const enabledInput = qs('molSoundEnabled');
+
+            if (enabledInput) {
+                enabledInput.checked = enabled;
+            }
+
+            document.querySelectorAll('[data-mol-sound-option]').forEach((button) => {
+                button.classList.toggle('is-active', button.dataset.molSoundOption === selected);
+            });
+
+            document.querySelectorAll('[data-mol-message-sounds-open] i, [data-mol-panel-action="message_sounds"] i, [data-action="message_sounds"] i, [data-mol-panel-action="sounds"] i').forEach((icon) => {
+                icon.classList.toggle('bi-volume-up', enabled);
+                icon.classList.toggle('bi-volume-up-fill', enabled);
+                icon.classList.toggle('bi-volume-mute', !enabled);
+                icon.classList.toggle('bi-volume-mute-fill', !enabled);
+            });
+        }
+
+        function bindModalEvents() {
+            if (document.__molMessageSoundsModalBound) return;
+            document.__molMessageSoundsModalBound = true;
+
+            document.addEventListener('change', (event) => {
+                const input = event.target.closest('#molSoundEnabled');
+
+                if (!input) return;
+
+                setEnabled(input.checked);
+
+                if (input.checked) {
+                    playSelected(true);
+                }
+            });
+
+            document.addEventListener('click', (event) => {
+                const option = event.target.closest('[data-mol-sound-option]');
+
+                if (!option) return;
+
+                event.preventDefault();
+
+                const sound = setSelectedSound(option.dataset.molSoundOption);
+
+                if (sound !== 'none') {
+                    setEnabled(true);
+                    playSound(sound, true);
+                }
+            });
+
+            qs('molSoundPreviewBtn')?.addEventListener('click', () => {
+                playSelected(true);
+            });
+
+            qs('molSoundSaveBtn')?.addEventListener('click', () => {
+                setEnabled(qs('molSoundEnabled')?.checked !== false);
+                refreshSoundUi();
+                closeModal();
+
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '{{ "Sons enregistrés"|trans }}',
+                        text: '{{ "Votre préférence de son a été sauvegardée."|trans }}',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        confirmButtonColor: '#2563eb',
+                        backdrop: 'rgba(15,23,42,.35)'
+                    });
+                }
+            });
+        }
+
+        function isOpenTrigger(target) {
+            return target.closest(
+                '[data-mol-message-sounds-open], ' +
+                '[data-mol-panel-action="message_sounds"], ' +
+                '[data-action="message_sounds"], ' +
+                '[data-mol-panel-action="sounds"]'
+            );
+        }
+
+        /*
+         * Capture sur window pour passer AVANT les anciens listeners document.
+         * Comme ça, l’ancien code ne bascule plus simplement ON/OFF :
+         * il ouvre bien la fenêtre de choix des sons.
+         */
+        window.addEventListener('click', (event) => {
+            const trigger = isOpenTrigger(event.target);
+
+            if (!trigger) return;
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            openModal();
+        }, true);
+
+        window.MolMessageSounds = {
+            open: openModal,
+            close: closeModal,
+            preview: () => playSelected(true),
+            playSelected,
+            play: playSound,
+            getSelectedSound,
+            setSelectedSound,
+            isEnabled,
+            setEnabled,
+            refresh: refreshSoundUi
+        };
+
+        function boot() {
+            bindModalEvents();
+
+            if (!localStorage.getItem(STORAGE_SELECTED)) {
+                localStorage.setItem(STORAGE_SELECTED, SOUND_DEFAULT);
+            }
+
+            if (!localStorage.getItem(STORAGE_ENABLED)) {
+                localStorage.setItem(STORAGE_ENABLED, '1');
+            }
+
+            if (!localStorage.getItem(STORAGE_PANEL_ENABLED)) {
+                localStorage.setItem(STORAGE_PANEL_ENABLED, localStorage.getItem(STORAGE_ENABLED));
+            }
+
+            window.MOL_CHAT_SOUND_ENABLED = isEnabled();
+            refreshSoundUi();
+        }
+
+        document.addEventListener('DOMContentLoaded', boot);
+        document.addEventListener('turbo:load', boot);
+
+        if (document.readyState !== 'loading') {
+            boot();
+        }
+    })();
+</script>

@@ -1,0 +1,149 @@
+.vip-nearby-map-section[hidden] {
+    display: none !important;
+}
+
+.vip-nearby-map-section {
+    padding: 22px 0 32px;
+    background: linear-gradient(180deg, #f4f8ff, #ffffff);
+}
+
+.vip-nearby-map-card {
+    overflow: hidden;
+    border: 1px solid #dbe5f1;
+    border-radius: 24px;
+    background: #ffffff;
+    box-shadow: 0 22px 58px rgba(13, 42, 82, 0.12);
+}
+
+.vip-nearby-map-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 20px 22px;
+    background: linear-gradient(135deg, #f4f8ff, #eefaf6);
+}
+
+.vip-nearby-map-kicker {
+    display: inline-flex;
+    margin-bottom: 7px;
+    border-radius: 999px;
+    padding: 6px 9px;
+    background: #e9f2ff;
+    color: #155eef;
+    font-size: 9px;
+    font-weight: 950;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.vip-nearby-map-header h2 {
+    margin: 0;
+    color: #0b2a57;
+    font-size: clamp(21px, 4vw, 30px);
+    font-weight: 950;
+    letter-spacing: -0.03em;
+}
+
+.vip-nearby-map-header p {
+    margin: 7px 0 0;
+    color: #677890;
+    font-size: 12px;
+}
+
+.vip-nearby-map-close {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 38px;
+    border: 1px solid #d7e1ed;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #5e6f88;
+    cursor: pointer;
+}
+
+#vipNearbyTalentMap {
+    width: 100%;
+    height: clamp(330px, 55vh, 560px);
+    min-height: 330px;
+    background: #e8eff7;
+}
+
+.vip-nearby-map-footer {
+    padding: 12px 18px;
+    background: #f9fbfe;
+    color: #61728a;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.vip-nearby-map-footer i {
+    margin-right: 6px;
+    color: #109565;
+}
+
+.mol-talent-map-popup h4 {
+    margin: 0 0 5px;
+    color: #102f5e;
+    font-size: 14px;
+    font-weight: 900;
+}
+
+.mol-talent-map-popup p {
+    margin: 4px 0;
+    color: #60718a;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.mol-talent-map-profile-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 9px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #155eef, #0b77d5);
+    color: #ffffff !important;
+    font-size: 11px;
+    font-weight: 850;
+    line-height: 1.2;
+    text-decoration: none !important;
+    box-shadow: 0 7px 18px rgba(21, 94, 239, 0.2);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.mol-talent-map-profile-btn:hover,
+.mol-talent-map-profile-btn:focus-visible {
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(21, 94, 239, 0.28);
+}
+
+.leaflet-popup-content .mol-talent-map-popup {
+    min-width: 150px;
+}
+
+@media (max-width: 620px) {
+    .vip-nearby-map-section {
+        padding: 12px 0 22px;
+    }
+
+    .vip-nearby-map-card {
+        border-radius: 17px;
+    }
+
+    .vip-nearby-map-header {
+        padding: 15px;
+    }
+
+    #vipNearbyTalentMap {
+        height: 60vh;
+        min-height: 360px;
+    }
+}

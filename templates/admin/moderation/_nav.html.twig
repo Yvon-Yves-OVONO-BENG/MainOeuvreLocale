@@ -1,0 +1,23 @@
+{% set currentRoute = app.request.attributes.get('_route') %}
+
+<div class="mod-nav">
+  <a href="{{ path('admin_content_moderation_index') }}"
+     class="mod-btn {{ currentRoute starts with 'admin_content_moderation_' ? 'mod-btn-primary' : 'mod-btn-soft' }}">
+    <span class="mod-dot"></span> {% trans %}File{% endtrans %}
+  </a>
+
+  <a href="{{ path('admin_keywords_index') }}"
+     class="mod-btn {{ currentRoute starts with 'admin_keywords_' ? 'mod-btn-primary' : 'mod-btn-soft' }}">
+    <span class="mod-dot"></span> {% trans %}Mots-clés{% endtrans %}
+  </a>
+
+  <a href="{{ path('admin_spam_index') }}"
+     class="mod-btn {{ currentRoute starts with 'admin_spam_' ? 'mod-btn-primary' : 'mod-btn-soft' }}">
+    <span class="mod-dot"></span> {% trans %}Anti-spam{% endtrans %}
+  </a>
+
+  <a href="{{ path('admin_bans_index') }}"
+     class="mod-btn {{ currentRoute starts with 'admin_bans_' ? 'mod-btn-primary' : 'mod-btn-soft' }}">
+    <span class="mod-dot"></span> {% trans %}Bannissements{% endtrans %}
+  </a>
+</div>

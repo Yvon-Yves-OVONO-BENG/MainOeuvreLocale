@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% trans %}Activation de votre compte{% endtrans %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="margin:0; padding:0; background-color:#f1f5f9; font-family:Arial, Helvetica, sans-serif; color:#1f2937;">
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f1f5f9; margin:0; padding:30px 12px;">
+        <tr>
+            <td align="center">
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:660px; background-color:#ffffff; border:1px solid #e5e7eb; border-radius:32px; overflow:hidden;">
+
+                    <tr>
+                        <td style="padding:0;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#eaf2ff;">
+                                <tr>
+                                    <td style="padding:36px 36px 28px 36px; border-bottom:1px solid #e5e7eb;">
+                                        <div style="font-size:24px; line-height:1.3; font-weight:800; color:#0f172a; margin:0;">
+                                            {% trans %}Activation de votre compte{% endtrans %}
+                                        </div>
+
+                                        <div style="font-size:15px; line-height:1.6; color:#6b7280; margin-top:8px;">
+                                            Main d'Oeuvre Locale &bull; {% trans %}Sécurité &bull; Validation &bull; Accès{% endtrans %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:36px;">
+                            <div style="font-size:18px; line-height:1.8; color:#1f2937; margin:0 0 20px 0;">
+                                {% trans %}Bonjour{% endtrans %},
+                                <span style="color:#2563eb;">{{ user.email }}</span>
+                            </div>
+
+                            <div style="font-size:17px; line-height:1.85; color:#374151; margin:0 0 26px 0;">
+                                {% trans %}Merci pour votre inscription sur{% endtrans %}
+                                <strong style="color:#0f172a;">Main d'Oeuvre Locale</strong>.
+                                {% trans %}Pour finaliser la création de votre compte et sécuriser votre accès, cliquez sur le bouton ci-dessous pour activer votre compte.{% endtrans %}
+                            </div>
+
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f8fafc; border:1px solid #e5e7eb; border-radius:24px; margin-bottom:30px;">
+                                <tr>
+                                    <td style="padding:24px 26px;">
+                                        <div style="font-size:18px; line-height:1.5; font-weight:800; color:#0f172a; margin-bottom:14px;">
+                                            {% trans %}A retenir :{% endtrans %}
+                                        </div>
+
+                                        <div style="font-size:16px; line-height:1.9; color:#4b5563;">
+                                            &bull; {% trans %}Ce lien d'activation est personnel{% endtrans %}<br>
+                                            &bull; {% trans %}Votre compte ne sera actif qu'après validation{% endtrans %}<br>
+                                            &bull; {% trans %}Le lien expire le{% endtrans %}
+                                            <strong style="color:#0f172a;">
+                                                {{ expiresAt ? expiresAt|date('d/m/Y') : '' }} à {{ expiresAt ? expiresAt|date('H:i') : '' }}
+                                            </strong>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-bottom:28px;">
+                                <tr>
+                                    <td align="center" bgcolor="#2563eb" style="border-radius:20px;">
+                                        <a href="{{ activationUrl }}"
+                                           style="display:inline-block; padding:16px 30px; font-size:17px; font-weight:800; color:#ffffff; text-decoration:none; border-radius:20px; background-color:#2563eb;">
+                                            {% trans %}Activer mon compte{% endtrans %}
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div style="font-size:15px; line-height:1.8; color:#6b7280; margin-bottom:10px;">
+                                {% trans %}Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :{% endtrans %}
+                            </div>
+
+                            <div style="font-size:15px; line-height:1.8; color:#2563eb; word-break:break-all; margin-bottom:26px;">
+                                {{ activationUrl }}
+                            </div>
+
+                            <div style="font-size:15px; line-height:1.8; color:#6b7280;">
+                                {% trans %}Si vous n'êtes pas à l'origine de cette inscription, aucune action n'est requise. Vous pouvez simplement ignorer cet email.{% endtrans %}
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:28px 36px; border-top:1px solid #e5e7eb; background-color:#fafafa;">
+                            <div style="font-size:16px; line-height:1.7; color:#4b5563;">
+                                {% trans %}Merci et à bientôt,{% endtrans %}<br>
+                                <span style="font-weight:800; color:#1f2937;">
+                                    {% trans %}L'équipe Main d'Oeuvre Locale{% endtrans %}
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:660px;">
+                    <tr>
+                        <td align="center" style="padding:18px 14px 0 14px; font-size:13px; line-height:1.7; color:#6b7280;">
+                            {% trans %}Cet email a été envoyé automatiquement, merci de ne pas y répondre directement.{% endtrans %}<br>
+                            &copy; {{ "now"|date("Y") }} &bull; Main d'Oeuvre Locale &bull; {% trans %}Tous droits réservés{% endtrans %}
+                        </td>
+                    </tr>
+                </table>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

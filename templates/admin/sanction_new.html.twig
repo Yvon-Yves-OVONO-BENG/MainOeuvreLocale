@@ -1,0 +1,230 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{% trans %}Nouvelle sanction{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-3xl px-4 py-6">
+
+    <div class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/80 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <div class="border-b border-slate-200/70 bg-white/70 px-5 py-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Modération{% endtrans %}</div>
+            <div class="text-2xl font-black tracking-tight text-slate-900">🧾 {% trans %}Nouvelle sanction{% endtrans %}</div>
+            <div class="mt-1 text-sm font-medium text-slate-600">
+              {% trans %}Crée une sanction administrative pour un utilisateur.{% endtrans %}
+            </div>
+          </div>
+
+          <a href="{{ path('tableau_de_bord') }}"
+             class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+            ← {% trans %}Tableau de bord{% endtrans %}
+          </a>
+        </div>
+      </div>
+
+      <div class="p-5">
+        {% for message in app.flashes('success') %}
+          <div class="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+            {{ message }}
+          </div>
+        {% endfor %}
+
+        {% if prefilledUser %}
+          <div class="mb-4 rounded-2xl border border-indigo-200/70 bg-indigo-50 px-4 py-3 text-sm font-semibold text-indigo-700">
+            {% trans %}Utilisateur préselectionné :{% endtrans %}
+            <span class="font-black">{{ prefilledUser.email }}</span>
+          </div>
+        {% endif %}
+
+        {{ form_start(form, {'attr': {'class': 'space-y-5'}}) }}
+
+          <div>
+            <label class="mb-1 block text-xs font-extrabold uppercase tracking-wide text-slate-600">
+              {% trans %}Utilisateur concerné{% endtrans %}
+            </label>
+            {{ form_widget(form.user, {
+              attr: {
+                class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none',
+                id: 'sanction_user'
+              }
+            }) }}
+            <div class="mt-1 text-xs text-rose-600">{{ form_errors(form.user) }}</div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-extrabold uppercase tracking-wide text-slate-600">
+              {% trans %}Type de sanction{% endtrans %}
+            </label>
+            {{ form_widget(form.type, {
+              attr: {
+                class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none',
+                id: 'sanction_type'
+              }
+            }) }}
+            <div class="mt-1 text-xs text-rose-600">{{ form_errors(form.type) }}</div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-extrabold uppercase tracking-wide text-slate-600">
+              {% trans %}Message envoyé à l’utilisateur{% endtrans %}
+            </label>
+            {{ form_widget(form.message, {
+              attr: {
+                class: 'min-h-[180px] w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none',
+                id: 'sanction_message',
+                placeholder: 'Le message se préremplira selon le type choisi...'|trans
+              }
+            }) }}
+            <div class="mt-1 text-xs text-slate-500">
+              {% trans %}Tu peux modifier le modèle avant d’enregistrer.{% endtrans %}
+            </div>
+            <div class="mt-1 text-xs text-rose-600">{{ form_errors(form.message) }}</div>
+          </div>
+
+          <div>
+            <label class="mb-1 block text-xs font-extrabold uppercase tracking-wide text-slate-600">{% trans %}Note interne admin{% endtrans %}</label>
+            {{ form_widget(form.adminNote, {
+              attr: {
+                class: 'min-h-[110px] w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none',
+                placeholder: 'Note visible uniquement par l’administration...'|trans
+              }
+            }) }}
+            <div class="mt-1 text-xs text-rose-600">{{ form_errors(form.adminNote) }}</div>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <label class="mb-1 block text-xs font-extrabold uppercase tracking-wide text-slate-600">{% trans %}Début d’effet{% endtrans %}</label>
+              {{ form_widget(form.startsAt, {
+                attr: { class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none' }
+              }) }}
+              <div class="mt-1 text-xs text-rose-600">{{ form_errors(form.startsAt) }}</div>
+            </div>
+
+            <div>
+              <label class="mb-1 block text-xs font-extrabold uppercase tracking-wide text-slate-600">{% trans %}Fin d’effet{% endtrans %}</label>
+              {{ form_widget(form.endsAt, {
+                attr: { class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold outline-none' }
+              }) }}
+              <div class="mt-1 text-xs text-rose-600">{{ form_errors(form.endsAt) }}</div>
+            </div>
+          </div>
+
+          {{ form_rest(form) }}
+
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button type="submit"
+                    class="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 px-5 py-3 text-sm font-extrabold text-white shadow-[0_18px_55px_rgba(244,63,94,.20)] hover:opacity-95">
+              ✅ {% trans %}Enregistrer la sanction{% endtrans %}
+            </button>
+
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-800 hover:bg-slate-50">
+              {% trans %}Annuler{% endtrans %}
+            </a>
+          </div>
+
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const userField = document.getElementById('sanction_user');
+  const typeField = document.getElementById('sanction_type');
+  const messageField = document.getElementById('sanction_message');
+
+  if (!userField || !typeField || !messageField) return;
+
+  function getSelectedUserLabel() {
+    const option = userField.options[userField.selectedIndex];
+    if (!option) return {{ 'utilisateur'|trans|json_encode|raw }};
+    const txt = (option.text || '').trim();
+    return txt !== '' ? txt : {{ 'utilisateur'|trans|json_encode|raw }};
+  }
+
+  function buildTemplates(userLabel) {
+    return {
+      warning: {{ ('Bonjour __USER__,
+
+Nous vous informons qu’un avertissement a été enregistré sur votre compte en raison d’un comportement non conforme à nos règles d’utilisation.
+
+Nous vous invitons à relire les règles de la plateforme et à éviter toute récidive.
+
+En cas de nouvel incident, des mesures plus strictes pourront être appliquées.
+
+Cordialement,
+L’équipe de modération')|trans|json_encode|raw }}.replace('__USER__', userLabel),
+
+      suspend: {{ ('Bonjour __USER__,
+
+Votre compte a été suspendu temporairement en raison d’un manquement à nos règles d’utilisation.
+
+Pendant la durée de cette suspension, certaines fonctionnalités de votre compte peuvent être limitées ou indisponibles.
+
+Nous vous invitons à adopter un comportement conforme aux règles de la plateforme à l’avenir.
+
+Cordialement,
+L’équipe de modération')|trans|json_encode|raw }}.replace('__USER__', userLabel),
+
+      ban: {{ ('Bonjour __USER__,
+
+Après analyse de votre activité, nous vous informons que votre compte fait l’objet d’un bannissement en raison d’une violation grave ou répétée de nos règles d’utilisation.
+
+Cette décision a été prise afin de protéger les utilisateurs et l’intégrité de la plateforme.
+
+Cordialement,
+L’équipe de modération')|trans|json_encode|raw }}.replace('__USER__', userLabel),
+
+      restrict: {{ ('Bonjour __USER__,
+
+Certaines fonctionnalités de votre compte ont été restreintes à la suite d’un comportement non conforme à nos règles d’utilisation.
+
+Cette mesure vise à prévenir de nouveaux abus tout en maintenant l’accès partiel à votre compte.
+
+Nous vous invitons à respecter strictement les règles de la plateforme.
+
+Cordialement,
+L’équipe de modération')|trans|json_encode|raw }}.replace('__USER__', userLabel)
+    };
+  }
+
+  let autoFilled = false;
+
+  function fillTemplate() {
+    const type = typeField.value;
+    const userLabel = getSelectedUserLabel();
+    const templates = buildTemplates(userLabel);
+    const tpl = templates[type] || '';
+
+    if (!tpl) return;
+
+    if (messageField.value.trim() === '' || autoFilled) {
+      messageField.value = tpl;
+      autoFilled = true;
+    }
+  }
+
+  typeField.addEventListener('change', fillTemplate);
+
+  userField.addEventListener('change', () => {
+    if (autoFilled || messageField.value.trim() === '') {
+      fillTemplate();
+    }
+  });
+
+  messageField.addEventListener('input', () => {
+    autoFilled = false;
+  });
+
+  fillTemplate();
+})();
+</script>
+{% endblock %}

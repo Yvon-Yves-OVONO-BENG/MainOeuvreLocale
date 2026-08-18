@@ -1,0 +1,556 @@
+<style>
+    .mol-job-card {
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 14px 35px rgba(0, 55, 110, .10);
+    transition: .25s ease;
+    height: 100%;
+    }
+
+    .mol-job-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 45px rgba(0, 55, 110, .16);
+    }
+
+    .mol-job-cover {
+        position: relative;
+        height: 145px;
+        overflow: visible;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .mol-job-cover > img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Fallback métier : reste lisible même si la photo métier est absente ou cassée. */
+    .mol-job-cover-fallback {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+        text-align: center;
+        background: linear-gradient(145deg, #eef6ff, #f4fbef);
+        color: #0b4fa3;
+    }
+
+    .mol-job-cover-fallback i { font-size: 32px; }
+    .mol-job-cover-fallback span {
+        max-width: 100%;
+        font-size: 11px;
+        line-height: 1.25;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .mol-job-cover.is-media-error > img { display: none; }
+
+    /* Skeleton léger pendant le lazy-loading des visuels d'offres. */
+    .mol-job-cover.has-media::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        border-radius: inherit;
+        background: linear-gradient(100deg, #edf2f7 25%, #f8fafc 42%, #edf2f7 60%);
+        background-size: 220% 100%;
+        animation: molJobImageSkeleton 1.15s linear infinite;
+        transition: opacity .2s ease;
+        pointer-events: none;
+    }
+
+    .mol-job-cover.has-media > img {
+        opacity: 0;
+        transition: opacity .22s ease;
+    }
+
+    .mol-job-cover.has-media.is-loaded::before { opacity: 0; animation: none; }
+    .mol-job-cover.has-media.is-loaded > img { opacity: 1; }
+
+    @keyframes molJobImageSkeleton {
+        from { background-position: 100% 0; }
+        to { background-position: -120% 0; }
+    }
+
+
+    /* Photo de l'auteur de l'annonce */
+    .mol-job-author {
+        position: absolute;
+        left: 16px;
+        bottom: -24px;
+        width: 56px;
+        height: 56px;
+        border: 4px solid #fff;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(0, 51, 120, .18);
+        z-index: 5;
+    }
+
+    .mol-job-author img,
+    .mol-job-author-empty {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .mol-job-author-empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef7ff;
+        color: #0b4fa3;
+    }
+
+    /* Corps */
+    .mol-job-body {
+        padding: 36px 16px 16px;
+        background: #fff;
+    }
+
+    .mol-job-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .mol-job-title {
+        display: block;
+        color: #05245c;
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.35;
+        text-decoration: none;
+    }
+
+    .mol-job-title:hover {
+        color: #55b900;
+    }
+
+    .mol-job-meta {
+        margin-top: 9px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    .mol-job-meta i {
+        color: #f5b400;
+    }
+
+    /* Bouton Détail */
+    .mol-job-view {
+        flex: 0 0 auto;
+        max-width: 92px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #55b900, #35a000);
+        color: #fff;
+        font-size: 11px;
+        font-weight: 900;
+        text-transform: uppercase;
+        text-decoration: none;
+        letter-spacing: .25px;
+        white-space: nowrap;
+        box-shadow: 0 8px 18px rgba(85, 185, 0, .28);
+    }
+
+    .mol-job-view:hover {
+        background: linear-gradient(135deg, #4aa600, #2f8f00);
+        color: #fff;
+    }
+
+    /* Footer vert doux */
+    .mol-job-footer {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: linear-gradient(135deg, #eaf8df, #dff4d0);
+        border-top: 1px solid rgba(85, 185, 0, .22);
+    }
+
+    .mol-job-price {
+        min-height: 50px;
+        padding: 8px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        color: #246400;
+        font-size: 12px;
+        font-weight: 800;
+        text-align: center;
+    }
+
+    .mol-job-price + .mol-job-price {
+        border-left: 1px solid rgba(85, 185, 0, .22);
+    }
+
+    .mol-job-price i {
+        font-size: 17px;
+        color: #55b900;
+    }
+
+    /* Sécurité anti-débordement */
+    .mol-job-title,
+    .mol-job-meta span,
+    .mol-job-price span {
+        overflow-wrap: anywhere;
+    }
+
+    /* Mobile */
+    @media (max-width: 575px) {
+        .mol-job-cover {
+            height: 118px;
+        }
+
+        .mol-job-body {
+            padding: 34px 12px 14px;
+        }
+
+        .mol-job-head {
+            display: block;
+        }
+
+        .mol-job-title {
+            font-size: 13px;
+            line-height: 1.32;
+            padding-right: 0;
+        }
+
+        .mol-job-view {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 12px;
+            width: 100%;
+            max-width: 100%;
+            padding: 9px 10px;
+            font-size: 10px;
+        }
+
+        .mol-job-footer {
+            grid-template-columns: 1fr;
+        }
+
+        .mol-job-price + .mol-job-price {
+            border-left: 0;
+            border-top: 1px solid rgba(85, 185, 0, .22);
+        }
+    }
+        
+    
+    
+    .mol-job-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: linear-gradient(135deg, #eaf8df, #dff4d0);
+        border-top: 1px solid rgba(85, 185, 0, .22);
+        padding: 10px 12px;
+    }
+
+    .mol-job-price {
+        min-height: auto;
+        padding: 0;
+        justify-content: flex-start;
+    }
+
+    .mol-job-view {
+        flex: 0 0 auto;
+        max-width: none;
+        padding: 8px 13px;
+    }
+
+    @media (max-width: 575px) {
+        .mol-job-footer {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .mol-job-view {
+            width: 100%;
+            text-align: center;
+        }
+    } 
+
+    /* =========================================================
+    TITRE SUR UNE SEULE LIGNE + CARTES SANS ESPACE VIDE
+    ========================================================= */
+
+    .mol-job-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mol-publication-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 6;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(5, 36, 92, .18) !important;
+        border: 1px solid rgba(255, 255, 255, .70);
+        backdrop-filter: blur(1px);
+        -webkit-backdrop-filter: blur(1px);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(5, 36, 92, .22);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    /* Le titre reste toujours sur une seule ligne */
+    .mol-job-title {
+        display: block;
+        width: 100%;
+        min-width: 0;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        overflow-wrap: normal;
+    }
+
+    /* Corps compact */
+    .mol-job-body {
+        flex: 0 0 auto;
+        padding-bottom: 12px;
+    }
+
+    /* Le footer reste collé en bas de la carte */
+    .mol-job-footer {
+        margin-top: auto;
+        flex-shrink: 0;
+    }
+</style>
+<script>
+(function () {
+    function bindJobImageSkeletons(root) {
+        (root || document).querySelectorAll('.mol-job-cover.has-media').forEach(function (cover) {
+            if (cover.dataset.imageSkeletonBound === '1') return;
+            cover.dataset.imageSkeletonBound = '1';
+            const image = cover.querySelector(':scope > img');
+            if (!image) { cover.classList.add('is-loaded'); return; }
+            const done = function () { cover.classList.add('is-loaded'); };
+            if (image.complete) { if (!image.naturalWidth) cover.classList.add('is-media-error'); done(); }
+            else { image.addEventListener('load', done, {once:true}); image.addEventListener('error', function(){ cover.classList.add('is-media-error'); done(); }, {once:true}); }
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function(){ bindJobImageSkeletons(document); });
+    document.addEventListener('turbo:load', function(){ bindJobImageSkeletons(document); });
+    document.addEventListener('mol:home-content-updated', function(event){ bindJobImageSkeletons(event.target || document); });
+})();
+</script>
+
+<!-- CONTENT -->
+        {% set isHomeJobsSection = routeName|default('liste_jobs') == 'accueil' %}
+        <section class="vip-wrap sptb bg-white"{% if isHomeJobsSection %} id="missions" data-home-ajax-pagination="jobs" aria-live="polite"{% endif %}>
+          <div class="container">
+            <div class="row g-3">
+      
+              <!-- LEFT: LIST -->
+              <div class="col-xl-12 col-lg-12 col-md-12">
+                {# <div class="vip-slab mb-5">
+                
+                  <div class="vip-slab-h">
+                    <div>
+                      <h6>
+                        {% trans %}Affichage{% endtrans %}
+                        <small>
+                          {% set from = ((page - 1) * limit) + 1 %}
+                          {% set to = min(page * limit, total) %}
+                          — <b>{{ from }}</b> {% trans %}à{% endtrans %} <b>{{ to }}</b> {% trans %}sur{% endtrans %} <b>{{ total }}</b>
+                        </small>
+                      </h6>
+                    </div>
+      
+                    <div class="d-flex gap-2 align-items-center">
+                      <small class="d-none d-md-inline">{% trans %}Trier :{% endtrans %}</small>
+                      <form method="get" data-turbo="false">
+                        <input type="hidden" name="q" value="{{ filters.q }}">
+                        <input type="hidden" name="city" value="{{ filters.city }}">
+                        {% if filters.professions is defined %}
+                            {% for id in filters.professions %}
+                                <input type="hidden" name="professions[]" value="{{ id }}">
+                            {% endfor %}
+                        {% endif %}
+                        <select class="vip-select" name="sort" onchange="this.form.submit()" style="height:40px;border-radius:12px;padding-left:14px;">
+                          <option value="newest" {{ filters.sort == 'newest' ? 'selected' : '' }}>{% trans %}Plus récent{% endtrans %}</option>
+                          <option value="salary_desc" {{ filters.sort == 'salary_desc' ? 'selected' : '' }}>{% trans %}Salaire: + élevé{% endtrans %}</option>
+                          <option value="salary_asc" {{ filters.sort == 'salary_asc' ? 'selected' : '' }}>{% trans %}Salaire: + bas{% endtrans %}</option>
+                          <option value="relevant" {{ filters.sort == 'relevant' ? 'selected' : '' }}>{% trans %}Pertinence{% endtrans %}</option>
+                        </select>
+                      </form>
+                    </div>
+                  </div>
+                </div> #}
+
+
+      
+                  {% if total == 0 %}
+                    <div class="p-4" style="margin:8px 0 20px;border:1px solid #e1eaf4;border-radius:18px;background:linear-gradient(135deg,#f8fbff,#fbfff7);color:#52677e;">
+                      <strong style="display:block;color:#173d69;font-size:15px;margin-bottom:5px;">{% trans %}Aucune offre trouvée{% endtrans %}</strong>
+                      <span style="display:block;font-size:12px;line-height:1.6;">{% trans %}Essayez avec un autre métier, retirez un filtre ou élargissez votre rayon de recherche.{% endtrans %}</span>
+                      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:13px;">
+                        <button type="button" onclick="(function(){const r=document.getElementById('job_nearby_radius');const f=document.getElementById('jobNearbySearchForm');if(r&&f){r.value='100';f.requestSubmit();}})()" style="min-height:36px;padding:0 12px;border:0;border-radius:10px;background:#155eef;color:#fff;font-size:11px;font-weight:850;">
+                          <i class="fa-solid fa-arrows-left-right me-1"></i>{% trans %}Élargir à 100 km{% endtrans %}
+                        </button>
+                        <a href="{{ path('liste_jobs') }}" data-turbo="false" style="min-height:36px;display:inline-flex;align-items:center;padding:0 12px;border:1px solid #ccdaea;border-radius:10px;background:#fff;color:#255b91;text-decoration:none;font-size:11px;font-weight:850;">
+                          <i class="fa-solid fa-list me-1"></i>{% trans %}Voir toutes les offres{% endtrans %}
+                        </a>
+                        <a href="#offres-alertes" style="min-height:36px;display:inline-flex;align-items:center;padding:0 12px;border:1px solid #ccdaea;border-radius:10px;background:#fff;color:#255b91;text-decoration:none;font-size:11px;font-weight:850;">
+                          <i class="fa-solid fa-bell me-1"></i>{% trans %}Créer une alerte{% endtrans %}
+                        </a>
+                      </div>
+                    </div>
+                  {% endif %}
+      
+                    <div class="row g-4 mt-1">
+                        {% for j in jobs %}
+                            <div class="col-6 col-lg-3">
+                                <article class="mol-job-card">
+
+                                    {% set professionName = j.profession ? j.profession.profession : j.title %}
+                                    {% set professionKey = professionName|default('')|lower %}
+                                    {% set professionIcon = 'fa-briefcase' %}
+                                    {% if 'jardin' in professionKey or 'agri' in professionKey %}{% set professionIcon = 'fa-seedling' %}
+                                    {% elseif 'web' in professionKey or 'site' in professionKey or 'dévelop' in professionKey or 'develop' in professionKey or 'informat' in professionKey %}{% set professionIcon = 'fa-laptop-code' %}
+                                    {% elseif 'maçon' in professionKey or 'macon' in professionKey or 'btp' in professionKey or 'construction' in professionKey %}{% set professionIcon = 'fa-helmet-safety' %}
+                                    {% elseif 'menuis' in professionKey or 'charpent' in professionKey %}{% set professionIcon = 'fa-hammer' %}
+                                    {% elseif 'plomb' in professionKey %}{% set professionIcon = 'fa-faucet-drip' %}
+                                    {% elseif 'élect' in professionKey or 'elect' in professionKey %}{% set professionIcon = 'fa-bolt' %}
+                                    {% elseif 'chauff' in professionKey or 'conduct' in professionKey %}{% set professionIcon = 'fa-car' %}
+                                    {% elseif 'ménage' in professionKey or 'menage' in professionKey or 'nettoy' in professionKey %}{% set professionIcon = 'fa-broom' %}
+                                    {% elseif 'cuisin' in professionKey or 'restaur' in professionKey %}{% set professionIcon = 'fa-utensils' %}
+                                    {% elseif 'coiff' in professionKey or 'beauté' in professionKey or 'beaute' in professionKey %}{% set professionIcon = 'fa-scissors' %}
+                                    {% elseif 'sécur' in professionKey or 'secur' in professionKey %}{% set professionIcon = 'fa-shield-halved' %}
+                                    {% elseif 'administr' in professionKey or 'secret' in professionKey or 'assistant' in professionKey %}{% set professionIcon = 'fa-file-lines' %}
+                                    {% elseif 'vente' in professionKey or 'commerce' in professionKey %}{% set professionIcon = 'fa-store' %}
+                                    {% endif %}
+
+                                    <div class="mol-job-cover{{ j.profession and j.profession.photo ? ' has-media' : '' }}">
+                                        <div class="mol-job-cover-fallback">
+                                            <i class="fa-solid {{ professionIcon }}"></i>
+                                            <span>{{ professionName|default(j.title) }}</span>
+                                        </div>
+                                        {% if j.profession and j.profession.photo %}
+                                            <img src="{{ asset('uploads/professions/' ~ j.profession.photo) }}" alt="{{ professionName|default(j.title) }}" loading="lazy" decoding="async" fetchpriority="low">
+                                        {% endif %}
+
+                                        <div class="mol-job-author">
+                                            {% if j.createdBy.personalProfile.photo is defined and j.createdBy.personalProfile.photo %}
+                                                <img src="{{ asset('uploads/profiles/' ~ j.createdBy.personalProfile.photo) }}" alt="Photo de {{ j.createdBy.personalProfile.nom|default('l’utilisateur') }}" loading="lazy" decoding="async" fetchpriority="low">
+                                            {% else %}
+                                                <div class="mol-job-author-empty" aria-label="Photo de profil indisponible">
+                                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="mol-job-body">
+                                        {% set fullTitle = j.title ?? ('Offre'|trans) %}
+                                        {% set displayedTitle = fullTitle %}
+                                        
+                                        {# Maximum conseillé pour la largeur actuelle des cartes #}
+                                        {% if fullTitle|length > 34 %}
+                                            {% set displayedTitle = fullTitle|slice(0, 34)|trim ~ '…' %}
+                                        {% endif %}
+                                        
+                                        <a
+                                            href="{{ path('job_detail', { slug: j.slug }) }}"
+                                            class="mol-job-title"
+                                            title="{{ fullTitle }}"
+                                            aria-label="{{ fullTitle }}"
+                                        >
+                                            {{ displayedTitle }}
+                                        </a>
+
+                                        <div class="mol-job-meta">
+                                            <i class="fa fa-map-marker"></i>
+                                            <span>{{ j.city }}</span>
+                                        </div>
+                                        
+                                    </div>
+
+                                    <div class="mol-job-footer">
+                                        <div class="mol-job-price">
+                                            <i class="fa fa-calendar"></i>
+                                            <span>{{ j.createdAt ? j.createdAt|ago : 'récemment'|trans }}</span>
+                                        </div>
+
+                                        <a href="{{ path('job_detail', { slug: j.slug }) }}" class="mol-job-view" data-turbo="false">
+                                            {% trans %}Voir l'annonce{% endtrans %}
+                                        </a>
+                                    </div>
+
+                                </article>
+                            </div>
+                        {% endfor %}
+                    </div>
+               
+      
+                <!-- Pagination -->
+                {% if pages > 1 %}
+                  {% set currentRouteName = routeName|default('liste_jobs') %}
+                  {% set currentRouteParams = routeParams|default({}) %}
+                  {% set paginationAnchor = currentRouteName == 'accueil' ? '#missions' : '' %}
+                  {% set prev = page - 1 %}
+                  {% set next = page + 1 %}
+      
+                  <div class="vip-pager">
+                    <a class="vip-pagebtn {{ page == 1 ? 'disabled' : '' }}"
+                      {% if currentRouteName == 'accueil' %}data-turbo="false"{% endif %}
+                      href="{{ path(currentRouteName, currentRouteParams|merge(app.request.query.all|merge({'page': (prev < 1 ? 1 : prev)}))) }}{{ paginationAnchor }}">
+                      {% trans %}Précédent{% endtrans %}
+                    </a>
+      
+                    {% for p in 1..pages %}
+                      {% if p == 1 or p == pages or (p >= page-1 and p <= page+1) %}
+                        <a class="vip-pagebtn {{ p == page ? 'active' : '' }}"
+                          {% if currentRouteName == 'accueil' %}data-turbo="false"{% endif %}
+                          href="{{ path(currentRouteName, currentRouteParams|merge(app.request.query.all|merge({'page': p}))) }}{{ paginationAnchor }}">
+                          {{ p }}
+                        </a>
+                      {% elseif p == page-2 or p == page+2 %}
+                        <span class="vip-pagebtn" style="opacity:.55;">…</span>
+                      {% endif %}
+                    {% endfor %}
+      
+                    <a class="vip-pagebtn {{ page == pages ? 'disabled' : '' }}"
+                      {% if currentRouteName == 'accueil' %}data-turbo="false"{% endif %}
+                      href="{{ path(currentRouteName, currentRouteParams|merge(app.request.query.all|merge({'page': (next > pages ? pages : next)}))) }}{{ paginationAnchor }}">
+                      {% trans %}Suivant{% endtrans %}
+                    </a>
+                  </div>
+                {% endif %}
+              </div>
+      
+          </div>
+        </section>
+
+{% if annonces is defined %}
+    {% include 'annonce/_public_section.html.twig' %}
+{% endif %}

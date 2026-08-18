@@ -1,0 +1,48 @@
+.kpi-card-availability{
+			overflow: hidden;
+		}
+
+		.availability-collapse-toggle{
+			width: 36px;
+			height: 36px;
+			border-radius: 12px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border: 1px solid rgba(15, 23, 42, .08);
+			background: #fff;
+			box-shadow: 0 4px 14px rgba(15, 23, 42, .05);
+			transition: all .25s ease;
+		}
+
+		.availability-collapse-toggle:hover{
+			background: #f8fafc;
+			border-color: rgba(15, 23, 42, .12);
+		}
+
+		.availability-collapse-toggle i{
+			transition: transform .25s ease;
+		}
+
+		.availability-collapse-toggle[aria-expanded="true"] i{
+			transform: rotate(180deg);
+		}
+
+		#availabilityCalendarCollapse{
+			margin-top: .75rem;
+		}
+
+		.availability-calendar-card{
+			background: #fff;
+			border: 1px solid rgba(15, 23, 42, .06);
+			border-radius: 18px;
+			padding: 1rem;
+		}
+
+.availability-collapse-toggle i{
+			transition: transform .25s ease;
+		}
+
+		.availability-collapse-toggle[aria-expanded="true"] i{
+			transform: rotate(180deg);
+		}

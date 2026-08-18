@@ -1,0 +1,512 @@
+<style>
+    :root{
+        --net-bg:#f4f7fb;
+        --net-card:rgba(255,255,255,.94);
+        --net-card-2:rgba(255,255,255,.88);
+        --net-stroke:rgba(15,23,42,.08);
+        --net-text:#0f172a;
+        --net-muted:rgba(15,23,42,.62);
+        --net-primary:#2563eb;
+        --net-primary-2:#60a5fa;
+        --net-success:#10b981;
+        --net-danger:#ef4444;
+        --net-shadow:0 24px 60px rgba(15,23,42,.08);
+        --net-shadow-sm:0 12px 28px rgba(15,23,42,.06);
+        --net-radius:24px;
+    }
+
+    body{
+        background:
+            radial-gradient(1000px circle at 10% 0%, rgba(37,99,235,.10), transparent 55%),
+            radial-gradient(900px circle at 90% 10%, rgba(16,185,129,.08), transparent 55%),
+            linear-gradient(180deg, #f7fbff 0%, #eef4fb 100%);
+    }
+
+    .network-page{
+        padding-top: 26px;
+        padding-bottom: 28px;
+    }
+
+    /* ===== HERO ===== */
+    .network-hero{
+        position:relative;
+        overflow:hidden;
+        border-radius:30px;
+        padding:28px 28px 24px;
+        color:#fff;
+        background:
+            radial-gradient(700px circle at 0% 0%, rgba(255,255,255,.20), transparent 45%),
+            radial-gradient(700px circle at 100% 0%, rgba(255,255,255,.14), transparent 40%),
+            linear-gradient(135deg, #0f172a 0%, #1d4ed8 45%, #0ea5e9 100%);
+        box-shadow:
+            0 30px 70px rgba(37,99,235,.22),
+            inset 0 1px 0 rgba(255,255,255,.15);
+        border:1px solid rgba(255,255,255,.12);
+    }
+
+    .network-hero::before{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:
+            linear-gradient(135deg, rgba(255,255,255,.05), transparent 42%);
+        pointer-events:none;
+    }
+
+    .network-hero__badge{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        padding:8px 14px;
+        border-radius:999px;
+        background:rgba(255,255,255,.12);
+        border:1px solid rgba(255,255,255,.14);
+        backdrop-filter:blur(10px);
+        color:#fff;
+        font-weight:800;
+        font-size:.88rem;
+        margin-bottom:12px;
+    }
+
+    .network-hero h1{
+        margin:0;
+        font-size:2.2rem;
+        line-height:1.04;
+        letter-spacing:-.04em;
+        font-weight:950;
+    }
+
+    .network-hero p{
+        margin:10px 0 0;
+        color:rgba(255,255,255,.84);
+        font-size:1rem;
+        font-weight:600;
+        max-width:760px;
+    }
+
+    .network-hero__stats{
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-top:18px;
+    }
+
+    .network-stat{
+        min-width:140px;
+        padding:14px 16px;
+        border-radius:20px;
+        background:rgba(255,255,255,.12);
+        border:1px solid rgba(255,255,255,.14);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+        backdrop-filter:blur(8px);
+    }
+
+    .network-stat__label{
+        color:rgba(255,255,255,.72);
+        font-size:.82rem;
+        font-weight:700;
+    }
+
+    .network-stat__value{
+        margin-top:4px;
+        font-size:1.45rem;
+        font-weight:950;
+        color:#fff;
+        line-height:1;
+    }
+
+    /* ===== SECTION WRAP ===== */
+    .network-shell{
+        margin-top:18px;
+        background:linear-gradient(180deg, rgba(255,255,255,.82), rgba(255,255,255,.68));
+        border:1px solid rgba(255,255,255,.60);
+        box-shadow:var(--net-shadow);
+        border-radius:28px;
+        padding:18px;
+        backdrop-filter:blur(10px);
+    }
+
+    /* ===== TABS ===== */
+    .network-tabs{
+        background:rgba(255,255,255,.76);
+        border:1px solid var(--net-stroke);
+        border-radius:22px;
+        padding:8px;
+        display:inline-flex;
+        gap:8px;
+        box-shadow:var(--net-shadow-sm);
+    }
+
+    .network-tabs .nav-link{
+        border:0;
+        border-radius:16px;
+        padding:12px 16px;
+        font-weight:800;
+        color:var(--net-text);
+        background:transparent;
+        transition:all .18s ease;
+    }
+
+    .network-tabs .nav-link:hover{
+        background:rgba(37,99,235,.06);
+        color:var(--net-primary);
+    }
+
+    .network-tabs .nav-link.active{
+        background:linear-gradient(135deg, var(--net-primary), var(--net-primary-2));
+        color:#fff;
+        box-shadow:0 14px 28px rgba(37,99,235,.22);
+    }
+
+    /* ===== GRID ===== */
+    .network-grid{
+        margin-top:18px;
+    }
+
+    /* ===== CARD ===== */
+    .network-card{
+        position:relative;
+        overflow:hidden;
+        height:100%;
+        background:
+            radial-gradient(500px circle at 100% 0%, rgba(37,99,235,.06), transparent 35%),
+            linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.92));
+        border-radius:24px;
+        border:1px solid var(--net-stroke);
+        box-shadow:var(--net-shadow-sm);
+        transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+    }
+
+    .network-card:hover{
+        transform:translateY(-4px);
+        box-shadow:0 20px 40px rgba(15,23,42,.10);
+        border-color:rgba(37,99,235,.14);
+    }
+
+    .network-card__body{
+        padding:18px;
+    }
+
+    .network-card__top{
+        display:flex;
+        align-items:center;
+        gap:14px;
+        min-width:0;
+    }
+
+    .network-avatar{
+        position:relative;
+        width:64px;
+        height:64px;
+        border-radius:20px;
+        flex:0 0 64px;
+        overflow:hidden;
+        border:1px solid rgba(37,99,235,.12);
+        box-shadow:0 14px 24px rgba(37,99,235,.12);
+        background:linear-gradient(135deg, rgba(37,99,235,.16), rgba(16,185,129,.10));
+        display:grid;
+        place-items:center;
+        font-weight:900;
+        color:var(--net-text);
+        font-size:1.15rem;
+    }
+
+    .network-avatar img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+    }
+
+    .network-avatar__dot{
+        position:absolute;
+        right:6px;
+        bottom:6px;
+        width:12px;
+        height:12px;
+        border-radius:999px;
+        background:var(--net-success);
+        border:2px solid #fff;
+        box-shadow:0 0 0 3px rgba(16,185,129,.12);
+    }
+
+    .network-main{
+        min-width:0;
+        flex:1 1 auto;
+    }
+
+    .network-name{
+        color:var(--net-text);
+        font-weight:900;
+        font-size:1rem;
+        line-height:1.2;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .network-meta{
+        margin-top:5px;
+        font-size:.88rem;
+        color:var(--net-muted);
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .network-badges{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        margin-top:12px;
+    }
+
+    .network-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:6px 10px;
+        border-radius:999px;
+        font-size:.75rem;
+        font-weight:800;
+        border:1px solid var(--net-stroke);
+        background:#fff;
+        color:var(--net-text);
+    }
+
+    .network-badge--blue{
+        background:rgba(37,99,235,.08);
+        border-color:rgba(37,99,235,.14);
+        color:#1d4ed8;
+    }
+
+    .network-badge--green{
+        background:rgba(16,185,129,.08);
+        border-color:rgba(16,185,129,.14);
+        color:#047857;
+    }
+
+    .network-badge--orange{
+        background:rgba(245,158,11,.10);
+        border-color:rgba(245,158,11,.14);
+        color:#b45309;
+    }
+
+    .network-actions{
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        margin-top:16px;
+    }
+
+    .network-btn{
+        --bs-btn-padding-y:.55rem;
+        --bs-btn-padding-x:.9rem;
+        --bs-btn-font-size:.82rem;
+        border-radius:999px;
+        font-weight:800;
+        box-shadow:none !important;
+    }
+
+    .network-btn-outline{
+        background:#fff;
+        border:1px solid var(--net-stroke);
+        color:var(--net-text);
+    }
+
+    .network-btn-outline:hover{
+        background:#f8fbff;
+        color:var(--net-primary);
+        border-color:rgba(37,99,235,.18);
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-network{
+        background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.90));
+        border:1px dashed rgba(15,23,42,.14);
+        border-radius:24px;
+        box-shadow:var(--net-shadow-sm);
+        text-align:center;
+        padding:40px 20px;
+        color:var(--net-muted);
+    }
+
+    .empty-network__icon{
+        width:74px;
+        height:74px;
+        margin:0 auto 14px;
+        border-radius:24px;
+        display:grid;
+        place-items:center;
+        font-size:2rem;
+        background:linear-gradient(135deg, rgba(37,99,235,.10), rgba(16,185,129,.10));
+        border:1px solid rgba(37,99,235,.10);
+        color:var(--net-primary);
+    }
+
+    .empty-network__title{
+        color:var(--net-text);
+        font-size:1.08rem;
+        font-weight:900;
+        margin-bottom:6px;
+    }
+
+    .empty-network__text{
+        font-weight:600;
+    }
+
+    /* ===== MOBILE FIX POSITION ===== */
+    @media (max-width: 991.98px){
+        .network-page{
+            padding-top:50px;
+        }
+
+        .network-hero h1{
+            font-size:1.9rem;
+        }
+    }
+
+    @media (max-width: 575.98px){
+        .network-page{
+            padding-top:180px;
+            padding-bottom:18px;
+        }
+
+        .network-hero{
+            border-radius:22px;
+            padding:18px 16px 16px;
+        }
+
+        .network-hero__badge{
+            font-size:.8rem;
+            padding:7px 12px;
+            margin-bottom:10px;
+        }
+
+        .network-hero h1{
+            font-size:1.55rem;
+            line-height:1.08;
+        }
+
+        .network-hero p{
+            font-size:.92rem;
+            line-height:1.45;
+        }
+
+        .network-hero__stats{
+            gap:8px;
+            margin-top:14px;
+        }
+
+        .network-stat{
+            flex:1 1 calc(50% - 8px);
+            min-width:0;
+            padding:12px;
+            border-radius:18px;
+        }
+
+        .network-stat__value{
+            font-size:1.2rem;
+        }
+
+        .network-shell{
+            border-radius:22px;
+            padding:12px;
+            margin-top:14px;
+        }
+
+        .network-tabs{
+            display:flex;
+            width:100%;
+            padding:6px;
+            border-radius:18px;
+        }
+
+        .network-tabs .nav-item{
+            flex:1 1 0;
+        }
+
+        .network-tabs .nav-link{
+            width:100%;
+            text-align:center;
+            padding:11px 10px;
+            font-size:.84rem;
+            line-height:1.25;
+            min-height:52px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+        }
+
+        .network-grid{
+            margin-top:14px;
+        }
+
+        .network-card{
+            border-radius:20px;
+        }
+
+        .network-card__body{
+            padding:14px;
+        }
+
+        .network-card__top{
+            align-items:flex-start;
+            gap:12px;
+        }
+
+        .network-avatar{
+            width:56px;
+            height:56px;
+            flex:0 0 56px;
+            border-radius:18px;
+        }
+
+        .network-name{
+            white-space:normal;
+            overflow:visible;
+            text-overflow:unset;
+            font-size:.98rem;
+        }
+
+        .network-meta{
+            white-space:normal;
+            overflow:visible;
+            text-overflow:unset;
+            line-height:1.4;
+        }
+
+        .network-badges{
+            gap:6px;
+            margin-top:10px;
+        }
+
+        .network-badge{
+            font-size:.72rem;
+            padding:6px 9px;
+        }
+
+        .network-actions{
+            gap:8px;
+            margin-top:14px;
+        }
+
+        .network-actions .btn{
+            flex:1 1 100%;
+            width:100%;
+            min-height:42px;
+        }
+
+        .empty-network{
+            padding:28px 16px;
+            border-radius:20px;
+        }
+
+        .empty-network__icon{
+            width:64px;
+            height:64px;
+            border-radius:20px;
+            font-size:1.7rem;
+        }
+    }
+</style>

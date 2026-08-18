@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • FAQ{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/support/_vip_ui.html.twig' %}
+
+  <div class="vip-shell" data-admin-support-page="faq">
+    <div class="vip-container vip-grid">
+
+      <section class="vip-card vip-page-head">
+        <div class="vip-card-inner">
+          <div class="vip-page-head-top">
+            <div class="vip-page-head-main">
+              <div class="vip-page-kicker">{% trans %}Support • FAQ{% endtrans %}</div>
+              <h1 class="vip-page-head-title">{% trans %}Knowledge Base{% endtrans %}</h1>
+              <p class="vip-page-head-text">
+                {% trans %}Centralise les réponses récurrentes, les procédures et les formulations de support dans une base claire, premium et facile à consulter.{% endtrans %}
+              </p>
+            </div>
+
+            <div class="vip-page-head-side">
+              <span class="vip-badge vip-badge-neutral">{{ faqs|length }} {% trans %}entrées{% endtrans %}</span>
+            </div>
+          </div>
+
+          <div class="vip-page-head-actions">
+            {% include 'admin/support/_quick_actions.html.twig' %}
+          </div>
+        </div>
+      </section>
+
+      <section class="vip-card">
+        <div class="vip-card-inner">
+          <div class="vip-toolbar">
+            <div>
+              <h2 class="vip-section-title">{% trans %}Base de connaissances{% endtrans %}</h2>
+              <p class="vip-section-subtitle">{% trans %}Recherche instantanée et filtrage par catégorie.{% endtrans %}</p>
+            </div>
+          </div>
+
+          <div class="vip-separator"></div>
+
+          <div class="vip-filters">
+            <div style="flex:2 1 320px;">
+              <input type="search"
+                     class="vip-input"
+                     placeholder="{% trans %}Rechercher une question, un mot-clé...{% endtrans %}"
+                     data-faq-search>
+            </div>
+
+            <div style="display:flex;flex-wrap:wrap;gap:8px;">
+              {% for category in categories %}
+                <button type="button"
+                        class="vip-chip {{ loop.first ? 'is-active' : '' }}"
+                        data-faq-chip="{{ category == 'Tous' ? '' : category }}">
+                  {{ category }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="vip-separator"></div>
+
+          <div class="vip-card-list">
+            {% for item in faqs %}
+              <article class="vip-mini-card js-faq-card"
+                       data-faq-category="{{ item.category }}"
+                       data-faq-text="{{ (item.question ~ ' ' ~ item.answer ~ ' ' ~ item.tags|join(' '))|lower }}">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+                  <div style="min-width:0;flex:1 1 auto;">
+                    <div class="vip-faq-question">{{ item.question }}</div>
+                    <div class="vip-faq-answer">{{ item.answer }}</div>
+                  </div>
+
+                  <span class="vip-badge medium">{{ item.category }}</span>
+                </div>
+
+                <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;">
+                  {% for tag in item.tags %}
+                    <span class="vip-chip">{{ tag }}</span>
+                  {% endfor %}
+                </div>
+
+                <div style="margin-top:12px;font-size:.82rem;color:var(--vip-muted);">
+                  {% trans %}Dernière mise à jour :{% endtrans %} {{ item.updatedAt|date('d/m/Y') }}
+                </div>
+              </article>
+            {% else %}
+              <div class="vip-empty">{% trans %}Aucune FAQ disponible.{% endtrans %}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-support.js') }}"></script>
+{% endblock %}

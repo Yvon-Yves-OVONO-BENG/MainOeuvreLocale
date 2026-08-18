@@ -6,113 +6,48 @@ use Fpdf\Fpdf;
 
 class EntetePortrait
 {
-	public function __construct()
-	{
-	}
+    public function entetePortrait(Fpdf $pdf): Fpdf
+    {
+        // Logo
+        $pdf->Image('../public/build/assets/images/brand/logo.png', 15, 10, 30);
+        $pdf->Image('../public/build/assets/images/brand/logoBackground.png', 35, 120, 150);
 
-	public function entetePortrait(Fpdf $pdf): Fpdf
-	{
-		// $pdf->Image('../public/assets/images/logoLucelle.png', 95, 12, 25);
-		// $pdf->Image('../public/images/logoLucelle.png', 95, 190, 150);
-		$pdf->SetFont('Helvetica', 'B', 11);
-		// fond de couleur gris (valeurs en RGB)
-		$pdf->setFillColor(230, 230, 230);
-		// position du coin supérieur gauche par rapport à la marge gauche (mm)
+        // Nom entreprise
+        $pdf->SetFont('Helvetica', 'B', 16);
+        $pdf->SetXY(50, 12);
+        $pdf->Cell(0, 6, utf8_decode("MAIN D'OEUVRE LOCALE"), 0, 1);
+
+        // Slogan / activité
+        $pdf->SetFont('Helvetica', '', 10);
+        $pdf->SetX(50);
+        $pdf->Cell(0, 5, utf8_decode("Plateforme de mise en relation professionnelle"), 0, 1);
+
+        // Ligne séparation élégante
+        $pdf->SetDrawColor(200, 200, 200);
+        $pdf->Line(15, 47, 195, 47);
+
+        // Bloc informations société (droite)
+        $pdf->SetFont('Helvetica', '', 8);
+        // $pdf->SetXY(120, 10);
+
+		$pdf->Ln();
 		$pdf->SetX(15);
-		$pdf->Cell(70, 4, utf8_decode("CENTRE DE SANTE PRIVE LUCELLE"), 0, 0, 'C', 0);
-		$pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		$pdf->Cell(70, 4, utf8_decode("LUCELLE PRIVATE HEALTH CENTER"), 0, 1, 'C', 0);
-
-		// $pdf->SetFont('Helvetica', 'B', 7);
-		// $pdf->SetX(15);
-		// $pdf->Cell(70, 4, utf8_decode("Paix - Travail - Patrie"), 0, 0, 'C', 0);
-		// $pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 4, utf8_decode("Peace - Work - Fatherland"), 0, 1, 'C', 0);
-
+        $pdf->Cell(75, 4, utf8_decode("Email : contact@maindoeuvrelocale.com"), 0, 1, 'L');
 		$pdf->SetX(15);
-		$pdf->SetFont('Helvetica', 'B', 8);
-		$pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		$pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		$pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->Cell(70, 4, utf8_decode('Ministère de la Santé Publique'), 0, 0, 'C', 0);
-		// $pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 4, utf8_decode('Ministry of Public Health'), 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->SetFont('Helvetica', 'B', 8);
-		// $pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		// $pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->Cell(70, 4, utf8_decode("Délégation Régionale de l'Est"), 0, 0, 'C', 0);
-		// $pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 4, utf8_decode('East Regional Delegation'), 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->SetFont('Helvetica', 'B', 8);
-		// $pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		// $pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->Cell(70, 4, utf8_decode("Délégation Départementale du Haut Nyong"), 0, 0, 'C', 0);
-		// $pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 4, utf8_decode('Haut Nyong Divisional Delegation'), 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->SetFont('Helvetica', 'B', 8);
-		// $pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		// $pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->Cell(70, 4, utf8_decode("District d'Abong Mbang"), 0, 0, 'C', 0);
-		// $pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 4, utf8_decode('Abong Mbang District'), 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->SetFont('Helvetica', 'B', 8);
-		// $pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		// $pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->Cell(70, 4, utf8_decode("CENTRE DE SANTE PRIVE LUCELLE"), 0, 0, 'C', 0);
-		// $pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 4, utf8_decode('LUCELLE PRIVATE HEALTH CENTER'), 0, 1, 'C', 0);
-
-		// $pdf->SetX(15);
-		// $pdf->SetFont('Helvetica', 'B', 8);
-		// $pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		// $pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		// $pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
-
-
+        $pdf->Cell(75, 4, utf8_decode("Yaoundé – Cameroun"), 0, 1, 'L');
 		$pdf->SetX(15);
-		$pdf->Cell(70, 4, utf8_decode('670 57 03 40 / 683 80 62 67 / 687 36 53 15'), 0, 0, 'C', 0);
-		$pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		$pdf->Cell(70, 4, utf8_decode('670 57 03 40 / 683 80 62 67 / 687 36 53 15'), 0, 1, 'C', 0);
+        $pdf->Cell(75, 4, utf8_decode("www.maindoeuvrelocale.com"), 0, 1, 'L');
 
-		$pdf->SetX(15);
-		$pdf->SetFont('Helvetica', 'B', 8);
-		$pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		$pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		$pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
+		$pdf->Ln(15);
+        // Titre document
+        $pdf->SetFont('Helvetica', 'B', 14);
+        $pdf->SetXY(15, 48);
+        $pdf->Cell(0, 8, utf8_decode("FACTURE"), 0, 1, 'C');
 
-		$pdf->SetX(15);
-		$pdf->Cell(70, 4, utf8_decode('BP : '), 0, 0, 'C', 0);
-		$pdf->Cell(40, 4, '', 0, 0, 'L', 0);
-		$pdf->Cell(70, 4, utf8_decode('Po.Box : '), 0, 1, 'C', 0);
+        // Sous-ligne
+        $pdf->SetDrawColor(220, 220, 220);
+        $pdf->Line(80, 56, 130, 56);
 
-		$pdf->SetX(15);
-		$pdf->SetFont('Helvetica', 'B', 8);
-		$pdf->Cell(70, 2, '*********', 0, 0, 'C', 0);
-		$pdf->Cell(40, 2, '', 0, 0, 'L', 0);
-		$pdf->Cell(70, 2, '*********', 0, 1, 'C', 0);
-
-		return $pdf;
-	}
+        return $pdf;
+    }
 }

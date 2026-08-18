@@ -1,0 +1,159 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Appel'|trans }} #{{ a.id }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_appeals_show.html.twig" %}
+
+{% set pp = pp ?? null %}
+{% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">📨 {% trans %}Appel{% endtrans %} #{{ a.id }}</div>
+        <div class="hint">{{ a.createdAt ? a.createdAt|date('d/m/Y H:i') : '—' }}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <a class="btn" href="{{ path('moderateur_appeals_index') }}">{% trans %}← Retour{% endtrans %}</a>
+        <a class="btn primary" href="/moderateur/verifications/u/{{ u.id }}">✅ {% trans %}Vérifications{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div class="bd">
+      <div class="grid">
+        <div class="box">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <img class="avatar" src="{{ photo }}" alt="{{ 'photo'|trans }}">
+            <div>
+              <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : u.email }}</div>
+              <div class="muted" style="font-size:12px;">{{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}</div>
+            </div>
+
+            {% if a.status == 'pending' %}
+              <span class="chip p">⏳ {% trans %}EN ATTENTE{% endtrans %}</span>
+            {% elseif a.status == 'accepted' %}
+              <span class="chip ok">✅ {% trans %}ACCEPTÉ{% endtrans %}</span>
+            {% else %}
+              <span class="chip bad">⛔ {% trans %}REJETÉ{% endtrans %}</span>
+            {% endif %}
+          </div>
+
+          <div style="margin-top:12px;">
+            <div style="font-weight:950;">{% trans %}Motif (appel){% endtrans %}</div>
+            <div style="margin-top:8px;padding:12px;border-radius:14px;border:1px solid rgba(15,23,42,.10);background:rgba(255,255,255,.92);">
+              {{ a.reason }}
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div style="font-weight:950;">{% trans %}Note interne modérateur{% endtrans %}</div>
+            <textarea id="noteBox" class="ta" placeholder="{{ 'Note interne…'|trans }}">{{ a.moderatorNote ?? '' }}</textarea>
+
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:10px;">
+              <button class="btn primary js-save-note"
+                      data-url="{{ path('moderateur_appeals_note', {id:a.id}) }}"
+                      data-token="{{ csrf_token('appeal_note_' ~ a.id) }}">
+                💾 {% trans %}Enregistrer note{% endtrans %}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="box">
+          <div style="font-weight:950;">{% trans %}Décision{% endtrans %}</div>
+          <div class="muted" style="font-size:12px;margin-top:6px;">
+            {% trans %}Décidé par :{% endtrans %} <b>{{ a.decidedBy ? (a.decidedBy.email ?? ('#' ~ a.decidedBy.id)) : '—' }}</b><br>
+            {% trans %}Décidé le :{% endtrans %} <b>{{ a.decidedAt ? a.decidedAt|date('d/m/Y H:i') : '—' }}</b>
+          </div>
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn good js-decision"
+                    data-kind="accept"
+                    data-url="{{ path('moderateur_appeals_accept', {id:a.id}) }}"
+                    data-token="{{ csrf_token('appeal_accept_' ~ a.id) }}">
+              ✅ {% trans %}Accepter{% endtrans %}
+            </button>
+
+            <button class="btn danger js-decision"
+                    data-kind="reject"
+                    data-url="{{ path('moderateur_appeals_reject', {id:a.id}) }}"
+                    data-token="{{ csrf_token('appeal_reject_' ~ a.id) }}">
+              ⛔ {% trans %}Rejeter{% endtrans %}
+            </button>
+
+            <a class="btn" href="/moderateur/reports?status=open&q={{ u.email|url_encode }}">🔎 {% trans %}Signalements{% endtrans %}</a>
+          </div>
+
+          <div class="muted" style="font-size:12px;margin-top:10px;">
+            {% trans %}Astuce : ajoute une note interne avant de décider.{% endtrans %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+  function toast(message, type='ok', sub=''){
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+      <div class="t-ico">${type==='ok'?'✅':type==='warn'?'⚠️':'⛔'}</div>
+      <div><div class="t-msg">${message}</div>${sub?`<div class="t-sub">${sub}</div>`:''}</div>
+    `;
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 3200);
+  }
+
+  async function postJson(url, payload){
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest' },
+      body: JSON.stringify(payload || {})
+    });
+    const data = await res.json().catch(()=>null);
+    if (!res.ok || !data || data.ok !== true) throw new Error(data?.message || '{{ "Erreur"|trans|e("js") }}');
+    return data;
+  }
+
+  document.addEventListener('click', async (e) => {
+    const save = e.target.closest('.js-save-note');
+    if (save) {
+      e.preventDefault();
+      try{
+        toast('{{ "Sauvegarde…"|trans|e("js") }}', 'warn');
+        await postJson(save.dataset.url, { _token: save.dataset.token, note: (document.getElementById('noteBox')?.value || '') });
+        toast('{{ "Note enregistrée ✅"|trans|e("js") }}', 'ok');
+      }catch(err){
+        toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+      }
+      return;
+    }
+
+    const btn = e.target.closest('.js-decision');
+    if (!btn) return;
+    e.preventDefault();
+
+    const note = (document.getElementById('noteBox')?.value || '').trim();
+
+    btn.disabled = true;
+    btn.style.opacity = '.75';
+
+    try{
+      toast('{{ "Enregistrement…"|trans|e("js") }}', 'warn');
+      await postJson(btn.dataset.url, { _token: btn.dataset.token, note });
+      toast(btn.dataset.kind === 'accept' ? '{{ "Appel accepté ✅"|trans|e("js") }}' : '{{ "Appel rejeté ⛔"|trans|e("js") }}', 'ok');
+      setTimeout(()=>location.reload(), 450);
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+      btn.disabled = false;
+      btn.style.opacity = '';
+    }
+  });
+</script>
+{% endblock %}

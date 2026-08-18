@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale|default('fr') }}" prefix="og: https://ogp.me/ns#">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+        <title>{% block title %}{% trans %}Main d’Œuvre Locale{% endtrans %}{% endblock %}</title>
+
+        {# ==============================================================
+           SEO GLOBAL — le domaine canonique doit rester unique partout.
+           Les paramètres GET sont volontairement exclus de la canonique.
+        ============================================================== #}
+        {% set mol_site_url = 'https://www.maindoeuvrelocale.com' %}
+        {% set mol_route = app.request.attributes.get('_route')|default('') %}
+        {% set mol_canonical_url = mol_site_url ~ app.request.pathInfo %}
+        {% set mol_page_title = block('title')|striptags|trim %}
+        {% set mol_description = seo_description|default('Trouvez un emploi, une mission, un artisan, un prestataire ou un talent qualifié près de chez vous au Cameroun avec Main d’Œuvre Locale.') %}
+        {% set mol_og_image = seo_image|default(mol_site_url ~ asset('images/og/maindoeuvrelocale-og.jpeg') ~ '?v=5') %}
+        {# Une page publique doit rester indexable, même si le visiteur est connecté. #}
+        {% set mol_is_private = mol_route starts with 'admin_'
+            or mol_route starts with 'moderateur_'
+            or mol_route starts with 'tableau_de_bord_'
+            or mol_route starts with 'chat_'
+            or mol_route starts with 'settings_'
+            or mol_route starts with 'payment_'
+            or mol_route starts with 'payments_'
+            or mol_route starts with 'report_'
+            or mol_route starts with 'onboarding_'
+            or mol_route starts with 'profile_edit'
+            or mol_route starts with 'mes_contacts'
+            or mol_route starts with 'mes_favoris'
+            or mol_route starts with 'friendship_'
+        %}
+
+        <meta name="description" content="{{ mol_description|striptags|trim|e('html_attr') }}">
+        <meta name="robots" content="{{ mol_is_private ? 'noindex, nofollow, noarchive' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' }}">
+        <meta name="author" content="Main d’Œuvre Locale">
+
+        <link rel="canonical" href="{{ mol_canonical_url|e('html_attr') }}">
+        <link rel="alternate" hreflang="{{ app.request.locale == 'en' ? 'en' : 'fr-CM' }}" href="{{ mol_canonical_url|e('html_attr') }}">
+        <link rel="alternate" hreflang="x-default" href="{{ mol_canonical_url|e('html_attr') }}">
+
+        <meta property="og:site_name" content="Main d’Œuvre Locale">
+        <meta property="og:title" content="{{ mol_page_title|e('html_attr') }}">
+        <meta property="og:description" content="{{ mol_description|striptags|trim|e('html_attr') }}">
+        <meta property="og:type" content="{{ seo_og_type|default('website') }}">
+        <meta property="og:url" content="{{ mol_canonical_url|e('html_attr') }}">
+        <meta property="og:image" content="{{ mol_og_image }}">
+        <meta property="og:image:url" content="{{ mol_og_image }}">
+        <meta property="og:image:secure_url" content="{{ mol_og_image }}">
+        <meta property="og:image:type" content="image/jpeg">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Main d’Œuvre Locale - plateforme de mise en relation locale">
+        <meta property="og:locale" content="{{ app.request.locale == 'en' ? 'en_US' : 'fr_CM' }}">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ mol_page_title|e('html_attr') }}">
+        <meta name="twitter:description" content="{{ mol_description|striptags|trim|e('html_attr') }}">
+        <meta name="twitter:image" content="{{ mol_og_image }}">
+
+        <link rel="image_src" href="{{ mol_og_image }}">
+
+        {% if mol_route == 'accueil' %}
+            <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "{{ mol_site_url }}/#organization",
+                  "name": "Main d’Œuvre Locale",
+                  "url": "{{ mol_site_url }}/",
+                  "logo": "{{ mol_site_url ~ asset('build/assets/images/brand/logo.png') }}",
+                  "description": {{ mol_description|json_encode|raw }}
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "{{ mol_site_url }}/#website",
+                  "url": "{{ mol_site_url }}/",
+                  "name": "Main d’Œuvre Locale",
+                  "alternateName": ["Main d'oeuvre locale", "Main-d’œuvre Locale"],
+                  "inLanguage": ["fr-CM", "en"]
+                }
+              ]
+            }
+            </script>
+        {% endif %}
+
+        {% block page_structured_data %}{% endblock %}
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="HandheldFriendly" content="True">
+		<meta name="MobileOptimized" content="320">
+
+        <link rel="icon" href="{{ asset ('build/assets/favicon.ico') }}" type="image/x-icon">
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset ('build/assets/favicon.ico') }}">
+
+        {% trans_default_domain 'messages' %}
+
+
+        <!-- Bootstrap Css -->
+        <link id="style" href="{{ asset ('build/assets/plugins/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet" >
+
+        <!-- Dashboard Css -->
+        <link href="{{ asset ('build/assets/css/style.css') }}" rel="stylesheet" >
+        <link href="{{ asset ('build/assets/css/dark-style.css') }}" rel="stylesheet" >
+        <link href="{{ asset ('build/assets/css/transparent-style.css') }}" rel="stylesheet" >
+
+        <!-- Font-awesome  Css -->
+        <link href="{{ asset ('build/assets/css/icons.css') }}" rel="stylesheet" >
+
+        <!--Select2 Plugin -->
+        <link href="{{ asset ('build/assets/plugins/select2/select2.min.css') }}" rel="stylesheet" >
+
+        <!-- Owl Theme css-->
+        <link href="{{ asset ('build/assets/plugins/owl-carousel/owl.carousel.css') }}" rel="stylesheet" >
+
+        <!--  ratings2 Plugin -->
+        <link href="{{ asset ('build/assets/plugins/ratings-2/star-rating-svg.css') }}" rel="stylesheet" >
+
+        <!-- COLOR-SKINS -->
+        <link id="theme" rel="stylesheet" type="text/css" media="all"
+            href="{{ asset ('build/assets/color-skins/color-skins/color10.css') }}" >
+        <link rel="stylesheet" href="{{ asset ('build/assets/color-skins/demo.css') }}" >
+    
+
+        
+        {% block stylesheets %}
+            {# {{ encore_entry_link_tags('app') }} #}
+            <style>
+                body {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: block !important;
+                }
+
+                /* =========================================================
+   GLOBAL SUBMIT SPINNER
+   Spinner automatique sur les boutons de soumission
+========================================================= */
+
+.mol-submit-loading {
+    position: relative !important;
+    pointer-events: none !important;
+    opacity: .88;
+}
+
+.mol-submit-loading .mol-submit-spinner {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: -2px;
+    border-radius: 999px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    animation: molSubmitSpin .65s linear infinite;
+}
+
+.mol-submit-loading[disabled],
+.mol-submit-loading.disabled {
+    cursor: wait !important;
+}
+
+@keyframes molSubmitSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+            </style>
+
+        {% endblock %}
+
+        {% block javascripts %}
+            {# {{ encore_entry_script_tags('app') }} #}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+    </head>
+
+    <body>
+        <div style="position:fixed;top:10px;left:10px;z-index:999999;background:transparent;color:#fff;padding:8px">
+            
+        </div>
+
+        <!--Loader-->
+        <div id="global-loader">
+            <img src="{{ asset ('build/assets/images/loader.svg') }}" class="loader-img" alt="{% trans %}Chargement{% endtrans %}">
+        </div>
+
+        {% block body %}{% endblock %}
+
+        <!-- JQuery js-->
+        <script src="{{ asset ('build/assets/js/vendors/jquery.min.js') }}"></script>
+
+        <!-- Bootstrap js -->
+        <script src="{{ asset ('build/assets/plugins/bootstrap/js/popper.min.js') }}"></script>
+        <script src="{{ asset ('build/assets/plugins/bootstrap/js/bootstrap.min.js') }}"></script>
+
+        <!--JQuery Sparkline Js-->
+        <script src="{{ asset ('build/assets/js/vendors/jquery.sparkline.min.js') }}"></script>
+
+        <!-- Circle Progress Js-->
+        <script src="{{ asset ('build/assets/js/vendors/circle-progress.min.js') }}"></script>
+
+        <!-- Star Rating Js-->
+        <script src="{{ asset ('build/assets/plugins/rating/jquery-rate-picker.js') }}"></script>
+        <script src="{{ asset ('build/assets/plugins/rating/rating-picker.js') }}"></script>
+
+        <!-- Star Rating-1 Js-->
+        <script src="{{ asset ('build/assets/plugins/ratings-2/jquery.star-rating.js') }}"></script>
+        <script src="{{ asset ('build/assets/plugins/ratings-2/star-rating.js') }}"></script>
+
+        <!--Counters -->
+        <script src="{{ asset ('build/assets/plugins/counters/counterup.min.js') }}"></script>
+        <script src="{{ asset ('build/assets/plugins/counters/waypoints.min.js') }}"></script>
+        <script src="{{ asset ('build/assets/plugins/counters/numeric-counter.js') }}"></script>
+
+        <!--Owl Carousel js -->
+        <script src="{{ asset ('build/assets/plugins/owl-carousel/owl.carousel.js') }}"></script>
+        <script src="{{ asset ('build/assets/js/owl-carousel.js') }}"></script>
+
+        <!--Horizontal Menu-->
+        <script src="{{ asset ('build/assets/plugins/horizontal/horizontal-menu/horizontal.js') }}"></script>
+
+        <!--JQuery TouchSwipe js-->
+        <script src="{{ asset ('build/assets/js/jquery.touchSwipe.min.js') }}"></script>
+
+        <!--Select2 js -->
+        <script src="{{ asset ('build/assets/plugins/select2/select2.full.min.js') }}"></script>
+        <script src="{{ asset ('build/assets/js/select2.js') }}"></script>
+
+        <!-- sticky Js-->
+        {# <script src="{{ asset ('build/assets/js/sticky.js') }}"></script> #}
+
+        <!-- Ion.RangeSlider -->
+        <script src="{{ asset ('build/assets/plugins/jquery-uislider/jquery-ui.js') }}"></script>
+
+        <!--Showmore Js-->
+        <script src="{{ asset ('build/assets/js/jquery.showmore.js') }}"></script>
+        <script src="{{ asset ('build/assets/js/showmore.js') }}"></script>
+
+        <!-- Swipe Js-->
+        <script src="{{ asset ('build/assets/js/swipe.js') }}"></script>
+
+        <!-- Scripts Js-->
+        <script src="{{ asset ('build/assets/js/scripts2.js') }}"></script>
+
+        <!-- Custom Js-->
+        <script src="{{ asset ('build/assets/js/themecolors.js') }}"></script>
+        <script src="{{ asset ('build/assets/js/custom.js') }}"></script>
+
+        <script>
+            // Sécurité anti-page-blanche (thèmes admin)
+            window.addEventListener('load', function () {
+                document.body.style.opacity = '1';
+                document.body.style.visibility = 'visible';
+
+                document.querySelectorAll(
+                '#global-loader, .global-loader, .loader, .page-loader, .preloader'
+                ).forEach(function(el){
+                el.remove();
+                });
+            });
+        </script>
+
+        <script>
+            (function () {
+                function getSubmitButton(form, event) {
+                    if (event && event.submitter) {
+                        return event.submitter;
+                    }
+
+                    const active = document.activeElement;
+
+                    if (
+                        active &&
+                        active.form === form &&
+                        (
+                            active.matches('button[type="submit"]') ||
+                            active.matches('input[type="submit"]')
+                        )
+                    ) {
+                        return active;
+                    }
+
+                    return form.querySelector('button[type="submit"], input[type="submit"]');
+                }
+
+                function setButtonLoading(button) {
+                    if (!button) return;
+
+                    if (button.dataset.loading === '1') {
+                        return;
+                    }
+
+                    button.dataset.loading = '1';
+
+                    if (button.tagName.toLowerCase() === 'button') {
+                        button.dataset.originalHtml = button.innerHTML;
+
+                        button.style.minWidth = button.offsetWidth + 'px';
+
+                        button.innerHTML =
+                            '<span class="mol-submit-spinner" aria-hidden="true"></span>' +
+                            '<span>' + (button.dataset.loadingText || 'Traitement...') + '</span>';
+                    }
+
+                    if (button.tagName.toLowerCase() === 'input') {
+                        button.dataset.originalValue = button.value;
+                        button.style.minWidth = button.offsetWidth + 'px';
+                        button.value = button.dataset.loadingText || 'Traitement...';
+                    }
+
+                    button.classList.add('mol-submit-loading');
+                    button.setAttribute('aria-busy', 'true');
+                    button.disabled = true;
+                }
+
+                function resetButtonLoading(button) {
+                    if (!button || button.dataset.loading !== '1') {
+                        return;
+                    }
+
+                    if (button.tagName.toLowerCase() === 'button' && button.dataset.originalHtml) {
+                        button.innerHTML = button.dataset.originalHtml;
+                    }
+
+                    if (button.tagName.toLowerCase() === 'input' && button.dataset.originalValue) {
+                        button.value = button.dataset.originalValue;
+                    }
+
+                    button.classList.remove('mol-submit-loading');
+                    button.removeAttribute('aria-busy');
+                    button.disabled = false;
+                    button.style.minWidth = '';
+
+                    delete button.dataset.loading;
+                    delete button.dataset.originalHtml;
+                    delete button.dataset.originalValue;
+                }
+
+                function resetAllSubmitButtons() {
+                    document.querySelectorAll('.mol-submit-loading').forEach(resetButtonLoading);
+                }
+
+                function initSubmitSpinners() {
+                    document.querySelectorAll('form').forEach(function (form) {
+                        if (form.dataset.submitSpinnerBound === '1') {
+                            return;
+                        }
+
+                        form.dataset.submitSpinnerBound = '1';
+
+                        form.addEventListener('submit', function (event) {
+                            if (form.dataset.noSubmitSpinner === '1') {
+                                return;
+                            }
+
+                            const button = getSubmitButton(form, event);
+
+                            if (!button) {
+                                return;
+                            }
+
+                            setButtonLoading(button);
+                        });
+                    });
+                }
+
+                function runInit() {
+                    requestAnimationFrame(initSubmitSpinners);
+                }
+
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', runInit);
+                } else {
+                    runInit();
+                }
+
+                document.addEventListener('turbo:load', runInit);
+                document.addEventListener('turbo:render', runInit);
+                document.addEventListener('turbo:frame-load', runInit);
+
+                document.addEventListener('turbo:submit-end', function () {
+                    resetAllSubmitButtons();
+                });
+
+                window.addEventListener('pageshow', function () {
+                    resetAllSubmitButtons();
+                    runInit();
+                });
+            })();
+        </script>
+
+    </body>
+
+</html>

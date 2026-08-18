@@ -1,0 +1,37 @@
+{# ===================== OUTILS SECONDAIRES ===================== #}
+            <section class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <a href="{{ path('calendar_index') }}" data-turbo="false" class="mol-secondary-action flex items-center gap-3 px-4 py-3.5">
+                    <span class="mol-action-icon" aria-hidden="true">🗓️</span>
+                    <span class="min-w-0">
+                        <span class="block truncate text-sm font-semibold text-slate-900">{% trans %}Planifier un rendez-vous{% endtrans %}</span>
+                        <span class="mt-0.5 block truncate text-[11px] text-slate-500">{% trans %}Créer une nouvelle rencontre{% endtrans %}</span>
+                    </span>
+                </a>
+
+                <a href="{{ path('applicant_calendar_index') }}" data-turbo="false" class="mol-secondary-action relative flex items-center gap-3 px-4 py-3.5">
+                    <span class="mol-action-icon" aria-hidden="true">📅</span>
+                    <span class="min-w-0">
+                        <span class="block truncate text-sm font-semibold text-slate-900">{% trans %}Mon calendrier{% endtrans %}</span>
+                        <span class="mt-0.5 block truncate text-[11px] text-slate-500">{% trans %}Rendez-vous et échéances{% endtrans %}</span>
+                    </span>
+                    {% if pendingAppointmentsCount|default(0) > 0 %}
+                        <span class="mol-notification-badge">{{ pendingAppointmentsCount }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="{{ path('contacts_index') }}" data-turbo="false" class="mol-secondary-action flex items-center gap-3 px-4 py-3.5">
+                    <span class="mol-action-icon" aria-hidden="true">📇</span>
+                    <span class="min-w-0">
+                        <span class="block truncate text-sm font-semibold text-slate-900">{% trans %}Mes contacts{% endtrans %}</span>
+                        <span class="mt-0.5 block truncate text-[11px] text-slate-500">{{ kpi.talentsContacted|default(0) }} {% trans %}talent(s) contacté(s){% endtrans %}</span>
+                    </span>
+                </a>
+
+                <a href="{{ path('planning') }}" data-turbo="false" class="mol-secondary-action flex items-center gap-3 px-4 py-3.5">
+                    <span class="mol-action-icon" aria-hidden="true">🧭</span>
+                    <span class="min-w-0">
+                        <span class="block truncate text-sm font-semibold text-slate-900">{% trans %}Mon planning{% endtrans %}</span>
+                        <span class="mt-0.5 block truncate text-[11px] text-slate-500">{% trans %}Organiser mes activités{% endtrans %}</span>
+                    </span>
+                </a>
+            </section>

@@ -1,0 +1,488 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Booster mon profil{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "payment_boost/_vip_ui_payment_boost.html.twig" %}
+
+
+<div class="container py-4">
+
+  {% set plan= plan is defined ? plan : 'premium' %}
+  {% set planInfo = {
+    'premium': {'name':'Premium', 'price':5000, 'icon':'fa-rocket', 'tag':'Recommandé', 'color':'primary'},
+    'gold':    {'name':'Gold',    'price':10000,'icon':'fa-trophy', 'tag':'Boost',       'color':'warning'},
+    'vip':     {'name':'VIP',     'price':25000,'icon':'fa-crown',  'tag':'Elite',       'color':'dark'}
+  } %}
+  {% set P = planInfo[plan] is defined ? planInfo[plan] : planInfo['premium'] %}
+
+  <div class="pay-hero p-4 p-lg-5 mb-4">
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <div>
+      <div class="text-uppercase small text-muted">{% trans %}Booster mon profil{% endtrans %}</div>
+      <h2 class="mb-1 fw-bold">{% trans %}Choisir un mode de paiement{% endtrans %}</h2>
+      <div class="text-muted">
+        {% trans %}Votre profil sera mis en avant pour augmenter votre visibilité.{% endtrans %}
+      </div>
+
+      <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+        <span class="plan-chip">
+          <span class="plan-icon">
+            <i class="fa {{ P.icon }} text-{{ P.color }}"></i>
+          </span>
+          <span>
+            {% trans %}Plan choisi :{% endtrans %} <strong>{{ plan }}</strong>
+            <span class="badge bg-{{ P.color }} ms-2">{{ P.tag }}</span>
+          </span>
+        </span>
+
+        <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+          {% trans %}Montant :{% endtrans %}
+          <strong class="ms-1">{{ montant|number_format(0, '.', ' ') }} XAF</strong>
+        </span>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{{ path('subscription_plans') }}" class="btn btn-outline-dark rounded-pill px-3">
+        ← {% trans %}Changer de plan{% endtrans %}
+      </a>
+      <a href="{{ path('tableau_de_bord') }}" class="btn btn-outline-dark rounded-pill px-3">
+        ← {% trans %}Retour{% endtrans %}
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-4">
+    <div class="pay-option p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="fw-bold">🟧 Orange Money</div>
+        <span class="badge pay-badge rounded-pill px-3 py-2">{% trans %}Recommandé{% endtrans %}</span>
+      </div>
+      <div class="text-muted mt-2">{% trans %}Paiement rapide via téléphone.{% endtrans %}</div>
+
+      <div class="mt-3">
+        <a class="btn btn-primary rounded-pill px-4"
+           href="{{ path('payment_boost_mobile_page', {plan: plan, montant: montant, method: 'OM'}) }}"
+           data-turbo="false">
+          {% trans %}Continuer{% endtrans %}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4">
+    <div class="pay-option p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="fw-bold">🟨 MTN Mobile Money</div>
+        <span class="badge pay-badge rounded-pill px-3 py-2">{% trans %}Mobile{% endtrans %}</span>
+      </div>
+      <div class="text-muted mt-2">{% trans %}Payez avec votre compte MoMo.{% endtrans %}</div>
+
+      <div class="mt-3">
+        <a class="btn btn-soft rounded-pill px-4"
+           href="{{ path('payment_boost_mobile_page', {plan: plan, montant: montant, method: 'MOMO'}) }}"
+           data-turbo="false">
+          {% trans %}Continuer{% endtrans %}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-4">
+    <div class="pay-option p-4 h-100">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="fw-bold">💳 {% trans %}Carte Prépayée{% endtrans %}</div>
+        <span class="badge pay-badge rounded-pill px-3 py-2">{% trans %}Carte{% endtrans %}</span>
+      </div>
+      <div class="text-muted mt-2">{% trans %}Paiement sécurisé par carte bancaire.{% endtrans %}</div>
+
+      <div class="mt-3">
+        <a href="{{ path('boost_stripe_card', { plan: plan, montant: montant }) }}"
+           class="btn btn-outline-dark rounded-pill px-4"
+           data-turbo="false">
+          {% trans %}Continuer{% endtrans %}
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pay-card mt-4 p-4">
+  <div class="fw-bold mb-1">
+    <i class="fa fa-bolt text-primary me-2"></i>
+    {% trans %}Vous êtes sur le point de payer le plan{% endtrans %}
+    <span class="text-primary">{{ plan }}</span>
+  </div>
+  <div class="text-muted">
+    {% trans %}• Badge “Boosté” • Meilleure position • Plus de contacts{% endtrans %}
+    <span class="ms-2">
+      — {% trans %}Total :{% endtrans %}
+      <strong>{{ montant|number_format(0, '.', ' ') }} XAF</strong>
+    </span>
+  </div>
+</div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+{# ===== MODAL CUSTOM (sans Bootstrap) ===== #}
+<div class="mol-modal-backdrop" id="molPayBackdrop" aria-hidden="true"></div>
+
+<div class="mol-modal" id="molPayModal" role="dialog" aria-modal="true" aria-labelledby="molPayTitle">
+  <div class="mol-modal-card" role="document">
+    <div class="mol-modal-h">
+      <h5 class="mol-modal-title" id="molPayTitle">{% trans %}Paiement Mobile{% endtrans %}</h5>
+      <button type="button" class="mol-x" id="molPayClose" aria-label="{% trans %}Fermer{% endtrans %}">✕</button>
+    </div>
+
+    <div class="mol-modal-b">
+      <div class="text-muted mb-3">
+        {% trans %}Vous payez le plan{% endtrans %}
+        <strong>{{ plan }}</strong>
+        ({{ montant|number_format(0, '.', ' ') }} XAF).<br>
+        {% trans %}Saisissez votre numéro pour continuer.{% endtrans %}
+      </div>
+
+      <form id="phonePayForm"
+            method="post"
+            action="{{ path('boost_mobile_pay', {plan: plan, montant: montant}) }}">
+
+        <input type="hidden" name="_token" value="{{ csrf_token('boost_mobile_pay') }}">
+        <input type="hidden" name="method" id="payMethod" value="">
+        {% set planIds = {'premium': 1, 'gold': 2, 'vip': 3} %}
+        <input type="hidden" name="plan" id="payPlan" value="{{ planIds[plan|lower|trim] ?? 0 }}">
+
+        <label class="form-label">{% trans %}Numéro de téléphone{% endtrans %}</label>
+        <div class="input-group">
+          <span class="input-group-text">+237</span>
+          <input type="tel"
+                 class="form-control"
+                 name="phone"
+                 id="payPhone"
+                 placeholder="{% trans %}6XXXXXXXX{% endtrans %}"
+                 required
+                 inputmode="numeric"
+                 pattern="[0-9]{9}">
+        </div>
+        <div class="form-text">{% trans %}Exemple : 6XXXXXXXX (9 chiffres){% endtrans %}</div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button type="button" class="btn btn-light rounded-pill px-3" id="molPayCancel">
+            {% trans %}Annuler{% endtrans %}
+          </button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4">
+            {% trans %}Payer{% endtrans %} {{ montant|number_format(0, '.', ' ') }} XAF
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modal = document.getElementById('molPayModal');
+  const backdrop = document.getElementById('molPayBackdrop');
+  const closeBtn = document.getElementById('molPayClose');
+  const cancelBtn = document.getElementById('molPayCancel');
+
+  const payMethod = document.getElementById('payMethod');
+  const payPlan = document.getElementById('payPlan');
+  const payPhone = document.getElementById('payPhone');
+
+  function openModal(method, plan){
+    payMethod.value = method || '';
+    payPlan.value = plan || '';
+    if (payPhone) payPhone.value = '';
+
+    backdrop.classList.add('is-open');
+    modal.classList.add('is-open');
+
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => payPhone?.focus(), 150);
+  }
+
+  function closeModal(){
+    modal.classList.remove('is-open');
+    backdrop.classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.js-open-phone-modal');
+    if(!btn) return;
+    e.preventDefault();
+    openModal(btn.dataset.method, btn.dataset.plan);
+  }, true);
+
+  closeBtn?.addEventListener('click', closeModal);
+  cancelBtn?.addEventListener('click', closeModal);
+  backdrop?.addEventListener('click', closeModal);
+
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closeModal();
+  });
+})();
+</script>
+
+<script>
+  // ===== Toast =====
+  const toast = (type, message) => {
+    const c = document.getElementById('toastContainer');
+    if (!c) return alert(message);
+
+    const el = document.createElement('div');
+    el.className = 'mol-toast mol-toast-' + (type || 'success');
+    el.innerHTML = message;
+    c.appendChild(el);
+    setTimeout(() => el.remove(), 4500);
+  };
+
+  // ===== Fetch helpers =====
+  const postJson = async (url, body) => {
+      const r = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const raw = await r.text();
+      let data = {};
+      try { data = raw ? JSON.parse(raw) : {}; } catch (e) {}
+
+      if (!r.ok) {
+        console.error('SERVER ERROR:', raw);
+        throw new Error(data.message || `HTTP ${r.status} : ${raw || 'Erreur serveur'}`);
+      }
+
+      return data;
+    };
+
+
+
+  const getJson = async (url) => {
+    const r = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.message || 'Erreur serveur');
+    return data;
+  };
+
+  // ===== Modal open/close (sans dépendre de Bootstrap) =====
+  const modal = document.getElementById('molPayModal');
+  const closeBtn = document.getElementById('molPayClose');
+  const cancelBtn = document.getElementById('molPayCancel');
+
+  const openPayModal = (method) => {
+    // method: "OM" | "MOMO"
+    document.getElementById('payMethod').value = method;
+
+    // reset UI
+    document.getElementById('payPhone').value = '';
+    ensurePayDebugUI(false);
+
+    // show
+    modal?.classList.add('is-open');
+    modal?.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('payPhone')?.focus(), 50);
+  };
+
+  const closePayModal = () => {
+    modal?.classList.remove('is-open');
+    modal?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+
+  closeBtn?.addEventListener('click', closePayModal);
+  cancelBtn?.addEventListener('click', closePayModal);
+
+  // Clique sur fond pour fermer (optionnel)
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) closePayModal();
+  });
+
+  // ===== Payment flow =====
+  let currentPaymentId = null;
+  let pollTimer = null;
+
+  const startPolling = () => {
+    if (!currentPaymentId) return;
+    if (pollTimer) clearInterval(pollTimer);
+
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await getJson(`/ajax/payments/${currentPaymentId}/status`);
+        setPayStatus('Statut : ' + res.status);
+
+        if (res.status === 'SUCCESS') {
+          toast('success', 'Paiement confirmé ✅');
+          clearInterval(pollTimer); pollTimer = null;
+          closePayModal();
+        }
+
+        if (res.status === 'FAILED') {
+          toast('warning', 'Paiement échoué ❌');
+          clearInterval(pollTimer); pollTimer = null;
+        }
+      } catch (e) {
+        clearInterval(pollTimer); pollTimer = null;
+      }
+    }, 2000);
+  };
+
+  // ===== UI status inside modal (créé dynamiquement) =====
+  const ensureStatusEl = () => {
+    let el = document.getElementById('payStatus');
+    if (!el) {
+      el = document.createElement('small');
+      el.id = 'payStatus';
+      el.className = 'd-block mt-2 text-muted';
+      document.querySelector('#phonePayForm')?.appendChild(el);
+    }
+    return el;
+  };
+
+  const setPayStatus = (text) => {
+    const el = ensureStatusEl();
+    el.textContent = text;
+  };
+
+  // ===== Debug simulate buttons (optionnel) =====
+  const ensurePayDebugUI = (show) => {
+    let wrap = document.getElementById('payActions');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'payActions';
+      wrap.className = 'd-flex justify-content-end gap-2 mt-3';
+      wrap.innerHTML = `
+        <button type="button" class="btn btn-outline-success btn-sm" id="btnSuccess">Simuler SUCCESS</button>
+        <button type="button" class="btn btn-outline-danger btn-sm" id="btnFailed">Simuler FAILED</button>
+      `;
+      document.querySelector('.mol-modal-b')?.appendChild(wrap);
+
+      wrap.querySelector('#btnSuccess')?.addEventListener('click', async () => {
+        if (!currentPaymentId) return;
+        try {
+          const res = await postJson(`/ajax/payments/${currentPaymentId}/simulate`, { result: 'SUCCESS' });
+          toast('success', res.message);
+        } catch (e) {
+          toast('danger', e.message);
+        }
+      });
+
+      wrap.querySelector('#btnFailed')?.addEventListener('click', async () => {
+        if (!currentPaymentId) return;
+        try {
+          const res = await postJson(`/ajax/payments/${currentPaymentId}/simulate`, { result: 'FAILED' });
+          toast('warning', res.message);
+        } catch (e) {
+          toast('danger', e.message);
+        }
+      });
+    }
+
+    wrap.style.display = show ? 'flex' : 'none';
+  };
+
+  // ===== Intercept form submit =====
+  const form = document.getElementById('phonePayForm');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const method = (document.getElementById('payMethod')?.value || '').toUpperCase();
+  const phone  = (document.getElementById('payPhone')?.value || '').trim();
+  const planKey = (document.getElementById('payPlan')?.value || '').trim(); // ✅ ICI
+
+  if (!method) { toast('danger', 'Méthode manquante (OM/MOMO).'); return; }
+  if (!planKey) { toast('danger', 'Plan manquant.'); return; }
+
+  try {
+    const res = await postJson(AJAX_PAYMENT_INIT_URL, { method, phone, planKey });
+    toast('success', res.message);
+  } catch (err) {
+    toast('danger', err.message);
+  }
+});
+
+
+
+  // ===== Exemple: comment ouvrir le modal depuis tes boutons OM/MOMO =====
+  // Dans ton HTML, tes boutons doivent appeler openPayModal('OM') / openPayModal('MOMO')
+  // Ex:
+  // <button type="button" onclick="openPayModal('OM')">Payer par OM</button>
+  // <button type="button" onclick="openPayModal('MOMO')">Payer par MoMo</button>
+  window.openPayModal = (m) => {
+    document.getElementById('payMethod').value = m; // ✅ OM ou MOMO
+    document.getElementById('molPayModal').classList.add('is-open');
+  };
+
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const btnSuccess = document.getElementById('btnSuccess');
+    const btnFailed  = document.getElementById('btnFailed');
+
+    if (!btnSuccess || !btnFailed) {
+        console.warn('Boutons simulate introuvables');
+        return;
+    }
+
+    btnSuccess.addEventListener('click', async () => {
+
+        if (!window.currentPaymentId) {
+            alert('Payment ID manquant');
+            return;
+        }
+
+        const planId = parseInt(document.getElementById('payPlan')?.value || '0', 10);
+
+        try {
+            const res = await postJson(`/ajax/payments/${window.currentPaymentId}/simulate`, {
+                result: 'SUCCESS',
+                planId: planId
+            });
+
+            console.log(res);
+            alert(res.message);
+
+        } catch (e) {
+            console.error(e);
+            alert(e.message);
+        }
+    });
+
+    btnFailed.addEventListener('click', async () => {
+
+        if (!window.currentPaymentId) {
+            alert('Payment ID manquant');
+            return;
+        }
+
+        try {
+            const res = await postJson(`/ajax/payments/${window.currentPaymentId}/simulate`, {
+                result: 'FAILED'
+            });
+
+            console.log(res);
+            alert(res.message);
+
+        } catch (e) {
+            console.error(e);
+            alert(e.message);
+        }
+    });
+
+});
+</script>
+
+
+{% endblock %}

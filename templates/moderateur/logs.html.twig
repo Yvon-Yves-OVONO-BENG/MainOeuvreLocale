@@ -1,0 +1,132 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Modérateur • Audit Logs'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_logs.html.twig" %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">🧾 {% trans %}Audit Logs{% endtrans %}</div>
+        <div class="hint">{% trans %}Actions et connexions{% endtrans %} ({{ days }}{% trans %}j{% endtrans %}). {% trans %}KPI “Actions modération (7j)” vient d’ici.{% endtrans %}</div>
+      </div>
+
+      <form class="filters" method="get">
+        <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Recherche : email, IP, action, ville…'|trans }}">
+        <input class="input" style="max-width:120px" name="days" value="{{ days }}" placeholder="{{ 'jours'|trans }}">
+        <input class="input" style="max-width:120px" name="action" value="{{ action }}" placeholder="{{ 'action'|trans }}">
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit==n?'selected':'' }}>{{ n }}/{% trans %}page{% endtrans %}</option>
+          {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+        <a class="btn" href="{{ path('moderateur_logs_index') }}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+      <div class="chip">{% trans %}Actions (7j) :{% endtrans %} {{ stats.total ?? 0 }}</div>
+
+      <div class="grid">
+        <div class="col-6">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Area — Actions / jour{% endtrans %}</div>
+                <div class="hint">{% trans %}Volume des actions sur la période.{% endtrans %}</div>
+              </div>
+              <span class="chip">📈</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chDaily"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Horizontal Bar — Top actions{% endtrans %}</div>
+                <div class="hint">{% trans %}Les actions les plus fréquentes.{% endtrans %}</div>
+              </div>
+              <span class="chip">{% trans %}Top{% endtrans %}</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chTop"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Utilisateur{% endtrans %}</th>
+              <th>{% trans %}Action{% endtrans %}</th>
+              <th>{% trans %}IP{% endtrans %}</th>
+              <th>{% trans %}Ville{% endtrans %}</th>
+              <th>{% trans %}Navigateur{% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in items %}
+              {% set u = l.user ?? null %}
+              {% set pp = u ? u.personalProfile : null %}
+              <tr>
+                <td>#{{ l.id }}</td>
+                <td class="muted">{{ u ? u.email : '—' }}{% if pp and pp.fullName %}<div class="muted" style="font-size:12px;">{{ pp.fullName }}</div>{% endif %}</td>
+                <td><span class="chip">{{ l.action ?? '—' }}</span></td>
+                <td class="muted">{{ l.ip ?? '—' }}</td>
+                <td class="muted">{{ l.ville ?? '—' }}</td>
+                <td class="muted">{{ l.browser ? (l.browser.name ?? '—') : '—' }}</td>
+                <td class="muted">{{ l.logedAt ? l.logedAt|date('d/m/Y H:i') : '—' }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="muted" style="padding:18px;text-align:center;">{% trans %}Aucun log{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p==page?'primary':'' }}"
+              href="{{ path('moderateur_logs_index', {page:p, limit:limit, q:q, days:days, action:action}) }}">
+              {{ p }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+  const stats = {{ stats|json_encode|raw }};
+  const labels = stats.daily.labels || [];
+  const values = stats.daily.values || [];
+  const top = stats.topActions || [];
+  const topLabels = top.map(x => x.label);
+  const topValues = top.map(x => Number(x.value||0));
+
+  new Chart(document.getElementById('chDaily'), {
+    type:'line',
+    data:{ labels, datasets:[{ label:'{{ "Actions"|trans|e("js") }}', data: values, tension:.35, fill:true, borderWidth:2, pointRadius:2,
+      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a1').trim() || 'rgba(56,189,248,.30)' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+  });
+
+  new Chart(document.getElementById('chTop'), {
+    type:'bar',
+    data:{ labels: topLabels, datasets:[{ label:'{{ "Occurrences"|trans|e("js") }}', data: topValues, borderWidth:1 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin{% endtrans %} • {{ pageTitle }}{% endblock %}
+
+{% block body %}
+  {% include 'admin/directory/_vip_ui.html.twig' %}
+
+  <div class="dir-shell" data-directory-page="jobs">
+    <div class="dir-container dir-grid">
+
+      <section class="dir-card dir-head">
+        <div class="dir-card-inner">
+          <div class="dir-head-top">
+            <div>
+              <div class="dir-kicker">{{ pageKicker }}</div>
+              <h1 class="dir-title">{{ pageTitle }}</h1>
+              <p class="dir-text">{{ pageDescription }}</p>
+            </div>
+          </div>
+
+          {% include 'admin/directory/_nav.html.twig' %}
+        </div>
+      </section>
+
+      <section class="dir-grid dir-grid-3">
+        <article class="dir-card dir-kpi"><div class="dir-card-inner"><div class="label">{% trans %}Total{% endtrans %}</div><div class="value">{{ stats.total }}</div><div class="hint">{% trans %}Offres trouvées{% endtrans %}</div></div></article>
+        <article class="dir-card dir-kpi"><div class="dir-card-inner"><div class="label">{% trans %}Expire bientôt{% endtrans %}</div><div class="value">{{ stats.expiringSoon }}</div><div class="hint">{% trans %}Sur la page courante{% endtrans %}</div></div></article>
+        <article class="dir-card dir-kpi"><div class="dir-card-inner"><div class="label">{% trans %}Signalées{% endtrans %}</div><div class="value">{{ stats.withReports }}</div><div class="hint">{% trans %}Sur la page courante{% endtrans %}</div></div></article>
+      </section>
+
+      <section class="dir-card">
+        <div class="dir-card-inner">
+          <form method="get" class="dir-filters" data-directory-search-form>
+            <div style="flex:2 1 360px;">
+              <input
+                type="search"
+                name="q"
+                value="{{ filters.q ?? '' }}"
+                class="dir-input"
+                placeholder="{% trans %}Rechercher titre, ville, référence...{% endtrans %}"
+                data-directory-search="jobs"
+                autocomplete="off"
+              >
+            </div>
+          </form>
+
+          <div class="dir-separator"></div>
+
+          <div class="dir-table-wrap">
+            <table class="dir-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Offre{% endtrans %}</th>
+                  <th>{% trans %}Entreprise{% endtrans %}</th>
+                  <th>{% trans %}Ville{% endtrans %}</th>
+                  <th>{% trans %}Salaire{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Signalements{% endtrans %}</th>
+                  <th>{% trans %}Expiration{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for j in jobs %}
+                  <tr>
+                    <td>
+                      <div class="dir-row-title">{{ j.title }}</div>
+                      <div class="dir-row-sub">{{ j.profession }} • {{ j.typeJob }}</div>
+                    </td>
+                    <td>{{ j.company }}</td>
+                    <td>{{ j.city }}</td>
+                    <td>{{ j.salary }}</td>
+                    <td><span class="dir-badge neutral">{{ j.status }}</span></td>
+                    <td><span class="dir-badge {{ j.reports > 0 ? 'warn' : 'neutral' }}">{{ j.reports }}</span></td>
+                    <td>{{ j.expiresAt ? j.expiresAt|date('d/m/Y') : '—' }}</td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="7">{% trans %}Aucune offre active.{% endtrans %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="dir-separator"></div>
+
+          <div class="dir-pagination">
+            <div class="dir-pagination-info">
+              {% trans %}Page{% endtrans %} {{ pagination.page }} / {{ pagination.pages }} • {{ pagination.total }} {% trans %}résultat(s){% endtrans %}
+            </div>
+
+            <div class="dir-pagination-links">
+              {% if pagination.page > 1 %}
+                <a class="dir-page-btn" href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({page: pagination.page - 1})) }}">← {% trans %}Précédent{% endtrans %}</a>
+              {% endif %}
+
+              {% for p in 1..pagination.pages %}
+                {% if p == pagination.page %}
+                  <span class="dir-page-btn is-active">{{ p }}</span>
+                {% else %}
+                  <a class="dir-page-btn" href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({page: p})) }}">{{ p }}</a>
+                {% endif %}
+              {% endfor %}
+
+              {% if pagination.page < pagination.pages %}
+                <a class="dir-page-btn" href="{{ path(app.request.attributes.get('_route'), app.request.query.all|merge({page: pagination.page + 1})) }}">{% trans %}Suivant{% endtrans %} →</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-directory.js') }}"></script>
+{% endblock %}

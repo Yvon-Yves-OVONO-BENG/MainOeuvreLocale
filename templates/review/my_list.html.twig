@@ -1,0 +1,223 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Mes avis{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "review/_vip_ui.html.twig" %}
+
+<div class="rv-page">
+  <div class="container my-4 rv-shell">
+    <div class="rv-wrap">
+      <div class="rv-hero">
+        <div class="rv-hero-left">
+          <div class="rv-eyebrow">
+            <i class="bi bi-stars"></i>
+            {% trans %}Espace réputation{% endtrans %}
+          </div>
+
+          <h1 class="rv-title">{% trans %}Avis & réputation{% endtrans %}</h1>
+          <p class="rv-sub">
+            {% trans %}Retrouve les avis que tu as reçus et ceux que tu as laissés, dans une interface plus claire, plus premium et plus agréable à consulter.{% endtrans %}
+          </p>
+        </div>
+
+        <div class="rv-right">
+          <div class="rv-top-actions">
+            <a class="btn-soft btn-dashboard" href="{{ path('tableau_de_bord') }}">
+              <i class="bi bi-arrow-left"></i>
+              {% trans %}Retour au tableau de bord{% endtrans %}
+            </a>
+          </div>
+
+          <div class="rv-kpis">
+            <div class="rv-kpi">
+              <div class="rv-kpi-label">{% trans %}Avis reçus{% endtrans %}</div>
+              <div class="rv-kpi-value">{{ countReceived }}</div>
+            </div>
+            <div class="rv-kpi">
+              <div class="rv-kpi-label">{% trans %}Avis donnés{% endtrans %}</div>
+              <div class="rv-kpi-value">{{ countGiven }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rv-body">
+        <div class="rv-toolbar">
+          <div class="rv-tabs">
+            <button type="button" class="rv-tab active" data-tab="received">
+              <span>{% trans %}Reçus{% endtrans %}</span>
+              <span class="rv-badge">{{ countReceived }}</span>
+            </button>
+
+            <button type="button" class="rv-tab" data-tab="given">
+              <span>{% trans %}Donnés{% endtrans %}</span>
+              <span class="rv-badge">{{ countGiven }}</span>
+            </button>
+          </div>
+
+          <div class="rv-search">
+            <i class="bi bi-search"></i>
+            <input
+              type="text"
+              id="rvSearchInput"
+              placeholder="{% trans %}Rechercher un nom ou un avis...{% endtrans %}"
+            >
+          </div>
+        </div>
+
+        {# ===== REÇUS ===== #}
+        <div class="rv-panel" id="tab-received">
+          {% if received is empty %}
+            <div class="rv-empty">
+              <i class="bi bi-chat-square-heart"></i>
+              <h3>{% trans %}Aucun avis reçu{% endtrans %}</h3>
+              <p>{% trans %}Les avis que d’autres utilisateurs te laisseront apparaîtront ici.{% endtrans %}</p>
+            </div>
+          {% else %}
+            <div class="rv-grid">
+              {% for r in received %}
+                {% set author = r.author %}
+                {% set authorName = author ? (author.fullName|default(author.email|default('Utilisateur'|trans))) : ('Utilisateur'|trans) %}
+                <div class="rv-card rv-searchable">
+                  <div class="rv-avatar">
+                    {{ author ? (author.fullName|default(author.email|default('U'))|slice(0,1)|upper) : 'U' }}
+                  </div>
+
+                  <div class="rv-main">
+                    <div class="rv-top">
+                      <div class="rv-name-wrap">
+                        <p class="rv-name">{{ authorName }}</p>
+                        <div class="rv-role">{% trans %}Avis reçu{% endtrans %}</div>
+                      </div>
+
+                      <div class="rv-date">
+                        {{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '' }}
+                      </div>
+                    </div>
+
+                    <div class="rv-text">{{ r.comment }}</div>
+
+                    <div class="rv-footer">
+                      <span class="rv-state">{% trans %}Reçu{% endtrans %}</span>
+
+                      {% if author and author.personalProfile and author.personalProfile.slug %}
+                        <a class="btn-soft btn-primary-soft"
+                           href="{{ path('profil_talent', {slug: author.personalProfile.slug}) }}">
+                          <i class="bi bi-person-circle"></i>
+                          {% trans %}Voir le profil{% endtrans %}
+                        </a>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+        {# ===== DONNÉS ===== #}
+        <div class="rv-panel d-none" id="tab-given">
+          {% if given is empty %}
+            <div class="rv-empty">
+              <i class="bi bi-pencil-square"></i>
+              <h3>{% trans %}Aucun avis donné{% endtrans %}</h3>
+              <p>{% trans %}Les avis que tu laisseras aux autres utilisateurs apparaîtront ici.{% endtrans %}</p>
+            </div>
+          {% else %}
+            <div class="rv-grid">
+              {% for r in given %}
+                {% set target = r.targetReview %}
+                {% set targetName = target ? (target.fullName|default(target.email|default('Utilisateur'|trans))) : ('Utilisateur'|trans) %}
+                <div class="rv-card rv-searchable">
+                  <div class="rv-avatar">
+                    {{ target ? (target.fullName|default(target.email|default('U'))|slice(0,1)|upper) : 'U' }}
+                  </div>
+
+                  <div class="rv-main">
+                    <div class="rv-top">
+                      <div class="rv-name-wrap">
+                        <p class="rv-name">{{ targetName }}</p>
+                        <div class="rv-role">{% trans %}Avis donné{% endtrans %}</div>
+                      </div>
+
+                      <div class="rv-date">
+                        {{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '' }}
+                      </div>
+                    </div>
+
+                    <div class="rv-text">{{ r.comment }}</div>
+
+                    <div class="rv-footer">
+                      <span class="rv-state">{% trans %}Donné{% endtrans %}</span>
+
+                      {% if target and target.personalProfile and target.personalProfile.slug %}
+                        <a class="btn-soft btn-primary-soft"
+                           href="{{ path('profil_talent', {slug: target.personalProfile.slug}) }}">
+                          <i class="bi bi-person-circle"></i>
+                          {% trans %}Voir le profil{% endtrans %}
+                        </a>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const tabs = document.querySelectorAll('.rv-tab');
+    const received = document.getElementById('tab-received');
+    const given = document.getElementById('tab-given');
+    const searchInput = document.getElementById('rvSearchInput');
+
+    function switchTab(key) {
+      tabs.forEach(tab => {
+        tab.classList.toggle('active', tab.getAttribute('data-tab') === key);
+      });
+
+      if (key === 'received') {
+        received.classList.remove('d-none');
+        given.classList.add('d-none');
+      } else {
+        given.classList.remove('d-none');
+        received.classList.add('d-none');
+      }
+
+      applySearch();
+    }
+
+    function getVisiblePanel() {
+      return received.classList.contains('d-none') ? given : received;
+    }
+
+    function applySearch() {
+      const query = (searchInput?.value || '').trim().toLowerCase();
+      const panel = getVisiblePanel();
+      const cards = panel.querySelectorAll('.rv-searchable');
+
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        switchTab(tab.getAttribute('data-tab'));
+      });
+    });
+
+    if (searchInput) {
+      searchInput.addEventListener('input', applySearch);
+    }
+  });
+</script>
+{% endblock %}

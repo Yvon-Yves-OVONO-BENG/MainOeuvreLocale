@@ -1,0 +1,1281 @@
+{# templates/admin/job_moderation.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Modération des offres | Administration{% endblock %}
+
+{% block body %}
+<div class="moderation-dashboard">
+    {# En-tête premium avec barre d'actions batch intégrée #}
+    <div class="moderation-header" id="moderationHeader">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="header-icon">
+                            <i class="fas fa-shield-haltered"></i>
+                        </div>
+                        <div>
+                            <h1 class="header-title">Modération des offres</h1>
+                            <p class="header-subtitle">
+                                <span class="live-indicator"></span>
+                                <span id="totalPending">{{ pendingCount }}</span>
+                                <span id="statusLabel">offre(s) en attente</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <div id="headerActionsContainer">
+                        {# Actions par défaut #}
+                        <div id="defaultHeaderActions">
+                            <button class="btn btn-light" onclick="refreshTable()">
+                                <i class="fas fa-sync-alt me-2"></i>Actualiser
+                            </button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="selectionHeroModal" class="selection-hero-modal">
+        <div class="selection-card">
+            <div class="selection-title">
+                <i class="fas fa-layer-group me-2"></i>
+                <span id="selectionCountText">0 offre sélectionnée</span>
+            </div>
+    
+            <div class="selection-actions">
+                <button class="btn btn-success btn-sm"
+                        onclick="batchAction('approve')">
+                    <i class="fas fa-check"></i>
+                    Approuver
+                </button>
+    
+                <button class="btn btn-danger btn-sm"
+                        onclick="batchAction('reject')">
+                    <i class="fas fa-times"></i>
+                    Rejeter
+                </button>
+    
+                <button class="btn btn-outline-secondary btn-sm"
+                        onclick="clearSelection()">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+        {# Barre de recherche et filtres #}
+        <div class="search-bar-card">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" 
+                               class="form-control search-input" 
+                               id="searchJobs" 
+                               placeholder="Rechercher par titre, référence, entreprise..."
+                               oninput="onSearchChange()">
+                        <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select filter-select" id="filterStatus" onchange="onFilterChange()">
+                        <option value="all">Tous les statuts</option>
+                        <option value="pending" selected>En attente</option>
+                        <option value="approved">Approuvés</option>
+                        <option value="rejected">Rejetés</option>
+                        <option value="modified">Modifiés</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select filter-select" id="filterDate" onchange="onFilterChange()">
+                        <option value="all">Toutes les dates</option>
+                        <option value="today">Aujourd'hui</option>
+                        <option value="week">7 derniers jours</option>
+                        <option value="month">30 derniers jours</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select filter-select" id="perPage" onchange="onPerPageChange()">
+                        <option value="10" selected>10 par page</option>
+                        <option value="25">25 par page</option>
+                        <option value="50">50 par page</option>
+                        <option value="100">100 par page</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <button class="btn btn-outline-secondary w-100" onclick="exportData()" title="Exporter">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {# Tableau des jobs #}
+        <div class="table-card">
+            <div class="table-responsive">
+                <table class="table moderation-table" id="jobsTable">
+                    <thead>
+                        <tr>
+                            <th width="40">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleAllJobs()">
+                                </div>
+                            </th>
+                            <th width="120">Référence</th>
+                            <th width="300">Titre & Détails</th>
+                            <th width="150">Auteur</th>
+                            <th width="120">Statut</th>
+                            <th width="120">Date</th>
+                            <th width="180">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobsTableBody">
+                        {% for job in pendingJobs %}
+                        <tr class="job-row" 
+                            data-job-slug="{{ job.slug }}"
+                            data-status="{{ job.moderationStatus }}"  {# ✅ Doit contenir pending/approved/rejected/modified #}
+                            data-date="{{ job.createdAt|date('Y-m-d') }}"
+                            data-search="{{ job.title|lower }} {{ job.reference|lower }} {{ job.createdBy.email|lower }} {{ job.city|lower }}">
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input job-checkbox" 
+                                           type="checkbox" 
+                                           value="{{ job.slug }}" 
+                                           data-job-slug="{{ job.slug }}"
+                                           onchange="onJobCheckboxChange(this)">
+                                </div>
+                            </td>
+                            <td>
+                                <span class="reference-badge">{{ job.reference }}</span>
+                            </td>
+                            <td>
+                                <div class="job-info">
+                                    <div class="job-title">{{ job.title }}</div>
+                                    <div class="job-meta">
+                                        <span class="meta-item">
+                                            <i class="fas fa-map-marker-alt"></i> {{ job.city }}
+                                        </span>
+                                        {% if job.profession %}
+                                        <span class="meta-item">
+                                            <i class="fas fa-briefcase"></i> {{ job.profession.profession }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="author-info">
+                                    
+                                    <div class="author-details">
+                                        <div class="author-name">{{ job.createdBy.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ job.moderationStatus }}">
+                                    {% if job.moderationStatus == 'pending' %}
+                                        <i class="fas fa-clock"></i> En attente
+                                    {% elseif job.moderationStatus == 'approved' %}
+                                        <i class="fas fa-check-circle"></i> Approuvé
+                                    {% elseif job.moderationStatus == 'rejected' %}
+                                        <i class="fas fa-times-circle"></i> Rejeté
+                                    {% else %}
+                                        <i class="fas fa-edit"></i> Modifié
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="date-info">
+                                    <i class="far fa-calendar-alt"></i>
+                                    {{ job.createdAt|date('d/m/Y') }}
+                                    <div class="date-time">{{ job.createdAt|date('H:i') }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-approve" onclick="approveJob({{ job.slug|json_encode|raw }})" title="Approuver">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    
+                                    <a href="{{ path('job_detail', {slug: job.slug}) }}" class="btn-action btn-view" data-turbo="false" title="Voir détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <a href="{{ path('job_edit', {slug: job.slug}) }}" class="btn-action btn-edit" data-turbo="false" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    <button class="btn-action btn-reject" onclick="rejectJob({{ job.slug|json_encode|raw }})" title="Rejeter">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# Pagination complète #}
+            <div class="table-footer">
+                <div class="showing-info" id="showingInfo">
+                    Affichage de <strong>1-10</strong> sur <strong>{{ pendingJobs|length }}</strong> résultats
+                </div>
+                <div class="pagination-container">
+                    <div class="page-info-text" id="pageInfoText">
+                        Page <strong>1</strong> / <strong>1</strong> · Total : <strong id="totalResults">{{ pendingJobs|length }}</strong>
+                    </div>
+                    <nav>
+                        <ul class="pagination" id="pagination"></ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ========== DESIGN SYSTEM PREMIUM ========== */
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+    --card-radius: 20px;
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+/* ========== HEADER ========== */
+.moderation-header {
+    background: var(--primary-gradient);
+    padding: 25px 0;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.moderation-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.header-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    z-index: 1;
+}
+
+.header-title {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.header-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.live-indicator {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    display: inline-block;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+    50% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); }
+}
+
+/* Batch actions dans le header */
+#headerActionsContainer {
+    position: relative;
+    z-index: 5;
+}
+
+#batchHeaderActions {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 5;
+}
+
+#batchHeaderActions.show {
+    display: flex !important;
+}
+
+#defaultHeaderActions.hide {
+    display: none !important;
+}
+
+.selected-count-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* ========== SEARCH BAR ========== */
+.search-bar-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--card-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--glass-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 5;
+}
+
+.search-input-wrapper {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 16px;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.search-input {
+    padding-left: 40px;
+    padding-right: 40px;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    height: 46px;
+    font-size: 0.9rem;
+    transition: var(--transition-smooth);
+    width: 100%;
+}
+
+.search-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.search-clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    z-index: 1;
+    padding: 5px;
+}
+
+.filter-select {
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    height: 46px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* ========== TABLE ========== */
+.table-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border-radius: var(--card-radius);
+    box-shadow: var(--glass-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.table-responsive {
+    position: relative;
+    z-index: 1;
+}
+
+.moderation-table {
+    margin: 0;
+}
+
+.moderation-table thead th {
+    background: #f8fafc;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 14px 16px;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.moderation-table tbody td {
+    padding: 14px 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.job-row {
+    transition: var(--transition-smooth);
+}
+
+.job-row:hover {
+    background: #f8fafc;
+}
+
+.job-row.selected {
+    background: #eff6ff;
+}
+
+.job-row.hidden-by-filter {
+    display: none !important;
+}
+
+.job-row.hidden-by-pagination {
+    display: none !important;
+}
+
+/* ========== STATUS BADGES ========== */
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-approved { background: #d1fae5; color: #065f46; }
+.status-rejected { background: #fee2e2; color: #991b1b; }
+.status-modified { background: #dbeafe; color: #1e40af; }
+
+/* ========== ACTION BUTTONS ========== */
+.action-buttons { display: flex; gap: 5px; }
+.btn-action {
+    width: 30px; height: 30px; border-radius: 8px; border: none;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: var(--transition-smooth); font-size: 12px;
+}
+.btn-approve { background: #d1fae5; color: #065f46; }
+.btn-approve:hover { background: #065f46; color: white; }
+.btn-view { background: #dbeafe; color: #1e40af; }
+.btn-view:hover { background: #1e40af; color: white; }
+.btn-edit { background: #fef3c7; color: #92400e; }
+.btn-edit:hover { background: #92400e; color: white; }
+.btn-reject { background: #fee2e2; color: #991b1b; }
+.btn-reject:hover { background: #991b1b; color: white; }
+
+/* ========== REFERENCE BADGE ========== */
+.reference-badge {
+    background: #f1f5f9; padding: 4px 8px; border-radius: 6px;
+    font-size: 0.75rem; font-weight: 600; color: #475569;
+    font-family: 'Courier New', monospace;
+}
+
+/* ========== AUTHOR ========== */
+.author-info { display: flex; align-items: center; gap: 8px; }
+.author-avatar {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--primary-gradient); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 13px; flex-shrink: 0;
+}
+.author-name { font-weight: 600; color: #1e293b; font-size: 0.8rem; word-break: break-all; }
+
+/* ========== JOB INFO ========== */
+.job-title { font-weight: 600; color: #1e293b; margin-bottom: 4px; font-size: 0.9rem; }
+.job-meta { display: flex; gap: 10px; flex-wrap: wrap; }
+.meta-item { font-size: 0.75rem; color: #64748b; display: flex; align-items: center; gap: 4px; }
+
+/* ========== SALARY ========== */
+.salary-info { text-align: center; }
+.salary-amount { font-weight: 700; color: #1e293b; font-size: 0.85rem; }
+.salary-separator { color: #94a3b8; margin: 0 3px; }
+.salary-currency { font-size: 0.65rem; color: #94a3b8; font-weight: 600; }
+
+/* ========== DATE ========== */
+.date-info { font-size: 0.8rem; color: #475569; }
+.date-time { font-size: 0.7rem; color: #94a3b8; }
+
+/* ========== TABLE FOOTER & PAGINATION ========== */
+.table-footer {
+    padding: 16px 20px; border-top: 1px solid #e2e8f0;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 15px;
+}
+.showing-info { font-size: 0.85rem; color: #64748b; }
+.pagination-container { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+.page-info-text { font-size: 0.8rem; color: #64748b; white-space: nowrap; }
+.page-info-text strong { color: #1e293b; }
+.pagination { margin: 0; gap: 4px; display: flex; flex-wrap: wrap; }
+.pagination .page-link {
+    border-radius: 8px; margin: 0; border: none;
+    color: #475569; font-weight: 500; font-size: 0.85rem;
+    padding: 6px 12px; cursor: pointer; transition: var(--transition-smooth);
+    text-decoration: none;
+}
+.pagination .page-item.active .page-link {
+    background: var(--primary-gradient); color: white;
+}
+.pagination .page-item.disabled .page-link {
+    color: #cbd5e1; pointer-events: none; cursor: default;
+}
+.pagination .page-link:hover:not(.active) { background: #f1f5f9; }
+
+/* ========== EMPTY STATE ========== */
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-icon { font-size: 64px; margin-bottom: 20px; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .moderation-header { padding: 20px 0; }
+    .header-title { font-size: 1.4rem; }
+    .table-footer { flex-direction: column; align-items: flex-start; }
+    .pagination-container { flex-direction: column; align-items: flex-start; gap: 10px; }
+}
+
+
+.selection-hero-modal{
+    position:fixed;
+    top:90px;
+    right:20px;
+    z-index:9999;
+    display:none;
+}
+
+.selection-card{
+    background:white;
+    padding:15px;
+    border-radius:16px;
+    box-shadow:0 15px 40px rgba(0,0,0,.15);
+    min-width:320px;
+    animation:slideIn .25s ease;
+}
+
+.selection-title{
+    font-weight:700;
+    margin-bottom:10px;
+    color:#1e293b;
+}
+
+.selection-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+@keyframes slideIn{
+    from{
+        opacity:0;
+        transform:translateY(-10px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+// ========== GLOBAL STATE ==========
+let selectedJobs = new Set();
+let currentPage = 1;
+let perPage = 10;
+let searchTimeout;
+
+// ========== INITIALIZATION ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Appliquer les filtres et la pagination au chargement
+    updateStatusLabel();
+    applyFiltersAndPagination();
+});
+
+// ========== RECHERCHE ==========
+function onSearchChange() {
+    clearTimeout(searchTimeout);
+    const searchInput = document.getElementById('searchJobs');
+    const clearButton = document.getElementById('searchClear');
+    
+    clearButton.style.display = searchInput.value ? 'block' : 'none';
+    
+    searchTimeout = setTimeout(() => {
+        currentPage = 1;
+        applyFiltersAndPagination();
+    }, 300);
+}
+
+function clearSearch() {
+    document.getElementById('searchJobs').value = '';
+    document.getElementById('searchClear').style.display = 'none';
+    currentPage = 1;
+    applyFiltersAndPagination();
+}
+
+// ========== FILTRES ==========
+function onFilterChange() {
+    currentPage = 1;
+    updateStatusLabel();
+    applyFiltersAndPagination();
+}
+
+function onPerPageChange() {
+    perPage = parseInt(document.getElementById('perPage').value);
+    currentPage = 1;
+    applyFiltersAndPagination();
+}
+
+// ========== FONCTION PRINCIPALE : FILTRE + PAGINATION ==========
+function applyFiltersAndPagination() {
+    // Lire les valeurs actuelles des filtres
+    const searchTerm = document.getElementById('searchJobs').value.toLowerCase().trim();
+    const statusFilter = document.getElementById('filterStatus').value;
+    const dateFilter = document.getElementById('filterDate').value;
+    
+    console.log('Applying filters - Status:', statusFilter, 'Search:', searchTerm, 'Page:', currentPage);
+    
+    // Récupérer toutes les lignes
+    const allRows = document.querySelectorAll('#jobsTableBody .job-row');
+    let visibleRows = [];
+    
+    // Étape 1 : Appliquer les filtres
+    allRows.forEach(row => {
+        const status = row.getAttribute('data-status');
+        const date = row.getAttribute('data-date');
+        const searchText = row.getAttribute('data-search') || '';
+        
+        let show = true;
+        
+        // Filtre statut
+        if (statusFilter !== 'all' && status !== statusFilter) {
+            show = false;
+        }
+        
+        // Filtre recherche
+        if (searchTerm && !searchText.includes(searchTerm)) {
+            show = false;
+        }
+        
+        // Filtre date
+        if (show && dateFilter !== 'all') {
+            const rowDate = new Date(date + 'T00:00:00');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (dateFilter === 'today') {
+                if (rowDate.getTime() !== today.getTime()) show = false;
+            } else if (dateFilter === 'week') {
+                const weekAgo = new Date(today);
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                if (rowDate < weekAgo) show = false;
+            } else if (dateFilter === 'month') {
+                const monthAgo = new Date(today);
+                monthAgo.setDate(monthAgo.getDate() - 30);
+                if (rowDate < monthAgo) show = false;
+            }
+        }
+        
+        if (show) {
+            visibleRows.push(row);
+            row.classList.remove('hidden-by-filter');
+        } else {
+            row.classList.add('hidden-by-filter');
+        }
+    });
+    
+    // Étape 2 : Appliquer la pagination
+    const totalResults = visibleRows.length;
+    const totalPages = Math.ceil(totalResults / perPage) || 1;
+    
+    // Ajuster currentPage si nécessaire
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+    if (currentPage < 1) {
+        currentPage = 1;
+    }
+    
+    // Cacher toutes les lignes visibles par le filtre
+    visibleRows.forEach(row => row.classList.add('hidden-by-pagination'));
+    
+    // Afficher uniquement les lignes de la page courante
+    const startIndex = (currentPage - 1) * perPage;
+    const endIndex = Math.min(startIndex + perPage, totalResults);
+    
+    for (let i = startIndex; i < endIndex; i++) {
+        visibleRows[i].classList.remove('hidden-by-pagination');
+    }
+    
+    // Mise à jour des infos
+    const totalPendingEl = document.getElementById('totalPending');
+    const totalResultsEl = document.getElementById('totalResults');
+    const showingInfoEl = document.getElementById('showingInfo');
+    const pageInfoTextEl = document.getElementById('pageInfoText');
+    
+    console.log({
+        totalPendingEl,
+        totalResultsEl,
+        showingInfoEl,
+        pageInfoTextEl
+    });
+    
+    if (totalPendingEl) {
+        totalPendingEl.textContent = totalResults;
+    }
+    
+    if (totalResultsEl) {
+        totalResultsEl.textContent = totalResults;
+    }
+    
+    if (showingInfoEl) {
+        showingInfoEl.innerHTML =
+            `Affichage de <strong>${totalResults > 0 ? startIndex + 1 : 0}-${endIndex}</strong> sur <strong>${totalResults}</strong> résultats`;
+    }
+    
+    if (pageInfoTextEl) {
+        pageInfoTextEl.innerHTML =
+            `Page <strong>${currentPage}</strong> / <strong>${totalPages}</strong> · Total : <strong>${totalResults}</strong>`;
+    }
+    
+    // Mise à jour de la pagination
+    renderPagination(totalPages);
+    
+    // Réinitialiser les sélections
+    clearSelection();
+    
+    console.log('Total results:', totalResults, 'Current page:', currentPage, 'Total pages:', totalPages);
+}
+
+// ========== RENDU PAGINATION ==========
+function renderPagination(totalPages) {
+    const paginationEl = document.getElementById('pagination');
+    
+    if (totalPages <= 0) {
+        paginationEl.innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    
+    // Bouton Précédent
+    if (currentPage > 1) {
+        html += `<li class="page-item">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage - 1})">
+                <i class="fas fa-chevron-left"></i> Préc
+            </a>
+        </li>`;
+    } else {
+        html += `<li class="page-item disabled">
+            <span class="page-link">
+                <i class="fas fa-chevron-left"></i> Préc
+            </span>
+        </li>`;
+    }
+    
+    // Pages numérotées
+    if (totalPages <= 7) {
+        // Afficher toutes les pages si 7 ou moins
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="goToPage(${i})">${i}</a>
+            </li>`;
+        }
+    } else {
+        // Toujours afficher la première page
+        html += `<li class="page-item ${1 === currentPage ? 'active' : ''}">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage(1)">1</a>
+        </li>`;
+        
+        if (currentPage > 3) {
+            html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+        }
+        
+        // Pages autour de la page courante
+        let startPage = Math.max(2, currentPage - 1);
+        let endPage = Math.min(totalPages - 1, currentPage + 1);
+        
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+                <a class="page-link" href="javascript:void(0)" onclick="goToPage(${i})">${i}</a>
+            </li>`;
+        }
+        
+        if (currentPage < totalPages - 2) {
+            html += '<li class="page-item disabled"><span class="page-link">…</span></li>';
+        }
+        
+        // Toujours afficher la dernière page
+        html += `<li class="page-item ${totalPages === currentPage ? 'active' : ''}">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage(${totalPages})">${totalPages}</a>
+        </li>`;
+    }
+    
+    // Bouton Suivant
+    if (currentPage < totalPages) {
+        html += `<li class="page-item">
+            <a class="page-link" href="javascript:void(0)" onclick="goToPage(${currentPage + 1})">
+                Suiv <i class="fas fa-chevron-right"></i>
+            </a>
+        </li>`;
+    } else {
+        html += `<li class="page-item disabled">
+            <span class="page-link">
+                Suiv <i class="fas fa-chevron-right"></i>
+            </span>
+        </li>`;
+    }
+    
+    paginationEl.innerHTML = html;
+}
+
+function goToPage(page) {
+    currentPage = page;
+
+    applyFiltersAndPagination();
+
+    document.querySelector('.table-card').scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
+// ========== CHECKBOX ==========
+function toggleAllJobs() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const visibleCheckboxes = document.querySelectorAll('#jobsTableBody .job-row:not(.hidden-by-filter):not(.hidden-by-pagination) .job-checkbox');
+    
+    visibleCheckboxes.forEach(cb => {
+        cb.checked = selectAllCheckbox.checked;
+        updateJobSelection(cb);
+    });
+    
+    updateBatchUI();
+}
+
+function onJobCheckboxChange(checkbox) {
+    updateJobSelection(checkbox);
+    updateBatchUI();
+
+    if(selectedJobs.size > 0){
+        showSelectionHeroModal();
+    } else {
+        hideSelectionHeroModal();
+    }
+}
+
+function updateJobSelection(checkbox) {
+    const jobId = checkbox.value;
+    const row = checkbox.closest('.job-row');
+    
+    if (checkbox.checked) {
+        selectedJobs.add(jobId);
+        if (row) row.classList.add('selected');
+    } else {
+        selectedJobs.delete(jobId);
+        if (row) row.classList.remove('selected');
+    }
+}
+
+function updateBatchUI() {
+
+    const selectAllCheckbox =
+        document.getElementById('selectAll');
+
+    const visibleCheckboxes =
+        document.querySelectorAll(
+            '#jobsTableBody .job-row:not(.hidden-by-filter):not(.hidden-by-pagination) .job-checkbox'
+        );
+
+    const checkedVisible =
+        Array.from(visibleCheckboxes)
+             .filter(cb => cb.checked);
+
+    if(selectedJobs.size > 0){
+        showSelectionHeroModal();
+    }else{
+        hideSelectionHeroModal();
+    }
+
+    selectAllCheckbox.checked =
+        visibleCheckboxes.length > 0 &&
+        checkedVisible.length === visibleCheckboxes.length;
+
+    selectAllCheckbox.indeterminate =
+        checkedVisible.length > 0 &&
+        checkedVisible.length < visibleCheckboxes.length;
+}
+
+function clearSelection() {
+
+    selectedJobs.clear();
+
+    document.querySelectorAll('.job-checkbox')
+        .forEach(cb => cb.checked = false);
+
+    document.querySelectorAll('.job-row')
+        .forEach(row => row.classList.remove('selected'));
+
+    const selectAll = document.getElementById('selectAll');
+
+    if(selectAll){
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+    }
+
+    const defaultActions =
+        document.getElementById('defaultHeaderActions');
+
+    if(defaultActions){
+        defaultActions.style.display = 'block';
+        defaultActions.classList.remove('hide');
+    }
+
+    hideSelectionHeroModal();
+}
+
+// ========== BATCH ACTIONS ==========
+function batchAction(action) {
+    if (selectedJobs.size === 0) {
+        Swal.fire('Info', 'Aucune offre sélectionnée', 'info');
+        return;
+    }
+    
+    const count = selectedJobs.size;
+    const jobIds = Array.from(selectedJobs);
+    
+    const actionConfig = {
+        approve: {
+            title: 'Approuver la sélection ?',
+            text: `${count} offre(s) seront approuvées et publiées`,
+            icon: 'question',
+            confirmButtonText: 'Approuver',
+            confirmButtonColor: '#10b981',
+            endpoint: '/admin/jobs/batch-approve'
+        },
+        reject: {
+            title: 'Rejeter la sélection ?',
+            text: `${count} offre(s) seront rejetées`,
+            icon: 'warning',
+            confirmButtonText: 'Rejeter',
+            confirmButtonColor: '#ef4444',
+            input: 'textarea',
+            inputLabel: 'Raison du rejet',
+            inputPlaceholder: 'Expliquez pourquoi ces offres sont rejetées...',
+            endpoint: '/admin/jobs/batch-reject'
+        },
+        modify: {
+            title: 'Modifier la sélection ?',
+            text: `${count} offre(s) seront modifiées`,
+            icon: 'info',
+            confirmButtonText: 'Modifier',
+            confirmButtonColor: '#f59e0b',
+            endpoint: '/admin/jobs/batch-modify'
+        }
+    };
+    
+    const config = actionConfig[action];
+    if (!config) return;
+    
+    Swal.fire({
+        title: config.title,
+        text: config.text,
+        icon: config.icon,
+        showCancelButton: true,
+        confirmButtonText: config.confirmButtonText,
+        confirmButtonColor: config.confirmButtonColor,
+        cancelButtonText: 'Annuler',
+        input: config.input || undefined,
+        inputLabel: config.inputLabel || undefined,
+        inputPlaceholder: config.inputPlaceholder || undefined,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new URLSearchParams();
+            jobIds.forEach(id => formData.append('job_ids[]', id));
+            if (result.value) {
+                formData.append('reason', result.value);
+            }
+            
+            fetch(config.endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Succès !', data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    Swal.fire('Erreur', data.message, 'error');
+                }
+            });
+        }
+    });
+}
+
+// ========== SINGLE JOB ACTIONS ==========
+function approveJob(jobId) {
+    Swal.fire({
+        title: 'Approuver cette offre ?',
+        text: 'L\'offre sera immédiatement publiée',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, approuver',
+        confirmButtonColor: '#10b981',
+        cancelButtonText: 'Annuler',
+        input: 'textarea',
+        inputLabel: 'Commentaire (optionnel)',
+        inputPlaceholder: 'Ajouter un commentaire...'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/job/${jobId}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `comment=${encodeURIComponent(result.value || '')}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Approuvé !', data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            });
+        }
+    });
+}
+
+function rejectJob(jobId) {
+    Swal.fire({
+        title: 'Rejeter cette offre ?',
+        text: 'Veuillez indiquer la raison du rejet',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Rejeter',
+        confirmButtonColor: '#ef4444',
+        cancelButtonText: 'Annuler',
+        input: 'textarea',
+        inputLabel: 'Raison du rejet',
+        inputPlaceholder: 'Expliquez pourquoi cette offre est rejetée...',
+        inputValidator: (value) => {
+            if (!value) return 'Vous devez fournir une raison !';
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Afficher un loader
+            Swal.fire({
+                title: 'Rejet en cours...',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                willOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // ✅ Construire l'URL correctement
+            const url = `/admin/job/${jobId}/reject`;
+            console.log('Fetching URL:', url);
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `reason=${encodeURIComponent(result.value)}`
+            })
+            .then(async response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers.get('content-type'));
+                
+                // ✅ Vérifier le type de contenu
+                const contentType = response.headers.get('content-type');
+                
+                if (contentType && contentType.includes('application/json')) {
+                    // C'est du JSON
+                    const data = await response.json();
+                    return { success: true, data: data };
+                } else {
+                    // C'est du HTML (page d'erreur probablement)
+                    const text = await response.text();
+                    console.error('HTML response:', text.substring(0, 500));
+                    throw new Error('Le serveur a retourné du HTML au lieu de JSON. Vérifiez la route.');
+                }
+            })
+            .then(result => {
+                if (result.success && result.data.success) {
+                    Swal.fire({
+                        title: 'Rejeté !',
+                        text: result.data.message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    Swal.fire('Erreur', result.data?.message || 'Erreur inconnue', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erreur complète:', error);
+                Swal.fire({
+                    title: 'Erreur',
+                    text: 'Impossible de rejeter cette offre. Vérifiez la console pour plus de détails.',
+                    icon: 'error'
+                });
+            });
+        }
+    });
+}
+
+function modifyJob(jobId) {
+    Swal.fire({
+        title: 'Modifier cette offre',
+        html: `
+            <div class="text-start">
+                <div class="mb-3"><label class="form-label">Titre</label><input type="text" class="form-control" id="mod-title"></div>
+                <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" id="mod-description" rows="3"></textarea></div>
+                <div class="mb-3"><label class="form-label">Salaire Min</label><input type="number" class="form-control" id="mod-salaireMin"></div>
+                <div class="mb-3"><label class="form-label">Salaire Max</label><input type="number" class="form-control" id="mod-salaireMax"></div>
+                <div class="mb-3"><label class="form-label">Note de modification</label><textarea class="form-control" id="mod-note" rows="2" placeholder="Expliquez les modifications..."></textarea></div>
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Enregistrer',
+        confirmButtonColor: '#f59e0b',
+        preConfirm: () => ({
+            title: document.getElementById('mod-title').value,
+            description: document.getElementById('mod-description').value,
+            salaireMin: document.getElementById('mod-salaireMin').value,
+            salaireMax: document.getElementById('mod-salaireMax').value,
+            note: document.getElementById('mod-note').value
+        })
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new URLSearchParams();
+            formData.append('note', result.value.note);
+            if (result.value.title) formData.append('modifications[title]', result.value.title);
+            if (result.value.description) formData.append('modifications[description]', result.value.description);
+            if (result.value.salaireMin) formData.append('modifications[salaireMin]', result.value.salaireMin);
+            if (result.value.salaireMax) formData.append('modifications[salaireMax]', result.value.salaireMax);
+            
+            fetch(`/admin/job/${jobId}/modify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Modifié !', data.message, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            });
+        }
+    });
+}
+
+function viewJobDetails(jobId) {
+    window.open(`/admin/job/${jobId}/details`, '_blank');
+}
+
+function refreshTable() {
+    location.reload();
+}
+
+function exportData() {
+    Swal.fire('Info', 'Fonctionnalité d\'export à venir', 'info');
+}
+
+
+function showSelectionHeroModal(){
+    const modal = document.getElementById('selectionHeroModal');
+
+    document.getElementById('selectionCountText').innerHTML =
+        selectedJobs.size + ' offre(s) sélectionnée(s)';
+
+    modal.style.display = 'block';
+}
+
+function hideSelectionHeroModal(){
+    document.getElementById('selectionHeroModal').style.display = 'none';
+}
+
+function updateStatusLabel() {
+    const status = document.getElementById('filterStatus').value;
+    const label = document.getElementById('statusLabel');
+
+    const labels = {
+        all: 'offre(s) au total',
+        pending: 'offre(s) en attente',
+        approved: 'offre(s) approuvée(s)',
+        rejected: 'offre(s) rejetée(s)',
+        modified: 'offre(s) modifiée(s)'
+    };
+
+    label.textContent = labels[status] || 'offre(s)';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    hideSelectionHeroModal();
+});
+</script>
+{% endblock %}

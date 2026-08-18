@@ -15,8 +15,8 @@ class PDF extends Fpdf
 		$this->AliasNbPages('{totalPages}');
 		$this->SetFont('Arial','BI',7);
 		// Page number
-		$this->Cell(100, 5, utf8_decode("Merci beacoup d'avoir fait confiance à notre hôpital. BONNE GUERISON !"), 0, 0, 'C');
-		$this->Cell(80, 5, utf8_decode("Hospitov - Imprimé le : ".date_format(new DateTime('now'),'d/m/Y H:i:s')), 0, 0, 'R');
+		$this->Cell(100, 5, utf8_decode(""), 0, 0, 'C');
+		$this->Cell(80, 5, utf8_decode("Main d'Oeuvre Locale - Imprimé le : ".date_format(new DateTime('now'),'d/m/Y H:i:s')), 0, 0, 'R');
     }
 
     public function RotatedText($x,$y,$txt,$angle)

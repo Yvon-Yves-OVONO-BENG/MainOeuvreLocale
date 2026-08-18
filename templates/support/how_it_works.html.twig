@@ -1,0 +1,127 @@
+{% extends 'support/layout.html.twig' %}
+{% set seo_description = 'Découvrez comment fonctionne Main d’Œuvre Locale pour les talents, particuliers et employeurs : inscription, profil, recherche, publication et mise en relation.' %}
+
+{% block title %}{% trans %}Comment ça marche — Main d’Œuvre Locale{% endtrans %}{% endblock %}
+
+{% block support_hero %}
+    <section class="mol-support-hero">
+        <div class="mol-support-hero__inner">
+            <span class="mol-support-eyebrow">
+                <i class="fa-solid fa-route" aria-hidden="true"></i>
+                {% trans %}Simple, local et professionnel{% endtrans %}
+            </span>
+    
+            <h1>{% trans %}Comment fonctionne Main d’Œuvre Locale ?{% endtrans %}</h1>
+            <p>{% trans %}La plateforme rapproche les besoins réels des talents disponibles. Chaque parcours reste simple : créer son compte, présenter clairement son besoin ou son savoir-faire, puis échanger en toute confiance.{% endtrans %}</p>
+    
+            <div class="mol-support-actions">
+                <a href="{{ path('app_register') }}" class="mol-support-btn mol-support-btn--white" data-turbo="false">
+                    <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+                    {% trans %}Créer mon compte{% endtrans %}
+                </a>
+                <a href="{{ path('liste_talents') }}" class="mol-support-btn mol-support-btn--glass" data-turbo="false">
+                    <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                    {% trans %}Voir les talents{% endtrans %}
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block support_content %}
+
+    <section class="mol-support-section">
+        <div class="mol-support-section-head">
+            <div>
+                <h2>{% trans %}Le parcours en 5 étapes{% endtrans %}</h2>
+                <p>{% trans %}Un chemin clair pour publier, trouver, comparer et entrer en contact sans perdre de temps.{% endtrans %}</p>
+            </div>
+        </div>
+
+        <div class="mol-process">
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">1</span>
+                <h3>{% trans %}Créer son compte{% endtrans %}</h3>
+                <p>{% trans %}Inscrivez-vous et choisissez le type de compte adapté à votre utilisation de la plateforme.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">2</span>
+                <h3>{% trans %}Compléter son profil{% endtrans %}</h3>
+                <p>{% trans %}Ajoutez les informations qui permettent aux autres utilisateurs de comprendre qui vous êtes et ce que vous recherchez.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">3</span>
+                <h3>{% trans %}Publier ou rechercher{% endtrans %}</h3>
+                <p>{% trans %}Publiez une annonce ou une mission, ou utilisez les filtres pour trouver directement le bon profil.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">4</span>
+                <h3>{% trans %}Comparer et échanger{% endtrans %}</h3>
+                <p>{% trans %}Consultez les informations disponibles, puis échangez avec les personnes qui correspondent à votre besoin.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">5</span>
+                <h3>{% trans %}Conclure avec confiance{% endtrans %}</h3>
+                <p>{% trans %}Clarifiez les conditions, les délais et la rémunération avant de commencer la collaboration.{% endtrans %}</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="mol-support-section">
+        <div class="mol-support-section-head">
+            <div>
+                <h2>{% trans %}Un parcours adapté à chaque profil{% endtrans %}</h2>
+                <p>{% trans %}Les outils affichés dépendent de votre rôle et des actions que vous devez réaliser.{% endtrans %}</p>
+            </div>
+        </div>
+
+        <div class="mol-role-grid">
+            <article class="mol-role-card">
+                <div class="mol-role-card__top">
+                    <i class="fa-solid fa-person-digging" aria-hidden="true"></i>
+                    <h3>{% trans %}Talent{% endtrans %}</h3>
+                </div>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Présenter ses compétences et son expérience{% endtrans %}</span></li>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Trouver des missions correspondant à son métier{% endtrans %}</span></li>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Échanger avec les recruteurs et particuliers{% endtrans %}</span></li>
+                </ul>
+            </article>
+
+            <article class="mol-role-card">
+                <div class="mol-role-card__top">
+                    <i class="fa-solid fa-building" aria-hidden="true"></i>
+                    <h3>{% trans %}Employeur{% endtrans %}</h3>
+                </div>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Publier des offres et préciser les conditions{% endtrans %}</span></li>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Consulter les talents disponibles{% endtrans %}</span></li>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Organiser le suivi des candidatures{% endtrans %}</span></li>
+                </ul>
+            </article>
+
+            <article class="mol-role-card">
+                <div class="mol-role-card__top">
+                    <i class="fa-solid fa-house-user" aria-hidden="true"></i>
+                    <h3>{% trans %}Particulier{% endtrans %}</h3>
+                </div>
+                <ul>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Décrire un besoin ponctuel ou urgent{% endtrans %}</span></li>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Trouver un artisan ou prestataire proche{% endtrans %}</span></li>
+                    <li><i class="fa-solid fa-check"></i><span>{% trans %}Comparer les profils avant de contacter{% endtrans %}</span></li>
+                </ul>
+            </article>
+        </div>
+    </section>
+
+    <section class="mol-support-band">
+        <div>
+            <h2>{% trans %}Prêt à commencer ?{% endtrans %}</h2>
+            <p>{% trans %}Créez votre compte gratuitement, complétez votre profil et accédez aux outils correspondant à votre activité.{% endtrans %}</p>
+        </div>
+        <a href="{{ path('app_register') }}" class="mol-support-btn" data-turbo="false">
+            <i class="fa-solid fa-arrow-right-to-bracket" aria-hidden="true"></i>
+            {% trans %}Rejoindre la plateforme{% endtrans %}
+        </a>
+    </section>
+{% endblock %}

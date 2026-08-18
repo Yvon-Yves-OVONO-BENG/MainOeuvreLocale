@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Connexion administrateur{% endtrans %}{% endblock %}
+
+{% block body %}
+<div class="container py-5" style="max-width:560px;">
+  <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5">
+    <div class="text-center mb-4">
+      <h1 class="fw-bold mb-2">{% trans %}Connexion administrateur{% endtrans %}</h1>
+      <div class="text-muted">{% trans %}Accès réservé à l’administration pendant la maintenance.{% endtrans %}</div>
+    </div>
+
+    {% if error %}
+      <div class="alert alert-danger rounded-3">
+        {{ error.messageKey|trans(error.messageData, 'security') }}
+      </div>
+    {% endif %}
+
+    <form method="post">
+      <div class="mb-3">
+        <label class="form-label fw-bold">{% trans %}Email{% endtrans %}</label>
+        <input type="email" name="_username" value="{{ last_username }}" class="form-control form-control-lg rounded-3" required autofocus>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-bold">{% trans %}Mot de passe{% endtrans %}</label>
+        <input type="password" name="_password" class="form-control form-control-lg rounded-3" required>
+      </div>
+
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+      <button class="btn btn-dark btn-lg w-100 rounded-3 fw-bold">
+        {% trans %}Se connecter{% endtrans %}
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

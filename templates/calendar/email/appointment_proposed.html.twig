@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Nouveau rendez-vous proposé</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f7fb;padding:24px 12px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border-radius:22px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 18px 45px rgba(15,23,42,.10);">
+          
+          <tr>
+            <td style="padding:26px 28px;background:linear-gradient(135deg,#0f172a,#2563eb);color:#ffffff;">
+              <div style="font-size:13px;font-weight:800;opacity:.9;">
+                Main d'Oeuvre Locale
+              </div>
+              <h1 style="margin:8px 0 0;font-size:24px;line-height:1.25;">
+                Nouveau rendez-vous proposé
+              </h1>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:26px 28px;">
+              <p style="margin:0 0 14px;font-size:15px;line-height:1.7;">
+                Bonjour,
+              </p>
+
+              <p style="margin:0 0 18px;font-size:15px;line-height:1.7;">
+                Un rendez-vous vient de vous être proposé pour une mission sur
+                <strong>Main d'Oeuvre Locale</strong>.
+              </p>
+
+              <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;padding:18px;margin:18px 0;">
+                <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:800;margin-bottom:6px;">
+                  Mission
+                </div>
+                <div style="font-size:17px;font-weight:900;color:#0f172a;">
+                  {{ job ? job.title : 'Mission' }}
+                </div>
+              </div>
+
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;">
+                <tr>
+                  <td style="padding:12px;border:1px solid #e5e7eb;border-radius:14px;background:#ffffff;">
+                    <div style="font-size:12px;color:#64748b;font-weight:800;">Date</div>
+                    <div style="margin-top:4px;font-size:15px;font-weight:900;">
+                      {{ startAt ? startAt|date('d/m/Y') : '—' }}
+                    </div>
+                  </td>
+                </tr>
+
+                <tr><td style="height:10px;"></td></tr>
+
+                <tr>
+                  <td style="padding:12px;border:1px solid #e5e7eb;border-radius:14px;background:#ffffff;">
+                    <div style="font-size:12px;color:#64748b;font-weight:800;">Heure</div>
+                    <div style="margin-top:4px;font-size:15px;font-weight:900;">
+                      {{ startAt ? startAt|date('H:i') : '—' }}
+                      {% if endAt %}
+                        - {{ endAt|date('H:i') }}
+                      {% endif %}
+                    </div>
+                  </td>
+                </tr>
+
+                <tr><td style="height:10px;"></td></tr>
+
+                <tr>
+                  <td style="padding:12px;border:1px solid #e5e7eb;border-radius:14px;background:#ffffff;">
+                    <div style="font-size:12px;color:#64748b;font-weight:800;">Durée</div>
+                    <div style="margin-top:4px;font-size:15px;font-weight:900;">
+                      {{ durationMinutes }} minutes
+                    </div>
+                  </td>
+                </tr>
+
+                <tr><td style="height:10px;"></td></tr>
+
+                <tr>
+                  <td style="padding:12px;border:1px solid #e5e7eb;border-radius:14px;background:#ffffff;">
+                    <div style="font-size:12px;color:#64748b;font-weight:800;">Lieu</div>
+                    <div style="margin-top:4px;font-size:15px;font-weight:900;">
+                      {{ rdv.location ?: 'Non précisé' }}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              {% if rdv.notes %}
+                <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:18px;padding:16px;margin-top:18px;">
+                  <div style="font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#64748b;font-weight:800;margin-bottom:6px;">
+                    Note
+                  </div>
+                  <div style="font-size:14px;line-height:1.7;color:#334155;">
+                    {{ rdv.notes|nl2br }}
+                  </div>
+                </div>
+              {% endif %}
+
+              <p style="margin:22px 0 0;font-size:14px;line-height:1.7;color:#475569;">
+                Merci de vous connecter à votre espace pour consulter vos rendez-vous.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:18px 28px;background:#f8fafc;border-top:1px solid #e5e7eb;color:#64748b;font-size:12px;line-height:1.6;">
+              Cet email est envoyé automatiquement. Merci de ne pas répondre directement à ce message.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

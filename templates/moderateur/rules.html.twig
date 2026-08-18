@@ -1,0 +1,169 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Règles{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_rules.html.twig" %}
+
+
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">🛡️ {% trans %}Règles & Policies{% endtrans %}</div>
+        <div class="hint">{% trans %}Base de règles de modération : fraude, spam, usurpation, jobs, messages. Toggle instant en AJAX.{% endtrans %}</div>
+
+        <div class="kpis">
+          <div class="kpi"><div class="t">{% trans %}Actives{% endtrans %}</div><div class="v">{{ kpi.active }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Inactives{% endtrans %}</div><div class="v">{{ kpi.inactive }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Critiques{% endtrans %}</div><div class="v">{{ kpi.critical }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Total{% endtrans %}</div><div class="v">{{ kpi.total }}</div></div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <a class="btn primary" href="{{ path('moderateur_rules_new') }}">➕ {% trans %}Nouvelle règle{% endtrans %}</a>
+        <a class="btn" href="/moderateur/analytics">📊 {% trans %}Analytics{% endtrans %}</a>
+        <form method="get" action="{{ path('moderateur_rules_index') }}" class="filters">
+          <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Rechercher…'|trans }}">
+          <select class="select" name="category">
+            <option value="">{% trans %}Catégorie{% endtrans %}</option>
+            {% for c in ['general','fraud','spam','identity','jobs','messages'] %}
+              <option value="{{ c }}" {{ category == c ? 'selected' : '' }}>{{ c|trans }}</option>
+            {% endfor %}
+          </select>
+          <select class="select" name="severity">
+            <option value="">{% trans %}Sévérité{% endtrans %}</option>
+            {% for s in ['info','warn','critical'] %}
+              <option value="{{ s }}" {{ severity == s ? 'selected' : '' }}>{{ s|trans }}</option>
+            {% endfor %}
+          </select>
+          <input type="hidden" name="limit" value="{{ limit }}">
+          <button class="btn" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+          <a class="btn" href="{{ path('moderateur_rules_index') }}">{% trans %}Reset{% endtrans %}</a>
+        </form>
+      </div>
+    </div>
+
+    <div class="bd">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Titre{% endtrans %}</th>
+              <th>{% trans %}Catégorie{% endtrans %}</th>
+              <th>{% trans %}Sévérité{% endtrans %}</th>
+              <th>{% trans %}Active{% endtrans %}</th>
+              <th style="text-align:right;">{% trans %}Actions{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+              {% set sevCls = r.severity == 'critical' ? 'sev-critical' : (r.severity == 'info' ? 'sev-info' : 'sev-warn') %}
+              <tr>
+                <td>#{{ r.id }}</td>
+                <td>
+                  <div style="font-weight:950;">{{ r.title }}</div>
+                  <div style="font-size:12px;color:rgba(15,23,42,.62);margin-top:2px;">
+                    {{ r.description|slice(0, 110) }}{% if r.description|length > 110 %}…{% endif %}
+                  </div>
+                </td>
+                <td><span class="chip">{{ r.category|trans }}</span></td>
+                <td><span class="chip {{ sevCls }}">{{ r.severity|trans|upper }}</span></td>
+                <td>
+                  <div class="toggle">
+                    <div class="switch {{ r.isActive ? 'on' : '' }}"
+                         role="switch"
+                         aria-checked="{{ r.isActive ? 'true' : 'false' }}"
+                         tabindex="0"
+                         data-rule-toggle
+                         data-id="{{ r.id }}"
+                         data-active="{{ r.isActive ? '1' : '0' }}"
+                         data-token="{{ csrf_token('rule_toggle_' ~ r.id) }}">
+                      <div class="dot"></div>
+                    </div>
+                    <span style="font-size:12px;color:rgba(15,23,42,.62);font-weight:900;">
+                      {{ (r.isActive ? 'ON' : 'OFF')|trans }}
+                    </span>
+                  </div>
+                </td>
+                <td style="text-align:right;">
+                  <a class="btn" href="{{ path('moderateur_rules_edit', {id: r.id}) }}">✏️ {% trans %}Éditer{% endtrans %}</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" style="padding:18px;text-align:center;color:rgba(15,23,42,.62);">{% trans %}Aucune règle{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p == page ? 'primary' : '' }}"
+               href="{{ path('moderateur_rules_index', {page:p, limit:limit, q:q, category:category, severity:severity}) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+  function toast(message, type='ok', sub=''){
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+      <div class="t-ico">${type==='ok'?'✅':type==='warn'?'⚠️':'⛔'}</div>
+      <div><div class="t-msg">${message}</div>${sub?`<div class="t-sub">${sub}</div>`:''}</div>
+    `;
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 3200);
+  }
+
+  async function postJson(url, payload){
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest' },
+      body: JSON.stringify(payload||{})
+    });
+    const data = await res.json().catch(()=>null);
+    if (!res.ok || !data || data.ok !== true) throw new Error(data?.message || 'Erreur');
+    return data;
+  }
+
+  // Toggle switch (AJAX)
+  document.addEventListener('click', async (e)=>{
+    const sw = e.target.closest('[data-rule-toggle]');
+    if (!sw) return;
+
+    const id = sw.dataset.id;
+    const token = sw.dataset.token;
+    const current = sw.dataset.active === '1';
+    const next = !current;
+
+    // optimiste UI
+    sw.dataset.active = next ? '1' : '0';
+    sw.classList.toggle('on', next);
+
+    try{
+      await postJson("{{ path('moderateur_rules_toggle', {id: 0}) }}".replace('/0/toggle', `/${id}/toggle`), {
+        _token: token,
+        active: next
+      });
+      toast('{{ "Règle mise à jour ✅"|trans|e("js") }}', 'ok');
+    }catch(err){
+      // rollback
+      sw.dataset.active = current ? '1' : '0';
+      sw.classList.toggle('on', current);
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }
+  });
+</script>
+{% endblock %}

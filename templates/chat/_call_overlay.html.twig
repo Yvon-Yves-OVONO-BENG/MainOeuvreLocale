@@ -1,0 +1,33 @@
+{# templates/chat/_call_overlay.html.twig #}
+{% if app.user %}
+<div id="molCallPremium" class="mol-call-premium" hidden>
+    <div class="mol-call-premium__card">
+        <header class="mol-call-premium__top">
+            <div class="mol-call-premium__identity">
+                <img data-call-avatar src="{{ asset('uploads/profiles/avatar.png') }}" alt="">
+                <div>
+                    <strong data-call-name>Appel</strong>
+                    <span data-call-status>En attente...</span>
+                </div>
+            </div>
+            <button type="button" class="mol-icon-btn" data-call-close aria-label="Fermer"><i class="bi bi-x-lg"></i></button>
+        </header>
+
+        <div class="mol-call-premium__stage">
+            <video data-call-remote autoplay playsinline></video>
+            <video data-call-local autoplay playsinline muted></video>
+            <div class="mol-call-premium__avatar-ring">
+                <img data-call-avatar-big src="{{ asset('uploads/profiles/avatar.png') }}" alt="">
+            </div>
+        </div>
+
+        <footer class="mol-call-premium__actions">
+            <button type="button" class="mol-call-btn accept" data-call-accept hidden><i class="bi bi-telephone-inbound-fill"></i></button>
+            <button type="button" class="mol-call-btn danger" data-call-decline hidden><i class="bi bi-telephone-x-fill"></i></button>
+            <button type="button" class="mol-call-btn" data-call-mute><i class="bi bi-mic-fill"></i></button>
+            <button type="button" class="mol-call-btn" data-call-camera><i class="bi bi-camera-video-fill"></i></button>
+            <button type="button" class="mol-call-btn danger" data-call-end hidden><i class="bi bi-telephone-x-fill"></i></button>
+        </footer>
+    </div>
+</div>
+{% endif %}

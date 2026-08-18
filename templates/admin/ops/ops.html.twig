@@ -1,0 +1,177 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Super Admin Ops Center{% endtrans %}{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ asset('assets/admin/admin-ops.css') }}">
+
+<div class="ops-shell"
+     data-admin-ops-root
+     data-status-url="{{ path('admin_ops_status') }}"
+     data-action-template="{{ path('admin_ops_action', {action: '__ACTION__'}) }}"
+     data-csrf="{{ csrf_token('admin_ops_action') }}">
+
+  <div class="ops-wrap">
+    <section class="ops-hero">
+      <div class="ops-hero__content">
+        <div class="ops-chip">⚡ {% trans %}Critical Operations{% endtrans %}</div>
+        <h1>{% trans %}Super Admin Ops Center{% endtrans %}</h1>
+        <p>
+          {% trans %}Console premium de supervision, compliance, maintenance, audit et orchestration technique.{% endtrans %}
+        </p>
+      </div>
+
+      <div class="ops-hero__side">
+        <div class="ops-live">
+          <span class="ops-live__dot"></span>
+          <span>{% trans %}Live control{% endtrans %}</span>
+        </div>
+
+        <div class="ops-state ops-state--{{ ops.maintenance ? 'danger' : 'success' }}" data-maintenance-badge>
+          {{ ops.maintenance ? '⛔ ON' : '✅ OFF' }}
+        </div>
+      </div>
+    </section>
+
+    <section class="ops-kpis">
+      <article class="ops-card ops-kpi">
+        <span class="ops-kpi__label">{% trans %}Maintenance{% endtrans %}</span>
+        <strong class="ops-kpi__value" data-kpi-maintenance>{{ ops.maintenanceLabel }}</strong>
+        <small class="ops-kpi__sub">{% trans %}État global de la plateforme{% endtrans %}</small>
+      </article>
+
+      <article class="ops-card ops-kpi">
+        <span class="ops-kpi__label">{% trans %}Queue{% endtrans %}</span>
+        <strong class="ops-kpi__value" data-kpi-queue>{{ ops.queueHealth }}</strong>
+        <small class="ops-kpi__sub">{% trans %}Traitements asynchrones{% endtrans %}</small>
+      </article>
+
+      <article class="ops-card ops-kpi">
+        <span class="ops-kpi__label">{% trans %}Failed webhooks{% endtrans %}</span>
+        <strong class="ops-kpi__value" data-kpi-webhooks>{{ ops.failedWebhooks }}</strong>
+        <small class="ops-kpi__sub">{% trans %}Événements externes en échec{% endtrans %}</small>
+      </article>
+
+      <article class="ops-card ops-kpi">
+        <span class="ops-kpi__label">{% trans %}Security score{% endtrans %}</span>
+        <strong class="ops-kpi__value">{{ ops.securityScore }}</strong>
+        <small class="ops-kpi__sub">{% trans %}Score global de contrôle{% endtrans %}</small>
+      </article>
+    </section>
+
+    <section class="ops-grid">
+      <div class="ops-card ops-panel">
+        <div class="ops-panel__head">
+          <div>
+            <h2>{% trans %}Actions rapides{% endtrans %}</h2>
+            <p>{% trans %}Exécute les opérations critiques depuis ton cockpit d’administration.{% endtrans %}</p>
+          </div>
+        </div>
+
+        <div class="ops-actions">
+          <a href="{{ path('admin_kyc_rules') }}" class="ops-btn ops-btn--secondary">
+            <span>✅</span>
+            <span>{% trans %}Valider KYC{% endtrans %}</span>
+          </a>
+
+          <button type="button"
+                  class="ops-btn ops-btn--secondary"
+                  data-ops-action="reindex_search"
+                  data-ops-title="{% trans %}Réindexation moteur{% endtrans %}"
+                  data-ops-confirm="{% trans %}Confirmer le lancement de la réindexation du moteur de recherche ?{% endtrans %}">
+            <span>🔎</span>
+            <span>{% trans %}Réindexer{% endtrans %}</span>
+          </button>
+
+          <button type="button"
+                  class="ops-btn ops-btn--secondary"
+                  data-ops-action="restart_notifications_queue"
+                  data-ops-title="{% trans %}Restart queue{% endtrans %}"
+                  data-ops-confirm="{% trans %}Confirmer la relance de la queue de notifications ?{% endtrans %}">
+            <span>📨</span>
+            <span>{% trans %}Restart queue{% endtrans %}</span>
+          </button>
+
+          <button type="button"
+                  class="ops-btn ops-btn--secondary"
+                  data-ops-action="retry_webhooks"
+                  data-ops-title="{% trans %}Relance webhooks{% endtrans %}"
+                  data-ops-confirm="{% trans %}Confirmer la relance des webhooks échoués ?{% endtrans %}">
+            <span>🪝</span>
+            <span>{% trans %}Webhooks{% endtrans %}</span>
+          </button>
+
+          <a href="{{ path('admin_audit_index') }}" class="ops-btn ops-btn--secondary">
+            <span>🧾</span>
+            <span>{% trans %}Audit report{% endtrans %}</span>
+          </a>
+
+          <button type="button"
+                  class="ops-btn ops-btn--danger"
+                  data-ops-action="toggle_maintenance"
+                  data-ops-title="{% trans %}Mode maintenance{% endtrans %}"
+                  data-ops-confirm="{% trans %}Confirmer la bascule du mode maintenance ?{% endtrans %}">
+            <span>⛔</span>
+            <span>{% trans %}Maintenance{% endtrans %}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="ops-card ops-panel">
+        <div class="ops-panel__head">
+          <div>
+            <h2>{% trans %}Dernières opérations{% endtrans %}</h2>
+            <p>{% trans %}Historique rapide des déclenchements administratifs.{% endtrans %}</p>
+          </div>
+        </div>
+
+        <div class="ops-list">
+          <div class="ops-list__item">
+            <div>
+              <strong>{% trans %}Dernière réindexation{% endtrans %}</strong>
+              <small>{% trans %}Moteur de recherche{% endtrans %}</small>
+            </div>
+            <span data-last-reindex>{{ ops.lastReindexAt ?: '—' }}</span>
+          </div>
+
+          <div class="ops-list__item">
+            <div>
+              <strong>{% trans %}Dernier restart queue{% endtrans %}</strong>
+              <small>{% trans %}Notifications / jobs{% endtrans %}</small>
+            </div>
+            <span data-last-queue>{{ ops.lastQueueRestartAt ?: '—' }}</span>
+          </div>
+
+          <div class="ops-list__item">
+            <div>
+              <strong>{% trans %}Dernière relance webhooks{% endtrans %}</strong>
+              <small>{% trans %}Services externes{% endtrans %}</small>
+            </div>
+            <span data-last-webhooks>{{ ops.lastWebhookRetryAt ?: '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="ops-toast" data-ops-toast></div>
+
+  <div class="ops-modal" data-ops-modal hidden>
+    <div class="ops-modal__backdrop" data-ops-close></div>
+    <div class="ops-modal__dialog">
+      <div class="ops-modal__head">
+        <h3 data-ops-modal-title>{% trans %}Confirmation{% endtrans %}</h3>
+      </div>
+      <div class="ops-modal__body">
+        <p data-ops-modal-text>{% trans %}Confirmer cette action ?{% endtrans %}</p>
+      </div>
+      <div class="ops-modal__foot">
+        <button type="button" class="ops-btn ops-btn--ghost" data-ops-close>{% trans %}Annuler{% endtrans %}</button>
+        <button type="button" class="ops-btn ops-btn--danger" data-ops-confirm-btn>{% trans %}Confirmer{% endtrans %}</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ asset('assets/admin/admin-ops.js') }}"></script>
+{% endblock %}

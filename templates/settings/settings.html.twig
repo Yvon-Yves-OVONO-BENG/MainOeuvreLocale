@@ -1,0 +1,373 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Paramètres{% endtrans %}{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/settings/settings.css') }}?v=20260805">
+{% endblock %}
+
+{% block body %}
+
+<div class="vip-wrap">
+  <div class="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6">
+
+    <div class="vip-card overflow-hidden mt-3">
+      <div class="p-4 sm:p-8">
+
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-xs font-extrabold text-slate-700">
+              <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+              ⚙️ {% trans %}Paramètres{% endtrans %}
+            </div>
+            <h1 class="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              {% trans %}Compte & préférences{% endtrans %}
+            </h1>
+            <p class="mt-1 text-sm text-slate-600">
+              {% trans %}Gérez vos infos, confidentialité et sécurité.{% endtrans %}
+            </p>
+          </div>
+
+          <div class="vip-soft p-3">
+            <div class="text-xs font-extrabold text-slate-600">{% trans %}Connecté{% endtrans %}</div>
+            <div class="font-black text-slate-900">{{ app.user.email }}</div>
+            <div class="text-xs text-slate-500 mt-1">
+              {% if app.user.isEmailVerified %}
+                ✅ {% trans %}Email vérifié{% endtrans %}
+              {% else %}
+                ⚠️ {% trans %}Email non vérifié{% endtrans %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        {# Flash messages #}
+        <div class="mt-5 space-y-2">
+          {% for msg in app.flashes('success') %}
+            <div class="vip-soft p-3 text-sm font-extrabold text-emerald-700 border-emerald-200 bg-emerald-50/60">{{ msg }}</div>
+          {% endfor %}
+          {% for msg in app.flashes('error') %}
+            <div class="vip-soft p-3 text-sm font-extrabold text-rose-700 border-rose-200 bg-rose-50/60">{{ msg }}</div>
+          {% endfor %}
+        </div>
+
+        {# Tabs #}
+        <div id="settingsTabsScroller" class="mol-settings-tabs mt-6 -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto">
+          <div class="flex gap-2 w-max sm:w-full flex-nowrap" role="tablist" aria-label="{{ 'Paramètres du compte'|trans }}">
+            <a class="tab {{ tab == 'account' ? 'active' : '' }}" href="{{ path('settings_index', {tab:'account'}) }}" role="tab" aria-selected="{{ tab == 'account' ? 'true' : 'false' }}" {% if tab == 'account' %}aria-current="page"{% endif %}>
+              👤 {% trans %}Compte{% endtrans %}
+            </a>
+            <a class="tab {{ tab == 'privacy' ? 'active' : '' }}" href="{{ path('settings_index', {tab:'privacy'}) }}" role="tab" aria-selected="{{ tab == 'privacy' ? 'true' : 'false' }}" {% if tab == 'privacy' %}aria-current="page"{% endif %}>
+              🕶️ {% trans %}Confidentialité{% endtrans %}
+            </a>
+            <a class="tab {{ tab == 'security' ? 'active' : '' }}" href="{{ path('settings_index', {tab:'security'}) }}" role="tab" aria-selected="{{ tab == 'security' ? 'true' : 'false' }}" {% if tab == 'security' %}aria-current="page"{% endif %}>
+              🔒 {% trans %}Sécurité{% endtrans %}
+            </a>
+            <a class="tab {{ tab == 'notifications' ? 'active' : '' }}" href="{{ path('settings_index', {tab:'notifications'}) }}" role="tab" aria-selected="{{ tab == 'notifications' ? 'true' : 'false' }}" {% if tab == 'notifications' %}aria-current="page"{% endif %}>
+              🔔 {% trans %}Notifications{% endtrans %}
+            </a>
+            <a class="tab {{ tab == 'activity' ? 'active' : '' }}" href="{{ path('settings_index', {tab:'activity'}) }}" role="tab" aria-selected="{{ tab == 'activity' ? 'true' : 'false' }}" {% if tab == 'activity' %}aria-current="page"{% endif %}>
+              🧾 {% trans %}Activité{% endtrans %}
+            </a>
+            <a class="tab {{ tab == 'danger' ? 'active' : '' }}" href="{{ path('settings_index', {tab:'danger'}) }}" role="tab" aria-selected="{{ tab == 'danger' ? 'true' : 'false' }}" {% if tab == 'danger' %}aria-current="page"{% endif %}>
+              ⚠️ {% trans %}Danger{% endtrans %}
+            </a>
+          </div>
+        </div>
+
+        <style>
+          /* L'onglet réellement sélectionné reste visible et identifiable sur mobile. */
+          .mol-settings-tabs {
+            scrollbar-width: thin;
+            scroll-behavior: smooth;
+            overscroll-behavior-inline: contain;
+          }
+          .mol-settings-tabs .tab {
+            position: relative;
+            text-decoration: none !important;
+          }
+          .mol-settings-tabs .tab::after {
+            content: '';
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            bottom: -5px;
+            height: 3px;
+            border-radius: 999px;
+            background: #2563eb;
+            opacity: 0;
+            transform: scaleX(.55);
+            transition: opacity .18s ease, transform .18s ease;
+          }
+          .mol-settings-tabs .tab.active {
+            color: #0f172a !important;
+            font-weight: 950 !important;
+            background: rgba(239,246,255,.96) !important;
+            border-color: rgba(37,99,235,.32) !important;
+            box-shadow: 0 8px 20px rgba(37,99,235,.10);
+          }
+          .mol-settings-tabs .tab.active::after {
+            opacity: 1;
+            transform: scaleX(1);
+          }
+        </style>
+
+        {# CONTENT #}
+        <div class="mt-5">
+
+          {% if tab == 'account' %}
+            <div class="vip-soft p-5">
+              <div class="font-black text-slate-900">👤 {% trans %}Informations du compte{% endtrans %}</div>
+              <div class="text-sm text-slate-600 mt-1">{% trans %}Email (lecture seule) + téléphone modifiable.{% endtrans %}</div>
+
+              {{ form_start(accountForm) }}
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <div class="text-xs font-extrabold text-slate-700 mb-1">{% trans %}Email{% endtrans %}</div>
+                    {{ form_widget(accountForm.email, {attr:{class:'w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm'}}) }}
+                    {{ form_errors(accountForm.email) }}
+                  </div>
+                  <div>
+                    <div class="text-xs font-extrabold text-slate-700 mb-1">{% trans %}Téléphone{% endtrans %}</div>
+                    {{ form_widget(accountForm.phone, {attr:{class:'w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm'}}) }}
+                    <div class="text-xs text-slate-500 mt-1">{% trans %}Format actuel: 6xxxxxxxx (adapte si tu veux international).{% endtrans %}</div>
+                    {{ form_errors(accountForm.phone) }}
+                  </div>
+                </div>
+
+                <div class="mt-5 flex gap-2 flex-wrap">
+                  <button class="btn primary w-full sm:w-auto" type="submit">{% trans %}Enregistrer{% endtrans %}</button>
+                  <a class="btn w-full sm:w-auto text-center" href="/">{% trans %}Retour{% endtrans %}</a>
+                </div>
+              {{ form_end(accountForm) }}
+            </div>
+          {% endif %}
+
+          {% if tab == 'privacy' %}
+            <div class="vip-soft p-5">
+              <div class="font-black text-slate-900">🕶️ {% trans %}Confidentialité{% endtrans %}</div>
+              <div class="text-sm text-slate-600 mt-1">{% trans %}Contrôle la visibilité de tes actions.{% endtrans %}</div>
+
+              {{ form_start(privacyForm) }}
+                <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                  <div class="flex items-start gap-3">
+                    {{ form_widget(privacyForm.profileViewsPrivate) }}
+                    <div>
+                      <div class="font-extrabold text-slate-900">{{ form_label(privacyForm.profileViewsPrivate) }}</div>
+                      <div class="text-sm text-slate-600 mt-1">{{ form_help(privacyForm.profileViewsPrivate) }}</div>
+                      {{ form_errors(privacyForm.profileViewsPrivate) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-5 flex gap-2 flex-wrap">
+                  <button class="btn primary w-full sm:w-auto" type="submit">{% trans %}Enregistrer{% endtrans %}</button>
+                </div>
+              {{ form_end(privacyForm) }}
+            </div>
+          {% endif %}
+
+          {% if tab == 'security' %}
+            <div class="vip-soft p-5">
+              <div class="font-black text-slate-900">🔒 {% trans %}Sécurité{% endtrans %}</div>
+              <div class="text-sm text-slate-600 mt-1">{% trans %}Change ton mot de passe en toute sécurité.{% endtrans %}</div>
+
+              {{ form_start(passwordForm) }}
+                <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div class="sm:col-span-2">
+                    <div class="text-xs font-extrabold text-slate-700 mb-1">{% trans %}Mot de passe actuel{% endtrans %}</div>
+                    {{ form_widget(passwordForm.currentPassword, {attr:{class:'w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm'}}) }}
+                    {{ form_errors(passwordForm.currentPassword) }}
+                  </div>
+                  <div>
+                    <div class="text-xs font-extrabold text-slate-700 mb-1">{% trans %}Nouveau mot de passe{% endtrans %}</div>
+                    {{ form_widget(passwordForm.newPassword.first, {attr:{class:'w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm'}}) }}
+                    {{ form_errors(passwordForm.newPassword.first) }}
+                  </div>
+                  <div>
+                    <div class="text-xs font-extrabold text-slate-700 mb-1">{% trans %}Confirmation{% endtrans %}</div>
+                    {{ form_widget(passwordForm.newPassword.second, {attr:{class:'w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm'}}) }}
+                    {{ form_errors(passwordForm.newPassword.second) }}
+                  </div>
+                </div>
+
+                <div class="mt-5 flex gap-2 flex-wrap">
+                  <button class="btn primary" type="submit">{% trans %}Mettre à jour{% endtrans %}</button>
+                </div>
+              {{ form_end(passwordForm) }}
+
+              <div class="mt-5 text-xs text-slate-500">
+                {% trans %}Conseil : utilise un mot de passe long + unique.{% endtrans %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if tab == 'notifications' %}
+            <div class="vip-soft p-5">
+              <div class="font-black text-slate-900">🔔 {% trans %}Notifications{% endtrans %}</div>
+              <div class="text-sm text-slate-600 mt-1">{% trans %}Choisis tes canaux et ce que tu veux recevoir.{% endtrans %}</div>
+
+              {{ form_start(notifForm) }}
+                <div class="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
+                  <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div class="font-extrabold text-slate-900 mb-2">{% trans %}Canaux{% endtrans %}</div>
+                    <div class="space-y-2 text-sm">
+                      <label class="flex items-center gap-2">{{ form_widget(notifForm.emailEnabled) }} {% trans %}Email{% endtrans %}</label>
+                      <label class="flex items-center gap-2">{{ form_widget(notifForm.smsEnabled) }} {% trans %}SMS{% endtrans %}</label>
+                      <label class="flex items-center gap-2">{{ form_widget(notifForm.whatsappEnabled) }} {% trans %}WhatsApp{% endtrans %}</label>
+                    </div>
+                  </div>
+
+                  <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div class="font-extrabold text-slate-900 mb-2">{% trans %}Événements{% endtrans %}</div>
+                    <div class="space-y-2 text-sm">
+                      <label class="flex items-center gap-2">{{ form_widget(notifForm.evNewApplication) }} {% trans %}Nouvelle candidature{% endtrans %}</label>
+                      <label class="flex items-center gap-2">{{ form_widget(notifForm.evNewMessage) }} {% trans %}Nouveau message{% endtrans %}</label>
+                      <label class="flex items-center gap-2">{{ form_widget(notifForm.evJobExpiring) }} {% trans %}Offre qui expire{% endtrans %}</label>
+                    </div>
+                  </div>
+
+                  <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                    <div class="font-extrabold text-slate-900 mb-2">{% trans %}Digest{% endtrans %}</div>
+                    <label class="flex items-center gap-2 text-sm">{{ form_widget(notifForm.digestEnabled) }} {% trans %}Activer le résumé{% endtrans %}</label>
+                    <div class="mt-3">
+                      <div class="text-xs font-extrabold text-slate-700 mb-1">{% trans %}Fréquence{% endtrans %}</div>
+                      {{ form_widget(notifForm.digestFrequency, {attr:{class:'w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm'}}) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-5">
+                  <button class="btn primary w-full sm:w-auto" type="submit">{% trans %}Enregistrer{% endtrans %}</button>
+                </div>
+              {{ form_end(notifForm) }}
+            </div>
+          {% endif %}
+
+          {% if tab == 'activity' %}
+            <div class="vip-soft p-5">
+              <div class="font-black text-slate-900">🧾 {% trans %}Sessions & activité{% endtrans %}</div>
+              <div class="text-sm text-slate-600 mt-1">{% trans %}Dernier login + événements récents.{% endtrans %}</div>
+
+              <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div class="text-xs font-extrabold text-slate-600">{% trans %}Dernier login{% endtrans %}</div>
+                  <div class="text-lg font-black text-slate-900">
+                    {{ app.user.lastLoginAt ? app.user.lastLoginAt|date('d/m/Y H:i') : '—' }}
+                  </div>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                  <div class="text-xs font-extrabold text-slate-600">{% trans %}Compte créé{% endtrans %}</div>
+                  <div class="text-lg font-black text-slate-900">
+                    {{ app.user.createdAt ? app.user.createdAt|date('d/m/Y') : '—' }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-5 overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+                <table class="min-w-[560px] w-full">
+                  <thead>
+                    <tr class="border-b border-slate-200">
+                      <th class="p-3 text-left text-xs font-black text-slate-600">{% trans %}Date{% endtrans %}</th>
+                      <th class="p-3 text-left text-xs font-black text-slate-600">{% trans %}Événement{% endtrans %}</th>
+                      <th class="p-3 text-left text-xs font-black text-slate-600">IP</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for l in logs %}
+                      <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+                        <td class="p-3 text-sm text-slate-700">{{ l.createdAt ? l.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                        <td class="p-3 text-sm font-extrabold text-slate-900">{{ l.event }}</td>
+                        <td class="p-3 text-sm text-slate-700">{{ l.ip ?? '—' }}</td>
+                      </tr>
+                    {% else %}
+                      <tr>
+                        <td colspan="3" class="p-5 text-center text-sm text-slate-500">{% trans %}Aucune activité.{% endtrans %}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if tab == 'danger' %}
+            <div class="vip-soft p-5">
+              <div class="font-black text-slate-900">⚠️ {% trans %}Zone dangereuse{% endtrans %}</div>
+              <div class="text-sm text-slate-600 mt-1">{% trans %}Actions sensibles. Lis bien avant de confirmer.{% endtrans %}</div>
+
+              <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-3">
+                <div class="rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+                  <div class="font-black text-slate-900">{% trans %}Désactiver mon compte{% endtrans %}</div>
+                  <div class="text-sm text-slate-700 mt-1">{% trans %}Tu seras déconnecté et tu pourras plus te reconnecter en temps voulu.{% endtrans %}</div>
+
+                  <form method="post" action="{{ path('settings_deactivate') }}" class="mt-3">
+                    <input type="hidden" name="_token" value="{{ csrf_token('settings_deactivate') }}">
+                    <button class="btn primary" type="submit">{% trans %}Désactiver{% endtrans %}</button>
+                  </form>
+                </div>
+
+                <div class="rounded-2xl border border-rose-200 bg-rose-50/60 p-4">
+                  <div class="font-black text-slate-900">{% trans %}Demander la suppression{% endtrans %}</div>
+                  <div class="text-sm text-slate-700 mt-1">
+                    {% trans %}Pourquoi voulez-vous nous quitter ?{% endtrans %}
+                    {% if hasDeletionRequest %}
+                      <span class="font-extrabold">{% trans %}Déjà demandé.{% endtrans %}</span>
+                    {% endif %}
+                  </div>
+
+                  <form method="post" action="{{ path('settings_delete_request') }}" class="mt-3 space-y-2">
+                    <input type="hidden" name="_token" value="{{ csrf_token('settings_delete_request') }}">
+
+                    <input
+                      name="reason"
+                      placeholder="{{ 'Raison (optionnel)'|trans }}"
+                      class="w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm"
+                    />
+
+                    <input
+                      type="password"
+                      name="password"
+                      placeholder="{{ 'Mot de passe (obligatoire)'|trans }}"
+                      class="w-full rounded-2xl border-slate-200 bg-white px-3 py-2 text-sm"
+                    />
+
+                    <button class="btn primary" type="submit" {% if hasDeletionRequest %}disabled{% endif %}>
+                      {% trans %}Confirmer la demande{% endtrans %}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+  {{ parent() }}
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    (() => {
+      function centerActiveSettingsTab() {
+        const scroller = document.getElementById('settingsTabsScroller');
+        const active = scroller?.querySelector('.tab.active');
+        if (!scroller || !active) return;
+
+        const target = active.offsetLeft - ((scroller.clientWidth - active.offsetWidth) / 2);
+        const max = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+        scroller.scrollTo({ left: Math.max(0, Math.min(max, target)), behavior: 'smooth' });
+      }
+
+      document.addEventListener('DOMContentLoaded', centerActiveSettingsTab);
+      document.addEventListener('turbo:load', centerActiveSettingsTab);
+      window.addEventListener('pageshow', centerActiveSettingsTab);
+    })();
+  </script>
+{% endblock %}

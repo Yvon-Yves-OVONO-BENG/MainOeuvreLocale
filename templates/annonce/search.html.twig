@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% set seo_description %}{% trans %}Découvrez les annonces de services, disponibilités et promotions publiées par les talents locaux.{% endtrans %}{% endset %}
+{% block title %}{% trans %}Annonces de talents près de chez vous | Main d’Œuvre Locale{% endtrans %}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/annonce/list.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/annonce/list-kjd.css') }}?v=20260805">
+{% endblock %}
+
+{% block body %}
+{% include 'job/_vip_ui_liste_jobs.html.twig' %}
+
+<link rel="stylesheet" href="{{ asset('css/annonce/search.css') }}">
+
+<main class="anlist-page">
+    <section class="vip-hero vip-jobs-slider-hero anlist-hero" aria-labelledby="annonce-results-title">
+        <div class="vip-jobs-bg-slider" id="annonceBgSlider" aria-hidden="true">
+            <div class="vip-jobs-bg-slide anlist-hero-slide--1 active"></div>
+            <div class="vip-jobs-bg-slide anlist-hero-slide--2"></div>
+            <div class="vip-jobs-bg-slide anlist-hero-slide--3"></div>
+            <div class="vip-jobs-bg-slide anlist-hero-slide--4"></div>
+            <div class="vip-jobs-bg-slide anlist-hero-slide--5"></div>
+            <div class="vip-jobs-bg-slide anlist-hero-slide--6"></div>
+            <div class="vip-jobs-bg-slide anlist-hero-slide--7"></div>
+            <div class="vip-jobs-bg-slide anlist-hero-slide--8"></div>
+        </div>
+        <div class="vip-jobs-slider-overlay"></div>
+
+        <div class="container vip-hero-inner vip-jobs-hero-inner">
+            <div class="text-center vip-jobs-hero-content">
+                <div class="vip-jobs-hero-badge"><i class="fa-solid fa-bullhorn"></i><span>{% trans %}Annonces locales qui évoluent chaque jour{% endtrans %}</span></div>
+                <h1 class="vip-title vip-jobs-hero-title" id="annonce-results-title"><span>{{ total }}</span> {% if total > 1 %}{% trans %}annonces disponibles{% endtrans %}{% else %}{% trans %}annonce disponible{% endtrans %}{% endif %}</h1>
+                <p class="vip-sub vip-jobs-hero-sub">{% trans %}Services, disponibilités et promotions proposés maintenant par les talents locaux.{% endtrans %}</p>
+            </div>
+
+            <form method="get" action="{{ path('annonce_search') }}" class="vip-search vip-jobs-hero-search" data-turbo="false" autocomplete="off">
+                <div class="row g-2">
+                    <div class="col-lg-5 col-md-12">
+                        <div class="vip-field" data-smart-search-container><i class="fa fa-search"></i><input class="vip-input" name="q" data-smart-keyword data-suggest-type="keyword" data-suggest-url="{{ path('api_search_suggestions') }}" data-numeric-error="{{ 'Saisissez un métier, un service ou une disponibilité, pas uniquement des chiffres.'|trans }}" value="{{ filters.q }}" placeholder="{% trans %}Mots-clés : service, promotion, disponibilité…{% endtrans %}" aria-label="{% trans %}Mots-clés{% endtrans %}"></div>
+                    </div>
+                    <div class="col-lg-4 col-md-12">
+                        <div class="vip-field" data-smart-search-container><i class="fa fa-map-marker"></i><input class="vip-input" name="city" data-smart-location data-suggest-type="location" data-suggest-url="{{ path('api_search_suggestions') }}" data-numeric-error="{{ 'Saisissez une ville, une région ou un pays, pas uniquement des chiffres.'|trans }}" value="{{ filters.city }}" placeholder="{% trans %}Ville, région…{% endtrans %}" aria-label="{% trans %}Ville{% endtrans %}"></div>
+                    </div>
+                    <div class="col-lg-3 col-md-12">
+                        <button class="vip-btn" type="submit"><i class="fa fa-search me-2"></i>{% trans %}Rechercher{% endtrans %}</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="anlist-results" aria-label="{% trans %}Résultats des annonces{% endtrans %}">
+        <div class="container">
+            {% set from = total > 0 ? ((page - 1) * limit) + 1 : 0 %}
+            {% set to = min(page * limit, total) %}
+            <div class="anlist-toolbar">
+                <div>
+                    <h2>{% if filters.q or filters.city %}{% trans %}Résultats de votre recherche{% endtrans %}{% else %}{% trans %}Toutes les annonces publiées{% endtrans %}{% endif %}</h2>
+                    <p>{% trans %}Affichage de{% endtrans %} {{ from }} {% trans %}à{% endtrans %} {{ to }} {% trans %}sur{% endtrans %} {{ total }} {% if total > 1 %}{% trans %}résultats, du plus récent au plus ancien.{% endtrans %}{% else %}{% trans %}résultat, du plus récent au plus ancien.{% endtrans %}{% endif %}</p>
+                </div>
+                <div class="anlist-tools">
+                    {% if filters.q %}<span class="anlist-chip"><i class="fa-solid fa-magnifying-glass"></i>{{ filters.q }}</span>{% endif %}
+                    {% if filters.city %}<span class="anlist-chip"><i class="fa-solid fa-location-dot"></i>{{ filters.city }}</span>{% endif %}
+                    {% if filters.q or filters.city %}<a class="anlist-reset" href="{{ path('annonce_search') }}" data-turbo="false"><i class="fa-solid fa-rotate-left"></i>{% trans %}Tout afficher{% endtrans %}</a>{% endif %}
+                </div>
+            </div>
+
+            {% if annonces is empty %}
+                <div class="anlist-empty">
+                    <div class="anlist-empty-icon"><i class="fa-regular fa-folder-open"></i></div>
+                    <strong>{% trans %}Aucune annonce ne correspond à cette recherche.{% endtrans %}</strong>
+                    <p>{% trans %}Essayez un mot plus général ou recherchez dans une autre ville.{% endtrans %}</p>
+                    <a href="{{ path('annonce_search') }}" data-turbo="false"><i class="fa-solid fa-rotate-left"></i>{% trans %}Voir toutes les annonces{% endtrans %}</a>
+                </div>
+            {% else %}
+                {% set ratings = ratingStats|default({}) %}
+                <div class="anlist-grid">
+                    {% for annonce in annonces %}
+                        {% set owner = annonce.user %}
+                        {% set personal = owner ? owner.personalProfile : null %}
+                        {% set stats = owner ? (ratings[owner.id] ?? {'avg': 0, 'voters': 0}) : {'avg': 0, 'voters': 0} %}
+                        <article class="anlist-card">
+                            <div class="anlist-cover">
+                                <div class="anlist-media">
+                                    {% if annonce.profession and annonce.profession.photo %}
+                                        <img loading="lazy" decoding="async" src="{{ asset('uploads/professions/' ~ annonce.profession.photo) }}" alt="{{ annonce.profession.profession }}">
+                                    {% else %}
+                                        <div class="anlist-cover-empty"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                                    {% endif %}
+                                </div>
+                                <span class="anlist-badge"><i class="fa-solid fa-bullhorn"></i>{% trans %}Annonce{% endtrans %}</span>
+                                <div class="anlist-avatar">
+                                    {% if personal and personal.photo %}<img loading="lazy" decoding="async" src="{{ asset('uploads/profiles/' ~ personal.photo) }}" alt="{{ personal.fullName }}">{% else %}<i class="fa-solid fa-user"></i>{% endif %}
+                                </div>
+                            </div>
+                            <div class="anlist-body">
+                                <a class="anlist-title" href="{{ path('annonce_show', {slug: annonce.slug}) }}" title="{{ annonce.titre }}" data-turbo="false">{{ annonce.titre }}</a>
+                                <div class="anlist-meta"><i class="fa-solid fa-location-dot"></i><span>{{ annonce.ville }}</span></div>
+                                <div class="anlist-offer-info">
+                                    <span class="anlist-price">{% if annonce.salaireJournalier %}{{ annonce.salaireJournalier|number_format(0, ',', ' ') }} {% trans %}FCFA/jour{% endtrans %}{% else %}{% trans %}Tarif à convenir{% endtrans %}{% endif %}</span>
+                                    <span class="anlist-rating" title="{{ stats.voters }} {% trans %}avis{% endtrans %}"><i class="fa-solid fa-star"></i>{{ stats.avg|number_format(1, '.', '') }}</span>
+                                </div>
+                                <div class="anlist-tags"><span class="anlist-tag">{{ annonce.categorie.nom }}</span><span class="anlist-tag">{{ annonce.profession.profession }}</span></div>
+                                <p class="anlist-desc">{{ annonce.description|striptags }}</p>
+                            </div>
+                            <div class="anlist-footer">
+                                <span class="anlist-date"><i class="fa-regular fa-clock me-1"></i>{{ annonce.dateCreation|ago }}</span>
+                                <a class="anlist-view" href="{{ path('annonce_show', {slug: annonce.slug}) }}" data-mol-view-announcement data-turbo="false">{% trans %}Voir l’annonce{% endtrans %}</a>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                {% if pages > 1 %}
+                    <nav class="anlist-pager" aria-label="{% trans %}Pagination des annonces{% endtrans %}">
+                        <a class="anlist-page-btn wide {{ page <= 1 ? 'disabled' : '' }}" href="{{ path('annonce_search', app.request.query.all|merge({'page': max(1, page - 1)})) }}">{% trans %}Précédent{% endtrans %}</a>
+                        {% for p in 1..pages %}
+                            {% if p == 1 or p == pages or (p >= page - 1 and p <= page + 1) %}
+                                <a class="anlist-page-btn {{ p == page ? 'active' : '' }}" href="{{ path('annonce_search', app.request.query.all|merge({'page': p})) }}">{{ p }}</a>
+                            {% elseif p == page - 2 or p == page + 2 %}
+                                <span class="anlist-page-btn">…</span>
+                            {% endif %}
+                        {% endfor %}
+                        <a class="anlist-page-btn wide {{ page >= pages ? 'disabled' : '' }}" href="{{ path('annonce_search', app.request.query.all|merge({'page': min(pages, page + 1)})) }}">{% trans %}Suivant{% endtrans %}</a>
+                    </nav>
+                {% endif %}
+            {% endif %}
+        </div>
+    </section>
+</main>
+
+{% include 'includes/_view_announcement_spinner.html.twig' %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="{{ asset('js/annonce/search.js') }}" defer></script>
+{% endblock %}

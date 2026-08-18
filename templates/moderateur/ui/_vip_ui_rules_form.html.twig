@@ -1,0 +1,150 @@
+
+<style>
+  :root{
+    --bg0:#F7F9FF; --bg1:#EEF2FF;
+    --card:rgba(255,255,255,.82); --card2:rgba(255,255,255,.96);
+    --line:rgba(15,23,42,.10);
+    --text:rgba(15,23,42,.92);
+    --muted:rgba(15,23,42,.62);
+    --shadow:0 18px 55px rgba(15,23,42,.12);
+    --r:24px;
+  }
+
+  /* ✅ Full screen, même si base.html.twig a un container */
+  .rules-page{
+    min-height: calc(100vh - 80px);
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    overflow-x: clip;
+    background:
+      radial-gradient(900px circle at 12% 10%, rgba(56,189,248,.18), transparent 55%),
+      radial-gradient(900px circle at 90% 15%, rgba(34,197,94,.14), transparent 55%),
+      radial-gradient(1200px circle at 40% 110%, rgba(168,85,247,.12), transparent 52%),
+      linear-gradient(180deg, var(--bg0), var(--bg1));
+    padding: 12px 14px 56px;
+    color: var(--text);
+  }
+
+  /* ✅ wrap full width pro */
+  .rules-wrap{
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+  }
+
+  /* ✅ Card pleine largeur */
+  .box{
+    width: 100%;
+    max-width: none;                /* ✅ plus de limite 980 */
+    margin: 0 auto;
+    padding: 16px;
+    border-radius: var(--r);
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+  }
+
+  /* Header */
+  .top{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    padding: 12px 12px 14px;
+    border-bottom: 1px solid rgba(15,23,42,.08);
+    background: linear-gradient(180deg, rgba(255,255,255,.90), rgba(255,255,255,.72));
+    border-radius: calc(var(--r) - 6px);
+  }
+
+  .title{
+    font-weight: 950;
+    font-size: 18px;
+    letter-spacing: -.02em;
+    margin: 0;
+  }
+  .hint{ margin-top:4px; font-size:12px; color: var(--muted); }
+
+  /* Form grid */
+  .row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  @media(max-width: 900px){
+    .row{ grid-template-columns: 1fr; }
+  }
+
+  .field{
+    padding: 12px;
+    border-radius: 18px;
+    border: 1px solid rgba(15,23,42,.10);
+    background: rgba(255,255,255,.86);
+  }
+  .label{
+    font-weight: 950;
+    margin-bottom: 6px;
+    font-size: 12px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: rgba(15,23,42,.72);
+  }
+
+  .input,.select,.ta{
+    width:100%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(15,23,42,.14);
+    background: rgba(255,255,255,.95);
+    font-weight: 900;
+    color: rgba(15,23,42,.92);
+    outline: none;
+  }
+  .ta{ min-height: 160px; font-weight: 700; resize: vertical; }
+
+  .input:focus,.select:focus,.ta:focus{
+    border-color: rgba(56,189,248,.45);
+    box-shadow: 0 0 0 4px rgba(56,189,248,.18);
+  }
+
+  .btn{
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+    padding:10px 12px;
+    border-radius:14px;
+    border:1px solid rgba(15,23,42,.12);
+    background:#fff;
+    font-weight:900;
+    text-decoration:none;
+    color:#0f172a;
+    cursor:pointer;
+    transition: transform .12s ease, background .12s ease, border-color .12s ease;
+    white-space: nowrap;
+  }
+  .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.98); border-color: rgba(15,23,42,.18); }
+  .btn.primary{
+    border-color: rgba(56,189,248,.45);
+    background: linear-gradient(180deg, rgba(56,189,248,.18), rgba(255,255,255,.92));
+  }
+
+  .actions{
+    margin-top: 12px;
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+
+  @media(max-width: 640px){
+    .rules-page{ padding: 10px 10px 46px; }
+    .box{ padding: 12px; }
+  }
+</style>

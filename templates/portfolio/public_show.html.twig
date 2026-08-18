@@ -1,0 +1,804 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Travaux du talent{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "portfolio/_vip_ui_public_show.html.twig" %}
+
+<section class="sptb mol-page">
+  <div class="container">
+    <div class="mol-shell">
+
+      {% set avatar = personal and personal.photo ? asset('uploads/profiles/' ~ personal.photo) : asset('uploads/profiles/avatar.png') %}
+
+      <div class="mol-hero">
+        <div class="mol-hero-grid">
+          <div class="mol-hero-left">
+            <div class="mol-kicker">
+              <i class="fa fa-star"></i>
+              {% trans %}Portfolio visuel premium{% endtrans %}
+            </div>
+
+            <h1 class="mol-title">
+              {% trans %}Les réalisations de{% endtrans %}
+              {{ personal and personal.fullName ? personal.fullName : 'ce talent'|trans }}
+            </h1>
+
+            <div class="mol-sub">
+              {% trans %}Une galerie haut de gamme, immersive et élégante, pensée pour mettre en valeur les travaux du talent avec une expérience fluide, tactile et spectaculaire sur desktop comme sur mobile.{% endtrans %}
+            </div>
+
+            <div class="mol-hero-tags">
+              <span class="mol-chip">
+                <i class="fa fa-photo"></i>
+                {{ media|length }} {% trans %}visuel(s){% endtrans %}
+              </span>
+
+              {% if personal and personal.city %}
+                <span class="mol-chip">
+                  <i class="fa fa-map-marker"></i>
+                  {{ personal.city }}
+                </span>
+              {% endif %}
+
+              {% if pro.profession and pro.profession.profession %}
+                <span class="mol-chip">
+                  <i class="fa fa-briefcase"></i>
+                  {{ pro.profession.profession }}
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="mol-hero-actions">
+              <a href="javascript:history.back()" class="mol-btn mol-btn-light">
+                <i class="fa fa-arrow-left"></i>
+                {% trans %}Retour{% endtrans %}
+              </a>
+
+              {% if media|length > 0 %}
+                <button type="button" class="mol-btn mol-btn-primary" id="molOpenSlideshow">
+                  <i class="fa fa-play-circle"></i>
+                  {% trans %}Lancer le diaporama{% endtrans %}
+                </button>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mol-hero-right">
+            <div class="mol-profile-card mol-glass">
+              <div class="mol-profile-top">
+                <img src="{{ avatar }}" class="mol-avatar" alt="{% trans %}Talent{% endtrans %}">
+
+                <div class="min-w-0">
+                  <div class="mol-profile-name">
+                    {{ personal and personal.fullName ? personal.fullName : 'Talent'|trans }}
+                  </div>
+
+                  <div class="mol-profile-meta">
+                    {% if personal and personal.city %}{{ personal.city }}{% endif %}
+                    {% if pro.profession and pro.profession.profession %}
+                      {% if personal and personal.city %} • {% endif %}
+                      {{ pro.profession.profession }}
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="mol-mini-stats">
+                <div class="mol-mini-stat">
+                  <div class="mol-mini-icon"><i class="fa fa-image"></i></div>
+                  <div class="mol-mini-label">{% trans %}Photos{% endtrans %}</div>
+                  <div class="mol-mini-value" id="molAnimatedCount">{{ media|length }}</div>
+                </div>
+
+                <div class="mol-mini-stat">
+                  <div class="mol-mini-icon"><i class="fa fa-expand"></i></div>
+                  <div class="mol-mini-label">{% trans %}Mode{% endtrans %}</div>
+                  <div class="mol-mini-value">{% trans %}HD{% endtrans %}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if form is defined and form.files is defined %}
+        <div class="mol-card">
+          <div class="mol-upload-card">
+            <div class="mol-card-head">
+              <div>
+                <h4 class="mol-card-title">
+                  <i class="fa fa-cloud-upload text-primary me-2"></i>
+                  {% trans %}Ajouter des images{% endtrans %}
+                </h4>
+                <div class="mol-soft mt-1">
+                  {% trans %}Glissez-déposez vos fichiers ou cliquez dans la zone pour sélectionner plusieurs images en une seule fois.{% endtrans %}
+                </div>
+              </div>
+
+              <span class="mol-counter-pill">
+                <i class="fa fa-upload"></i>
+                {% trans %}Drag & Drop{% endtrans %}
+              </span>
+            </div>
+
+            {{ form_start(form, {'attr': {'enctype':'multipart/form-data'}}) }}
+              <div class="mol-dropzone" id="molDropzone">
+                <div class="mol-drop-inner">
+                  <div class="mol-drop-icon">
+                    <i class="fa fa-image"></i>
+                  </div>
+
+                  <div class="mol-drop-copy">
+                    <div class="mol-drop-title">{% trans %}Déposez vos images ici{% endtrans %}</div>
+                    <div class="mol-drop-sub">
+                      {% trans %}Sélection multiple, expérience premium, prévisualisation des fichiers choisis et interface pensée pour une sensation moderne et fluide.{% endtrans %}
+                    </div>
+                  </div>
+
+                  <div>
+                    <span class="mol-btn mol-btn-primary">
+                      <i class="fa fa-folder-open"></i>
+                      {% trans %}Choisir les images{% endtrans %}
+                    </span>
+                  </div>
+                </div>
+
+                {{ form_widget(form.files, {
+                  'attr': {
+                    'id': 'molUploadInput',
+                    'class': 'mol-hidden-input',
+                    'multiple': 'multiple',
+                    'accept': 'image/*'
+                  }
+                }) }}
+
+                <div class="mol-selected-files" id="molSelectedFiles"></div>
+              </div>
+
+              <div class="d-flex justify-content-end mt-3">
+                <button type="submit" class="mol-btn mol-btn-primary">
+                  <i class="fa fa-check"></i>
+                  {% trans %}Envoyer{% endtrans %}
+                </button>
+              </div>
+
+              {{ form_errors(form.files) }}
+            {{ form_end(form) }}
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="mol-card">
+        <div class="mol-gallery-card">
+          <div class="mol-gallery-top">
+            <div>
+              <h4 class="mol-card-title">
+                <i class="fa fa-th-large text-primary me-2"></i>
+                {% trans %}Galerie premium{% endtrans %}
+              </h4>
+              <div class="mol-soft mt-1">
+                {% trans %}Cliquez sur une image pour ouvrir une preview immersive plein écran, zoomer, lancer la lecture automatique ou naviguer par glissement sur mobile.{% endtrans %}
+              </div>
+            </div>
+
+            <div class="mol-gallery-right">
+              <span class="mol-counter-pill">
+                <i class="fa fa-photo"></i>
+                <span class="mol-counter-value" id="molHeaderCount">{{ media|length }}</span>
+                {% trans %}élément(s){% endtrans %}
+              </span>
+            </div>
+          </div>
+
+          {% if media|length == 0 %}
+            <div class="mol-empty">
+              <div class="mol-empty-icon">
+                <i class="fa fa-image"></i>
+              </div>
+              <div class="mol-empty-title">{% trans %}Aucune image pour le moment{% endtrans %}</div>
+              <div class="mol-empty-sub">
+                {% trans %}Dès que des réalisations seront ajoutées, elles apparaîtront ici dans une galerie immersive et haut de gamme.{% endtrans %}
+              </div>
+            </div>
+          {% else %}
+            <div class="mol-masonry" id="molGallery">
+              {% for m in media %}
+                {% set src = asset('uploads/portfolio/' ~ m.file) %}
+                <div class="mol-masonry-item">
+                  <article
+                    class="mol-shot js-mol-shot"
+                    data-index="{{ loop.index0 }}"
+                    data-src="{{ src }}"
+                    data-name="{{ m.file }}"
+                    data-date="{{ m.createdAt ? m.createdAt|date('d/m/Y') : '—' }}"
+                  >
+                    <div class="mol-shot-media">
+                      <img
+                        class="js-lazy"
+                        src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='520'%3E%3Crect width='100%25' height='100%25' fill='%23eef4fb'/%3E%3C/svg%3E"
+                        data-src="{{ src }}"
+                        loading="lazy"
+                        decoding="async"
+                        alt="{% trans %}Réalisation{% endtrans %}"
+                      >
+                      <div class="mol-shot-overlay"></div>
+
+                      <div class="mol-shot-top">
+                        <span class="mol-badge mol-badge-light">
+                          <i class="fa fa-calendar"></i>
+                          {{ m.createdAt ? m.createdAt|date('d/m/Y') : '—' }}
+                        </span>
+
+                        <span class="mol-badge mol-badge-green">
+                          <i class="fa fa-check"></i>
+                          {% trans %}Publié{% endtrans %}
+                        </span>
+                      </div>
+
+                      <div class="mol-shot-bottom">
+                        <span class="mol-shot-open">
+                          <i class="fa fa-search-plus"></i>
+                          {% trans %}Preview plein écran{% endtrans %}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="mol-shot-info">
+                      <div class="mol-shot-title">{% trans %}Travail visuel{% endtrans %}</div>
+                      <div class="mol-shot-meta">{{ m.file }}</div>
+                    </div>
+                  </article>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="mol-lightbox" id="molLightbox" aria-hidden="true">
+  <div class="mol-lightbox-shell">
+
+    <div class="mol-lightbox-toolbar">
+      <div class="mol-lightbox-left">
+        <div class="mol-lb-counter" id="molLbCounter">
+          <i class="fa fa-image"></i>
+          <span id="molLbCounterText">1 / 1</span>
+        </div>
+      </div>
+
+      <div class="mol-lightbox-right">
+        <button type="button" class="mol-lb-btn" id="molPlayBtn" aria-label="{% trans %}Lecture auto{% endtrans %}">
+          <i class="fa fa-play"></i>
+        </button>
+
+        <button type="button" class="mol-lb-btn" id="molZoomOutBtn" aria-label="{% trans %}Zoom moins{% endtrans %}">
+          <i class="fa fa-search-minus"></i>
+        </button>
+
+        <button type="button" class="mol-lb-btn" id="molZoomResetBtn" aria-label="{% trans %}Réinitialiser{% endtrans %}">
+          <i class="fa fa-expand"></i>
+        </button>
+
+        <button type="button" class="mol-lb-btn" id="molZoomInBtn" aria-label="{% trans %}Zoom plus{% endtrans %}">
+          <i class="fa fa-search-plus"></i>
+        </button>
+
+        <button type="button" class="mol-lb-btn" id="molFullscreenBtn" aria-label="{% trans %}Plein écran{% endtrans %}">
+          <i class="fa fa-arrows-alt"></i>
+        </button>
+
+        <button type="button" class="mol-lb-btn" id="molCloseBtn" aria-label="{% trans %}Fermer{% endtrans %}">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="mol-progress">
+      <div class="mol-progress-bar" id="molProgressBar"></div>
+    </div>
+
+    <div class="mol-lightbox-stage" id="molLightboxStage">
+      <button type="button" class="mol-nav prev" id="molPrevBtn" aria-label="{% trans %}Précédent{% endtrans %}">
+        <i class="fa fa-chevron-left"></i>
+      </button>
+
+      <div class="mol-lightbox-image-wrap">
+        <img alt="" id="molLightboxImg" class="mol-lightbox-img" decoding="async">
+      </div>
+
+      <button type="button" class="mol-nav next" id="molNextBtn" aria-label="{% trans %}Suivant{% endtrans %}">
+        <i class="fa fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="mol-lightbox-caption">
+      <div class="mol-lightbox-copy">
+        <div class="mol-lightbox-title" id="molCaptionTitle"></div>
+        <div class="mol-lightbox-sub" id="molCaptionSub"></div>
+      </div>
+    </div>
+
+    <div class="mol-filmstrip" id="molFilmstrip"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const shots = Array.from(document.querySelectorAll('.js-mol-shot'));
+  const lazyImages = Array.from(document.querySelectorAll('.js-lazy'));
+  const animatedCount = document.getElementById('molAnimatedCount');
+  const headerCount = document.getElementById('molHeaderCount');
+
+  function animateNumber(el, target){
+    if(!el) return;
+    const end = parseInt(target, 10) || 0;
+    const duration = 800;
+    const start = performance.now();
+
+    function tick(now){
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(end * eased);
+      if(progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  animateNumber(animatedCount, {{ media|length }});
+  animateNumber(headerCount, {{ media|length }});
+
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    shots.forEach(card => revealObserver.observe(card));
+  } else {
+    shots.forEach(card => card.classList.add('is-visible'));
+  }
+
+  function loadImage(img){
+    const src = img.getAttribute('data-src');
+    if(src && img.src !== src){
+      img.src = src;
+    }
+  }
+
+  if ('IntersectionObserver' in window) {
+    const lazyObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          loadImage(entry.target);
+          lazyObserver.unobserve(entry.target);
+        }
+      });
+    }, { rootMargin: '220px 0px' });
+
+    lazyImages.forEach(img => lazyObserver.observe(img));
+  } else {
+    lazyImages.forEach(loadImage);
+  }
+
+  const dropzone = document.getElementById('molDropzone');
+  const uploadInput = document.getElementById('molUploadInput');
+  const selectedFiles = document.getElementById('molSelectedFiles');
+
+  function renderSelectedFiles(files){
+    if(!selectedFiles) return;
+
+    selectedFiles.innerHTML = '';
+    const list = Array.from(files || []);
+    if(!list.length){
+      selectedFiles.classList.remove('is-visible');
+      return;
+    }
+
+    selectedFiles.classList.add('is-visible');
+
+    list.forEach(file => {
+      const item = document.createElement('div');
+      item.className = 'mol-file-pill';
+      item.innerHTML = '<i class="fa fa-file-image-o text-primary"></i><span>' + file.name + '</span>';
+      selectedFiles.appendChild(item);
+    });
+  }
+
+  if(dropzone && uploadInput){
+    ['dragenter','dragover'].forEach(evt => {
+      dropzone.addEventListener(evt, function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('is-dragover');
+      });
+    });
+
+    ['dragleave','dragend','drop'].forEach(evt => {
+      dropzone.addEventListener(evt, function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        if(evt !== 'drop'){
+          dropzone.classList.remove('is-dragover');
+        }
+      });
+    });
+
+    dropzone.addEventListener('drop', function(e){
+      dropzone.classList.remove('is-dragover');
+      const files = e.dataTransfer?.files;
+      if(!files || !files.length) return;
+      uploadInput.files = files;
+      renderSelectedFiles(files);
+    });
+
+    uploadInput.addEventListener('change', function(){
+      renderSelectedFiles(this.files);
+    });
+  }
+
+  if(!shots.length) return;
+
+  const items = shots.map((node, index) => ({
+    index,
+    src: node.dataset.src || '',
+    name: node.dataset.name || '',
+    date: node.dataset.date || '—'
+  }));
+
+  const openSlideshowBtn = document.getElementById('molOpenSlideshow');
+  const lightbox = document.getElementById('molLightbox');
+  const stage = document.getElementById('molLightboxStage');
+  const lightboxImg = document.getElementById('molLightboxImg');
+  const counter = document.getElementById('molLbCounter');
+  const counterText = document.getElementById('molLbCounterText');
+  const captionTitle = document.getElementById('molCaptionTitle');
+  const captionSub = document.getElementById('molCaptionSub');
+  const filmstrip = document.getElementById('molFilmstrip');
+  const progressBar = document.getElementById('molProgressBar');
+
+  const prevBtn = document.getElementById('molPrevBtn');
+  const nextBtn = document.getElementById('molNextBtn');
+  const closeBtn = document.getElementById('molCloseBtn');
+  const playBtn = document.getElementById('molPlayBtn');
+  const zoomInBtn = document.getElementById('molZoomInBtn');
+  const zoomOutBtn = document.getElementById('molZoomOutBtn');
+  const zoomResetBtn = document.getElementById('molZoomResetBtn');
+  const fullscreenBtn = document.getElementById('molFullscreenBtn');
+
+  if (!lightbox || !stage || !lightboxImg || !prevBtn || !nextBtn || !closeBtn || !playBtn || !zoomInBtn || !zoomOutBtn || !zoomResetBtn || !fullscreenBtn || !filmstrip || !progressBar || !counter || !counterText || !captionTitle || !captionSub) {
+    return;
+  }
+
+  let current = 0;
+  let scale = 1;
+  let isPlaying = false;
+  let autoplayInterval = null;
+  let progressInterval = null;
+  let progress = 0;
+
+  let touchStartX = 0;
+  let touchMoveX = 0;
+
+  function bumpCounter(){
+    counter.classList.remove('is-bump');
+    void counter.offsetWidth;
+    counter.classList.add('is-bump');
+  }
+
+  function updateZoom(){
+    lightboxImg.style.transform = 'scale(' + scale + ')';
+    lightboxImg.classList.toggle('zoomed', scale > 1.01);
+  }
+
+  function resetZoom(){
+    scale = 1;
+    updateZoom();
+  }
+
+  function preloadAround(index){
+    const prev = (index - 1 + items.length) % items.length;
+    const next = (index + 1) % items.length;
+    [prev, next].forEach(i => {
+      const im = new Image();
+      im.src = items[i].src;
+    });
+  }
+
+  function buildFilmstrip(){
+    filmstrip.innerHTML = '';
+    items.forEach((item, index) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'mol-thumb' + (index === current ? ' active' : '');
+      btn.innerHTML = '<img src="' + item.src + '" alt="">';
+      btn.addEventListener('click', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        openAt(index, false);
+      });
+      filmstrip.appendChild(btn);
+    });
+  }
+
+  function updateFilmstrip(){
+    filmstrip.querySelectorAll('.mol-thumb').forEach((thumb, index) => {
+      thumb.classList.toggle('active', index === current);
+    });
+
+    const active = filmstrip.querySelector('.mol-thumb.active');
+    if(active){
+      active.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+    }
+  }
+
+  function stopProgress(){
+    progress = 0;
+    progressBar.style.width = '0%';
+    if(progressInterval){
+      clearInterval(progressInterval);
+      progressInterval = null;
+    }
+  }
+
+  function startProgress(){
+    stopProgress();
+    progress = 0;
+    progressBar.style.width = '0%';
+    progressInterval = setInterval(() => {
+      progress += 100 / (3200 / 80);
+      if(progress > 100) progress = 100;
+      progressBar.style.width = progress + '%';
+    }, 80);
+  }
+
+  function stopAutoplay(){
+    isPlaying = false;
+    playBtn.innerHTML = '<i class="fa fa-play"></i>';
+    if(autoplayInterval){
+      clearInterval(autoplayInterval);
+      autoplayInterval = null;
+    }
+    stopProgress();
+  }
+
+  function startAutoplay(){
+    stopAutoplay();
+    isPlaying = true;
+    playBtn.innerHTML = '<i class="fa fa-pause"></i>';
+    startProgress();
+    autoplayInterval = setInterval(() => {
+      next();
+      startProgress();
+    }, 3200);
+  }
+
+  function toggleAutoplay(){
+    if(isPlaying) stopAutoplay();
+    else startAutoplay();
+  }
+
+  function render(){
+    const item = items[current];
+    if(!item) return;
+
+    lightboxImg.src = item.src;
+    lightboxImg.alt = item.name || 'Image';
+    counterText.textContent = (current + 1) + ' / ' + items.length;
+    captionTitle.textContent = item.name || 'Image';
+    captionSub.textContent = 'Date : ' + item.date;
+
+    bumpCounter();
+    updateFilmstrip();
+    resetZoom();
+    preloadAround(current);
+  }
+
+  function openAt(index, autoPlay = false){
+    const item = items[index];
+    if(!item) return;
+
+    current = index;
+    lightbox.classList.add('is-open');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('mol-no-scroll');
+    render();
+
+    if(autoPlay) startAutoplay();
+    else stopAutoplay();
+  }
+
+  function closeLightbox(){
+    lightbox.classList.remove('is-open');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('mol-no-scroll');
+    stopAutoplay();
+    stopProgress();
+    resetZoom();
+  }
+
+  function next(){
+    current = (current + 1) % items.length;
+    render();
+  }
+
+  function prev(){
+    current = (current - 1 + items.length) % items.length;
+    render();
+  }
+
+  function zoomIn(){
+    scale = Math.min(scale + 0.2, 4);
+    updateZoom();
+  }
+
+  function zoomOut(){
+    scale = Math.max(scale - 0.2, 1);
+    updateZoom();
+  }
+
+  async function toggleFullscreen(){
+    try{
+      if(!document.fullscreenElement){
+        await stage.requestFullscreen();
+      }else{
+        await document.exitFullscreen();
+      }
+    }catch(e){}
+  }
+
+  buildFilmstrip();
+
+  shots.forEach(card => {
+    card.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openAt(Number(this.dataset.index || 0), false);
+    });
+  });
+
+  if(openSlideshowBtn){
+    openSlideshowBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openAt(0, true);
+    });
+  }
+
+  prevBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    prev();
+    if(isPlaying) startProgress();
+  });
+
+  nextBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    next();
+    if(isPlaying) startProgress();
+  });
+
+  closeBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    closeLightbox();
+  });
+
+  playBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    toggleAutoplay();
+  });
+
+  zoomInBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    zoomIn();
+  });
+
+  zoomOutBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    zoomOut();
+  });
+
+  zoomResetBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    resetZoom();
+  });
+
+  fullscreenBtn.addEventListener('click', function(e){
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFullscreen();
+  });
+
+  lightbox.addEventListener('click', function(e){
+    if(e.target === lightbox){
+      closeLightbox();
+    }
+  });
+
+  stage.addEventListener('dblclick', function(){
+    if(scale > 1.01) resetZoom();
+    else{
+      scale = 2;
+      updateZoom();
+    }
+  });
+
+  stage.addEventListener('wheel', function(e){
+    e.preventDefault();
+    if(e.deltaY < 0) zoomIn();
+    else zoomOut();
+  }, { passive:false });
+
+  stage.addEventListener('touchstart', function(e){
+    if(!e.touches.length) return;
+    touchStartX = e.touches[0].clientX;
+    touchMoveX = touchStartX;
+  }, { passive:true });
+
+  stage.addEventListener('touchmove', function(e){
+    if(!e.touches.length) return;
+    touchMoveX = e.touches[0].clientX;
+  }, { passive:true });
+
+  stage.addEventListener('touchend', function(){
+    const diff = touchMoveX - touchStartX;
+    if(Math.abs(diff) > 50){
+      if(diff < 0) next();
+      else prev();
+      if(isPlaying) startProgress();
+    }
+    touchStartX = 0;
+    touchMoveX = 0;
+  });
+
+  window.addEventListener('pageshow', function(){
+    closeLightbox();
+  });
+
+  window.addEventListener('beforeunload', function(){
+    document.body.classList.remove('mol-no-scroll');
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden){
+      stopAutoplay();
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(!lightbox.classList.contains('is-open')) return;
+
+    if(e.key === 'Escape') closeLightbox();
+    if(e.key === 'ArrowRight'){
+      next();
+      if(isPlaying) startProgress();
+    }
+    if(e.key === 'ArrowLeft'){
+      prev();
+      if(isPlaying) startProgress();
+    }
+    if(e.key === ' '){
+      e.preventDefault();
+      toggleAutoplay();
+    }
+    if(e.key === '+') zoomIn();
+    if(e.key === '-') zoomOut();
+    if(e.key.toLowerCase() === 'f') toggleFullscreen();
+  });
+});
+</script>
+{% endblock %}

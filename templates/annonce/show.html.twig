@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ annonce.titre }}{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="{{ asset('css/annonce/show.css') }}">
+
+{% set owner = annonce.user %}
+{% set personal = owner ? owner.personalProfile : null %}
+{% set professional = owner ? owner.professionalProfile : null %}
+{% set authorName = personal and personal.fullName ? personal.fullName : ('Prestataire'|trans) %}
+{% set authorProfession = professional and professional.profession ? professional.profession.profession : (annonce.profession ? annonce.profession.profession : ('Prestataire'|trans)) %}
+{% set authorInitial = authorName|slice(0, 1)|upper %}
+{% set stats = ratingStats|default({'avg': 0, 'voters': 0}) %}
+<main class="ans-page mt-4">
+    {% if not annonce.afficherMaintenant or not annonce.publier %}
+        <div class="ans-private"><i class="fa-solid fa-eye-slash me-2"></i>{% trans %}Aperçu privé : cette annonce n’est pas encore visible publiquement.{% endtrans %}</div>
+    {% endif %}
+
+    <article class="ans-shell">
+        <header class="ans-cover">
+            <div class="ans-cover-in">
+                <div class="ans-cover-author" aria-label="{{ 'Prestataire de cette annonce'|trans }}">
+                    <div class="ans-cover-avatar">
+                        {% if personal and personal.photo %}
+                            <img src="{{ asset('uploads/profiles/' ~ personal.photo) }}" alt="{{ authorName }}" loading="eager" decoding="async">
+                        {% else %}
+                            <span aria-hidden="true">{{ authorInitial ?: 'M' }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="ans-cover-author-copy">
+                        <strong>{{ authorName }}</strong>
+                        <span>
+                            {{ authorProfession }}
+                            {% if professional and professional.isVerified %}
+                                <b class="ans-cover-verified"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> {% trans %}Vérifié{% endtrans %}</b>
+                            {% endif %}
+                        </span>
+                        <small><i class="fa-solid fa-star" aria-hidden="true"></i> {{ stats.avg|number_format(1, '.', '') }} · {{ stats.voters }} {% trans %}avis{% endtrans %}</small>
+                    </div>
+                </div>
+                <div class="ans-badges">
+                    <span class="ans-badge main"><i class="fa-solid fa-bullhorn"></i> {% trans %}Annonce{% endtrans %}</span>
+                    <span class="ans-badge">{{ annonce.categorie.nom }}</span>
+                    <span class="ans-badge">{{ annonce.profession.profession }}</span>
+                </div>
+                <h1>{{ annonce.titre }}</h1>
+                <div class="ans-meta">
+                    <span><i class="fa-solid fa-location-dot me-1"></i>{{ annonce.ville }}</span>
+                    <span class="ans-price"><i class="fa-solid fa-money-bill-wave me-1"></i>{% if annonce.salaireJournalier %}{{ annonce.salaireJournalier|number_format(0, ',', ' ') }} {% trans %}FCFA/jour{% endtrans %}{% else %}{% trans %}Tarif à convenir{% endtrans %}{% endif %}</span>
+                    <span class="ans-rating" title="{{ stats.voters }} {% trans %}avis{% endtrans %}"><i class="fa-solid fa-star"></i>{{ stats.avg|number_format(1, '.', '') }}</span>
+                    <span><i class="fa-regular fa-clock me-1"></i>{{ annonce.dateCreation|date('d/m/Y à H:i') }}</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="ans-body">
+            <section class="ans-content">
+                <h2>{% trans %}Ce que je propose aujourd’hui{% endtrans %}</h2>
+                <div class="ans-text">{{ annonce.description }}</div>
+            </section>
+
+            <aside class="ans-side">
+                <div class="ans-card">
+                    <div class="ans-author">
+                        <div class="ans-avatar">
+                            {% if personal and personal.photo %}
+                                <img src="{{ asset('uploads/profiles/' ~ personal.photo) }}" alt="{{ personal.fullName }}">
+                            {% else %}
+                                <i class="fa-solid fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <strong>{{ personal and personal.fullName ? personal.fullName : ('Profil sans nom'|trans) }}</strong>
+                            <small>{% trans %}Auteur de l’annonce{% endtrans %}</small>
+                        </div>
+                    </div>
+                    <div class="ans-actions">
+                        {% if personal and personal.slug and owner.professionalProfile %}
+                            <a href="{{ path('profil_talent', {slug: personal.slug}) }}" class="ans-btn ans-btn-primary" data-turbo="false"><i class="fa-solid fa-address-card"></i> {% trans %}Voir le profil complet{% endtrans %}</a>
+                        {% endif %}
+                        {% if isOwner %}
+                            <a href="{{ path('annonce_boost', {annonce: annonce.slug}) }}" class="ans-btn ans-btn-primary" data-turbo="false"><i class="fa-solid fa-rocket"></i> {% trans %}Booster l’annonce{% endtrans %}</a>
+                            <a href="{{ path('annonce_edit', {slug: annonce.slug}) }}" class="ans-btn ans-btn-light" data-turbo="false"><i class="fa-solid fa-pen"></i> {% trans %}Modifier l’annonce{% endtrans %}</a>
+                            <a href="{{ path('annonce_manage') }}" class="ans-btn ans-btn-light" data-turbo="false"><i class="fa-solid fa-table-list"></i> {% trans %}Mes annonces{% endtrans %}</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </article>
+</main>
+<style>
+    .ans-cover-author{display:flex;align-items:center;gap:12px;margin:0 0 14px;min-width:0}
+    .ans-cover-avatar{width:56px;height:56px;flex:0 0 56px;display:grid;place-items:center;overflow:hidden;border-radius:50%;background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.82);box-shadow:0 8px 22px rgba(0,0,0,.16);color:#fff;font-weight:950;font-size:21px}
+    .ans-cover-avatar img{width:100%;height:100%;display:block;object-fit:cover}
+    .ans-cover-author-copy{min-width:0;display:grid;gap:2px;color:#fff}
+    .ans-cover-author-copy strong{font-size:15px;line-height:1.25;overflow-wrap:anywhere}
+    .ans-cover-author-copy span,.ans-cover-author-copy small{display:flex;align-items:center;flex-wrap:wrap;gap:6px;color:rgba(255,255,255,.82);font-size:11px;line-height:1.4}
+    .ans-cover-author-copy small i{color:#ffd24d}
+    .ans-cover-verified{display:inline-flex;align-items:center;gap:4px;color:#c9ffd2;font-size:10px}
+    @media(max-width:575.98px){.ans-cover-author{align-items:flex-start}.ans-cover-avatar{width:50px;height:50px;flex-basis:50px}.ans-cover-author-copy strong{font-size:14px}}
+</style>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'support/layout.html.twig' %}
+{% set seo_description = 'Boostez votre annonce sur Main d’Œuvre Locale avec les offres Essentiel, Plus ou Premium pour améliorer sa visibilité.' %}
+
+{% block title %}{% trans %}Boost annonce — Main d’Œuvre Locale{% endtrans %}{% endblock %}
+
+{% set boostUrl = app.user ? path('annonce_boost') : path('app_login') %}
+{% set publishUrl = app.user ? path('annonce_new') : path('app_register') %}
+
+{% block support_hero %}
+    <section class="mol-support-hero">
+        <div class="mol-support-hero__inner">
+            <span class="mol-support-eyebrow">
+                <i class="fa-solid fa-rocket" aria-hidden="true"></i>
+                {% trans %}Plus de visibilité, au bon moment{% endtrans %}
+            </span>
+    
+            <h1>{% trans %}Donnez plus de portée à votre annonce{% endtrans %}</h1>
+            <p>{% trans %}Le boost améliore temporairement la priorité de votre annonce dans les emplacements prévus. Choisissez la durée adaptée à votre objectif et à votre budget.{% endtrans %}</p>
+    
+            <div class="mol-support-actions">
+                <a href="{{ boostUrl }}" class="mol-support-btn mol-support-btn--white" data-turbo="false">
+                    <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                    {{ app.user ? 'Booster mon annonce' : 'Se connecter pour booster' }}
+                </a>
+                <a href="{{ publishUrl }}" class="mol-support-btn mol-support-btn--glass" data-turbo="false">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    {{ app.user ? 'Publier une annonce' : 'Créer un compte' }}
+                </a>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block support_content %}
+
+    <section class="mol-support-section">
+        <div class="mol-support-section-head">
+            <div>
+                <h2>{% trans %}Choisissez votre niveau de visibilité{% endtrans %}</h2>
+                <p>{% trans %}Les trois offres utilisent la logique de boost déjà présente dans votre espace de gestion des annonces.{% endtrans %}</p>
+            </div>
+        </div>
+
+        <div class="mol-boost-grid">
+            {% for plan in boost_plans %}
+                <article class="mol-boost-card mol-boost-card--{{ plan.tone }} {{ plan.featured|default(false) ? 'is-featured' : '' }}">
+                    {% if plan.featured|default(false) %}
+                        <span class="mol-boost-popular">{% trans %}Le plus choisi{% endtrans %}</span>
+                    {% endif %}
+
+                    <span class="mol-boost-icon"><i class="fa-solid {{ plan.icon }}" aria-hidden="true"></i></span>
+                    <h2>Boost {{ plan.name }}</h2>
+
+                    <div class="mol-boost-price">
+                        <strong>{{ plan.price|number_format(0, ',', ' ') }}</strong>
+                        <span>FCFA</span>
+                    </div>
+                    <div class="mol-boost-duration">{% trans %}Pendant{% endtrans %} {{ plan.duration }}</div>
+
+                    <ul class="mol-boost-features">
+                        {% for feature in plan.features %}
+                            <li><i class="fa-solid fa-check" aria-hidden="true"></i><span>{{ feature }}</span></li>
+                        {% endfor %}
+                    </ul>
+
+                    <a href="{{ boostUrl }}" class="mol-support-btn" data-turbo="false">
+                        <i class="fa-solid fa-arrow-up-right-dots" aria-hidden="true"></i>
+                        {% trans %}Choisir ce boost{% endtrans %}
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+
+        <div class="mol-boost-note">
+            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
+            <span>{% trans %}Le boost ne remplace pas une annonce complète. Utilisez un titre clair, une bonne description, la bonne profession, la ville et les informations de rémunération avant de lancer la mise en avant.{% endtrans %}</span>
+        </div>
+    </section>
+
+    <section class="mol-support-section">
+        <div class="mol-support-section-head">
+            <div>
+                <h2>{% trans %}Comment lancer un boost ?{% endtrans %}</h2>
+                <p>{% trans %}La sélection se fait depuis votre espace personnel, sur une annonce qui vous appartient.{% endtrans %}</p>
+            </div>
+        </div>
+
+        <div class="mol-process">
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">1</span>
+                <h3>{% trans %}Publiez l’annonce{% endtrans %}</h3>
+                <p>{% trans %}Créez d’abord l’annonce avec toutes les informations utiles pour les personnes intéressées.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">2</span>
+                <h3>{% trans %}Ouvrez « Booster »{% endtrans %}</h3>
+                <p>{% trans %}Depuis la gestion de vos annonces, accédez à la page de boost et choisissez l’annonce concernée.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">3</span>
+                <h3>{% trans %}Choisissez l’offre{% endtrans %}</h3>
+                <p>{% trans %}Sélectionnez Essentiel, Plus ou Premium selon la durée de visibilité recherchée.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">4</span>
+                <h3>{% trans %}Validez la demande{% endtrans %}</h3>
+                <p>{% trans %}La demande est enregistrée et passe dans le circuit de paiement prévu par la plateforme.{% endtrans %}</p>
+            </article>
+            <article class="mol-process-step">
+                <span class="mol-process-step__number">5</span>
+                <h3>{% trans %}Suivez la visibilité{% endtrans %}</h3>
+                <p>{% trans %}Retrouvez ensuite vos demandes récentes et l’état du boost dans votre espace d’annonces.{% endtrans %}</p>
+            </article>
+        </div>
+    </section>
+{% endblock %}

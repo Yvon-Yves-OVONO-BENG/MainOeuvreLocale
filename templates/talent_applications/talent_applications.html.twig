@@ -1,0 +1,162 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes candidatures{% endblock %}
+
+{% block body %}
+
+{% include "talent_applications/_vip_ui.html.twig" %}
+
+
+<div class="container vip-page">
+  <div class="vip-wrap">
+
+    <div class="vip-head">
+      <div class="vip-head-top">
+        <div>
+          <h2 class="vip-title">{% trans %}Mes candidatures{% endtrans %}</h2>
+          <p class="vip-sub">
+            {% trans %}Suivez les réponses des entreprises :{% endtrans %}
+            <span class="vip-strong">{% trans %}accepté{% endtrans %}</span>
+            {% trans %}ou{% endtrans %}
+            <span class="vip-strong">{% trans %}refusé{% endtrans %}</span>.
+          </p>
+        </div>
+
+        <div class="vip-head-actions">
+          <a href="{{ path('tableau_de_bord') }}" class="vip-btn vip-btn--primary">
+            ← {% trans %}Retour au tableau de bord{% endtrans %}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="vip-body">
+
+      <div class="vip-kpis">
+        <div class="vip-kpi">
+          <div>
+            <div class="n">{{ applicationsCount ?? 0 }}</div>
+            <div class="l">{% trans %}Candidatures totales{% endtrans %}</div>
+          </div>
+          <div class="vip-pill">📌 {% trans %}Total{% endtrans %}</div>
+        </div>
+
+        <div class="vip-kpi">
+          <div>
+            <div class="n">{{ acceptedCount ?? 0 }}</div>
+            <div class="l">{% trans %}Réponses positives{% endtrans %}</div>
+          </div>
+          <div class="vip-pill">✅ {% trans %}Acceptées{% endtrans %}</div>
+        </div>
+
+        <div class="vip-kpi">
+          <div>
+            <div class="n">{{ rejectedCount ?? 0 }}</div>
+            <div class="l">{% trans %}Réponses négatives{% endtrans %}</div>
+          </div>
+          <div class="vip-pill">⛔ {% trans %}Refusées{% endtrans %}</div>
+        </div>
+      </div>
+
+      <div class="vip-tools">
+        <div class="vip-search">
+          <span class="vip-muted">🔎</span>
+          <input id="vipSearch" type="text" placeholder="{{ 'Rechercher une entreprise ou un poste…'|trans }}">
+        </div>
+
+        <div class="vip-tabs">
+          <a class="vip-tab {{ statusFilter == 'ALL' ? 'active' : '' }}" href="{{ path('talent_applications', {status:'ALL'}) }}">
+            {% trans %}Tous{% endtrans %} <span class="vip-muted">({{ applicationsCount ?? 0 }})</span>
+          </a>
+          <a class="vip-tab {{ statusFilter == 'ACCEPTED' ? 'active' : '' }}" href="{{ path('talent_applications', {status:'ACCEPTED'}) }}">
+            {% trans %}Acceptées{% endtrans %} <span class="vip-muted">({{ acceptedCount ?? 0 }})</span>
+          </a>
+          <a class="vip-tab {{ statusFilter == 'REJECTED' ? 'active' : '' }}" href="{{ path('talent_applications', {status:'REJECTED'}) }}">
+            {% trans %}Refusées{% endtrans %} <span class="vip-muted">({{ rejectedCount ?? 0 }})</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="vip-table" id="vipTable">
+        <div class="rowx head">
+          <div>{% trans %}Entreprise{% endtrans %}</div>
+          <div>{% trans %}Poste / Offre{% endtrans %}</div>
+          <div>{% trans %}Statut{% endtrans %}</div>
+          <div>{% trans %}Date{% endtrans %}</div>
+        </div>
+
+        {% if applications is empty %}
+          <div class="rowx">
+            <div class="vip-muted">{% trans %}Aucune candidature à afficher pour ce filtre.{% endtrans %}</div>
+            <div></div><div></div><div></div>
+          </div>
+        {% endif %}
+
+        {% for a in applications %}
+          {% set j = a.job ?? null %}
+
+          {% set companyName = 'Entreprise'|trans %}
+          {% if j and j.createdBy %}
+              {% if j.createdBy.personalProfile and j.createdBy.personalProfile.fullName %}
+                  {% set companyName = j.createdBy.personalProfile.fullName %}
+              {% elseif j.createdBy.email %}
+                  {% set companyName = j.createdBy.email %}
+              {% endif %}
+          {% endif %}
+
+          {% set jobTitle = j and j.title ? j.title : ('Offre'|trans) %}
+
+          {% set st = (a.status ?? '')|upper %}
+          {% set badgeClass = st == 'ACCEPTED' ? 'ok' : (st == 'REJECTED' ? 'no' : 'wait') %}
+          {% set badgeLabel = st == 'ACCEPTED' ? 'Accepté'|trans : (st == 'REJECTED' ? 'Refusé'|trans : 'En attente'|trans) %}
+          {% set badgeIcon = st == 'ACCEPTED' ? '✅' : (st == 'REJECTED' ? '⛔' : '⏳') %}
+
+          <div class="rowx vip-row" data-search="{{ (companyName ~ ' ' ~ jobTitle ~ ' ' ~ badgeLabel)|lower }}">
+            <div>
+              <span class="vip-cell-label">{% trans %}Entreprise{% endtrans %}</span>
+              <div class="vip-strong">{{ companyName }}</div>
+              <div class="vip-muted small">{% trans %}Candidature :{% endtrans %} {{ a.reference ?? '—' }}</div>
+            </div>
+
+            <div>
+              <span class="vip-cell-label">{% trans %}Poste / Offre{% endtrans %}</span>
+              <div class="vip-strong">{{ jobTitle }}</div>
+              <div class="vip-muted small">
+                {% if j and j.city %}📍 {{ j.city }}{% endif %}
+              </div>
+            </div>
+
+            <div>
+              <span class="vip-cell-label">{% trans %}Statut{% endtrans %}</span>
+              <span class="vip-badge {{ badgeClass }}">{{ badgeIcon }} {{ badgeLabel }}</span>
+            </div>
+
+            <div>
+              <span class="vip-cell-label">{% trans %}Date{% endtrans %}</span>
+              <div class="vip-strong">{{ a.createdAt ? a.createdAt|date('d/m/Y') : '—' }}</div>
+              <div class="vip-muted small">{{ a.createdAt ? a.createdAt|date('H:i') : '' }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const input = document.getElementById('vipSearch');
+    const rows  = document.querySelectorAll('.vip-row');
+
+    if(!input) return;
+
+    input.addEventListener('input', function(){
+      const q = (this.value || '').trim().toLowerCase();
+      rows.forEach(r => {
+        const hay = (r.getAttribute('data-search') || '');
+        r.style.display = hay.includes(q) ? '' : 'none';
+      });
+    });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Modérateur • Appels'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_appeals.html.twig" %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">📨 {% trans %}Appels / Contestations{% endtrans %}</div>
+        <div class="hint">{% trans %}Module générique — analyser, accepter ou rejeter.{% endtrans %}</div>
+      </div>
+
+      <form class="filters" method="get">
+        <input class="input" name="q" value="{{ q }}" placeholder="{{ 'Recherche : email, nom, motif…'|trans }}">
+        <select class="select" name="status">
+          {% for st in ['pending','accepted','rejected','all'] %}
+            <option value="{{ st }}" {{ status==st?'selected':'' }}>{{ st|trans }}</option>
+          {% endfor %}
+        </select>
+        <select class="select" name="role">
+          <option value="">{% trans %}Tous rôles{% endtrans %}</option>
+          <option value="talent" {{ role=='talent'?'selected':'' }}>{% trans %}Talent{% endtrans %}</option>
+          <option value="particulier" {{ role=='particulier'?'selected':'' }}>{% trans %}Particulier{% endtrans %}</option>
+          <option value="company" {{ role=='company'?'selected':'' }}>{% trans %}Company{% endtrans %}</option>
+        </select>
+        <select class="select" name="days">
+          {% for d in [7,14,30,60,90] %}
+            <option value="{{ d }}" {{ days==d?'selected':'' }}>{{ d }}{% trans %}j{% endtrans %}</option>
+          {% endfor %}
+        </select>
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit==n?'selected':'' }}>{{ n }}/{% trans %}page{% endtrans %}</option>
+          {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+        <a class="btn" href="{{ path('moderateur_appeals_index') }}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+        <span class="chip">{% trans %}Total:{% endtrans %} {{ total }}</span>
+        <span class="chip p">{% trans %}Pending:{% endtrans %} {{ stats.byStatus.pending ?? 0 }}</span>
+        <span class="chip ok">{% trans %}Accepted:{% endtrans %} {{ stats.byStatus.accepted ?? 0 }}</span>
+        <span class="chip bad">{% trans %}Rejected:{% endtrans %} {{ stats.byStatus.rejected ?? 0 }}</span>
+      </div>
+
+      <div class="grid">
+        <div class="col-8">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Area — Appels / jour{% endtrans %}</div>
+                <div class="hint">{% trans %}Volume sur{% endtrans %} {{ days }} {% trans %}jours.{% endtrans %}</div>
+              </div>
+              <span class="chip">📈</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chAppealsDaily"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-4">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Pie — Statuts{% endtrans %}</div>
+                <div class="hint">{% trans %}pending / accepted / rejected{% endtrans %}</div>
+              </div>
+            </div>
+            <div class="canvaswrap"><canvas id="chAppealsStatus"></canvas></div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="chartbox">
+            <div class="charthead">
+              <div>
+                <div style="font-weight:950;">{% trans %}Horizontal Bar — Rôles{% endtrans %}</div>
+                <div class="hint">{% trans %}Talent / Particulier / Company{% endtrans %}</div>
+              </div>
+              <span class="chip">{% trans %}Roles{% endtrans %}</span>
+            </div>
+            <div class="canvaswrap"><canvas id="chAppealsRoles"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Utilisateur{% endtrans %}</th>
+              <th>{% trans %}Statut{% endtrans %}</th>
+              <th>{% trans %}Motif (extrait){% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+              <th style="text-align:right;">{% trans %}Action{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in items %}
+              {% set u = a.user %}
+              {% set pp = u ? u.personalProfile : null %}
+              {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+              <tr>
+                <td>#{{ a.id }}</td>
+                <td>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <img class="avatar" src="{{ photo }}" alt="{{ 'photo'|trans }}">
+                    <div>
+                      <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : (u ? u.email : '—') }}</div>
+                      <div class="muted" style="font-size:12px;">{{ u ? u.email : '—' }}{% if u and u.phone %} • {{ u.phone }}{% endif %}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  {% if a.status == 'pending' %}
+                    <span class="chip p">⏳ {% trans %}PENDING{% endtrans %}</span>
+                  {% elseif a.status == 'accepted' %}
+                    <span class="chip ok">✅ {% trans %}ACCEPTED{% endtrans %}</span>
+                  {% else %}
+                    <span class="chip bad">⛔ {% trans %}REJECTED{% endtrans %}</span>
+                  {% endif %}
+                </td>
+
+                <td class="muted" style="font-size:12px;">
+                  {{ (a.reason ?? '')|striptags|slice(0,120) }}{% if (a.reason ?? '')|length > 120 %}…{% endif %}
+                </td>
+
+                <td class="muted" style="font-size:12px;">{{ a.createdAt ? a.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                <td style="text-align:right;">
+                  <a class="btn primary" href="{{ path('moderateur_appeals_show', {id:a.id}) }}">{% trans %}Voir{% endtrans %}</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted" style="padding:18px;text-align:center;">{% trans %}Aucun appel{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p==page?'primary':'' }}"
+               href="{{ path('moderateur_appeals_index', {page:p, limit:limit, q:q, status:status, role:role, days:days}) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+  const stats = {{ stats|json_encode|raw }};
+  const labels = stats.daily.labels || [];
+  const values = stats.daily.values || [];
+
+  const byStatus = stats.byStatus || {};
+  const pending = Number(byStatus.pending||0);
+  const accepted = Number(byStatus.accepted||0);
+  const rejected = Number(byStatus.rejected||0);
+
+  const byRole = stats.byRole || {};
+  const rTalent = Number(byRole.talent||0);
+  const rPart = Number(byRole.particulier||0);
+  const rComp = Number(byRole.company||0);
+
+  new Chart(document.getElementById('chAppealsDaily'), {
+    type:'line',
+    data:{ labels, datasets:[{ label:'{{ "Appels"|trans|e("js") }}', data: values, tension:.35, fill:true, borderWidth:2, pointRadius:2,
+      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--a4').trim() || 'rgba(168,85,247,.26)' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+  });
+
+  new Chart(document.getElementById('chAppealsStatus'), {
+    type:'pie',
+    data:{ labels:['{{ "pending"|trans|e("js") }}','{{ "accepted"|trans|e("js") }}','{{ "rejected"|trans|e("js") }}'], datasets:[{ data:[pending,accepted,rejected], borderWidth:1 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+  });
+
+  new Chart(document.getElementById('chAppealsRoles'), {
+    type:'bar',
+    data:{ labels:['{{ "Talent"|trans|e("js") }}','{{ "Particulier"|trans|e("js") }}','{{ "Company"|trans|e("js") }}'], datasets:[{ label:'{{ "Appels"|trans|e("js") }}', data:[rTalent,rPart,rComp], borderWidth:1 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
+  });
+})();
+</script>
+{% endblock %}

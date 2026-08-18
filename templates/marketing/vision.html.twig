@@ -1,0 +1,97 @@
+{% extends 'marketing/layout.html.twig' %}
+{% set seo_description = 'La vision de Main d’Œuvre Locale : valoriser les compétences locales et rendre chaque talent visible, crédible et accessible au Cameroun.' %}
+{% block title %}{{ 'Notre vision — Main d’Œuvre Locale'|trans }}{% endblock %}
+
+{% block marketing_content %}
+<div class="mol-page-head">
+    <span class="mol-page-label">
+        {% trans %}Notre vision{% endtrans %}
+    </span>
+
+    <div class="mol-page-actions">
+        <a href="{{ path('app_register') }}" class="mol-cta-primary">
+          {% trans %}Je rejoins la vision{% endtrans %}
+        </a>
+        <a href="{{ path('marketing_mission') }}" class="mol-cta-soft">
+          {% trans %}Voir notre mission{% endtrans %} →
+        </a>
+    </div>
+</div>
+
+<section
+  class="mol-hero mol-hero--single"
+  style="--mol-hero-image:url('{{ asset('images/marketing/notre-vision.jpeg') }}')">
+  <div class="mol-hero-grid mol-hero-grid--single">
+    <div class="flex flex-col justify-end">
+
+      <h1 class="mt-4 mol-hero-title">
+        {% trans %}Faire du travail local un standard de qualité, de confiance et de fierté.{% endtrans %}
+      </h1>
+
+      {# <p class="mt-4 mol-hero-text">
+        {% trans %}Nous voulons un monde où un talent n’est plus invisible, où une entreprise ne recrute plus au hasard, et où chaque collaboration se construit avec preuve, respect et transparence.{% endtrans %}
+      </p> #}
+
+    </div>
+
+
+  </div>
+</section>
+
+<section class="mol-after-hero">
+  <div class="mol-hero-card mol-hero-card--below rounded-[28px] p-5 sm:p-6">
+<div class="mol-after-hero-title"> {% trans %}Ce qu’on veut changer{% endtrans %}</div>
+
+  <div class="mt-4 mol-list">
+    <div class="mol-list-item">
+      <div class="mol-iconbox">1</div>
+      <div>
+        <div class="font-extrabold text-slate-900">{% trans %}Visibilité{% endtrans %}</div>
+        <div class="mt-1 text-sm text-slate-600">{% trans %}Rendre les talents trouvables, crédibles et désirables.{% endtrans %}</div>
+      </div>
+    </div>
+
+    <div class="mol-list-item">
+      <div class="mol-iconbox">2</div>
+      <div>
+        <div class="font-extrabold text-slate-900">{% trans %}Confiance{% endtrans %}</div>
+        <div class="mt-1 text-sm text-slate-600">{% trans %}Des preuves, des avis et une modération claire.{% endtrans %}</div>
+      </div>
+    </div>
+
+    <div class="mol-list-item">
+      <div class="mol-iconbox">3</div>
+      <div>
+        <div class="font-extrabold text-slate-900">{% trans %}Efficacité{% endtrans %}</div>
+        <div class="mt-1 text-sm text-slate-600">{% trans %}Recruter et collaborer sans perte de temps.{% endtrans %}</div>
+      </div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section class="mt-8">
+  <h2 class="mol-section-title">{% trans %}Les principes de notre futur{% endtrans %}</h2>
+  <p class="mt-2 mol-section-text">{% trans %}Une plateforme solide se construit avec des règles simples.{% endtrans %}</p>
+
+  <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Le mérite{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}La compétence d’abord : preuves, portfolio et réputation réelle.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}La confiance{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Des relations propres : identité claire, avis fiables et modération saine.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}La vitesse{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Trouver, contacter et engager sans friction inutile.{% endtrans %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

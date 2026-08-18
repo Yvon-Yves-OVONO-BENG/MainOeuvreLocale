@@ -1,0 +1,39 @@
+{# MOL DASHBOARD PARTICULIER — REFACTOR V5 — Twig / CSS / JavaScript séparés #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Particulier • Dashboard{% endblock %}
+
+{% block body %}
+    {% include 'tableau_de_bord_particulier/_vip_ui.html.twig' %}
+
+    {# La configuration doit être chargée avant le CDN Tailwind. #}
+    <script src="{{ asset('assets/js/tableau_de_bord_particulier/tailwind-config.js') }}"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    {% set me = app.user %}
+    {% set personalProfile = me and me.personalProfile is defined ? me.personalProfile : null %}
+    {% set avatar =
+        (personalProfile and personalProfile.photo)
+            ? asset('uploads/profiles/' ~ personalProfile.photo)
+            : 'https://ui-avatars.com/api/?background=0F172A&color=fff&name=' ~ (me ? me.userIdentifier|url_encode : 'U')
+    %}
+    {% set displayName = personalProfile and personalProfile.fullName ? personalProfile.fullName : ('Compte'|trans) %}
+    {% set completion = kpi.completion|default(0) %}
+    {% set applicationTotal = applicationsCount|default(kpi.applicationsCount|default(0)) %}
+    {% set paymentTotal = paymentsCount|default(payments is defined ? payments|length : 0) %}
+
+    <div class="mol-dashboard min-h-screen mol-bg mt-4">
+        {% include 'tableau_de_bord_particulier/partials/_topbar.html.twig' %}
+
+        <main class="mol-dashboard-main mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            {% include 'tableau_de_bord_particulier/partials/_welcome.html.twig' %}
+            {% include 'tableau_de_bord_particulier/partials/_action_groups.html.twig' %}
+            {% include 'tableau_de_bord_particulier/partials/_secondary_tools.html.twig' %}
+            {% include 'tableau_de_bord_particulier/partials/_metrics.html.twig' %}
+            {% include 'tableau_de_bord_particulier/partials/_activity.html.twig' %}
+            {% include 'tableau_de_bord_particulier/partials/_payments.html.twig' %}
+        </main>
+    </div>
+
+    <script src="{{ asset('assets/js/tableau_de_bord_particulier/dashboard.js') }}" defer></script>
+{% endblock %}

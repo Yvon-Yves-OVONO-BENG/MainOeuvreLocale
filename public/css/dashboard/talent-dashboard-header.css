@@ -1,0 +1,32 @@
+/* ===== FIX HEADER / PAGE CACHEE DERRIERE ===== */
+		:root{
+			--mol-dashboard-offset-desktop: 18px;
+			--mol-dashboard-offset-mobile: 150px;
+		}
+
+		/* le contenu du dashboard descend sous le header */
+		.container-fluid.py-4{
+			position: relative;
+			z-index: 1;
+			padding-top: var(--mol-dashboard-offset-desktop) !important;
+		}
+
+		/* mobile: topbar + mobile header + espace de respiration */
+		@media (max-width: 991.98px){
+			.container-fluid.py-4{
+				padding-top: var(--mol-dashboard-offset-mobile) !important;
+			}
+		}
+
+		/* très petits écrans */
+		@media (max-width: 575.98px){
+			.container-fluid.py-4{
+				padding-top: 165px !important;
+			}
+		}
+
+		/* sécurité: si le hero touche encore le header */
+		.dash-hero{
+			position: relative;
+			z-index: 1;
+		}

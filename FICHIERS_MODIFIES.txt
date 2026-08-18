@@ -1,0 +1,13 @@
+CORRECTIFS AUTO-SUGGEST — OFFRES ET ANNONCES
+
+Remplacez les fichiers en conservant exactement leur arborescence.
+
+Correctifs inclus :
+- nouveau style professionnel et flottant des erreurs ;
+- validation identique du champ Ville / Région / Pays ;
+- rejet des valeurs composées uniquement de chiffres côté navigateur et serveur ;
+- auto-suggestion des villes, régions et pays ;
+- auto-suggestion activée sur les offres et sur les annonces ;
+- suggestions affichées au-dessus de la bande défilante grâce à un portail d'affichage ;
+- validation JSON/cartographique cohérente pour les deux champs ;
+- aucun fichier du chat n'est inclus dans cette archive.

@@ -1,0 +1,205 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Mes favoris{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "mes_favoris/_vip_ui_mes_favoris.html.twig" %}
+
+<div class="container vip-page">
+  <div class="vip-shell">
+    <div class="vip-head">
+      <div class="vip-head-top">
+        <div>
+          <div class="vip-title">❤️ {% trans %}Mes favoris{% endtrans %}</div>
+          <div class="vip-sub">{% trans %}Talents, particuliers et entreprises que vous avez enregistrés.{% endtrans %}</div>
+        </div>
+
+        <div class="vip-head-actions">
+          <a class="vip-btn btn-primary-soft" href="{{ path('tableau_de_bord') }}">
+            ← {% trans %}Retour au tableau de bord{% endtrans %}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="vip-body">
+      <div class="vip-topbar">
+        <div class="vip-kpi">
+          <span>{% trans %}Total des favoris{% endtrans %}</span>
+          <span class="vip-kpi-count">{{ favorites|length }}</span>
+        </div>
+      </div>
+
+      <div class="vip-table-wrap">
+        <div class="vip-table-pad">
+          <table id="favTable" class="table table-hover align-middle mb-0">
+            <thead>
+              <tr>
+                <th style="width:70px;">#</th>
+                <th>{% trans %}Profil{% endtrans %}</th>
+                <th style="width:170px;">{% trans %}Type{% endtrans %}</th>
+                <th style="width:180px;">{% trans %}Ajouté le{% endtrans %}</th>
+                <th style="width:250px;" class="text-end">{% trans %}Options{% endtrans %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in favorites %}
+                {% set u = f.targetUser %}
+
+                {% if u %}
+                  {% set roles = u.roles ?? [] %}
+                  {% set isTalent = 'ROLE_TALENT' in roles %}
+                  {% set isCompany = 'ROLE_COMPANY' in roles %}
+                  {% set typeLabel = isCompany ? 'Entreprise'|trans : (isTalent ? 'Talent'|trans : 'Particulier'|trans) %}
+                  {% set dotClass = isCompany ? 'green' : (isTalent ? 'orange' : '') %}
+
+                  {% set personalProfile = u.personalProfile ?? null %}
+                  {% set displayName = (personalProfile and personalProfile.fullName) ? personalProfile.fullName : ('Profil sans nom'|trans) %}
+                  {% set initials = displayName|slice(0,1)|upper %}
+
+                  {% set photoPath = (personalProfile and personalProfile.photo) ? asset('uploads/profiles/' ~ personalProfile.photo) : null %}
+                  {% set profileUrl = (personalProfile and personalProfile.slug) ? path('profil_talent', {slug: personalProfile.slug}) : 'javascript:void(0);' %}
+
+                  <tr data-row-id="{{ f.id }}">
+                    <td class="text-muted fw-semibold">{{ loop.index }}</td>
+
+                    <td>
+                      <div class="vip-profile">
+                        <div class="vip-avatar">
+                          {% if photoPath %}
+                            <img src="{{ photoPath }}" alt="{{ displayName }}">
+                          {% else %}
+                            {{ initials }}
+                          {% endif %}
+                        </div>
+
+                        <div class="vip-profile-text">
+                          <div class="vip-name">{{ displayName }}</div>
+                          
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="vip-badge">
+                        <span class="vip-dot {{ dotClass }}"></span>
+                        {{ typeLabel }}
+                      </span>
+                    </td>
+
+                    <td class="text-muted">
+                      {{ f.createdAt ? f.createdAt|date('d/m/Y H:i') : '-' }}
+                    </td>
+
+                    <td>
+                      <div class="vip-actions">
+                        {% if personalProfile and personalProfile.slug %}
+                          <a class="vip-btn btn-primary-soft btn-sm" href="{{ profileUrl }}">
+                            👁️ {% trans %}Voir le profil{% endtrans %}
+                          </a>
+                        {% else %}
+                          <span class="vip-btn btn-primary-soft btn-sm disabled" aria-disabled="true">
+                            👁️ {% trans %}Profil indisponible{% endtrans %}
+                          </span>
+                        {% endif %}
+
+                        <button type="button"
+                                class="vip-btn btn-danger-soft btn-sm js-remove-fav"
+                                data-url="{{ path('app_favorites_remove', {id: f.id}) }}"
+                                data-token="{{ csrf_token('fav_remove_' ~ f.id) }}">
+                          ✖ {% trans %}Retirer{% endtrans %}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                {% endif %}
+              {% else %}
+                <tr>
+                  <td colspan="5" class="vip-empty">
+                    {% trans %}Aucun favori enregistré pour le moment.{% endtrans %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastZone"></div>
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+  function vipToast(message, type = 'success'){
+    const zone = document.getElementById('toastZone');
+    const el = document.createElement('div');
+    el.className = 'vip-toast ' + (type === 'success' ? 'success' : 'error');
+    el.textContent = message;
+    zone.appendChild(el);
+    setTimeout(() => el.remove(), 4500);
+  }
+
+  $(function () {
+    const dt = $('#favTable').DataTable({
+      pageLength: 10,
+      lengthMenu: [5, 10, 25, 50],
+      order: [[3, 'desc']],
+      responsive: false,
+      language: {
+        search: "{{ 'Rechercher'|trans|e('js') }}",
+        lengthMenu: "{{ '_MENU_ / page'|trans|e('js') }}",
+        info: "{{ 'Affichage _START_ à _END_ sur _TOTAL_'|trans|e('js') }}",
+        infoEmpty: "{{ 'Aucun favori'|trans|e('js') }}",
+        zeroRecords: "{{ 'Aucun résultat'|trans|e('js') }}",
+        paginate: {
+          previous: "{{ 'Préc.'|trans|e('js') }}",
+          next: "{{ 'Suiv.'|trans|e('js') }}"
+        }
+      }
+    });
+
+    document.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.js-remove-fav');
+      if(!btn) return;
+
+      const url = btn.getAttribute('data-url');
+      const token = btn.getAttribute('data-token');
+
+      btn.disabled = true;
+
+      try{
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+          },
+          body: new URLSearchParams({_token: token}).toString()
+        });
+
+        const data = await res.json();
+
+        if(!data.ok){
+          vipToast(data.message || '{{ "Impossible de retirer ce favori."|trans|e("js") }}', 'error');
+          btn.disabled = false;
+          return;
+        }
+
+        const tr = btn.closest('tr');
+        dt.row(tr).remove().draw();
+
+        vipToast(data.message || '{{ "Retiré de vos favoris."|trans|e("js") }}', 'success');
+      }catch(err){
+        vipToast('{{ "Erreur réseau. Réessayez."|trans|e("js") }}', 'error');
+        btn.disabled = false;
+      }
+    });
+  });
+</script>
+{% endblock %}

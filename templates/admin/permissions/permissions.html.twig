@@ -1,0 +1,376 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Revue des permissions{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% set roleUi = {
+    'ROLE_SUPER_ADMIN': {'label': 'Super Admin', 'classes': 'bg-rose-100 text-rose-700 ring-rose-200'},
+    'ROLE_ADMIN': {'label': 'Admin', 'classes': 'bg-indigo-100 text-indigo-700 ring-indigo-200'},
+    'ROLE_MODERATEUR': {'label': 'Modérateur', 'classes': 'bg-sky-100 text-sky-700 ring-sky-200'},
+    'ROLE_COMPANY': {'label': 'Entreprise', 'classes': 'bg-amber-100 text-amber-700 ring-amber-200'},
+    'ROLE_PARTICULIER': {'label': 'Particulier', 'classes': 'bg-emerald-100 text-emerald-700 ring-emerald-200'},
+    'ROLE_TALENT': {'label': 'Talent', 'classes': 'bg-violet-100 text-violet-700 ring-violet-200'}
+} %}
+
+{% set currentPage = pagination.page %}
+{% set totalPages = pagination.totalPages %}
+{% set totalItems = pagination.totalItems %}
+{% set limit = pagination.limit %}
+{% set startItem = totalItems > 0 ? ((currentPage - 1) * limit) + 1 : 0 %}
+{% set endItem = currentPage * limit > totalItems ? totalItems : currentPage * limit %}
+{% set queryParams = {'q': filters.q, 'role': filters.role} %}
+
+<div class="min-h-screen bg-[radial-gradient(1000px_circle_at_0%_0%,rgba(59,130,246,.10),transparent_35%),radial-gradient(1200px_circle_at_100%_0%,rgba(16,185,129,.10),transparent_35%),linear-gradient(180deg,#f8fafc,#eef2ff_45%,#f8fafc)] text-slate-900">
+    <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="mb-4 rounded-2xl px-4 py-3 text-sm font-semibold ring-1
+                    {{ label == 'success' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : '' }}
+                    {{ label == 'warning' ? 'bg-amber-50 text-amber-700 ring-amber-200' : '' }}
+                    {{ label == 'error' ? 'bg-rose-50 text-rose-700 ring-rose-200' : '' }}
+                    {{ label not in ['success', 'warning', 'error'] ? 'bg-slate-50 text-slate-700 ring-slate-200' : '' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <section class="rounded-[2rem] border border-white/70 bg-white/75 p-5 shadow-[0_20px_80px_rgba(15,23,42,.08)] backdrop-blur xl:p-7">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-600 ring-1 ring-slate-200">
+                            {% trans %}Administration{% endtrans %}
+                        </span>
+                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-indigo-700 ring-1 ring-indigo-200">
+                            {% trans %}Permissions & rôles{% endtrans %}
+                        </span>
+                    </div>
+
+                    <h1 class="mt-4 text-2xl font-black tracking-tight text-slate-950 lg:text-4xl">
+                        {% trans %}Revue des permissions utilisateurs{% endtrans %}
+                    </h1>
+
+                    <p class="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
+                        {% trans %}Consultez les comptes, visualisez leurs rôles et modifiez les autorisations depuis une interface d’administration premium.{% endtrans %}
+                    </p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="{{ path('tableau_de_bord') }}" class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50">
+                        ← {% trans %}Retour{% endtrans %}
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+            {% for role in editableRoles %}
+                <div class="rounded-[1.75rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                    <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">
+                        {{ role }}
+                    </div>
+                    <div class="mt-3 text-3xl font-black tracking-tight text-slate-950">
+                        {{ stats[role]|default(0)|number_format(0, ',', ' ') }}
+                    </div>
+                    <div class="mt-2">
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 {{ roleUi[role].classes }}">
+                            {{ roleUi[role].label }}
+                        </span>
+                    </div>
+                </div>
+            {% endfor %}
+        </section>
+
+        <section class="mt-5 rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6"> 
+            <div class="grid grid-cols-1 gap-4 xl:grid-cols-[1.2fr,.8fr]"> 
+                <div> 
+                    <label class="mb-2 block text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500"> 
+                        {% trans %}Recherche instantanée{% endtrans %} 
+                    </label> 
+                    <div class="relative"> 
+                        <input id="permissionSearch" type="text" value="{{ filters.q }}" placeholder="{% trans %}Rechercher par email...{% endtrans %}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pl-11 text-sm font-medium text-slate-800 shadow-sm outline-none ring-0 transition placeholder:text-slate-400 focus:border-indigo-300" > 
+                        <span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔎</span> 
+                    </div> 
+                </div>
+                <div> 
+                    <label class="mb-2 block text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500"> {% trans %}Filtrer par rôle{% endtrans %} 
+                    </label> 
+                    <div class="flex flex-wrap gap-2"> 
+                        <button type="button" class="role-filter-btn rounded-full border border-slate-200 bg-slate-900 px-4 py-2 text-xs font-black text-white" data-role-filter=""> {% trans %}Tous{% endtrans %} 
+                        </button> 
+                        {% for role in editableRoles %} 
+                            <button type="button" class="role-filter-btn rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-700 hover:bg-slate-50" data-role-filter="{{ role }}"> 
+                                {{ roleUi[role].label }} 
+                            </button> {% endfor %} 
+                        </div> 
+                    </div> 
+                </div> 
+        </section>
+
+        <section class="mt-5 rounded-[2rem] border border-white/70 bg-white/80 p-3 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-4">
+            <div class="overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">ID</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Utilisateur{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Rôles actuels{% endtrans %}</th>
+                                <th class="px-4 py-3 text-right text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Action{% endtrans %}</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            {% for user in users %}
+                                <tr
+                                    class="permission-user-row hover:bg-slate-50/70"
+                                    data-user-email="{{ (user.email ?? '')|lower }}"
+                                    data-user-roles='{{ user.roles|json_encode|e("html_attr") }}'
+                                    id="user-row-{{ user.id }}"
+                                >
+                                    <td class="px-4 py-4 text-sm font-black text-slate-900">{{ loop.index }}</td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="text-sm font-black text-slate-900">{{ user.email ?? '—' }}</div>
+                                        <div class="mt-1 text-xs text-slate-500">
+                                            {% trans %}Compte utilisateur{% endtrans %}
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4">
+                                        <div class="flex flex-wrap gap-2">
+                                            {% for role in editableRoles %}
+                                                {% if role in user.roles %}
+                                                    <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 {{ roleUi[role].classes }}">
+                                                        {{ roleUi[role].label }}
+                                                    </span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+
+                                    <td class="px-4 py-4 text-right">
+                                        <button
+                                            type="button"
+                                            class="toggle-role-editor inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50"
+                                            data-target="editor-{{ user.id }}"
+                                        >
+                                            ✏️ {% trans %}Modifier les rôles{% endtrans %}
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <tr class="permission-editor-row hidden bg-slate-50/60" id="editor-{{ user.id }}">
+                                    <td colspan="4" class="px-4 py-4">
+                                        <div class="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm">
+                                            <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                                                <div>
+                                                    <div class="text-sm font-black text-slate-900">
+                                                        {% trans %}Édition des rôles{% endtrans %} — {{ user.email ?? ('#' ~ user.id) }}
+                                                    </div>
+                                                    <div class="mt-1 text-sm text-slate-500">
+                                                        {% trans %}Sélectionnez les rôles à conserver pour cet utilisateur.{% endtrans %}
+                                                    </div>
+                                                </div>
+
+                                                <div class="text-xs text-slate-400">
+                                                    {% trans %}ROLE_USER sera conservé automatiquement.{% endtrans %}
+                                                </div>
+                                            </div>
+
+                                            <form method="post" action="{{ path('admin_permissions_update_roles', {id: user.id}) }}" class="mt-5">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('admin_update_roles_' ~ user.id) }}">
+
+                                                <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                                    {% for role in editableRoles %}
+                                                        <label class="group flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-indigo-300 hover:bg-indigo-50/40">
+                                                            <input
+                                                                type="checkbox"
+                                                                name="roles[]"
+                                                                value="{{ role }}"
+                                                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                                                {{ role in user.roles ? 'checked' : '' }}
+                                                            >
+                                                            <span class="flex-1">
+                                                                <span class="block text-sm font-black text-slate-900">{{ roleUi[role].label }}</span>
+                                                                <span class="block text-xs text-slate-500">{{ role }}</span>
+                                                            </span>
+                                                        </label>
+                                                    {% endfor %}
+                                                </div>
+
+                                                <div class="mt-5 flex flex-wrap items-center justify-between gap-3">
+                                                    <div class="text-xs text-slate-400">
+                                                        {% trans %}Pensez à éviter les cumuls de privilèges inutiles.{% endtrans %}
+                                                    </div>
+
+                                                    <div class="flex items-center gap-3">
+                                                        <button
+                                                            type="button"
+                                                            class="close-role-editor inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50"
+                                                            data-target="editor-{{ user.id }}">
+                                                            {% trans %}Annuler{% endtrans %}
+                                                        </button>
+
+                                                        <button
+                                                            type="submit"
+                                                            class="inline-flex items-center rounded-2xl bg-slate-900 px-5 py-2.5 text-sm font-black text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800">
+                                                            💾 {% trans %}Enregistrer{% endtrans %}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="px-4 py-10 text-center">
+                                        <div class="text-lg font-black text-slate-900">{% trans %}Aucun utilisateur trouvé{% endtrans %}</div>
+                                        <div class="mt-2 text-sm text-slate-500">{% trans %}Aucune donnée ne correspond à la recherche actuelle.{% endtrans %}</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-col gap-4 rounded-[2rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur md:flex-row md:items-center md:justify-between">
+                <div class="text-sm font-semibold text-slate-600">
+                    {% trans %}Affichage{% endtrans %} {{ startItem }}–{{ endItem }} {% trans %}sur{% endtrans %} {{ totalItems }}
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    {% if pagination.hasPrevious %}
+                        <a href="{{ path('admin_permissions_index', queryParams|merge({'page': pagination.previousPage})) }}"
+                           class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50">
+                            ← {% trans %}Précédent{% endtrans %}
+                        </a>
+                    {% else %}
+                        <span class="inline-flex cursor-not-allowed items-center rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-black text-slate-300">
+                            ← {% trans %}Précédent{% endtrans %}
+                        </span>
+                    {% endif %}
+
+                    <span class="inline-flex items-center rounded-2xl bg-slate-900 px-4 py-2 text-sm font-black text-white">
+                        {% trans %}Page{% endtrans %} {{ currentPage }} / {{ totalPages }}
+                    </span>
+
+                    {% if pagination.hasNext %}
+                        <a href="{{ path('admin_permissions_index', queryParams|merge({'page': pagination.nextPage})) }}"
+                           class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50">
+                            {% trans %}Suivant{% endtrans %} →
+                        </a>
+                    {% else %}
+                        <span class="inline-flex cursor-not-allowed items-center rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-black text-slate-300">
+                            {% trans %}Suivant{% endtrans %} →
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('permissionSearch');
+    const filterButtons = document.querySelectorAll('.role-filter-btn');
+    const userRows = document.querySelectorAll('.permission-user-row');
+    const toggleButtons = document.querySelectorAll('.toggle-role-editor');
+    const closeButtons = document.querySelectorAll('.close-role-editor');
+
+    let activeRole = '';
+
+    function hideAllEditors() {
+        document.querySelectorAll('.permission-editor-row').forEach((row) => {
+            row.classList.add('hidden');
+        });
+    }
+
+    function getRolesFromRow(row) {
+        try {
+            return JSON.parse(row.dataset.userRoles || '[]');
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function filterRows() {
+        const q = (searchInput?.value || '').trim().toLowerCase();
+
+        userRows.forEach((row) => {
+            const email = (row.dataset.userEmail || '').toLowerCase();
+            const roles = getRolesFromRow(row);
+
+            const matchesText = q === '' || email.includes(q);
+            const matchesRole = activeRole === '' || roles.includes(activeRole);
+            const visible = matchesText && matchesRole;
+
+            row.style.display = visible ? '' : 'none';
+
+            const editorId = row.id.replace('user-row-', 'editor-');
+            const editorRow = document.getElementById(editorId);
+
+            if (editorRow) {
+                editorRow.style.display = visible ? '' : 'none';
+
+                if (!visible) {
+                    editorRow.classList.add('hidden');
+                }
+            }
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', filterRows);
+    }
+
+    filterButtons.forEach((btn) => {
+        btn.addEventListener('click', function () {
+            activeRole = this.dataset.roleFilter || '';
+
+            filterButtons.forEach((b) => {
+                b.classList.remove('bg-slate-900', 'text-white');
+                b.classList.add('bg-white', 'text-slate-700');
+            });
+
+            this.classList.remove('bg-white', 'text-slate-700');
+            this.classList.add('bg-slate-900', 'text-white');
+
+            filterRows();
+        });
+    });
+
+    toggleButtons.forEach((btn) => {
+        btn.addEventListener('click', function () {
+            const target = document.getElementById(this.dataset.target);
+            if (!target) return;
+
+            document.querySelectorAll('.permission-editor-row').forEach((row) => {
+                if (row !== target) {
+                    row.classList.add('hidden');
+                }
+            });
+
+            target.classList.toggle('hidden');
+        });
+    });
+
+    closeButtons.forEach((btn) => {
+        btn.addEventListener('click', function () {
+            const target = document.getElementById(this.dataset.target);
+            if (target) {
+                target.classList.add('hidden');
+            }
+        });
+    });
+
+    filterRows();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Audit report{% endtrans %}{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+  <div class="rounded-4 p-4 p-lg-5 border bg-white shadow-sm">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+      <div>
+        <div class="text-uppercase small text-muted fw-bold">{% trans %}Traceability{% endtrans %}</div>
+        <h1 class="fw-bold mb-1">{% trans %}Audit Report{% endtrans %}</h1>
+        <div class="text-muted">{% trans %}Historique des actions sensibles du back-office.{% endtrans %}</div>
+      </div>
+      <a href="{{ path('admin_ops_index') }}" class="btn btn-dark rounded-pill px-4">
+        {% trans %}Retour Ops Center{% endtrans %}
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>{% trans %}Événement{% endtrans %}</th>
+            <th>{% trans %}Acteur{% endtrans %}</th>
+            <th>{% trans %}Niveau{% endtrans %}</th>
+            <th>{% trans %}Date{% endtrans %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in logs %}
+            <tr>
+              <td>{{ log.event }}</td>
+              <td>{{ log.actor }}</td>
+              <td><span class="badge text-bg-dark rounded-pill">{{ log.level }}</span></td>
+              <td>{{ log.createdAt|date('d/m/Y H:i') }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="4" class="text-center text-muted">
+                {% trans %}Aucune donnée disponible.{% endtrans %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,109 @@
+/* Même rendu pour les badges « Offre d'emploi » et « Demande d'emploi ». */
+	.mol-publication-badge,
+	.anpub-badge {
+		position: absolute !important;
+		top: 12px !important;
+		right: 12px !important;
+		z-index: 6 !important;
+		display: inline-flex !important;
+		align-items: center !important;
+		gap: 6px !important;
+		padding: 6px 10px !important;
+		border-radius: 999px !important;
+		background: rgba(5, 36, 92, .18) !important;
+		border: 1px solid rgba(255, 255, 255, .70) !important;
+		backdrop-filter: blur(1px) !important;
+		-webkit-backdrop-filter: blur(1px) !important;
+		filter: none !important;
+		opacity: 1 !important;
+		color: #fff !important;
+		box-shadow: 0 8px 20px rgba(5, 36, 92, .22) !important;
+		font-size: 9px !important;
+		font-weight: 900 !important;
+		letter-spacing: .08em !important;
+		line-height: normal !important;
+		text-transform: uppercase !important;
+		text-shadow: none !important;
+		white-space: nowrap !important;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	.mol-publication-badge i,
+	.anpub-badge i {
+		color: #fff !important;
+	}
+
+	/* Footer des annonces : même composition que les offres, en bleu. */
+	.anpub-card .anpub-footer {
+		display: flex !important;
+		align-items: center !important;
+		justify-content: space-between !important;
+		gap: 10px !important;
+		min-height: 53px !important;
+		margin-top: auto !important;
+		padding: 10px 12px !important;
+		border-top: 1px solid rgba(40, 97, 235, .18) !important;
+		background: linear-gradient(90deg, rgba(40, 97, 235, .09), rgba(76, 73, 230, .08)) !important;
+	}
+
+	.anpub-card .anpub-date {
+		display: inline-flex !important;
+		align-items: center !important;
+		gap: 6px !important;
+		min-width: 0 !important;
+		color: #24447c !important;
+		font-size: 11px !important;
+		font-weight: 600 !important;
+		white-space: nowrap !important;
+	}
+
+	.anpub-card .anpub-date i {
+		margin: 0 !important;
+		color: #2861eb !important;
+		font-size: 16px !important;
+	}
+
+	.anpub-card .anpub-view {
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		flex: 0 0 auto !important;
+		min-height: 34px !important;
+		padding: 8px 14px !important;
+		border: 0 !important;
+		border-radius: 999px !important;
+		background: linear-gradient(90deg, #2861eb 0%, #3a55e8 50%, #4c49e6 100%) !important;
+		color: #fff !important;
+		box-shadow: 0 8px 18px rgba(49, 82, 232, .24) !important;
+		font-size: 10px !important;
+		font-weight: 900 !important;
+		line-height: 1 !important;
+		text-decoration: none !important;
+		white-space: nowrap !important;
+		transition: transform .2s ease, box-shadow .2s ease, filter .2s ease !important;
+	}
+
+	.anpub-card .anpub-view:hover,
+	.anpub-card .anpub-view:focus-visible {
+		color: #fff !important;
+		transform: translateY(-1px) !important;
+		filter: saturate(1.08) !important;
+		box-shadow: 0 10px 22px rgba(49, 82, 232, .32) !important;
+	}
+
+	@media (max-width: 420px) {
+		.anpub-card .anpub-footer {
+			padding-right: 10px !important;
+			padding-left: 10px !important;
+		}
+
+		.anpub-card .anpub-date {
+			font-size: 10px !important;
+		}
+
+		.anpub-card .anpub-view {
+			padding-right: 12px !important;
+			padding-left: 12px !important;
+			font-size: 9px !important;
+		}
+	}

@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Modérateur • Signalements Jobs'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_report_jobs.html.twig" %}
+
+
+<div class="mod-page">
+  <div class="wrap">
+
+    <div class="card">
+      <div class="hd">
+        <div>
+          <div class="h1">📦 {% trans %}Signalements (Jobs){% endtrans %}</div>
+          <div class="hint">{% trans %}Gestion des annonces signalées (pending/reviewed/rejected/resolved) + analytics.{% endtrans %}</div>
+        </div>
+        <div class="filters">
+          <a class="btn" href="{{ path('moderateur_reports_index', {status: 'open'}) }}">👤 {% trans %}Signalements Comptes{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div class="bd">
+        <div class="kpis">
+          <div class="kpi"><div class="t">{% trans %}Pending (14j){% endtrans %}</div><div class="v">{{ stats.kpi.pending ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Reviewed (14j){% endtrans %}</div><div class="v">{{ stats.kpi.reviewed ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Rejected (14j){% endtrans %}</div><div class="v">{{ stats.kpi.rejected ?? 0 }}</div></div>
+          <div class="kpi"><div class="t">{% trans %}Resolved (14j){% endtrans %}</div><div class="v">{{ stats.kpi.resolved ?? 0 }}</div></div>
+        </div>
+
+        <form method="get" action="{{ path('moderateur_report_jobs_index') }}" style="margin-top:14px;">
+          <div class="filters">
+            <select class="select" name="status">
+              <option value="">{% trans %}— Tous statuts —{% endtrans %}</option>
+              {% for st in ['pending','reviewed','rejected','resolved'] %}
+                <option value="{{ st }}" {{ status == st ? 'selected' : '' }}>{{ st|trans }}</option>
+              {% endfor %}
+            </select>
+            <input class="input" type="search" name="q" value="{{ q }}" placeholder="{{ 'Rechercher (raison, email)…'|trans }}">
+            <button class="btn warn" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+            <a class="btn" href="{{ path('moderateur_report_jobs_index') }}">{% trans %}Réinitialiser{% endtrans %}</a>
+          </div>
+        </form>
+
+        <div class="grid" style="margin-top:14px;">
+          <div class="col-8">
+            <div class="chartbox">
+              <div style="font-weight:950;margin-bottom:10px;">{% trans %}Reports Jobs (14 jours){% endtrans %}</div>
+              <canvas id="jobArea14"></canvas>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="chartbox">
+              <div style="font-weight:950;margin-bottom:10px;">{% trans %}Pie — Statuts (14j){% endtrans %}</div>
+              <canvas id="jobPie"></canvas>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="chartbox">
+              <div style="font-weight:950;margin-bottom:10px;">{% trans %}Horizontal Bar — Top Jobs signalés (30j){% endtrans %}</div>
+              <canvas id="jobTop"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="chartbox tablebox" style="margin-top:14px;">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;">
+            <div>
+              <div style="font-weight:950;">{% trans %}Liste des signalements Jobs{% endtrans %}</div>
+              <div class="muted" style="font-size:12px;">{% trans %}Ouvrir pour décider : reviewed / rejected / resolved.{% endtrans %}</div>
+            </div>
+            <div class="muted" style="font-size:12px;">{% trans %}Total:{% endtrans %} <b>{{ total }}</b></div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{% trans %}Job{% endtrans %}</th>
+                  <th>{% trans %}Utilisateur{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Date{% endtrans %}</th>
+                  <th style="text-align:right;">{% trans %}Action{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in items %}
+                  {% set st = (r.status ?? 'pending') %}
+                  {% set stInfo = {
+                    'pending':  {'label':'PENDING', 'icon':'⏳', 'cls':'st-pending'},
+                    'reviewed': {'label':'REVIEWED', 'icon':'👀', 'cls':'st-reviewed'},
+                    'rejected': {'label':'REJECTED', 'icon':'⛔', 'cls':'st-rejected'},
+                    'resolved': {'label':'RESOLVED', 'icon':'✅', 'cls':'st-resolved'}
+                  } %}
+                  {% set meta = stInfo[st] ?? {'label': st|upper, 'icon':'•', 'cls':''} %}
+
+                  <tr>
+                    <td>#{{ r.id }}</td>
+                    <td class="muted">{{ r.job ? (r.job.title ?? ('Job #' ~ r.job.id)) : '—' }}</td>
+                    <td class="muted">{{ r.user ? (r.user.email ?? ('#' ~ r.user.id)) : 'Anonyme'|trans }}</td>
+
+                    <td>
+                      <span class="st-chip {{ meta.cls }}">
+                        <span class="st-ico">{{ meta.icon }}</span>
+                        {{ meta.label|trans }}
+                      </span>
+                    </td>
+
+                    <td class="muted">{{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                    <td style="text-align:right;">
+                      <a class="btn primary" href="{{ path('moderateur_report_jobs_show', {id:r.id}) }}">{% trans %}Ouvrir{% endtrans %}</a>
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="6" class="muted" style="padding:18px;text-align:center;">{% trans %}Aucun signalement{% endtrans %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(() => {
+  const stats = {{ stats|json_encode|raw }};
+  const dailyLabels = stats.daily.labels || [];
+  const dailyValues = stats.daily.values || [];
+  const byStatus = stats.byStatus || {};
+
+  const pending  = Number(byStatus.pending || 0);
+  const reviewed = Number(byStatus.reviewed || 0);
+  const rejected = Number(byStatus.rejected || 0);
+  const resolved = Number(byStatus.resolved || 0);
+
+  const top = stats.topJobs || [];
+  const topLabels = top.map(x => x.label);
+  const topValues = top.map(x => Number(x.value||0));
+
+  new Chart(document.getElementById('jobArea14'), {
+    type: 'line',
+    data: { labels: dailyLabels, datasets: [{ label:'{{ "Reports jobs"|trans|e("js") }}', data: dailyValues, tension:.35, fill:true, borderWidth:2, pointRadius:3 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ display:false } }, y:{ beginAtZero:true } } }
+  });
+
+  new Chart(document.getElementById('jobPie'), {
+    type: 'pie',
+    data: { labels:['{{ "pending"|trans|e("js") }}','{{ "reviewed"|trans|e("js") }}','{{ "rejected"|trans|e("js") }}','{{ "resolved"|trans|e("js") }}'], datasets:[{ data:[pending,reviewed,rejected,resolved], borderWidth:1 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom' } } }
+  });
+
+  new Chart(document.getElementById('jobTop'), {
+    type:'bar',
+    data:{ labels: topLabels, datasets:[{ label:'{{ "Occurrences"|trans|e("js") }}', data: topValues, borderWidth:1 }] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true }, y:{ grid:{ display:false } } } }
+  });
+})();
+</script>
+{% endblock %}

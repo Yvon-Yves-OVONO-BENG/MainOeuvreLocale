@@ -1,0 +1,97 @@
+{# templates/subscription/cancel.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement annulé{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 text-center">
+            <div class="cancel-icon">
+                <i class="fas fa-times-circle text-danger" style="font-size: 80px;"></i>
+            </div>
+            <h2 class="mt-4">Paiement annulé</h2>
+            <p class="text-muted">Vous n'avez pas finalisé votre paiement.</p>
+            <a href="{{ path('subscription_plans') }}" 
+               class="btn btn-primary mt-3 cancel-btn"
+               data-loading-text="<i class='fas fa-spinner fa-spin me-2'></i> Chargement...">
+                <i class="fas fa-arrow-left me-2"></i> Retour aux plans
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.cancel-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* ✅ Style pour le spinner sur le bouton */
+.cancel-btn {
+    transition: all 0.3s ease;
+}
+
+.cancel-btn.loading {
+    pointer-events: none !important;
+    opacity: 0.8 !important;
+    cursor: wait !important;
+}
+
+.cancel-btn.loading i:not(.fa-spinner) {
+    display: none !important;
+}
+
+/* Animation d'entrée */
+.container {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+{# ✅ JavaScript pour le spinner #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btn = document.querySelector('.cancel-btn');
+    
+    if (btn) {
+        btn.addEventListener('click', function(e) {
+            // Ne pas ajouter de spinner si déjà en chargement
+            if (this.classList.contains('loading')) {
+                e.preventDefault();
+                return;
+            }
+            
+            // Sauvegarder l'URL
+            const href = this.href;
+            const loadingText = this.dataset.loadingText || '<i class="fas fa-spinner fa-spin me-2"></i> Chargement...';
+            
+            // Ajouter la classe loading
+            this.classList.add('loading');
+            
+            // Remplacer le contenu par le spinner
+            this.innerHTML = loadingText;
+            
+            // Rediriger après un court délai pour montrer le spinner
+            setTimeout(function() {
+                window.location.href = href;
+            }, 300);
+        });
+    }
+});
+</script>
+{% endblock %}

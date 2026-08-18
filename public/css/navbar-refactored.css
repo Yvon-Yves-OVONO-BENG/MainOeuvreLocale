@@ -1,0 +1,495 @@
+
+    /* FORCER LE MENU MOBILE À ÊTRE AU-DESSUS DE TOUT */
+    .pm-mobile-menu,
+    #pmMobileMenu {
+        position: fixed !important;
+        top: 0 !important;
+        right: -420px !important;
+        bottom: 0 !important;
+        width: 400px !important;
+        max-width: 92% !important;
+        height: 100% !important;
+        min-height: 100vh !important;
+        background: #ffffff !important;
+        z-index: 2147483647 !important;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-shadow: -8px 0 40px rgba(0, 0, 0, 0.2) !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .pm-mobile-menu.open,
+    #pmMobileMenu.open {
+        right: 0 !important;
+    }
+
+    .pm-mobile-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 16px 20px !important;
+        border-bottom: 1px solid #eef2f6 !important;
+        flex-shrink: 0 !important;
+        min-height: 70px !important;
+        background: #ffffff !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 2147483647 !important;
+        width: 100% !important;
+    }
+
+    .pm-mobile-close-btn {
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #f1f5f9 !important;
+        border: none !important;
+        border-radius: 50% !important;
+        color: #475569 !important;
+        font-size: 20px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        flex-shrink: 0 !important;
+        z-index: 2147483647 !important;
+    }
+
+    .pm-mobile-body {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        padding: 16px 20px 24px !important;
+        -webkit-overflow-scrolling: touch !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    /* Overlay */
+    .pm-overlay {
+        z-index: 999999 !important;
+    }
+    
+    .mol-auth-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:8px 18px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08);
+    color:#ffffff;
+    font-size:14px;
+    font-weight:700;
+    text-decoration:none;
+    transition:all .2s ease;
+}
+
+.mol-btn-content{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.mol-btn-spinner{
+    display:none;
+}
+
+.mol-auth-login:hover{
+    background:#16a34a;
+    border-color:#16a34a;
+    color:#ffffff;
+}
+
+.mol-auth-register:hover{
+    background:#d4af37;
+    border-color:#d4af37;
+    color:#1f2937;
+}
+
+.mol-auth-btn.is-loading{
+    pointer-events:none;
+    opacity:.85;
+}
+
+.mol-auth-btn.is-loading .mol-btn-content{
+    display:none;
+}
+
+.mol-auth-btn.is-loading .mol-btn-spinner{
+    display:inline-block;
+}
+
+
+
+/* ============================================
+   STYLES RESPONSIVE
+   ============================================ */
+
+/* Desktop - tout visible */
+@media (min-width: 993px) {
+    .pm-mobile-menu,
+    .pm-overlay {
+        display: none !important;
+    }
+    
+    #pmHamburgerBtn {
+        display: none !important;
+    }
+}
+
+/* Tablette et mobile */
+@media (max-width: 992px) {
+    .pm-navbar-pro .pm-navbar-inner > ul {
+        display: none !important;
+    }
+    
+    .pm-navbar-pro .pm-navbar-inner > div:last-child .pm-lang-selector,
+    .pm-navbar-pro .pm-navbar-inner > div:last-child .pm-user-dropdown,
+    .pm-navbar-pro .pm-navbar-inner > div:last-child > a[href*="login"],
+    .pm-navbar-pro .pm-navbar-inner > div:last-child > a[href*="register"] {
+        display: none !important;
+    }
+    
+    .pm-navbar-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+    }
+    
+    .pm-navbar-pro .pm-brand-desktop,
+    .pm-navbar-pro .pm-brand-mobile {
+        order: 1 !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 70% !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+    
+    .pm-navbar-pro .pm-brand img {
+        height: 32px !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .pm-navbar-pro .pm-brand span {
+        font-size: 15px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 160px !important;
+    }
+    
+    #pmHamburgerBtn {
+        display: flex !important;
+        order: 3 !important;
+        flex: 0 0 auto !important;
+        margin-left: auto !important;
+        margin-right: 0 !important;
+        position: relative !important;
+        z-index: 9999 !important;
+    }
+    
+    .pm-navbar-pro .pm-navbar-inner > div:last-child {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        flex: 0 0 auto !important;
+        order: 2 !important;
+    }
+}
+
+/* Mobile uniquement */
+@media (max-width: 576px) {
+    .pm-navbar-pro {
+        padding: 0 12px !important;
+        height: 60px !important;
+        min-height: 60px !important;
+    }
+    
+    .pm-navbar-pro .pm-brand img {
+        height: 28px !important;
+    }
+    
+    .pm-navbar-pro .pm-brand span {
+        font-size: 13px !important;
+        max-width: 120px !important;
+    }
+    
+    @media (max-width: 400px) {
+        .pm-navbar-pro .pm-brand span {
+            font-size: 11px !important;
+            max-width: 80px !important;
+        }
+        .pm-navbar-pro .pm-brand img {
+            height: 24px !important;
+        }
+        .pm-navbar-pro .pm-brand {
+            gap: 4px !important;
+        }
+    }
+    
+    .pm-mobile-menu {
+        width: 92% !important;
+        max-width: 320px !important;
+        right: -100% !important;
+    }
+    
+    #pmHamburgerBtn {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    
+    #pmHamburgerBtn span {
+        width: 18px !important;
+        height: 2px !important;
+    }
+}
+
+/* Surbrillance des liens actifs */
+.pm-menu-link.active {
+    font-weight: 600 !important;
+}
+
+.pm-navbar-pro:not(.scrolled) .pm-menu-link.active {
+    background: rgba(255, 255, 255, 0.20) !important;
+    color: #ffffff !important;
+}
+
+.pm-navbar-pro.scrolled .pm-menu-link.active {
+    background: rgba(37, 99, 235, 0.10) !important;
+    color: #2563eb !important;
+}
+
+/* Hover */
+.pm-navbar-pro:not(.scrolled) .pm-navbar-inner > ul li a:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-1px);
+}
+
+.pm-navbar-pro.scrolled .pm-navbar-inner > ul li a:hover {
+    background: rgba(37, 99, 235, 0.08) !important;
+}
+
+/* Dropdown hover desktop */
+.pm-dropdown:hover .pm-dropdown-menu {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+.pm-dropdown:hover .pm-dropdown-toggle .fa-chevron-down {
+    transform: rotate(180deg);
+}
+
+
+/* ============================================
+   FORCER LES LIENS EN BLANC ET GRAS SUR L'ACCUEIL
+   ============================================ */
+
+/* Sur la page d'accueil, quand la navbar n'est pas scrollée */
+.pm-navbar-pro:not(.scrolled) .pm-menu-link {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+.pm-navbar-pro:not(.scrolled) .pm-menu-link i {
+    color: #ffffff !important;
+}
+
+.pm-navbar-pro:not(.scrolled) .pm-menu-link.active {
+    background: rgba(255, 255, 255, 0.20) !important;
+    color: #ffffff !important;
+}
+
+.pm-navbar-pro:not(.scrolled) .pm-menu-link.active i {
+    color: #ffffff !important;
+}
+
+/* Sur la page d'accueil, quand la navbar est scrollée */
+.pm-navbar-pro.scrolled .pm-menu-link {
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+}
+
+.pm-navbar-pro.scrolled .pm-menu-link i {
+    color: #1f2937 !important;
+}
+
+.pm-navbar-pro.scrolled .pm-menu-link.active {
+    background: rgba(37, 99, 235, 0.10) !important;
+    color: #2563eb !important;
+}
+
+.pm-navbar-pro.scrolled .pm-menu-link.active i {
+    color: #2563eb !important;
+}
+
+/* ============================================
+   FORCER LES COULEURS DE LA NAVBAR - CORRIGÉ
+   ============================================ */
+
+/* État par défaut sur l'accueil (transparent) */
+.pm-navbar-pro:not(.scrolled) .pm-menu-link {
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+.pm-navbar-pro:not(.scrolled) .pm-menu-link i {
+    color: #ffffff !important;
+}
+
+.pm-navbar-pro:not(.scrolled) .pm-menu-link.active {
+    background: rgba(255, 255, 255, 0.20) !important;
+    color: #ffffff !important;
+}
+
+.pm-navbar-pro:not(.scrolled) .pm-menu-link.active i {
+    color: #ffffff !important;
+}
+
+/* État scrollé sur l'accueil */
+.pm-navbar-pro.scrolled .pm-menu-link {
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+}
+
+.pm-navbar-pro.scrolled .pm-menu-link i {
+    color: #1f2937 !important;
+}
+
+.pm-navbar-pro.scrolled .pm-menu-link.active {
+    background: rgba(37, 99, 235, 0.10) !important;
+    color: #2563eb !important;
+}
+
+.pm-navbar-pro.scrolled .pm-menu-link.active i {
+    color: #2563eb !important;
+}
+
+/* FORCER les couleurs sur toutes les pages sauf accueil */
+.pm-navbar-pro:not(.scrolled):not(.pm-navbar-home) .pm-menu-link {
+    color: #1f2937 !important;
+    font-weight: 500 !important;
+}
+
+.pm-navbar-pro:not(.scrolled):not(.pm-navbar-home) .pm-menu-link i {
+    color: #1f2937 !important;
+}
+
+/* FORCER le logo à être visible sur toutes les pages */
+.pm-navbar-pro:not(.scrolled) .pm-brand img {
+    filter: brightness(0) invert(1);
+    transition: filter 0.35s ease;
+}
+
+.pm-navbar-pro.scrolled .pm-brand img {
+    filter: none !important;
+}
+
+.pm-navbar-pro:not(.pm-navbar-home) .pm-brand img {
+    filter: none !important;
+}
+
+/* FORCER la couleur du hamburger */
+.pm-navbar-pro:not(.scrolled) #pmHamburgerBtn span {
+    background: #ffffff !important;
+}
+
+.pm-navbar-pro.scrolled #pmHamburgerBtn span {
+    background: #1f2937 !important;
+}
+
+.pm-navbar-pro:not(.pm-navbar-home) #pmHamburgerBtn span {
+    background: #1f2937 !important;
+}
+
+.mol-auth-login:hover,
+.pm-navbar-pro.scrolled .mol-auth-login:hover,
+.pm-navbar-pro:not(.scrolled) .mol-auth-login:hover {
+    background: #85ca18 !important;
+    border-color: #16a34a !important;
+    color: #ffffff !important;
+}
+
+.mol-auth-register:hover,
+.pm-navbar-pro.scrolled .mol-auth-register:hover,
+.pm-navbar-pro:not(.scrolled) .mol-auth-register:hover {
+    background: #ffd400 !important;
+    border-color: #d4af37 !important;
+    color: #1f2937 !important;
+}
+
+.mol-auth-login:hover {
+    background: #85ca18 !important;
+    border-color: #16a34a !important;
+    color: #ffffff !important;
+}
+
+.mol-auth-register:hover {
+    background: #ffd400 !important;
+    border-color: #d4af37 !important;
+    color: #1f2937 !important;
+}
+
+
+/* Desktop par défaut */
+.pm-brand-desktop {
+    display: flex;
+}
+
+.pm-brand-mobile {
+    display: none;
+}
+
+/* Mobile */
+@media (max-width: 767.98px) {
+    .pm-brand-desktop {
+        display: none !important;
+    }
+
+    .pm-brand-mobile {
+        display: flex !important;
+    }
+}
+
+/* ============================================
+   GESTION CORRECTE DES LOGOS
+   ============================================ */
+
+/* Desktop et tablette */
+.pm-navbar-pro .pm-brand-desktop {
+    display: flex !important;
+}
+
+.pm-navbar-pro .pm-brand-mobile {
+    display: none !important;
+}
+
+/* Mobile uniquement */
+@media screen and (max-width: 767.98px) {
+    .pm-navbar-pro .pm-brand-desktop {
+        display: none !important;
+    }
+
+    .pm-navbar-pro .pm-brand-mobile {
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        max-width: 70% !important;
+    }
+
+    .pm-navbar-pro .pm-brand-mobile img {
+        display: block !important;
+        height: 32px !important;
+        width: auto !important;
+        max-width: 100% !important;
+        object-fit: contain !important;
+    }
+}

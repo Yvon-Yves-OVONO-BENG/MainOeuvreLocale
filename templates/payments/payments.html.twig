@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Paiements • Factures{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "payments/_vip_ui.html.twig" %}
+
+<div class="pay-wrap">
+  <div class="pay-head">
+    <div>
+      <div class="pay-title">🧾 {% trans %}Paiements{% endtrans %}</div>
+      <div class="pay-sub">{% trans %}Factures & transactions — téléchargez vos justificatifs en 1 clic.{% endtrans %}</div>
+    </div>
+
+    <div class="pay-actions">
+      {# 🔎 Recherche (en haut à droite) #}
+      <form class="pay-search" method="get" action="{{ path('payments_index') }}">
+        <span class="muted">🔎</span>
+        <input
+          type="text"
+          name="q"
+          value="{{ q }}"
+          placeholder="{% trans %}Rechercher (facture, provider, montant, devise...){% endtrans %}"
+        />
+        <input type="hidden" name="page" value="1">
+      </form>
+
+      <a class="pay-btn" href="{{ path('payments_index') }}">↻ {% trans %}Rafraîchir{% endtrans %}</a>
+    </div>
+  </div>
+
+  <div class="pay-body">
+
+    <div class="pay-kpis">
+      <div class="pay-kpi">
+        <div class="k1">{% trans %}Total factures{% endtrans %}</div>
+        <div class="k2">{{ total }}</div>
+      </div>
+      <div class="pay-kpi">
+        <div class="k1">{% trans %}Page{% endtrans %}</div>
+        <div class="k2">{{ page }} / {{ pages }}</div>
+      </div>
+    </div>
+
+    {% if invoices is defined and invoices|length > 0 %}
+      <div class="pay-scroll">
+        <table class="pay-table">
+          <thead>
+            <tr>
+              <th>{% trans %}Mode{% endtrans %}</th>
+              <th>{% trans %}Facture{% endtrans %}</th>
+              <th>{% trans %}Montant{% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+              <th class="text-end">{% trans %}Télécharger{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for inv in invoices %}
+              {% set p = inv.payment ?? null %}
+              {% set providerName = (p and p.provider) ? (p.provider.provider ?? '—') : '—' %}
+
+              {# ⚠️ Ton entity Payment a getSatusPayment() (typo) : on supporte les 2 pour être safe #}
+              {% set sp = p ? (p.satusPayment ?? p.statusPayment ?? null) : null %}
+              {% set statusLabel = sp ? (sp.status ?? sp.statusPayment ?? '') : '' %}
+
+              <tr>
+                <td>
+                  <span class="pill">💳 {{ providerName }}</span>
+                  {% if statusLabel %}
+                    <div class="muted" style="margin-top:6px;">{{ statusLabel }}</div>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div style="font-weight:1000;">
+                    {{ inv.invoiceNumber ?? ('INV-' ~ inv.id) }}
+                  </div>
+                  <div class="muted">
+                    {{ inv.createdAt ? inv.createdAt|date('d/m/Y H:i') : '' }}
+                  </div>
+                </td>
+
+                <td class="amt">
+                  {{ p ? (p.amount ?? '—') : '—' }} {{ p ? (p.currency ?? 'FCFA') : 'FCFA' }}
+                </td>
+
+                <td>
+                  <span class="muted">
+                    {{ p and p.paidAt ? p.paidAt|date('d/m/Y H:i') : '—' }}
+                  </span>
+                </td>
+
+                <td class="text-end">
+                  {% if inv.slug %}
+                    <a class="dl" href="{{ path('invoice_download', {slug: inv.slug}) }}" target="_blank" rel="noopener">
+                      ⬇️ {% trans %}Télécharger{% endtrans %}
+                    </a>
+                  {% else %}
+                    <span class="dl disabled">⬇️ {% trans %}Télécharger{% endtrans %}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {# Pagination #}
+      <div class="pay-foot">
+        <div class="muted">
+          {% set from = ((page - 1) * limit) + 1 %}
+          {% set to = ((page - 1) * limit) + invoices|length %}
+          {% trans with {'%from%': from, '%to%': to, '%total%': total} %}
+            Affichage %from%–%to% sur %total%
+          {% endtrans %}
+        </div>
+
+        {% if pages > 1 %}
+          <div class="pager">
+            {% set prev = page > 1 ? page - 1 : 1 %}
+            {% set next = page < pages ? page + 1 : pages %}
+
+            <a class="pg" href="{{ path('payments_index', {page: prev, q: q}) }}">←</a>
+
+            {# Pages (compact) #}
+            {% set start = page - 2 %}
+            {% set end = page + 2 %}
+            {% if start < 1 %}{% set start = 1 %}{% endif %}
+            {% if end > pages %}{% set end = pages %}{% endif %}
+
+            {% if start > 1 %}
+              <a class="pg" href="{{ path('payments_index', {page: 1, q: q}) }}">1</a>
+              {% if start > 2 %}<span class="muted">…</span>{% endif %}
+            {% endif %}
+
+            {% for i in start..end %}
+              <a class="pg {{ i == page ? 'on' : '' }}" href="{{ path('payments_index', {page: i, q: q}) }}">{{ i }}</a>
+            {% endfor %}
+
+            {% if end < pages %}
+              {% if end < pages - 1 %}<span class="muted">…</span>{% endif %}
+              <a class="pg" href="{{ path('payments_index', {page: pages, q: q}) }}">{{ pages }}</a>
+            {% endif %}
+
+            <a class="pg" href="{{ path('payments_index', {page: next, q: q}) }}">→</a>
+          </div>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <div class="empty">
+        <div class="t1">{% trans %}Aucune facture{% endtrans %}</div>
+        <div class="t2">{% trans %}Dès que vous effectuez un paiement, il apparaîtra ici avec sa facture téléchargeable.{% endtrans %}</div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+Correctif : texte saisi invisible dans les champs de recherche invalides.
+
+Fichiers à remplacer :
+- public/css/search/smart-keyword-search.css
+- public/js/search/smart-keyword-search.js
+- templates/base.html.twig
+
+Le chat n'est pas concerné et aucun fichier du chat n'a été modifié.

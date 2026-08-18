@@ -1,0 +1,519 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suppression de compte | Main d’Œuvre Locale{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .mol-delete-page {
+            --mol-blue: #2563eb;
+            --mol-blue-deep: #1d4ed8;
+            --mol-ink: #0f172a;
+            --mol-muted: #64748b;
+            --mol-line: #e2e8f0;
+            --mol-soft: #f8fafc;
+            --mol-danger: #dc2626;
+            min-height: calc(100vh - 80px);
+            padding: clamp(28px, 5vw, 72px) 16px 80px;
+            background:
+                radial-gradient(circle at 8% 8%, rgba(37, 99, 235, .10), transparent 26rem),
+                linear-gradient(180deg, #f8fbff 0%, #f8fafc 46%, #ffffff 100%);
+            color: var(--mol-ink);
+        }
+
+        .mol-delete-shell {
+            width: min(1120px, 100%);
+            margin: 0 auto;
+        }
+
+        .mol-delete-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 22px;
+            color: #475569;
+            text-decoration: none;
+            font-size: .94rem;
+            font-weight: 700;
+        }
+
+        .mol-delete-back:hover { color: var(--mol-blue); }
+
+        .mol-delete-hero {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(26px, 5vw, 48px);
+            border: 1px solid rgba(148, 163, 184, .22);
+            border-radius: 28px;
+            background: rgba(255, 255, 255, .93);
+            box-shadow: 0 24px 70px rgba(15, 23, 42, .08);
+        }
+
+        .mol-delete-hero::after {
+            content: '';
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            right: -85px;
+            top: -95px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, .18), rgba(14, 165, 233, .05));
+            pointer-events: none;
+        }
+
+        .mol-delete-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            padding: 8px 12px;
+            border: 1px solid #bfdbfe;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: .82rem;
+            font-weight: 800;
+            letter-spacing: .02em;
+        }
+
+        .mol-delete-title {
+            position: relative;
+            z-index: 1;
+            max-width: 760px;
+            margin: 0;
+            font-size: clamp(2rem, 5vw, 3.45rem);
+            line-height: 1.03;
+            letter-spacing: -.045em;
+            font-weight: 850;
+        }
+
+        .mol-delete-lead {
+            position: relative;
+            z-index: 1;
+            max-width: 760px;
+            margin: 18px 0 0;
+            color: var(--mol-muted);
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            line-height: 1.75;
+        }
+
+        .mol-delete-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(300px, .92fr);
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .mol-delete-card {
+            border: 1px solid var(--mol-line);
+            border-radius: 24px;
+            background: #fff;
+            box-shadow: 0 16px 44px rgba(15, 23, 42, .055);
+        }
+
+        .mol-delete-card-body { padding: clamp(22px, 4vw, 34px); }
+
+        .mol-delete-card h2 {
+            margin: 0 0 8px;
+            font-size: clamp(1.35rem, 3vw, 1.65rem);
+            letter-spacing: -.025em;
+            font-weight: 850;
+        }
+
+        .mol-delete-card p {
+            color: var(--mol-muted);
+            line-height: 1.7;
+        }
+
+        .mol-delete-alert {
+            display: flex;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            border-radius: 15px;
+            font-size: .94rem;
+            line-height: 1.55;
+        }
+
+        .mol-delete-alert-success {
+            border: 1px solid #bbf7d0;
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .mol-delete-alert-error {
+            border: 1px solid #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .mol-delete-alert ul { margin: 0; padding-left: 18px; }
+
+        .mol-delete-field { margin-top: 18px; }
+
+        .mol-delete-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #334155;
+            font-size: .9rem;
+            font-weight: 800;
+        }
+
+        .mol-delete-input,
+        .mol-delete-textarea {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            background: #fff;
+            color: var(--mol-ink);
+            font: inherit;
+            outline: none;
+            transition: border-color .18s ease, box-shadow .18s ease;
+        }
+
+        .mol-delete-input {
+            min-height: 50px;
+            padding: 0 14px;
+        }
+
+        .mol-delete-textarea {
+            min-height: 104px;
+            padding: 13px 14px;
+            resize: vertical;
+        }
+
+        .mol-delete-input:focus,
+        .mol-delete-textarea:focus {
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+        }
+
+        .mol-delete-help {
+            margin: 7px 0 0;
+            color: #94a3b8;
+            font-size: .82rem;
+            line-height: 1.5;
+        }
+
+        .mol-delete-check {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 20px;
+            padding: 14px;
+            border: 1px solid #fee2e2;
+            border-radius: 14px;
+            background: #fffafa;
+        }
+
+        .mol-delete-check input {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            accent-color: var(--mol-danger);
+            flex: 0 0 auto;
+        }
+
+        .mol-delete-check label {
+            color: #7f1d1d;
+            font-size: .9rem;
+            line-height: 1.55;
+            cursor: pointer;
+        }
+
+        .mol-delete-submit {
+            width: 100%;
+            min-height: 52px;
+            margin-top: 18px;
+            border: 0;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #fff;
+            font-weight: 850;
+            box-shadow: 0 12px 26px rgba(220, 38, 38, .18);
+            transition: transform .16s ease, box-shadow .16s ease;
+        }
+
+        .mol-delete-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(220, 38, 38, .23);
+        }
+
+        .mol-delete-oauth-note {
+            margin-top: 16px;
+            padding: 13px 14px;
+            border: 1px solid #dbeafe;
+            border-radius: 14px;
+            background: #f8fbff;
+            color: #475569;
+            font-size: .86rem;
+            line-height: 1.55;
+        }
+
+        .mol-delete-info-list {
+            display: grid;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .mol-delete-info-item {
+            display: grid;
+            grid-template-columns: 42px 1fr;
+            gap: 13px;
+            align-items: start;
+            padding: 15px;
+            border: 1px solid #edf2f7;
+            border-radius: 16px;
+            background: #fbfdff;
+        }
+
+        .mol-delete-icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            background: #eff6ff;
+            color: var(--mol-blue);
+            font-size: 1.05rem;
+        }
+
+        .mol-delete-info-item h3 {
+            margin: 1px 0 4px;
+            font-size: .97rem;
+            font-weight: 850;
+        }
+
+        .mol-delete-info-item p { margin: 0; font-size: .88rem; }
+
+        .mol-delete-policy {
+            margin-top: 24px;
+            padding: clamp(22px, 4vw, 34px);
+        }
+
+        .mol-delete-policy-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .mol-delete-policy-item {
+            padding: 18px;
+            border: 1px solid var(--mol-line);
+            border-radius: 17px;
+            background: var(--mol-soft);
+        }
+
+        .mol-delete-policy-item strong {
+            display: block;
+            margin-bottom: 7px;
+            color: #1e293b;
+        }
+
+        .mol-delete-policy-item span {
+            color: #64748b;
+            font-size: .88rem;
+            line-height: 1.55;
+        }
+
+        .mol-delete-footer-note {
+            margin: 22px 0 0;
+            text-align: center;
+            color: #94a3b8;
+            font-size: .82rem;
+        }
+
+        @media (max-width: 860px) {
+            .mol-delete-grid { grid-template-columns: 1fr; }
+            .mol-delete-policy-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 575.98px) {
+            .mol-delete-page { padding-left: 12px; padding-right: 12px; }
+            .mol-delete-hero,
+            .mol-delete-card { border-radius: 20px; }
+            .mol-delete-hero { padding: 24px 20px; }
+            .mol-delete-card-body,
+            .mol-delete-policy { padding: 20px; }
+            .mol-delete-info-item { grid-template-columns: 38px 1fr; padding: 13px; }
+            .mol-delete-icon { width: 38px; height: 38px; }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<main class="mol-delete-page">
+    <div class="mol-delete-shell">
+        <a class="mol-delete-back" href="{{ path('accueil') }}">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+            Retour à Main d’Œuvre Locale
+        </a>
+
+        <section class="mol-delete-hero" aria-labelledby="delete-account-title">
+            <div class="mol-delete-badge">
+                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                Confidentialité & contrôle de vos données
+            </div>
+            <h1 id="delete-account-title" class="mol-delete-title">Supprimer votre compte Main d’Œuvre Locale</h1>
+            <p class="mol-delete-lead">
+                Cette page publique vous permet de demander la suppression de votre compte et le traitement des données qui lui sont associées, depuis un navigateur Web et sans réinstaller l’application mobile.
+            </p>
+        </section>
+
+        <div class="mol-delete-grid">
+            <section class="mol-delete-card" aria-labelledby="delete-form-title">
+                <div class="mol-delete-card-body">
+                    <h2 id="delete-form-title">Envoyer une demande</h2>
+                    <p>Pour éviter qu’un tiers ne supprime votre compte à votre place, nous vérifions votre adresse e-mail et votre mot de passe avant d’enregistrer la demande.</p>
+
+                    {% if success %}
+                        <div class="mol-delete-alert mol-delete-alert-success" role="status">
+                            <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+                            <div>
+                                <strong>Demande enregistrée.</strong><br>
+                                Votre demande de suppression a été transmise. Elle sera vérifiée puis traitée conformément au processus de suppression du compte.
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if errors is not empty %}
+                        <div class="mol-delete-alert mol-delete-alert-error" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+                            <ul>
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{{ path('app_suppression_compte') }}" novalidate>
+                        <input type="hidden" name="_token" value="{{ csrf_token('public_account_deletion_request') }}">
+
+                        <div class="mol-delete-field">
+                            <label class="mol-delete-label" for="delete-email">Adresse e-mail du compte</label>
+                            <input
+                                class="mol-delete-input"
+                                id="delete-email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
+                                inputmode="email"
+                                value="{{ form_email }}"
+                                required
+                            >
+                        </div>
+
+                        <div class="mol-delete-field">
+                            <label class="mol-delete-label" for="delete-password">Mot de passe</label>
+                            <input
+                                class="mol-delete-input"
+                                id="delete-password"
+                                name="password"
+                                type="password"
+                                autocomplete="current-password"
+                                required
+                            >
+                            <p class="mol-delete-help">Votre mot de passe sert uniquement à vérifier que la demande provient bien du titulaire du compte.</p>
+                        </div>
+
+                        <div class="mol-delete-field">
+                            <label class="mol-delete-label" for="delete-reason">Motif <span style="font-weight:600;color:#94a3b8">(facultatif)</span></label>
+                            <textarea
+                                class="mol-delete-textarea"
+                                id="delete-reason"
+                                name="reason"
+                                maxlength="1000"
+                                placeholder="Vous pouvez nous indiquer la raison de votre départ…"
+                            >{{ form_reason }}</textarea>
+                        </div>
+
+                        <div class="mol-delete-check">
+                            <input id="confirm-delete" name="confirm_delete" type="checkbox" value="1" required>
+                            <label for="confirm-delete">
+                                Je confirme vouloir demander la suppression de mon compte Main d’Œuvre Locale et le traitement des données personnelles qui lui sont associées.
+                            </label>
+                        </div>
+
+                        <button class="mol-delete-submit" type="submit">
+                            <i class="bi bi-trash3 me-2" aria-hidden="true"></i>
+                            Demander la suppression de mon compte
+                        </button>
+                    </form>
+
+                    <div class="mol-delete-oauth-note">
+                        <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                        Si votre compte utilise exclusivement une connexion Google/Facebook et que vous ne disposez pas d’un mot de passe Main d’Œuvre Locale, connectez-vous sur le site puis utilisez l’option de suppression disponible dans les paramètres du compte.
+                    </div>
+                </div>
+            </section>
+
+            <aside class="mol-delete-card" aria-labelledby="delete-process-title">
+                <div class="mol-delete-card-body">
+                    <h2 id="delete-process-title">Ce qui se passe ensuite</h2>
+                    <p>Le processus est conçu pour protéger votre compte tout en respectant votre demande.</p>
+
+                    <div class="mol-delete-info-list">
+                        <div class="mol-delete-info-item">
+                            <div class="mol-delete-icon"><i class="bi bi-person-check"></i></div>
+                            <div>
+                                <h3>1. Vérification</h3>
+                                <p>Nous vérifions que la demande correspond bien au compte concerné.</p>
+                            </div>
+                        </div>
+
+                        <div class="mol-delete-info-item">
+                            <div class="mol-delete-icon"><i class="bi bi-hourglass-split"></i></div>
+                            <div>
+                                <h3>2. Traitement</h3>
+                                <p>Après approbation, le compte est désactivé puis programmé pour suppression ou anonymisation des données personnelles.</p>
+                            </div>
+                        </div>
+
+                        <div class="mol-delete-info-item">
+                            <div class="mol-delete-icon"><i class="bi bi-eraser"></i></div>
+                            <div>
+                                <h3>3. Anonymisation</h3>
+                                <p>Les identifiants directs du compte et les informations personnelles de profil sont supprimés ou rendus anonymes.</p>
+                            </div>
+                        </div>
+
+                        <div class="mol-delete-info-item">
+                            <div class="mol-delete-icon"><i class="bi bi-lock"></i></div>
+                            <div>
+                                <h3>4. Données conservées</h3>
+                                <p>Certaines données strictement nécessaires à la sécurité, à la prévention de la fraude ou aux obligations légales peuvent être conservées uniquement pendant la durée requise.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <section class="mol-delete-card mol-delete-policy" aria-labelledby="delete-data-title">
+            <h2 id="delete-data-title">Données concernées par la demande</h2>
+            <p>Selon les fonctionnalités utilisées sur votre compte, la suppression peut concerner notamment les éléments suivants.</p>
+
+            <div class="mol-delete-policy-grid">
+                <div class="mol-delete-policy-item">
+                    <strong>Compte & profil</strong>
+                    <span>Adresse e-mail, téléphone, photo, informations de profil, préférences et données d’identification du compte.</span>
+                </div>
+                <div class="mol-delete-policy-item">
+                    <strong>Contenus liés au compte</strong>
+                    <span>Les données personnelles associées aux annonces, candidatures, interactions ou autres contenus sont supprimées ou anonymisées lorsque cela est techniquement et légalement applicable.</span>
+                </div>
+                <div class="mol-delete-policy-item">
+                    <strong>Conservation limitée</strong>
+                    <span>Les éléments devant être conservés pour une obligation légale, comptable, de sécurité ou de lutte contre la fraude restent limités au strict nécessaire puis sont supprimés ou anonymisés à l’issue de la durée applicable.</span>
+                </div>
+            </div>
+        </section>
+
+        <p class="mol-delete-footer-note">
+            Page officielle de suppression de compte — Main d’Œuvre Locale · maindoeuvrelocale.com
+        </p>
+    </div>
+</main>
+{% endblock %}

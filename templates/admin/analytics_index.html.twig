@@ -1,0 +1,413 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Analytics{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),radial-gradient(900px_circle_at_22%_88%,rgba(16,185,129,.10),transparent_55%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)] text-slate-900">
+  <div class="mx-auto max-w-[1440px] px-4 py-6 lg:py-8 space-y-6">
+
+    {# HERO #}
+    <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)]">
+      <div class="bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.16),transparent_60%),radial-gradient(800px_circle_at_90%_30%,rgba(6,182,212,.12),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.72))] p-5">
+        <div class="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div>
+            <div class="text-sm font-semibold text-slate-500">{% trans %}Pilotage • Performance • Risque{% endtrans %}</div>
+            <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">📊 {% trans %}Centre Analytics{% endtrans %}</h1>
+            <p class="mt-2 max-w-3xl text-sm font-medium text-slate-600">
+              {% trans %}Supervise la croissance, les revenus, la qualité des comptes, les signaux de fraude et l’efficacité opérationnelle.{% endtrans %}
+            </p>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+              <span class="inline-flex items-center gap-2 rounded-full border border-indigo-200/70 bg-indigo-50 px-3 py-1.5 text-[11px] font-extrabold text-indigo-700">
+                👥 {% trans %}Utilisateurs actifs{% endtrans %} : {{ kpis.activeUsers|number_format(0, ',', ' ') }}
+              </span>
+              <span class="inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-3 py-1.5 text-[11px] font-extrabold text-emerald-700">
+                💳 {% trans %}Revenus{% endtrans %} : {{ kpis.revenue|number_format(0, ',', ' ') }} FCFA
+              </span>
+              <span class="inline-flex items-center gap-2 rounded-full border border-rose-200/70 bg-rose-50 px-3 py-1.5 text-[11px] font-extrabold text-rose-700">
+                🚨 {% trans %}Signaux fraude{% endtrans %} : {{ kpis.fraudSignals }}
+              </span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 shadow-[0_10px_30px_rgba(2,6,23,.06)] hover:bg-slate-50">
+              ← {% trans %}Tableau de bord{% endtrans %}
+            </a>
+            <button type="button"
+                    id="toggleInsightsBtn"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-[0_10px_30px_rgba(15,23,42,.16)] hover:opacity-95">
+              ⚡ {% trans %}Vue rapide{% endtrans %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# FILTERS #}
+    <section class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <form method="get" class="grid gap-3 lg:grid-cols-[220px,220px,1fr]">
+        <select name="range"
+                class="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none">
+          <option value="7d" {{ range == '7d' ? 'selected' : '' }}>{% trans %}7 jours{% endtrans %}</option>
+          <option value="30d" {{ range == '30d' ? 'selected' : '' }}>{% trans %}30 jours{% endtrans %}</option>
+          <option value="90d" {{ range == '90d' ? 'selected' : '' }}>{% trans %}90 jours{% endtrans %}</option>
+          <option value="12m" {{ range == '12m' ? 'selected' : '' }}>{% trans %}12 mois{% endtrans %}</option>
+        </select>
+
+        <select name="segment"
+                class="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none">
+          <option value="global" {{ segment == 'global' ? 'selected' : '' }}>{% trans %}Global{% endtrans %}</option>
+          <option value="talents" {{ segment == 'talents' ? 'selected' : '' }}>{% trans %}Talents{% endtrans %}</option>
+          <option value="companies" {{ segment == 'companies' ? 'selected' : '' }}>{% trans %}Compagnies{% endtrans %}</option>
+          <option value="payments" {{ segment == 'payments' ? 'selected' : '' }}>{% trans %}Paiements{% endtrans %}</option>
+          <option value="moderation" {{ segment == 'moderation' ? 'selected' : '' }}>{% trans %}Modération{% endtrans %}</option>
+        </select>
+
+        <div class="flex justify-end">
+          <button class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-5 py-2.5 text-sm font-extrabold text-white hover:opacity-95">
+            🔎 {% trans %}Actualiser{% endtrans %}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    {# KPI GRID #}
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 backdrop-blur-xl shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-slate-500">{% trans %}Inscriptions{% endtrans %}</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-slate-900">{{ kpis.signups|number_format(0, ',', ' ') }}</div>
+        <div class="mt-2 text-xs font-extrabold {{ kpis.signupsDelta >= 0 ? 'text-emerald-700' : 'text-rose-700' }}">
+          {{ kpis.signupsDelta >= 0 ? '+' : '' }}{{ kpis.signupsDelta }}% {% trans %}vs période précédente{% endtrans %}
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-cyan-200/70 bg-cyan-50/70 p-4 backdrop-blur-xl shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-cyan-700">{% trans %}Offres actives{% endtrans %}</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-cyan-900">{{ kpis.activeJobs|number_format(0, ',', ' ') }}</div>
+        <div class="mt-2 text-xs font-extrabold text-cyan-700">
+          +{{ kpis.jobsDelta }}% {% trans %}volume actif{% endtrans %}
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-emerald-200/70 bg-emerald-50/70 p-4 backdrop-blur-xl shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-emerald-700">{% trans %}Revenus{% endtrans %}</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-emerald-900">{{ kpis.revenue|number_format(0, ',', ' ') }}</div>
+        <div class="mt-2 text-xs font-extrabold text-emerald-700">
+          +{{ kpis.revenueDelta }}% {% trans %}croissance{% endtrans %}
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-amber-200/70 bg-amber-50/70 p-4 backdrop-blur-xl shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-amber-700">{% trans %}Conversion{% endtrans %}</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-amber-900">{{ kpis.conversionRate }}%</div>
+        <div class="mt-2 text-xs font-extrabold text-amber-700">
+          +{{ kpis.conversionDelta }} {% trans %}pt{% endtrans %}
+        </div>
+      </div>
+    </section>
+
+    {# MAIN GRID #}
+    <section class="grid gap-4 xl:grid-cols-3">
+      <div class="space-y-4 xl:col-span-2">
+        <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-sm font-extrabold text-slate-900">📈 {% trans %}Croissance utilisateurs{% endtrans %}</div>
+                <div class="text-xs font-semibold text-slate-500">{% trans %}Tendance inscriptions{% endtrans %}</div>
+              </div>
+            </div>
+          </div>
+          <div class="p-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_8px_18px_rgba(2,6,23,.05)] h-[340px]">
+              <canvas id="signupsChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap-4 lg:grid-cols-2">
+          <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+              <div class="text-sm font-extrabold text-slate-900">📣 {% trans %}Offres publiées{% endtrans %}</div>
+              <div class="text-xs font-semibold text-slate-500">{% trans %}Activité des publications{% endtrans %}</div>
+            </div>
+            <div class="p-4">
+              <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_8px_18px_rgba(2,6,23,.05)] h-[300px]">
+                <canvas id="jobsChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+              <div class="text-sm font-extrabold text-slate-900">💳 {% trans %}Revenus{% endtrans %}</div>
+              <div class="text-xs font-semibold text-slate-500">{% trans %}Évolution consolidée{% endtrans %}</div>
+            </div>
+            <div class="p-4">
+              <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_8px_18px_rgba(2,6,23,.05)] h-[300px]">
+                <canvas id="revenueChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div class="text-sm font-extrabold text-slate-900">🌍 {% trans %}Performance par ville{% endtrans %}</div>
+                <div class="text-xs font-semibold text-slate-500">{% trans %}Utilisateurs, offres, revenus{% endtrans %}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-sm">
+              <thead class="bg-slate-50/60">
+                <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+                  <th class="px-5 py-3 font-extrabold">{% trans %}Ville{% endtrans %}</th>
+                  <th class="px-5 py-3 font-extrabold">{% trans %}Utilisateurs{% endtrans %}</th>
+                  <th class="px-5 py-3 font-extrabold">{% trans %}Offres{% endtrans %}</th>
+                  <th class="px-5 py-3 font-extrabold">{% trans %}Revenus{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200/70">
+                {% for city in topCities %}
+                  <tr class="hover:bg-indigo-50/20">
+                    <td class="px-5 py-3 font-bold text-slate-900">{{ city.name }}</td>
+                    <td class="px-5 py-3 text-slate-700 font-semibold">{{ city.users|number_format(0, ',', ' ') }}</td>
+                    <td class="px-5 py-3 text-slate-700 font-semibold">{{ city.jobs|number_format(0, ',', ' ') }}</td>
+                    <td class="px-5 py-3 text-slate-700 font-semibold">{{ city.revenue|number_format(0, ',', ' ') }} FCFA</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div id="quickInsightsCard" class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] p-5">
+          <div class="text-sm font-extrabold text-slate-900">⚡ {% trans %}Vue rapide{% endtrans %}</div>
+          <div class="mt-4 grid gap-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4">
+              <div class="text-xs font-semibold text-slate-500">{% trans %}File de modération{% endtrans %}</div>
+              <div class="mt-1 text-xl font-black text-slate-900">{{ kpis.moderationQueue }}</div>
+            </div>
+            <div class="rounded-2xl border border-amber-200/70 bg-amber-50 p-4">
+              <div class="text-xs font-semibold text-amber-700">{% trans %}KYC en attente{% endtrans %}</div>
+              <div class="mt-1 text-xl font-black text-amber-900">{{ kpis.kycPending }}</div>
+            </div>
+            <div class="rounded-2xl border border-rose-200/70 bg-rose-50 p-4">
+              <div class="text-xs font-semibold text-rose-700">{% trans %}Incidents{% endtrans %}</div>
+              <div class="mt-1 text-xl font-black text-rose-900">{{ kpis.incidents }}</div>
+            </div>
+            <div class="rounded-2xl border border-cyan-200/70 bg-cyan-50 p-4">
+              <div class="text-xs font-semibold text-cyan-700">{% trans %}Support ouvert{% endtrans %}</div>
+              <div class="mt-1 text-xl font-black text-cyan-900">{{ kpis.supportOpen }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+            <div class="text-sm font-extrabold text-slate-900">🎯 {% trans %}Funnel{% endtrans %}</div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Du trafic au paiement{% endtrans %}</div>
+          </div>
+          <div class="p-4 space-y-3">
+            {% set maxFunnel = funnel|map(f => f.value)|first %}
+            {% for step in funnel %}
+              {% set pct = (step.value / funnel[0].value * 100) %}
+              <div>
+                <div class="mb-1 flex items-center justify-between gap-3 text-xs font-semibold text-slate-600">
+                  <span>{{ step.step }}</span>
+                  <span>{{ step.value|number_format(0, ',', ' ') }}</span>
+                </div>
+                <div class="h-2.5 w-full overflow-hidden rounded-full border border-slate-200 bg-slate-50">
+                  <div class="h-full rounded-full bg-gradient-to-r from-indigo-600 to-cyan-500" style="width: {{ pct|number_format(0, '.', '') }}%;"></div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+            <div class="text-sm font-extrabold text-slate-900">🛡️ {% trans %}Qualité plateforme{% endtrans %}</div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}État des profils et risques{% endtrans %}</div>
+          </div>
+          <div class="p-4">
+            <div class="rounded-2xl border border-slate-200 bg-white p-3 shadow-[0_8px_18px_rgba(2,6,23,.05)] h-[260px]">
+              <canvas id="qualityChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] p-5">
+          <div class="flex items-center justify-between gap-3">
+            <div>
+              <div class="text-sm font-extrabold text-slate-900">🚨 {% trans %}Alertes{% endtrans %}</div>
+              <div class="text-xs font-semibold text-slate-500">{% trans %}Signaux à surveiller{% endtrans %}</div>
+            </div>
+          </div>
+
+          <div class="mt-4 space-y-3">
+            {% for alert in alerts %}
+              <div class="rounded-2xl border p-4
+                {{ alert.level == 'high'
+                  ? 'border-rose-200/70 bg-rose-50'
+                  : (alert.level == 'medium'
+                    ? 'border-amber-200/70 bg-amber-50'
+                    : 'border-slate-200 bg-white') }}">
+                <div class="text-sm font-extrabold
+                  {{ alert.level == 'high'
+                    ? 'text-rose-700'
+                    : (alert.level == 'medium'
+                      ? 'text-amber-700'
+                      : 'text-slate-800') }}">
+                  {{ alert.title }}
+                </div>
+                <div class="mt-1 text-xs font-semibold text-slate-600">
+                  {{ alert.description }}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const signupsData = {{ charts.signups|json_encode|raw }};
+  const jobsData = {{ charts.jobs|json_encode|raw }};
+  const revenueData = {{ charts.revenue|json_encode|raw }};
+  const qualityData = {{ quality|json_encode|raw }};
+
+  const lineOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { intersect: false, mode: 'index' }
+    },
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      x: { grid: { display: false }, ticks: { maxRotation: 0 } },
+      y: { beginAtZero: true, grid: { color: 'rgba(15,23,42,.06)' } }
+    }
+  };
+
+  const barOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, grid: { color: 'rgba(15,23,42,.06)' } }
+    }
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 10, boxHeight: 10 } }
+    }
+  };
+
+  const signupsEl = document.getElementById('signupsChart');
+  if (signupsEl) {
+    new Chart(signupsEl, {
+      type: 'line',
+      data: {
+        labels: signupsData.map(x => x.label),
+        datasets: [{
+          label: '{{ "Inscriptions"|trans }}',
+          data: signupsData.map(x => x.value),
+          tension: 0.35,
+          fill: true,
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        }]
+      },
+      options: lineOptions
+    });
+  }
+
+  const jobsEl = document.getElementById('jobsChart');
+  if (jobsEl) {
+    new Chart(jobsEl, {
+      type: 'bar',
+      data: {
+        labels: jobsData.map(x => x.label),
+        datasets: [{
+          label: '{{ "Offres"|trans }}',
+          data: jobsData.map(x => x.value),
+          borderWidth: 1
+        }]
+      },
+      options: barOptions
+    });
+  }
+
+  const revenueEl = document.getElementById('revenueChart');
+  if (revenueEl) {
+    new Chart(revenueEl, {
+      type: 'line',
+      data: {
+        labels: revenueData.map(x => x.label),
+        datasets: [{
+          label: '{{ "Revenus"|trans }}',
+          data: revenueData.map(x => x.value),
+          tension: 0.35,
+          fill: true,
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        }]
+      },
+      options: lineOptions
+    });
+  }
+
+  const qualityEl = document.getElementById('qualityChart');
+  if (qualityEl) {
+    new Chart(qualityEl, {
+      type: 'doughnut',
+      data: {
+        labels: qualityData.map(x => x.label),
+        datasets: [{
+          data: qualityData.map(x => x.value),
+          borderWidth: 1
+        }]
+      },
+      options: doughnutOptions
+    });
+  }
+
+  const quickBtn = document.getElementById('toggleInsightsBtn');
+  const quickCard = document.getElementById('quickInsightsCard');
+
+  quickBtn?.addEventListener('click', () => {
+    quickCard?.classList.toggle('hidden');
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      document.querySelector('select[name="range"]')?.focus();
+    }
+  });
+})();
+</script>
+{% endblock %}

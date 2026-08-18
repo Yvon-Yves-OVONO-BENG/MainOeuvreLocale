@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Backups{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/center/_vip_ui.html.twig' %}
+
+  <div class="ctr-shell" data-center-page="backups">
+    <div class="ctr-container ctr-grid">
+
+      <section class="ctr-card ctr-head">
+        <div class="ctr-card-inner">
+          <div class="ctr-head-top">
+            <div>
+              <div class="ctr-kicker">{% trans %}Centre d’administration • Backups{% endtrans %}</div>
+              <h1 class="ctr-title">{% trans %}Sauvegardes & résilience{% endtrans %}</h1>
+              <p class="ctr-text">
+                {% trans %}Visualise les sauvegardes base, fichiers, configuration et logs dans une vue opérationnelle claire.{% endtrans %}
+              </p>
+            </div>
+          </div>
+
+          {% include 'admin/center/_nav.html.twig' %}
+        </div>
+      </section>
+
+      <section class="ctr-grid ctr-grid-3">
+        <article class="ctr-card ctr-kpi"><div class="ctr-card-inner"><div class="label">{% trans %}Total{% endtrans %}</div><div class="value">{{ stats.total }}</div><div class="hint">{% trans %}Sauvegardes listées{% endtrans %}</div></div></article>
+        <article class="ctr-card ctr-kpi"><div class="ctr-card-inner"><div class="label">{% trans %}Succès{% endtrans %}</div><div class="value">{{ stats.successful }}</div><div class="hint">{% trans %}Backups valides{% endtrans %}</div></div></article>
+        <article class="ctr-card ctr-kpi"><div class="ctr-card-inner"><div class="label">{% trans %}Échecs{% endtrans %}</div><div class="value">{{ stats.failed }}</div><div class="hint">{% trans %}À investiguer{% endtrans %}</div></div></article>
+      </section>
+
+      <section class="ctr-card">
+        <div class="ctr-card-inner">
+          <div>
+            <input type="search" class="ctr-input" placeholder="{% trans %}Rechercher un backup, type, provider...{% endtrans %}" data-center-search="backups">
+          </div>
+
+          <div class="ctr-separator"></div>
+
+          <div class="ctr-table-wrap">
+            <table class="ctr-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Nom{% endtrans %}</th>
+                  <th>{% trans %}Type{% endtrans %}</th>
+                  <th>{% trans %}Provider{% endtrans %}</th>
+                  <th>{% trans %}Taille{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                  <th>{% trans %}Date{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for backup in backups %}
+                  <tr class="js-center-backup"
+                      data-center-text="{{ (backup.name ~ ' ' ~ backup.type ~ ' ' ~ backup.provider ~ ' ' ~ backup.size ~ ' ' ~ backup.status)|lower }}">
+                    <td><div class="ctr-row-title">{{ backup.name }}</div></td>
+                    <td>{{ backup.type }}</td>
+                    <td>{{ backup.provider }}</td>
+                    <td>{{ backup.size }}</td>
+                    <td><span class="ctr-badge {{ backup.status }}">{{ backup.status|capitalize }}</span></td>
+                    <td>{{ backup.createdAt|date('d/m/Y H:i') }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="6">{% trans %}Aucune sauvegarde trouvée.{% endtrans %}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-center.js') }}"></script>
+{% endblock %}

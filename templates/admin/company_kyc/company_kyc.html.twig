@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Queue KYC entreprises{% endtrans %}{% endblock %}
+
+{% block body %}
+<div class="max-w-6xl mx-auto px-4 py-6">
+	<div class="sa-card rounded-3xl p-5">
+		<div class="flex items-center justify-between mb-4">
+			<div>
+				<h1 class="text-2xl font-black text-slate-900">{% trans %}Queue KYC entreprises{% endtrans %}</h1>
+				<div class="text-sm text-slate-500">{% trans %}Dossiers en attente ou en cours de revue{% endtrans %}</div>
+			</div>
+			<span class="sa-chip">{{ cases|length }} {% trans %}dossier(s){% endtrans %}</span>
+		</div>
+
+		<div class="space-y-3">
+			{% for c in cases %}
+				<a href="{{ path('admin_company_kyc_show', {id: c.id}) }}"
+				   class="block sa-card-soft rounded-2xl p-4 hover:bg-slate-50 transition">
+					<div class="flex items-center justify-between gap-3">
+						<div>
+							<div class="font-bold text-slate-900">{{ c.displayCompanyName }}</div>
+							<div class="text-sm text-slate-500 mt-1">{{ c.displayCity }}</div>
+						</div>
+
+						<span class="sa-chip
+							{% if c.riskLevel == 'high' %}
+								sa-risk-high
+							{% elseif c.riskLevel == 'medium' %}
+								sa-risk-medium
+							{% else %}
+								sa-risk-low
+							{% endif %}
+						">
+							{{ c.riskLevel }}
+						</span>
+					</div>
+				</a>
+			{% else %}
+				<div class="text-sm text-slate-400">{% trans %}Aucun dossier KYC en attente.{% endtrans %}</div>
+			{% endfor %}
+		</div>
+	</div>
+</div>
+{% endblock %}

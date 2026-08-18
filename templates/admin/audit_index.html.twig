@@ -1,0 +1,217 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Audit (journaux utilisateurs){% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.12),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.10),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 space-y-4">
+
+    <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+      <div class="p-5 border-b border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.74))]">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Sécurité • Connexions • Traces{% endtrans %}</div>
+            <div class="text-2xl font-black tracking-tight text-slate-900">🧾 {% trans %}Audit / Journaux utilisateurs{% endtrans %}</div>
+            <div class="mt-1 text-sm font-medium text-slate-600">
+              {% trans %}Analyse IP, appareil, OS, navigateur, ville/pays + statut session.{% endtrans %}
+            </div>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('admin_audit_export_csv', filters) }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_10px_30px_rgba(2,6,23,.06)] hover:bg-slate-50">
+              ⬇️ {% trans %}Exporter CSV{% endtrans %}
+            </a>
+            <a href="{{ path('tableau_de_bord')}}"
+               class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-3 py-2 text-xs font-extrabold text-white shadow-[0_12px_35px_rgba(2,6,23,.14)] hover:opacity-95">
+              ← {% trans %}Tableau de bord{% endtrans %}
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-4 grid gap-3 sm:grid-cols-3">
+          <div class="rounded-3xl border border-slate-200 bg-white/80 p-4">
+            <div class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">{% trans %}Sessions actives{% endtrans %}</div>
+            <div class="mt-1 text-2xl font-black tracking-tight text-slate-900">{{ kpi.activeSessions }}</div>
+          </div>
+          <div class="rounded-3xl border border-slate-200 bg-white/80 p-4">
+            <div class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">{% trans %}Connexions aujourd’hui{% endtrans %}</div>
+            <div class="mt-1 text-2xl font-black tracking-tight text-slate-900">{{ kpi.todayConnections }}</div>
+          </div>
+          <div class="rounded-3xl border border-slate-200 bg-white/80 p-4">
+            <div class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">{% trans %}Total logs (filtrés){% endtrans %}</div>
+            <div class="mt-1 text-2xl font-black tracking-tight text-slate-900">{{ total }}</div>
+          </div>
+        </div>
+
+        <form class="mt-4 grid gap-3 lg:grid-cols-12" method="get">
+          <div class="lg:col-span-4">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Recherche{% endtrans %}</label>
+            <input name="q" value="{{ filters.q }}"
+                   class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none"
+                   placeholder="{% trans %}email, ip, userAgent, ville…{% endtrans %}">
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Action{% endtrans %}</label>
+            <select name="action" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="">{% trans %}Toutes{% endtrans %}</option>
+              {% for a in actionsList %}
+                <option value="{{ a }}" {{ filters.action == a ? 'selected' : '' }}>{{ a }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Statut session{% endtrans %}</label>
+            <select name="status" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="" {{ filters.status == '' ? 'selected' : '' }}>{% trans %}Toutes{% endtrans %}</option>
+              <option value="connected" {{ filters.status == 'connected' ? 'selected' : '' }}>{% trans %}Active{% endtrans %}</option>
+              <option value="disconnected" {{ filters.status == 'disconnected' ? 'selected' : '' }}>{% trans %}Déconnectée{% endtrans %}</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">IP</label>
+            <input name="ip" value="{{ filters.ip }}"
+                   class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none"
+                   placeholder="41.202…">
+          </div>
+
+          <div class="lg:col-span-1">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Du{% endtrans %}</label>
+            <input type="date" name="from" value="{{ filters.from }}"
+                   class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-2 py-2.5 text-sm font-semibold outline-none">
+          </div>
+
+          <div class="lg:col-span-1">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Au{% endtrans %}</label>
+            <input type="date" name="to" value="{{ filters.to }}"
+                   class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-2 py-2.5 text-sm font-semibold outline-none">
+          </div>
+
+          <div class="lg:col-span-12 flex flex-wrap items-center justify-between gap-2 pt-1">
+            <div class="text-xs font-semibold text-slate-500">
+              {% trans %}Page{% endtrans %} <span class="font-black text-slate-900">{{ page }}</span> / {{ pages }}
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <select name="perPage" class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800">
+                {% for n in [10,20,30,50,100] %}
+                  <option value="{{ n }}" {{ perPage == n ? 'selected' : '' }}>{{ n }}/page</option>
+                {% endfor %}
+              </select>
+
+              <button class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2 text-xs font-extrabold text-white shadow-[0_12px_35px_rgba(79,70,229,.18)] hover:opacity-95">
+                🔎 {% trans %}Filtrer{% endtrans %}
+              </button>
+
+              <a href="{{ path('admin_audit_index') }}"
+                 class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+                ✨ {% trans %}Réinitialiser{% endtrans %}
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50/60">
+            <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-extrabold">{% trans %}Date{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Utilisateur{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">IP</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Appareil{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Ville/Pays{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Action{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Session{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Détails{% endtrans %}</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-200/70">
+            {% for l in logs %}
+              {% set device = l.deviceType ? (attribute(l.deviceType,'name') ?? attribute(l.deviceType,'label') ?? attribute(l.deviceType,'libelle') ?? ('#' ~ l.deviceType.id)) : '—' %}
+              {% set os = l.operatingSystem ? (attribute(l.operatingSystem,'name') ?? attribute(l.operatingSystem,'label') ?? attribute(l.operatingSystem,'libelle') ?? ('#' ~ l.operatingSystem.id)) : '—' %}
+              {% set br = l.browser ? (attribute(l.browser,'name') ?? attribute(l.browser,'label') ?? attribute(l.browser,'libelle') ?? ('#' ~ l.browser.id)) : '—' %}
+              {% set country = l.country ? (attribute(l.country,'name') ?? attribute(l.country,'label') ?? attribute(l.country,'libelle') ?? ('#' ~ l.country.id)) : '—' %}
+
+              <tr class="hover:bg-indigo-50/20">
+                <td class="px-5 py-3 text-xs font-semibold text-slate-500">
+                  {{ l.logedAt ? l.logedAt|date('d/m/Y H:i') : '—' }}
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">{{ l.user ? l.user.email : '—' }}</div>
+                  <div class="text-[11px] font-semibold text-slate-500">#{{ l.user ? l.user.id : '—' }}</div>
+                </td>
+
+                <td class="px-5 py-3 text-xs font-semibold text-slate-600">{{ l.ip ?? '—' }}</td>
+
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">{{ device }}</div>
+                  <div class="text-[11px] font-semibold text-slate-500">{{ os }} • {{ br }}</div>
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">{{ l.ville ?? '—' }}</div>
+                  <div class="text-[11px] font-semibold text-slate-500">{{ country }}</div>
+                </td>
+
+                <td class="px-5 py-3">
+                  {% if l.action %}
+                    <span class="inline-flex items-center rounded-full border border-indigo-200/70 bg-indigo-50 px-2.5 py-1 text-[11px] font-extrabold text-indigo-700">
+                      {{ l.action }}
+                    </span>
+                  {% else %}
+                    <span class="text-xs font-semibold text-slate-400">—</span>
+                  {% endif %}
+                </td>
+
+                <td class="px-5 py-3">
+                  {% if l.disconnectedAt %}
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-extrabold text-slate-700">
+                      ✅ {% trans %}Déconnectée{% endtrans %}
+                    </span>
+                  {% else %}
+                    <span class="inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-2.5 py-1 text-[11px] font-extrabold text-emerald-700">
+                      <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> {% trans %}Active{% endtrans %}
+                    </span>
+                  {% endif %}
+                </td>
+
+                <td class="px-5 py-3">
+                  <a href="{{ path('admin_audit_show', {id: l.id}) }}"
+                     class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 shadow-[0_10px_30px_rgba(2,6,23,.06)] hover:bg-slate-50">
+                    👁️ {% trans %}Voir{% endtrans %}
+                  </a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="8" class="px-5 py-10 text-center text-sm font-semibold text-slate-500">
+                  {% trans %}Aucun log.{% endtrans %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="px-5 py-4 border-t border-slate-200/70 bg-white/60 flex items-center justify-between gap-2">
+        {% set prev = page > 1 ? page - 1 : 1 %}
+        {% set next = page < pages ? page + 1 : pages %}
+
+        <a class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ page <= 1 ? 'opacity-40 pointer-events-none' : '' }}"
+           href="{{ path('admin_audit_index', filters|merge({'page': prev})) }}">← {% trans %}Précédent{% endtrans %}</a>
+
+        <a class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ page >= pages ? 'opacity-40 pointer-events-none' : '' }}"
+           href="{{ path('admin_audit_index', filters|merge({'page': next})) }}">{% trans %}Suivant{% endtrans %} →</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

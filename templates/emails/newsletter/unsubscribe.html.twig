@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Désinscription des alertes offres{% endblock %}
+
+{% block body %}
+
+{% include "emails/newsletter/_vip_ui.html.twig" %}
+
+<div class="nl-wrap">
+    <div class="nl-card">
+        <div class="nl-hero">
+            <span class="nl-badge">Alertes offres</span>
+            <h1>
+                {% if done %}
+                    Désinscription confirmée
+                {% else %}
+                    Gérer votre abonnement
+                {% endif %}
+            </h1>
+            <p>
+                {% if done %}
+                    Votre adresse a bien été retirée des alertes offres Main d’Œuvre Locale.
+                {% else %}
+                    Vous pouvez confirmer la désinscription de cette adresse en un clic.
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="nl-body">
+            <div class="nl-panel">
+                <div style="font-size:12px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:#64748b;">
+                    Adresse concernée
+                </div>
+
+                <div class="nl-email">
+                    {{ subscriber.email }}
+                </div>
+
+                {% if done %}
+                    <div class="nl-state nl-state-success">
+                        <div style="font-size:20px;">✓</div>
+                        <div>
+                            Vous ne recevrez plus les emails liés aux nouvelles offres de votre profession.
+                        </div>
+                    </div>
+
+                    <div class="nl-actions">
+                        <a href="{{ path('accueil') }}" class="nl-btn nl-btn-primary">
+                            Retour à la plateforme
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="nl-text">
+                        En confirmant, vous ne recevrez plus les nouvelles offres correspondant à votre profession.
+                    </div>
+
+                    <div class="nl-actions">
+                        <form method="post" action="{{ path('newsletter_unsubscribe_confirm', {token: token}) }}">
+                            <input type="hidden"
+                                   name="_token"
+                                   value="{{ csrf_token('newsletter_unsubscribe_' ~ subscriber.id) }}">
+                            <button type="submit" class="nl-btn nl-btn-danger">
+                                Confirmer la désinscription
+                            </button>
+                        </form>
+
+                        <a href="{{ path('accueil') }}" class="nl-btn nl-btn-light">
+                            Annuler
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

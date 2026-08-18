@@ -1,0 +1,141 @@
+
+      :root{
+        --mol-bg:#f6f8fc;
+        --mol-card:rgba(255,255,255,.92);
+        --mol-border:rgba(15,23,42,.08);
+        --mol-muted:rgba(15,23,42,.62);
+        --mol-text:rgba(15,23,42,.92);
+        --mol-shadow:0 18px 45px rgba(2,6,23,.08);
+        --mol-shadow-sm:0 10px 25px rgba(2,6,23,.06);
+        --r:22px;
+      }
+    
+      .mol-page{
+        background:
+          radial-gradient(900px circle at 10% 10%, rgba(13,110,253,.12), transparent 55%),
+          radial-gradient(900px circle at 90% 10%, rgba(32,201,151,.10), transparent 55%),
+          var(--mol-bg);
+      }
+    
+      .mol-hero{
+        border-radius:var(--r);
+        padding:24px;
+        background:
+          radial-gradient(1100px circle at 12% 18%, rgba(13,110,253,.18), transparent 58%),
+          radial-gradient(900px circle at 88% 12%, rgba(32,201,151,.14), transparent 55%),
+          linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.72));
+        border:1px solid var(--mol-border);
+        box-shadow: var(--mol-shadow-sm);
+      }
+    
+      .mol-title{ font-weight:950; letter-spacing:-.03em; line-height:1.05; color:var(--mol-text); }
+      .mol-soft{ color:var(--mol-muted); }
+    
+      .mol-card{
+        background:var(--mol-card);
+        border:1px solid var(--mol-border);
+        border-radius:var(--r);
+        box-shadow:var(--mol-shadow-sm);
+        overflow:hidden;
+        transition:.18s ease;
+        animation: molFadeUp .55s ease both;
+      }
+      .mol-card:hover{ transform: translateY(-2px); box-shadow:var(--mol-shadow); }
+    
+      .mol-plan{
+        position:relative;
+        padding:18px;
+        border-radius:var(--r);
+        border:1px solid var(--mol-border);
+        background:rgba(255,255,255,.75);
+        box-shadow:0 10px 26px rgba(2,6,23,.06);
+        height:100%;
+        overflow:hidden;
+      }
+    
+      .mol-plan::before{
+        content:"";
+        position:absolute; inset:-2px;
+        background: radial-gradient(500px circle at 10% 10%, rgba(13,110,253,.14), transparent 60%),
+                    radial-gradient(500px circle at 90% 20%, rgba(32,201,151,.12), transparent 58%);
+        opacity:.8;
+        pointer-events:none;
+      }
+    
+      .mol-plan-inner{ position:relative; z-index:2; }
+    
+      .mol-badge{
+        display:inline-flex; align-items:center; gap:.4rem;
+        padding:.35rem .6rem;
+        border-radius:999px;
+        border:1px solid var(--mol-border);
+        background:rgba(255,255,255,.85);
+        font-weight:900;
+        color:rgba(15,23,42,.75);
+        font-size:.82rem;
+      }
+    
+      .mol-icon{
+        width:48px; height:48px;
+        border-radius:16px;
+        display:flex; align-items:center; justify-content:center;
+        background:rgba(13,110,253,.10);
+        border:1px solid rgba(13,110,253,.18);
+        box-shadow:0 10px 22px rgba(2,6,23,.08);
+        font-size:20px;
+        color:#0d6efd;
+      }
+    
+      .mol-h{
+        font-weight:950;
+        letter-spacing:-.02em;
+        margin:10px 0 6px;
+        color:var(--mol-text);
+      }
+    
+      .mol-price{
+        font-weight:950;
+        letter-spacing:-.02em;
+        font-size:32px;
+        margin:8px 0 0;
+        color:var(--mol-text);
+      }
+      .mol-price small{
+        font-size:14px;
+        font-weight:800;
+        color:var(--mol-muted);
+      }
+    
+      .mol-ul{ list-style:none; padding:0; margin:14px 0 0; }
+      .mol-ul li{
+        display:flex; gap:.55rem;
+        padding:.45rem 0;
+        border-bottom:1px dashed rgba(15,23,42,.10);
+        color:rgba(15,23,42,.78);
+        font-weight:700;
+      }
+      .mol-ul li:last-child{ border-bottom:0; }
+      .mol-ul i{ margin-top:3px; width:18px; text-align:center; color:#0d6efd; }
+    
+      .mol-cta .btn{
+        border-radius:16px;
+        font-weight:900;
+        padding:.65rem .9rem;
+      }
+    
+      /* highlight (plan recommandé) */
+      .mol-featured{
+        border:1px solid rgba(13,110,253,.25) !important;
+        box-shadow:0 18px 45px rgba(13,110,253,.12);
+        transform: translateY(-2px);
+      }
+      .mol-featured .mol-icon{
+        background:rgba(13,110,253,.14);
+        border-color:rgba(13,110,253,.26);
+      }
+    
+      @keyframes molFadeUp{
+        from{ opacity:0; transform: translateY(10px); }
+        to{ opacity:1; transform: translateY(0); }
+      }
+ 

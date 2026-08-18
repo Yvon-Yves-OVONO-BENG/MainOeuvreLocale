@@ -1,0 +1,1832 @@
+<!-- Navbar principale - Complète et corrigée -->
+<nav 
+    class="pm-navbar-pro {% if app.request.attributes.get('_route') == 'accueil' %}pm-navbar-home{% endif %} {% if app.request.attributes.get('_route') != 'accueil' %}scrolled{% endif %}"  
+    role="navigation" 
+    aria-label="Navigation principale"
+    id="mainNavbar"
+    style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        height: 76px;
+        min-height: 76px;
+        z-index: 3000;
+        margin: 0;
+        padding: 0 24px;
+        {% if app.request.attributes.get('_route') == 'accueil' %}
+            background: transparent;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        {% else %}
+            background: #ffffff;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        {% endif %}
+        overflow: visible;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    "
+>
+    <div class="pm-navbar-inner" style="width:100%;max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;">
+        
+        <!-- Logo Desktop -->
+        <a href="{{ path('accueil') }}"
+           class="pm-brand pm-brand-desktop"
+           data-turbo="false"
+           style="align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+        
+            <img
+                src="{{ asset('build/assets/images/brand/logo.png') }}"
+                alt="Main d’Œuvre Locale"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                style="height:40px;width:auto;{% if app.request.attributes.get('_route') == 'accueil' %}filter:brightness(0) invert(1);{% else %}filter:none;{% endif %}transition:filter 0.35s ease;"
+            >
+        </a>
+        
+        <!-- Logo Mobile -->
+        <a href="{{ path('accueil') }}"
+           class="pm-brand pm-brand-mobile"
+           data-turbo="false"
+           style="align-items:center;gap:10px;text-decoration:none;flex-shrink:0;">
+        
+            <img
+                src="{{ asset('build/assets/images/brand/logoMobile.png') }}"
+                alt="Main d’Œuvre Locale"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                style="height:40px;width:auto;{% if app.request.attributes.get('_route') == 'accueil' %}filter:brightness(0) invert(1);{% else %}filter:none;{% endif %}transition:filter 0.35s ease;"
+            >
+        </a>
+
+        <!-- Menu Desktop -->
+        <ul class="pm-desktop-menu" style="display:flex;align-items:center;gap:4px;margin:0;padding:0;list-style:none;flex:1;justify-content:center;">
+            <li style="list-style:none;margin:0;padding:0;">
+                <a class="pm-menu-link {% if app.request.attributes.get('_route') == 'accueil' %}active{% endif %}" 
+                   href="{{ path('accueil') }}" 
+                   data-turbo="false" 
+                   style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.2s ease;background:transparent;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff !important;{% else %}color:#1f2937 !important;{% endif %}{% if app.request.attributes.get('_route') == 'accueil' %}background:rgba(255,255,255,0.20) !important;{% elseif app.request.attributes.get('_route') == 'accueil' %}background:rgba(37,99,235,0.10) !important;{% endif %}">
+                    <i class="fas fa-home" style="font-size:13px;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i> {% trans %}ACCUEIL{% endtrans %}
+                </a>
+            </li>
+            <li style="list-style:none;margin:0;padding:0;">
+                <a class="pm-menu-link {% if app.request.attributes.get('_route') == 'liste_jobs' %}active{% endif %}" 
+                   href="{{ path('liste_jobs') }}" 
+                   data-turbo="false" 
+                   style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.2s ease;background:transparent;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff !important;{% else %}color:#1f2937 !important;{% endif %}{% if app.request.attributes.get('_route') == 'liste_jobs' and app.request.attributes.get('_route') == 'accueil' %}background:rgba(255,255,255,0.20) !important;{% elseif app.request.attributes.get('_route') == 'liste_jobs' %}background:rgba(37,99,235,0.10) !important;{% endif %}">
+                    <i class="fas fa-briefcase" style="font-size:13px;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i> {% trans %}MISSIONS{% endtrans %}
+                </a>
+            </li>
+            <li style="list-style:none;margin:0;padding:0;">
+                <a class="pm-menu-link {% if app.request.attributes.get('_route') == 'liste_talents' %}active{% endif %}" 
+                   href="{{ path('liste_talents') }}" 
+                   data-turbo="false" 
+                   style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.2s ease;background:transparent;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff !important;{% else %}color:#1f2937 !important;{% endif %}{% if app.request.attributes.get('_route') == 'liste_talents' and app.request.attributes.get('_route') == 'accueil' %}background:rgba(255,255,255,0.20) !important;{% elseif app.request.attributes.get('_route') == 'liste_talents' %}background:rgba(37,99,235,0.10) !important;{% endif %}">
+                    <i class="fas fa-star" style="font-size:13px;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i>{% trans %}TALENTS{% endtrans %}
+                </a>
+            </li>
+            <li style="list-style:none;margin:0;padding:0;position:relative;" class="pm-dropdown">
+                <a class="pm-menu-link pm-dropdown-toggle {% if app.request.attributes.get('_route') in ['reputation_companies', 'reputation_particuliers'] %}active{% endif %}" 
+                   href="javascript:void(0);" 
+                   style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.2s ease;background:transparent;cursor:pointer;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff !important;{% else %}color:#1f2937 !important;{% endif %}{% if app.request.attributes.get('_route') in ['reputation_companies', 'reputation_particuliers'] and app.request.attributes.get('_route') == 'accueil' %}background:rgba(255,255,255,0.20) !important;{% elseif app.request.attributes.get('_route') in ['reputation_companies', 'reputation_particuliers'] %}background:rgba(37,99,235,0.10) !important;{% endif %}">
+                    <i class="fas fa-users" style="font-size:13px;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i> {% trans %}EMPLOYEURS{% endtrans %}
+                    <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px;transition:transform 0.25s ease;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i>
+                </a>
+                <ul class="pm-dropdown-menu" style="position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(8px);min-width:200px;padding:8px;background:#ffffff;border:1px solid rgba(15,23,42,0.08);border-radius:14px;box-shadow:0 18px 40px rgba(15,23,42,0.12);opacity:0;visibility:hidden;pointer-events:none;transition:all 0.25s ease;z-index:4000;list-style:none;margin:0;">
+                    <li style="list-style:none;margin:0;padding:0;">
+                        <a href="{{ path('reputation_companies') }}" data-turbo="false" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">
+                            <i class="fas fa-building" style="color:#2563eb;width:18px;"></i> {% trans %}COMPAGNIES{% endtrans %}
+                        </a>
+                    </li>
+                    <li style="list-style:none;margin:0;padding:0;">
+                        <a href="{{ path('reputation_particuliers') }}" data-turbo="false" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">
+                            <i class="fas fa-user-circle" style="color:#2563eb;width:18px;"></i> {% trans %}PARTICULIERS{% endtrans %}
+                        </a>
+                    </li>
+                    
+                </ul>
+            </li>
+
+            {# A PROPOS : placé entre EMPLOYEURS et CONTACT #}
+            <li style="list-style:none;margin:0;padding:0;position:relative;" class="pm-dropdown pm-about-dropdown">
+                <a class="pm-menu-link pm-dropdown-toggle {% if app.request.attributes.get('_route') in ['marketing_story', 'marketing_vision', 'marketing_mission', 'marketing_services'] %}active{% endif %}"
+                   href="javascript:void(0);"
+                   aria-haspopup="true"
+                   aria-expanded="false"
+                   style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.2s ease;background:transparent;cursor:pointer;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff !important;{% else %}color:#1f2937 !important;{% endif %}{% if app.request.attributes.get('_route') in ['marketing_story', 'marketing_vision', 'marketing_mission', 'marketing_services'] %}background:rgba(37,99,235,0.10) !important;{% endif %}">
+                    <i class="fas fa-info-circle" style="font-size:13px;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i>
+                    {% trans %}A PROPOS{% endtrans %}
+                    <i class="fas fa-chevron-down" style="font-size:10px;margin-left:2px;transition:transform 0.25s ease;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i>
+                </a>
+
+                <ul class="pm-dropdown-menu" style="position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(8px);min-width:220px;padding:8px;background:#ffffff;border:1px solid rgba(15,23,42,0.08);border-radius:14px;box-shadow:0 18px 40px rgba(15,23,42,0.12);opacity:0;visibility:hidden;pointer-events:none;transition:all 0.25s ease;z-index:4000;list-style:none;margin:0;">
+                    <li style="list-style:none;margin:0;padding:0;">
+                        <a href="{{ path('marketing_story') }}" data-turbo="false" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">
+                            <i class="fas fa-book-open" style="color:#2563eb;width:18px;"></i> {% trans %}NOTRE HISTOIRE{% endtrans %}
+                        </a>
+                    </li>
+                    <li style="list-style:none;margin:0;padding:0;">
+                        <a href="{{ path('marketing_vision') }}" data-turbo="false" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">
+                            <i class="fas fa-eye" style="color:#2563eb;width:18px;"></i> {% trans %}NOTRE VISION{% endtrans %}
+                        </a>
+                    </li>
+                    <li style="list-style:none;margin:0;padding:0;">
+                        <a href="{{ path('marketing_mission') }}" data-turbo="false" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">
+                            <i class="fas fa-bullseye" style="color:#2563eb;width:18px;"></i> {% trans %}NOTRE MISSION{% endtrans %}
+                        </a>
+                    </li>
+                    <li style="list-style:none;margin:0;padding:0;">
+                        <a href="{{ path('marketing_services') }}" data-turbo="false" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:14px;font-weight:500;transition:all 0.2s ease;">
+                            <i class="fas fa-concierge-bell" style="color:#2563eb;width:18px;"></i> {% trans %}NOS SERVICES{% endtrans %}
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            
+            <li style="list-style:none;margin:0;padding:0;">
+                <a class="pm-menu-link {% if app.request.attributes.get('_route') == 'contact_page' %}active{% endif %}" 
+                   href="{{ path('contact_page') }}" 
+                   data-turbo="false" 
+                   style="display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:500;text-decoration:none;transition:all 0.2s ease;background:transparent;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff !important;{% else %}color:#1f2937 !important;{% endif %}{% if app.request.attributes.get('_route') == 'contact_page' and app.request.attributes.get('_route') == 'accueil' %}background:rgba(255,255,255,0.20) !important;{% elseif app.request.attributes.get('_route') == 'contact_page' %}background:rgba(37,99,235,0.10) !important;{% endif %}">
+                    <i class="fas fa-envelope" style="font-size:13px;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i> {% trans %}CONTACT{% endtrans %}
+                </a>
+            </li>
+        </ul>
+
+        <!-- Actions Desktop -->
+        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+            <!-- Langue - Déroulant -->
+            <div class="pm-lang-selector" style="position:relative;">
+                <button class="pm-lang-btn" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid {% if app.request.attributes.get('_route') == 'accueil' %}rgba(255,255,255,0.25){% else %}rgba(15,23,42,0.15){% endif %};background:{% if app.request.attributes.get('_route') == 'accueil' %}rgba(255,255,255,0.08){% else %}rgba(255,255,255,0.9){% endif %};color:{% if app.request.attributes.get('_route') == 'accueil' %}#ffffff{% else %}#1f2937{% endif %};font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s ease;">
+                    <img src="{{ asset('build/assets/' ~ app.request.locale ~ '.png') }}" alt="FR" style="width:18px;height:13px;border-radius:2px;">
+                    <span>{{ app.request.locale|upper }}</span>
+                    <i class="fas fa-chevron-down" style="font-size:10px;transition:transform 0.25s ease;"></i>
+                </button>
+                <div class="pm-lang-dropdown" style="position:absolute;top:calc(100% + 8px);right:0;min-width:180px;padding:6px;background:#ffffff;border:1px solid rgba(15,23,42,0.08);border-radius:14px;box-shadow:0 18px 40px rgba(15,23,42,0.12);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:all 0.25s ease;z-index:4000;">
+                    {% for locale in locales %}
+                        <a href="{{ path('change_locale', {'locale': locale}) }}" data-turbo="false" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:13px;font-weight:500;transition:all 0.2s ease;{% if locale == app.request.locale %}background:#eff6ff;color:#2563eb;{% endif %}">
+                            <img src="{{ asset('build/assets/' ~ locale ~ '.png') }}" alt="{{ locale }}" style="width:18px;height:13px;border-radius:2px;">
+                            <span>{% if locale == 'fr' %}{% trans %}Français{% endtrans %}{% else %}{% trans %}Anglais{% endtrans %}{% endif %}</span>
+                            {% if locale == app.request.locale %}
+                                <i class="fas fa-check" style="margin-left:auto;color:#2563eb;font-size:12px;"></i>
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Compte Utilisateur -->
+            {% if app.user %}
+                <div class="pm-user-dropdown" style="position:relative;">
+                    <button type="button" class="pm-user-btn" aria-haspopup="true" aria-expanded="false">
+                        <span class="pm-user-btn-avatar" aria-hidden="true">
+                            <i class="fas fa-user"></i>
+                        </span>
+
+                        <span class="pm-user-btn-label">{% trans %}Mon compte{% endtrans %}</span>
+
+                        <span class="pm-user-btn-chevron" aria-hidden="true">
+                            <i class="fas fa-chevron-down"></i>
+                        </span>
+                    </button>
+                    <div class="pm-user-dropdown-menu" aria-hidden="true" style="position:absolute;top:calc(100% + 8px);right:0;width:280px;padding:8px;background:#ffffff;border:1px solid rgba(15,23,42,0.08);border-radius:16px;box-shadow:0 18px 40px rgba(15,23,42,0.12);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px);transition:all 0.25s ease;z-index:4000;">
+                        <div style="padding:12px;margin-bottom:6px;border-radius:12px;background:#f8fafc;border:1px solid rgba(15,23,42,0.06);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:44px;height:44px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#2563eb,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#ffffff;font-weight:700;font-size:18px;">
+                                    {% if app.user.photo is defined and app.user.photo %}
+                                        <img src="{{ asset('uploads/users/' ~ app.user.photo) }}" alt="{{ app.user.email }}" style="width:100%;height:100%;object-fit:cover;">
+                                    {% else %}
+                                        <span>{{ app.user.email|slice(0, 1)|upper }}</span>
+                                    {% endif %}
+                                </div>
+                                <div style="min-width:0;">
+                                    <p style="margin:0;font-size:14px;font-weight:700;color:#0f172a;">{{ app.user.email }}</p>
+                                    <span style="font-size:12px;color:#64748b;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{% trans %}Espace membre{% endtrans %}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="padding:4px 0;">
+                            <a href="{{ path('tableau_de_bord') }}" data-turbo="false" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:13px;font-weight:500;transition:all 0.2s ease;">
+                                <i class="fas fa-tachometer-alt" style="width:20px;color:#2563eb;"></i> {% trans %}Tableau de bord{% endtrans %}
+                            </a>
+                            <a href="{{ path('profile_edit') }}" data-turbo="false" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:13px;font-weight:500;transition:all 0.2s ease;">
+                                <i class="fas fa-id-card" style="width:20px;color:#2563eb;"></i> {% trans %}Mon profil{% endtrans %}
+                            </a>
+                            <a href="{{ path('settings_index', { tab: 'security' }) }}" data-turbo="false" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:13px;font-weight:500;transition:all 0.2s ease;">
+                                <i class="fas fa-lock" style="width:20px;color:#2563eb;"></i> {% trans %}Sécurité{% endtrans %}
+                            </a>
+                            <a href="{{ path('settings_index') }}" data-turbo="false" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#1f2937;text-decoration:none;font-size:13px;font-weight:500;transition:all 0.2s ease;">
+                                <i class="fas fa-cog" style="width:20px;color:#2563eb;"></i> {% trans %}Paramètres{% endtrans %}
+                            </a>
+                        </div>
+                        <div style="padding:4px 0;border-top:1px solid rgba(15,23,42,0.06);margin-top:4px;">
+                            <a href="{{ path('app_logout') }}" data-mol-chat-reset-session data-turbo="false" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#dc2626;text-decoration:none;font-size:13px;font-weight:500;transition:all 0.2s ease;">
+                                <i class="fas fa-sign-out-alt" style="width:20px;"></i> {% trans %}Déconnexion{% endtrans %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ path('app_login') }}" data-turbo="false" class="mol-auth-btn mol-auth-login">
+                    <span class="mol-btn-content">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>{% trans %}Connexion{% endtrans %}</span>
+                    </span>
+                    <i class="fas fa-spinner fa-spin mol-btn-spinner"></i>
+                </a>
+                
+                <a href="{{ path('app_register') }}" data-turbo="false" class="mol-auth-btn mol-auth-register">
+                    <span class="mol-btn-content">
+                        <i class="fas fa-user-plus"></i>
+                        <span>{% trans %}Inscription{% endtrans %}</span>
+                    </span>
+                    <i class="fas fa-spinner fa-spin mol-btn-spinner"></i>
+                </a>
+                                
+            {% endif %}
+
+            <!-- Hamburger -->
+            <button id="pmHamburgerBtn" aria-label="Menu" style="display:none;width:42px;height:42px;border:1px solid {% if app.request.attributes.get('_route') == 'accueil' %}rgba(255,255,255,0.25){% else %}rgba(15,23,42,0.15){% endif %};border-radius:12px;background:{% if app.request.attributes.get('_route') == 'accueil' %}rgba(255,255,255,0.08){% else %}rgba(255,255,255,0.9){% endif %};color:{% if app.request.attributes.get('_route') == 'accueil' %}#ffffff{% else %}#1f2937{% endif %};cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;transition:all 0.2s ease;">
+                <span style="display:block;width:20px;height:2px;background:{% if app.request.attributes.get('_route') == 'accueil' %}#ffffff{% else %}#1f2937{% endif %};border-radius:2px;transition:all 0.3s ease;"></span>
+                <span style="display:block;width:20px;height:2px;background:{% if app.request.attributes.get('_route') == 'accueil' %}#ffffff{% else %}#1f2937{% endif %};border-radius:2px;transition:all 0.3s ease;"></span>
+                <span style="display:block;width:20px;height:2px;background:{% if app.request.attributes.get('_route') == 'accueil' %}#ffffff{% else %}#1f2937{% endif %};border-radius:2px;transition:all 0.3s ease;"></span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<!-- Overlay -->
+<div class="pm-overlay" id="pmOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,0.5);z-index:999999;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:all 0.3s ease;pointer-events:none;"></div>
+
+<!-- Menu Mobile - CORRIGÃ‰ ULTIME -->
+<div class="pm-mobile-menu" id="pmMobileMenu">
+    <!-- Header fixe en haut -->
+    <div class="pm-mobile-header">
+        <a href="{{ path('accueil') }}" data-turbo="false" class="pm-mobile-brand">
+            <img src="{{ asset('build/assets/images/brand/logoMobile.png') }}" alt="Logo">
+        </a>
+        <button id="pmMobileClose" class="pm-mobile-close-btn">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- Corps du menu - scrollable -->
+    <div class="pm-mobile-body">
+        <!-- Langue Mobile -->
+        <div class="pm-mobile-lang">
+            <span class="pm-mobile-lang-label"><i class="fas fa-globe"></i> {% trans %}LANGUE{% endtrans %}</span>
+            <div class="pm-mobile-lang-options">
+                {% for locale in locales %}
+                    <a href="{{ path('change_locale', {'locale': locale}) }}" 
+                       class="pm-mobile-lang-option {{ locale == app.request.locale ? 'active' : '' }}"
+                       data-turbo="false">
+                        <img src="{{ asset('build/assets/' ~ locale ~ '.png') }}" alt="{{ locale }}">
+                        <span>{% if locale == 'fr' %}{% trans %}Français{% endtrans %}{% else %}{% trans %}Anglais{% endtrans %}{% endif %}</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Navigation Mobile -->
+        <ul class="pm-mobile-nav">
+            <li><a href="{{ path('accueil') }}" data-turbo="false" class="pm-mobile-link"><i class="fas fa-home"></i> {% trans %}ACCUEIL{% endtrans %}</a></li>
+            <li><a href="{{ path('liste_jobs') }}" data-turbo="false" class="pm-mobile-link"><i class="fas fa-briefcase"></i> {% trans %}MISSIONS{% endtrans %}</a></li>
+            <li><a href="{{ path('liste_talents') }}" data-turbo="false" class="pm-mobile-link"><i class="fas fa-star"></i> {% trans %}TALENTS{% endtrans %}</a></li>
+            <li class="pm-mobile-dropdown">
+                <button class="pm-mobile-link pm-mobile-dropdown-toggle" data-mobile-dropdown-toggle>
+                    <span><i class="fa fa-users"></i> {% trans %}EMPLOYEURS{% endtrans %}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <ul class="pm-mobile-dropdown-menu">
+                    <li><a href="{{ path('reputation_companies') }}" data-turbo="false"><i class="fas fa-building"></i> {% trans %}COMPAGNIES{% endtrans %}</a></li>
+                    <li><a href="{{ path('reputation_particuliers') }}" data-turbo="false"><i class="fas fa-user-circle"></i> {% trans %}PARTICULIERS{% endtrans %}</a></li>
+                    
+                </ul>
+            </li>
+
+            <li class="pm-mobile-dropdown pm-mobile-about-dropdown">
+                <button type="button" class="pm-mobile-link pm-mobile-dropdown-toggle" data-mobile-dropdown-toggle>
+                    <span><i class="fas fa-info-circle"></i> {% trans %}A PROPOS{% endtrans %}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <ul class="pm-mobile-dropdown-menu">
+                    <li><a href="{{ path('marketing_story') }}" data-turbo="false"><i class="fas fa-book-open"></i> {% trans %}NOTRE HISTOIRE{% endtrans %}</a></li>
+                    <li><a href="{{ path('marketing_vision') }}" data-turbo="false"><i class="fas fa-eye"></i> {% trans %}NOTRE VISION{% endtrans %}</a></li>
+                    <li><a href="{{ path('marketing_mission') }}" data-turbo="false"><i class="fas fa-bullseye"></i> {% trans %}NOTRE MISSION{% endtrans %}</a></li>
+                    <li><a href="{{ path('marketing_services') }}" data-turbo="false"><i class="fas fa-concierge-bell"></i> {% trans %}NOS SERVICES{% endtrans %}</a></li>
+                </ul>
+            </li>
+
+            <li><a href="{{ path('subscription_plans') }}" data-turbo="false" class="pm-mobile-link"><i class="fas fa-tags"></i>{% trans %}ABONNEMENT{% endtrans %}</a></li>
+            <li><a href="{{ path('contact_page') }}" data-turbo="false" class="pm-mobile-link"><i class="fas fa-envelope"></i> {% trans %}CONTACT{% endtrans %}</a></li>
+        </ul>
+
+        <!-- Actions Mobile -->
+        <div class="pm-mobile-actions">
+            {% if app.user %}
+                <div class="pm-mobile-user">
+                    <div class="pm-mobile-user-info">
+                        <div class="pm-user-avatar-sm">
+                            {% if app.user.photo is defined and app.user.photo %}
+                                <img src="{{ asset('uploads/users/' ~ app.user.photo) }}" alt="{{ app.user.email }}">
+                            {% else %}
+                                <span>{{ app.user.email|slice(0, 1)|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="pm-mobile-user-name">{{ app.user.prenom ?? app.user.email|split('@')|first }}</p>
+                            <span class="pm-mobile-user-email">{{ app.user.email }}</span>
+                        </div>
+                    </div>
+                    <div class="pm-mobile-user-links">
+                        <a href="{{ path('tableau_de_bord') }}" data-turbo="false"><i class="fas fa-tachometer-alt"></i> {% trans %}Tableau de bord{% endtrans %}</a>
+                        <a href="{{ path('profile_edit') }}" data-turbo="false"><i class="fas fa-id-card"></i> {% trans %}Mon profil{% endtrans %}</a>
+                        <a href="{{ path('settings_index', { tab: 'security' }) }}" data-turbo="false"><i class="fas fa-lock"></i> {% trans %}Sécurité{% endtrans %}</a>
+                        <a href="{{ path('settings_index') }}" data-turbo="false"><i class="fas fa-cog"></i> {% trans %}Paramètres{% endtrans %}</a>
+                        <a href="{{ path('app_logout') }}" data-mol-chat-reset-session data-turbo="false" class="pm-mobile-logout">
+                            <i class="fas fa-sign-out-alt"></i> {% trans %}Déconnexion{% endtrans %}
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ path('app_login') }}" data-turbo="false" class="pm-btn pm-btn-block pm-btn-outline">
+                    <i class="fas fa-sign-in-alt"></i> {% trans %}Connexion{% endtrans %}
+                </a>
+                <a href="{{ path('app_register') }}" data-turbo="false" class="pm-btn pm-btn-block pm-btn-green">
+                    <i class="fas fa-user-plus"></i> {% trans %}Inscription{% endtrans %}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- STYLE DE FORCE POUR LE MENU MOBILE -->
+<style>
+    /* FORCER LE MENU MOBILE À ÊTRE AU-DESSUS DE TOUT */
+    .pm-mobile-menu,
+    #pmMobileMenu {
+        position: fixed !important;
+        top: 0 !important;
+        right: -420px !important;
+        bottom: 0 !important;
+        width: 400px !important;
+        max-width: 92% !important;
+        height: 100% !important;
+        min-height: 100vh !important;
+        background: #ffffff !important;
+        z-index: 2147483647 !important;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        box-shadow: -8px 0 40px rgba(0, 0, 0, 0.2) !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+    }
+
+    .pm-mobile-menu.open,
+    #pmMobileMenu.open {
+        right: 0 !important;
+    }
+
+    .pm-mobile-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 16px 20px !important;
+        border-bottom: 1px solid #eef2f6 !important;
+        flex-shrink: 0 !important;
+        min-height: 70px !important;
+        background: #ffffff !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 2147483647 !important;
+        width: 100% !important;
+    }
+
+    .pm-mobile-close-btn {
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: #f1f5f9 !important;
+        border: none !important;
+        border-radius: 50% !important;
+        color: #475569 !important;
+        font-size: 20px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        flex-shrink: 0 !important;
+        z-index: 2147483647 !important;
+    }
+
+    .pm-mobile-body {
+        flex: 1 !important;
+        overflow-y: auto !important;
+        padding: 16px 20px 24px !important;
+        -webkit-overflow-scrolling: touch !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    /* Overlay */
+    .pm-overlay {
+        z-index: 999999 !important;
+    }
+    
+    .mol-auth-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:8px 18px;
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08);
+    color:#ffffff;
+    font-size:14px;
+    font-weight:700;
+    text-decoration:none;
+    transition:all .2s ease;
+    }
+
+    .mol-btn-content{
+        display:flex;
+        align-items:center;
+        gap:8px;
+    }
+
+    .mol-btn-spinner{
+        display:none;
+    }
+
+    .mol-auth-login:hover{
+        background:#16a34a;
+        border-color:#16a34a;
+        color:#ffffff;
+    }
+
+    .mol-auth-register:hover{
+        background:#579b00;
+        border-color:#579b00;
+        color:#ffffff;
+    }
+
+    .mol-auth-btn.is-loading{
+        pointer-events:none;
+        opacity:.85;
+    }
+
+    .mol-auth-btn.is-loading .mol-btn-content{
+        display:none;
+    }
+
+    .mol-auth-btn.is-loading .mol-btn-spinner{
+        display:inline-block;
+    }
+</style>
+
+<script>
+    // ============================================
+    // 1. EFFET DE SCROLL - CORRIGÉ
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const navbar = document.querySelector('.pm-navbar-pro');
+        const isHomePage = window.location.pathname === '/' || window.location.pathname === '/accueil';
+        
+        // Si ce n'est PAS la page d'accueil, on garde le style blanc fixe
+        if (!isHomePage) {
+            if (navbar) {
+                navbar.style.background = '#ffffff';
+                navbar.style.borderBottom = '1px solid rgba(15,23,42,0.06)';
+                navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.06)';
+                navbar.classList.add('scrolled');
+                
+                // Mettre à jour tous les éléments
+                updateNavbarElements(navbar, true);
+            }
+            return;
+        }
+        
+        // PAGE D'ACCUEIL - EFFET DE SCROLL
+        function updateNavbarElements(navbar, isScrolled) {
+            if (!navbar) return;
+            
+            // Logo
+            const logo = navbar.querySelector('.pm-brand img');
+            if (logo) {
+                logo.style.filter = isScrolled ? 'none' : 'brightness(0) invert(1)';
+            }
+            
+            // Liens du menu
+            navbar.querySelectorAll('.pm-navbar-inner > ul li a.pm-menu-link').forEach(el => {
+                if (isScrolled) {
+                    el.style.color = '#1f2937 !important';
+                    el.style.fontWeight = '500 !important';
+                    if (el.classList.contains('active')) {
+                        el.style.background = 'rgba(37,99,235,0.10) !important';
+                    } else {
+                        el.style.background = 'transparent !important';
+                    }
+                    const icon = el.querySelector('i');
+                    if (icon) icon.style.color = '#1f2937';
+                } else {
+                    el.style.color = '#ffffff !important';
+                    el.style.fontWeight = '600 !important';
+                    if (el.classList.contains('active')) {
+                        el.style.background = 'rgba(255,255,255,0.20) !important';
+                    } else {
+                        el.style.background = 'transparent !important';
+                    }
+                    const icon = el.querySelector('i');
+                    if (icon) icon.style.color = '#ffffff';
+                }
+            });
+            
+            // Bouton langue
+            const langBtn = navbar.querySelector('.pm-lang-btn');
+            if (langBtn) {
+                if (isScrolled) {
+                    langBtn.style.color = '#1f2937';
+                    langBtn.style.borderColor = 'rgba(15,23,42,0.15)';
+                    langBtn.style.background = 'rgba(255,255,255,0.9)';
+                } else {
+                    langBtn.style.color = '#ffffff';
+                    langBtn.style.borderColor = 'rgba(255,255,255,0.25)';
+                    langBtn.style.background = 'rgba(255,255,255,0.08)';
+                }
+            }
+            
+            // Boutons Connexion / Inscription
+            const authBtns = navbar.querySelectorAll('.mol-auth-btn');
+            
+            authBtns.forEach(btn => {
+                if (btn.matches(':hover')) return;
+            
+                if (isScrolled) {
+                    btn.style.color = '#1f2937';
+                    btn.style.borderColor = 'rgba(15,23,42,0.15)';
+                    btn.style.background = 'rgba(255,255,255,0.9)';
+                } else {
+                    btn.style.color = '#ffffff';
+                    btn.style.borderColor = 'rgba(255,255,255,0.25)';
+                    btn.style.background = 'rgba(255,255,255,0.08)';
+                }
+            });
+            
+            // Bouton utilisateur
+            const userBtn = navbar.querySelector('.pm-user-btn');
+            if (userBtn) {
+                if (isScrolled) {
+                    userBtn.style.color = '#1f2937';
+                    userBtn.style.borderColor = 'rgba(15,23,42,0.15)';
+                    userBtn.style.background = 'rgba(255,255,255,0.9)';
+                } else {
+                    userBtn.style.color = '#ffffff';
+                    userBtn.style.borderColor = 'rgba(255,255,255,0.25)';
+                    userBtn.style.background = 'rgba(255,255,255,0.08)';
+                }
+            }
+            
+            // Hamburger
+            const hamburger = document.getElementById('pmHamburgerBtn');
+            if (hamburger) {
+                if (isScrolled) {
+                    hamburger.style.color = '#1f2937';
+                    hamburger.style.borderColor = 'rgba(15,23,42,0.15)';
+                    hamburger.style.background = 'rgba(255,255,255,0.9)';
+                    hamburger.querySelectorAll('span').forEach(el => el.style.background = '#1f2937');
+                } else {
+                    hamburger.style.color = '#ffffff';
+                    hamburger.style.borderColor = 'rgba(255,255,255,0.25)';
+                    hamburger.style.background = 'rgba(255,255,255,0.08)';
+                    hamburger.querySelectorAll('span').forEach(el => el.style.background = '#ffffff');
+                }
+            }
+        }
+        
+        function updateNavbar(isScrolled) {
+            if (!navbar) return;
+            
+            if (isScrolled) {
+                navbar.style.background = '#ffffff';
+                navbar.style.borderBottom = '1px solid rgba(15,23,42,0.06)';
+                navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.06)';
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.style.background = 'transparent';
+                navbar.style.borderBottom = '1px solid rgba(255,255,255,0.12)';
+                navbar.style.boxShadow = 'none';
+                navbar.classList.remove('scrolled');
+            }
+            
+            // Mettre à jour tous les éléments
+            updateNavbarElements(navbar, isScrolled);
+        }
+        
+        let scrollTimeout;
+        let lastScrollY = window.pageYOffset;
+        
+        window.addEventListener('scroll', function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const currentScrollY = window.pageYOffset;
+                // Mettre à jour seulement si la position a changé
+                if (currentScrollY !== lastScrollY) {
+                    lastScrollY = currentScrollY;
+                    updateNavbar(currentScrollY > 50);
+                }
+            }, 10);
+        });
+        
+        // Initialisation - FORCER la mise à jour après un court délai
+        setTimeout(() => {
+            updateNavbar(window.pageYOffset > 50);
+        }, 100);
+        
+        // FORCER la mise à jour au retour en haut de page (click sur le logo ou lien)
+        document.querySelectorAll('a[href="#"], a[href="/"], a[href="{{ path('accueil') }}"]').forEach(link => {
+            link.addEventListener('click', function() {
+                setTimeout(() => {
+                    updateNavbar(window.pageYOffset > 50);
+                }, 50);
+            });
+        });
+    });
+    // ============================================
+    // 2. DROPDOWN LANGUE
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const langSelector = document.querySelector('.pm-lang-selector');
+        if (!langSelector) return;
+        
+        const langBtn = langSelector.querySelector('.pm-lang-btn');
+        const langDropdown = langSelector.querySelector('.pm-lang-dropdown');
+        
+        if (langBtn && langDropdown) {
+            langBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = langDropdown.style.opacity === '1';
+                langDropdown.style.opacity = isOpen ? '0' : '1';
+                langDropdown.style.visibility = isOpen ? 'hidden' : 'visible';
+                langDropdown.style.pointerEvents = isOpen ? 'none' : 'auto';
+                langDropdown.style.transform = isOpen ? 'translateY(8px)' : 'translateY(0)';
+                const icon = this.querySelector('.fa-chevron-down');
+                if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!langSelector.contains(e.target)) {
+                    langDropdown.style.opacity = '0';
+                    langDropdown.style.visibility = 'hidden';
+                    langDropdown.style.pointerEvents = 'none';
+                    langDropdown.style.transform = 'translateY(8px)';
+                    const icon = langBtn.querySelector('.fa-chevron-down');
+                    if (icon) icon.style.transform = 'rotate(0deg)';
+                }
+            });
+        }
+    });
+
+    // ============================================
+    // 3. DROPDOWN COMPTE UTILISATEUR
+    // ============================================
+    (function installUserDropdownController() {
+        function setUserDropdownState(dropdown, isOpen) {
+            if (!dropdown) return;
+
+            const button = dropdown.querySelector('.pm-user-btn');
+            const menu = dropdown.querySelector('.pm-user-dropdown-menu');
+
+            if (!button || !menu) return;
+
+            menu.style.opacity = isOpen ? '1' : '0';
+            menu.style.visibility = isOpen ? 'visible' : 'hidden';
+            menu.style.pointerEvents = isOpen ? 'auto' : 'none';
+            menu.style.transform = isOpen ? 'translateY(0)' : 'translateY(8px)';
+            menu.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            dropdown.dataset.userMenuOpen = isOpen ? '1' : '0';
+
+            const icon = button.querySelector('.fa-chevron-down');
+            if (icon) {
+                icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
+        function closeAllUserDropdowns(exceptDropdown) {
+            document.querySelectorAll('.pm-user-dropdown').forEach(function (dropdown) {
+                if (dropdown !== exceptDropdown) {
+                    setUserDropdownState(dropdown, false);
+                }
+            });
+        }
+
+        // Ferme aussi le nouveau menu immédiatement lorsque la navbar vient
+        // d'être remplacée par Turbo.
+        closeAllUserDropdowns();
+
+        if (window.__pmUserDropdownControllerInstalled) {
+            return;
+        }
+
+        window.__pmUserDropdownControllerInstalled = true;
+
+        // Délégation : le gestionnaire reste valide même si Turbo remplace
+        // complètement le bouton et son menu dans le DOM.
+        document.addEventListener('click', function (event) {
+            const button = event.target.closest('.pm-user-btn');
+
+            if (button) {
+                const dropdown = button.closest('.pm-user-dropdown');
+
+                if (!dropdown) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const isOpen = dropdown.dataset.userMenuOpen === '1';
+                closeAllUserDropdowns(dropdown);
+                setUserDropdownState(dropdown, !isOpen);
+                return;
+            }
+
+            if (!event.target.closest('.pm-user-dropdown')) {
+                closeAllUserDropdowns();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeAllUserDropdowns();
+            }
+        });
+
+        document.addEventListener('turbo:before-cache', function () {
+            closeAllUserDropdowns();
+        });
+
+        document.addEventListener('turbo:load', function () {
+            closeAllUserDropdowns();
+        });
+
+        document.addEventListener('turbo:render', function () {
+            closeAllUserDropdowns();
+        });
+
+        window.addEventListener('pageshow', function () {
+            closeAllUserDropdowns();
+        });
+    })();
+
+    // ============================================
+    // 4. DROPDOWN PROFILS (Desktop)
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.pm-dropdown').forEach(function(dropdown) {
+            const toggle = dropdown.querySelector('.pm-dropdown-toggle');
+            const menu = dropdown.querySelector('.pm-dropdown-menu');
+
+            if (!toggle || !menu) return;
+
+            let timeoutId;
+            
+            dropdown.addEventListener('mouseenter', function() {
+                clearTimeout(timeoutId);
+                menu.style.opacity = '1';
+                menu.style.visibility = 'visible';
+                menu.style.pointerEvents = 'auto';
+                menu.style.transform = 'translateX(-50%) translateY(0)';
+                const icon = toggle.querySelector('.fa-chevron-down');
+                if (icon) icon.style.transform = 'rotate(180deg)';
+                toggle.setAttribute('aria-expanded', 'true');
+            });
+            
+            dropdown.addEventListener('mouseleave', function() {
+                timeoutId = setTimeout(() => {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                    menu.style.pointerEvents = 'none';
+                    menu.style.transform = 'translateX(-50%) translateY(8px)';
+                    const icon = toggle.querySelector('.fa-chevron-down');
+                    if (icon) icon.style.transform = 'rotate(0deg)';
+                    toggle.setAttribute('aria-expanded', 'false');
+                }, 150);
+            });
+            
+            menu.addEventListener('mouseenter', function() {
+                clearTimeout(timeoutId);
+            });
+            
+            menu.addEventListener('mouseleave', function() {
+                dropdown.dispatchEvent(new Event('mouseleave'));
+            });
+        });
+    });
+
+    // ============================================
+    // 5. MENU MOBILE - CORRIGÉ ULTIME
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        const hamburger = document.getElementById('pmHamburgerBtn');
+        const mobileMenu = document.getElementById('pmMobileMenu');
+        const overlay = document.getElementById('pmOverlay');
+        const closeBtn = document.getElementById('pmMobileClose');
+        
+        const spans = hamburger ? hamburger.querySelectorAll('span') : [];
+        
+        function openMobileMenu() {
+            if (mobileMenu) {
+                mobileMenu.classList.add('open');
+                mobileMenu.style.right = '0';
+                mobileMenu.style.visibility = 'visible';
+                mobileMenu.style.opacity = '1';
+                mobileMenu.style.pointerEvents = 'auto';
+            }
+            if (overlay) {
+                overlay.classList.add('active');
+                overlay.style.opacity = '1';
+                overlay.style.visibility = 'visible';
+                overlay.style.pointerEvents = 'auto';
+            }
+            document.body.style.overflow = 'hidden';
+            document.body.classList.add('pm-mobile-open');
+            
+            if (hamburger) {
+                hamburger.classList.add('active');
+                if (spans.length === 3) {
+                    spans[0].style.transform = 'rotate(45deg) translate(6px, 6px)';
+                    spans[1].style.opacity = '0';
+                    spans[2].style.transform = 'rotate(-45deg) translate(6px, -6px)';
+                }
+            }
+        }
+        
+        function closeMobileMenu() {
+            if (mobileMenu) {
+                mobileMenu.classList.remove('open');
+                mobileMenu.style.right = '-420px';
+                mobileMenu.style.visibility = 'hidden';
+                mobileMenu.style.opacity = '0';
+                mobileMenu.style.pointerEvents = 'none';
+            }
+            if (overlay) {
+                overlay.classList.remove('active');
+                overlay.style.opacity = '0';
+                overlay.style.visibility = 'hidden';
+                overlay.style.pointerEvents = 'none';
+            }
+            document.body.style.overflow = '';
+            document.body.classList.remove('pm-mobile-open');
+            
+            if (hamburger) {
+                hamburger.classList.remove('active');
+                if (spans.length === 3) {
+                    spans[0].style.transform = 'rotate(0deg) translate(0, 0)';
+                    spans[1].style.opacity = '1';
+                    spans[2].style.transform = 'rotate(0deg) translate(0, 0)';
+                }
+            }
+        }
+        
+        if (hamburger) {
+            hamburger.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const isOpen = mobileMenu && mobileMenu.classList.contains('open');
+                
+                if (isOpen) {
+                    closeMobileMenu();
+                } else {
+                    openMobileMenu();
+                }
+            });
+        }
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeMobileMenu();
+            });
+        }
+        
+        if (overlay) {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    closeMobileMenu();
+                }
+            });
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMobileMenu();
+            }
+        });
+        
+        let resizeTimer;
+        window.addEventListener('resize', function() {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function() {
+                if (window.innerWidth > 992) {
+                    closeMobileMenu();
+                }
+            }, 250);
+        });
+    });
+
+    // ============================================
+    // 6. DROPDOWN MOBILE (Profils)
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.pm-mobile-dropdown').forEach(function(mobileDropdown) {
+            const toggle = mobileDropdown.querySelector('.pm-mobile-dropdown-toggle');
+            const menu = mobileDropdown.querySelector('ul');
+
+            if (!toggle || !menu) return;
+
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                const isOpen = menu.style.maxHeight && menu.style.maxHeight !== '0px';
+                menu.style.maxHeight = isOpen ? '0' : '500px';
+                const icon = this.querySelector('.fa-chevron-down');
+                if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+                this.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+            });
+        });
+    });
+
+    // ============================================
+    // 7. FORCER LA MISE À JOUR AU CHARGEMENT DE TURBO
+    // ============================================
+    document.addEventListener('turbo:load', function() {
+        const navbar = document.querySelector('.pm-navbar-pro');
+        if (navbar) {
+            const isHomePage = window.location.pathname === '/' || window.location.pathname === '/accueil';
+            if (!isHomePage) {
+                navbar.classList.add('scrolled');
+                navbar.style.background = '#ffffff';
+                navbar.style.borderBottom = '1px solid rgba(15,23,42,0.06)';
+                navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.06)';
+            } else {
+                setTimeout(() => {
+                    const isScrolled = window.pageYOffset > 50;
+                    if (isScrolled) {
+                        navbar.classList.add('scrolled');
+                        navbar.style.background = '#ffffff';
+                        navbar.style.borderBottom = '1px solid rgba(15,23,42,0.06)';
+                        navbar.style.boxShadow = '0 4px 24px rgba(0,0,0,0.06)';
+                    } else {
+                        navbar.classList.remove('scrolled');
+                        navbar.style.background = 'transparent';
+                        navbar.style.borderBottom = '1px solid rgba(255,255,255,0.12)';
+                        navbar.style.boxShadow = 'none';
+                    }
+                }, 50);
+            }
+        }
+    });
+
+    // ============================================
+    // 8. FORCER LA MISE À JOUR APRÈS LE SCROLL COMPLET
+    // ============================================
+    document.addEventListener('scroll', function() {
+        // Si on est en haut de page, forcer la mise à jour
+        if (window.pageYOffset === 0) {
+            const navbar = document.querySelector('.pm-navbar-pro');
+            if (navbar && window.location.pathname === '/' || window.location.pathname === '/accueil') {
+                navbar.classList.remove('scrolled');
+                navbar.style.background = 'transparent';
+                navbar.style.borderBottom = '1px solid rgba(255,255,255,0.12)';
+                navbar.style.boxShadow = 'none';
+                
+                // Réappliquer les styles non-scrollés
+                navbar.querySelectorAll('.pm-navbar-inner > ul li a.pm-menu-link').forEach(el => {
+                    el.style.color = '#ffffff !important';
+                    el.style.fontWeight = '600 !important';
+                    const icon = el.querySelector('i');
+                    if (icon) icon.style.color = '#ffffff';
+                });
+                
+                const logo = navbar.querySelector('.pm-brand img');
+                if (logo) logo.style.filter = 'brightness(0) invert(1)';
+            }
+        }
+    }, { passive: true });
+
+    // ============================================
+    // 9. FORCER LE RETOUR EN HAUT
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Intercepter les clics sur les liens d'ancrage et les logos
+        document.querySelectorAll('a[href="#"], a[href="/"], a[href*="accueil"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                // Laisser le comportement normal se faire
+                setTimeout(() => {
+                    const navbar = document.querySelector('.pm-navbar-pro');
+                    if (navbar && window.pageYOffset < 10) {
+                        const isHomePage = window.location.pathname === '/' || window.location.pathname === '/accueil';
+                        if (isHomePage) {
+                            navbar.classList.remove('scrolled');
+                            navbar.style.background = 'transparent';
+                            navbar.style.borderBottom = '1px solid rgba(255,255,255,0.12)';
+                            navbar.style.boxShadow = 'none';
+                            
+                            // Réappliquer les styles blancs
+                            navbar.querySelectorAll('.pm-navbar-inner > ul li a.pm-menu-link').forEach(el => {
+                                el.style.color = '#ffffff !important';
+                                el.style.fontWeight = '600 !important';
+                                if (!el.classList.contains('active')) {
+                                    el.style.background = 'transparent !important';
+                                }
+                                const icon = el.querySelector('i');
+                                if (icon) icon.style.color = '#ffffff';
+                            });
+                            
+                            const logo = navbar.querySelector('.pm-brand img');
+                            if (logo) logo.style.filter = 'brightness(0) invert(1)';
+                        }
+                    }
+                }, 50);
+            });
+        });
+    });
+
+
+</script>
+
+<script>
+    // ============================================
+    // SPINNERS DE NAVIGATION DESKTOP + MOBILE
+    // Délégation d'événements : reste fonctionnelle
+    // même si la navbar est reconstruite par Turbo.
+    // ============================================
+    (function installNavbarLoadingSpinners() {
+        if (window.__pmNavbarLoadingSpinnersInstalled) {
+            return;
+        }
+
+        window.__pmNavbarLoadingSpinnersInstalled = true;
+
+        function resetNavbarLoadingStates() {
+            document.querySelectorAll('.mol-auth-btn.is-loading').forEach(function (button) {
+                button.classList.remove('is-loading');
+                button.removeAttribute('aria-busy');
+            });
+
+            document.querySelectorAll('#pmMobileMenu a.is-mobile-loading').forEach(function (link) {
+                link.classList.remove('is-mobile-loading');
+                link.removeAttribute('aria-busy');
+
+                const spinner = link.querySelector('.pm-mobile-click-spinner');
+                if (spinner) {
+                    spinner.remove();
+                }
+            });
+        }
+
+        document.addEventListener('click', function (event) {
+            // Boutons Connexion / Inscription de la navbar desktop.
+            const desktopAuthButton = event.target.closest('.mol-auth-btn');
+
+            if (desktopAuthButton) {
+                desktopAuthButton.classList.add('is-loading');
+                desktopAuthButton.setAttribute('aria-busy', 'true');
+            }
+
+            // Tous les liens réellement navigables du menu mobile.
+            const mobileLink = event.target.closest('#pmMobileMenu a[href]');
+
+            if (!mobileLink || mobileLink.classList.contains('is-mobile-loading')) {
+                return;
+            }
+
+            // Ne pas modifier le comportement d'un clic ouvrant un nouvel onglet.
+            if (
+                event.button !== 0 ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.shiftKey ||
+                event.altKey ||
+                mobileLink.target === '_blank'
+            ) {
+                return;
+            }
+
+            const rawHref = mobileLink.getAttribute('href');
+
+            if (
+                !rawHref ||
+                rawHref === '#' ||
+                rawHref.startsWith('javascript:')
+            ) {
+                return;
+            }
+
+            mobileLink.classList.add('is-mobile-loading');
+            mobileLink.setAttribute('aria-busy', 'true');
+
+            if (!mobileLink.querySelector('.pm-mobile-click-spinner')) {
+                const spinner = document.createElement('i');
+                spinner.className = 'fas fa-spinner fa-spin pm-mobile-click-spinner';
+                spinner.setAttribute('aria-hidden', 'true');
+                mobileLink.appendChild(spinner);
+            }
+
+            /*
+             * Très court délai pour laisser le navigateur afficher le spinner
+             * avant la navigation normale, sans changer la destination ni la logique.
+             */
+            event.preventDefault();
+
+            window.setTimeout(function () {
+                window.location.assign(mobileLink.href);
+            }, 120);
+        });
+
+        document.addEventListener('turbo:before-cache', resetNavbarLoadingStates);
+        window.addEventListener('pageshow', resetNavbarLoadingStates);
+    })();
+</script>
+
+<style>
+    /* ============================================
+    STYLES RESPONSIVE
+    ============================================ */
+
+    /* Desktop - tout visible */
+    @media (min-width: 993px) {
+        .pm-mobile-menu,
+        .pm-overlay {
+            display: none !important;
+        }
+        
+        #pmHamburgerBtn {
+            display: none !important;
+        }
+    }
+
+    /* Tablette et mobile */
+    @media (max-width: 992px) {
+    .pm-navbar-pro .pm-navbar-inner > ul {
+        display: none !important;
+    }
+    
+    .pm-navbar-pro .pm-navbar-inner > div:last-child .pm-lang-selector,
+    .pm-navbar-pro .pm-navbar-inner > div:last-child .pm-user-dropdown,
+    .pm-navbar-pro .pm-navbar-inner > div:last-child > a[href*="login"],
+    .pm-navbar-pro .pm-navbar-inner > div:last-child > a[href*="register"] {
+        display: none !important;
+    }
+    
+    .pm-navbar-inner {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+    }
+    
+    .pm-navbar-pro .pm-brand-desktop,
+    .pm-navbar-pro .pm-brand-mobile {
+        order: 1 !important;
+        flex: 0 1 auto !important;
+        min-width: 0 !important;
+        max-width: 70% !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+    
+    .pm-navbar-pro .pm-brand img {
+        height: 32px !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .pm-navbar-pro .pm-brand span {
+        font-size: 15px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 160px !important;
+    }
+    
+    #pmHamburgerBtn {
+        display: flex !important;
+        order: 3 !important;
+        flex: 0 0 auto !important;
+        margin-left: auto !important;
+        margin-right: 0 !important;
+        position: relative !important;
+        z-index: 9999 !important;
+    }
+    
+    .pm-navbar-pro .pm-navbar-inner > div:last-child {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        flex: 0 0 auto !important;
+        order: 2 !important;
+    }
+    }
+
+    /* Mobile uniquement */
+    @media (max-width: 576px) {
+        .pm-navbar-pro {
+            padding: 0 12px !important;
+            height: 60px !important;
+            min-height: 60px !important;
+        }
+        
+        .pm-navbar-pro .pm-brand img {
+            height: 28px !important;
+        }
+        
+        .pm-navbar-pro .pm-brand span {
+            font-size: 13px !important;
+            max-width: 120px !important;
+        }
+        
+        @media (max-width: 400px) {
+            .pm-navbar-pro .pm-brand span {
+                font-size: 11px !important;
+                max-width: 80px !important;
+            }
+            .pm-navbar-pro .pm-brand img {
+                height: 24px !important;
+            }
+            .pm-navbar-pro .pm-brand {
+                gap: 4px !important;
+            }
+        }
+        
+        .pm-mobile-menu {
+            width: 92% !important;
+            max-width: 320px !important;
+            right: -100% !important;
+        }
+        
+        #pmHamburgerBtn {
+            width: 36px !important;
+            height: 36px !important;
+        }
+        
+        #pmHamburgerBtn span {
+            width: 18px !important;
+            height: 2px !important;
+        }
+    }
+
+    /* Surbrillance des liens actifs */
+    .pm-menu-link.active {
+        font-weight: 600 !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link.active {
+        background: rgba(255, 255, 255, 0.20) !important;
+        color: #ffffff !important;
+    }
+
+    .pm-navbar-pro.scrolled .pm-menu-link.active {
+        background: rgba(37, 99, 235, 0.10) !important;
+        color: #2563eb !important;
+    }
+
+    /* Hover */
+    .pm-navbar-pro:not(.scrolled) .pm-navbar-inner > ul li a:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        transform: translateY(-1px);
+    }
+
+    .pm-navbar-pro.scrolled .pm-navbar-inner > ul li a:hover {
+        background: rgba(37, 99, 235, 0.08) !important;
+    }
+
+    /* Dropdown hover desktop */
+    .pm-dropdown:hover .pm-dropdown-menu {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: translateX(-50%) translateY(0) !important;
+    }
+
+    .pm-dropdown:hover .pm-dropdown-toggle .fa-chevron-down {
+        transform: rotate(180deg);
+    }
+
+
+    /* ============================================
+    FORCER LES LIENS EN BLANC ET GRAS SUR L'ACCUEIL
+    ============================================ */
+
+    /* Sur la page d'accueil, quand la navbar n'est pas scrollée */
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link i {
+        color: #ffffff !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link.active {
+        background: rgba(255, 255, 255, 0.20) !important;
+        color: #ffffff !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link.active i {
+        color: #ffffff !important;
+    }
+
+    /* Sur la page d'accueil, quand la navbar est scrollée */
+    .pm-navbar-pro.scrolled .pm-menu-link {
+        color: #1f2937 !important;
+        font-weight: 500 !important;
+    }
+
+    .pm-navbar-pro.scrolled .pm-menu-link i {
+        color: #1f2937 !important;
+    }
+
+    .pm-navbar-pro.scrolled .pm-menu-link.active {
+        background: rgba(37, 99, 235, 0.10) !important;
+        color: #2563eb !important;
+    }
+
+    .pm-navbar-pro.scrolled .pm-menu-link.active i {
+        color: #2563eb !important;
+    }
+
+    /* ============================================
+    FORCER LES COULEURS DE LA NAVBAR - CORRIGÉ
+    ============================================ */
+
+    /* État par défaut sur l'accueil (transparent) */
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link i {
+        color: #ffffff !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link.active {
+        background: rgba(255, 255, 255, 0.20) !important;
+        color: #ffffff !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled) .pm-menu-link.active i {
+        color: #ffffff !important;
+    }
+
+    /* État scrollé sur l'accueil */
+    .pm-navbar-pro.scrolled .pm-menu-link {
+        color: #1f2937 !important;
+        font-weight: 500 !important;
+    }
+
+    .pm-navbar-pro.scrolled .pm-menu-link i {
+        color: #1f2937 !important;
+    }
+
+    .pm-navbar-pro.scrolled .pm-menu-link.active {
+        background: rgba(37, 99, 235, 0.10) !important;
+        color: #2563eb !important;
+    }
+
+    .pm-navbar-pro.scrolled .pm-menu-link.active i {
+        color: #2563eb !important;
+    }
+
+    /* FORCER les couleurs sur toutes les pages sauf accueil */
+    .pm-navbar-pro:not(.scrolled):not(.pm-navbar-home) .pm-menu-link {
+        color: #1f2937 !important;
+        font-weight: 500 !important;
+    }
+
+    .pm-navbar-pro:not(.scrolled):not(.pm-navbar-home) .pm-menu-link i {
+        color: #1f2937 !important;
+    }
+
+    /* FORCER le logo à être visible sur toutes les pages */
+    .pm-navbar-pro:not(.scrolled) .pm-brand img {
+        filter: brightness(0) invert(1);
+        transition: filter 0.35s ease;
+    }
+
+    .pm-navbar-pro.scrolled .pm-brand img {
+        filter: none !important;
+    }
+
+    .pm-navbar-pro:not(.pm-navbar-home) .pm-brand img {
+        filter: none !important;
+    }
+
+    /* FORCER la couleur du hamburger */
+    .pm-navbar-pro:not(.scrolled) #pmHamburgerBtn span {
+        background: #ffffff !important;
+    }
+
+    .pm-navbar-pro.scrolled #pmHamburgerBtn span {
+        background: #1f2937 !important;
+    }
+
+    .pm-navbar-pro:not(.pm-navbar-home) #pmHamburgerBtn span {
+        background: #1f2937 !important;
+    }
+
+    .mol-auth-login:hover,
+    .pm-navbar-pro.scrolled .mol-auth-login:hover,
+    .pm-navbar-pro:not(.scrolled) .mol-auth-login:hover {
+        background: #85ca18 !important;
+        border-color: #16a34a !important;
+        color: #ffffff !important;
+    }
+
+    .mol-auth-register,
+    .pm-navbar-pro.scrolled .mol-auth-register,
+    .pm-navbar-pro:not(.scrolled) .mol-auth-register {
+        background: #69b900 !important;
+        border-color: #69b900 !important;
+        color: #ffffff !important;
+    }
+
+    .mol-auth-login:hover {
+        background: #85ca18 !important;
+        border-color: #16a34a !important;
+        color: #ffffff !important;
+    }
+
+    .mol-auth-register:hover,
+    .pm-navbar-pro.scrolled .mol-auth-register:hover,
+    .pm-navbar-pro:not(.scrolled) .mol-auth-register:hover {
+        background: #579b00 !important;
+        border-color: #579b00 !important;
+        color: #ffffff !important;
+    }
+
+
+    /* Desktop par défaut */
+    .pm-brand-desktop {
+        display: flex;
+    }
+
+    .pm-brand-mobile {
+        display: none;
+    }
+
+    /* Mobile */
+    @media (max-width: 767.98px) {
+        .pm-brand-desktop {
+            display: none !important;
+        }
+
+        .pm-brand-mobile {
+            display: flex !important;
+        }
+    }
+
+    /* ============================================
+    GESTION CORRECTE DES LOGOS
+    ============================================ */
+
+    /* Desktop et tablette */
+    .pm-navbar-pro .pm-brand-desktop {
+        display: flex !important;
+    }
+
+    .pm-navbar-pro .pm-brand-mobile {
+        display: none !important;
+    }
+
+    /* Mobile uniquement */
+    @media screen and (max-width: 767.98px) {
+        .pm-navbar-pro .pm-brand-desktop {
+            display: none !important;
+        }
+
+        .pm-navbar-pro .pm-brand-mobile {
+            display: flex !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
+            max-width: 70% !important;
+        }
+
+        .pm-navbar-pro .pm-brand-mobile img {
+            display: block !important;
+            height: 32px !important;
+            width: auto !important;
+            max-width: 100% !important;
+            object-fit: contain !important;
+        }
+    }
+
+    /* Bouton Connexion — vert du logo */
+    .pm-btn-outline {
+        background-color: #69b900 !important;
+        border-color: #69b900 !important;
+        color: #ffffff !important;
+    }
+
+    .pm-btn-outline:hover,
+    .pm-btn-outline:focus {
+        background-color: #579b00 !important;
+        border-color: #579b00 !important;
+        color: #ffffff !important;
+    }
+
+    /* Bouton Inscription — vert */
+    .pm-btn-green {
+        background-color: #69b900 !important;
+        border-color: #69b900 !important;
+        color: #ffffff !important;
+    }
+
+    .pm-btn-green:hover,
+    .pm-btn-green:focus {
+        background-color: #579b00 !important;
+        border-color: #579b00 !important;
+        color: #ffffff !important;
+    }
+
+
+    @media (max-width: 991.98px) {
+        /* Supprime l’espace supplémentaire après les icônes */
+        .pm-mobile-nav > li > a.pm-mobile-link {
+            gap: 0 !important;
+            column-gap: 0 !important;
+        }
+
+        .pm-mobile-dropdown-toggle > span {
+            gap: 0 !important;
+            column-gap: 0 !important;
+        }
+
+        /* Même largeur et même espace pour toutes les icônes */
+        .pm-mobile-nav > li > a.pm-mobile-link > i:first-child,
+        .pm-mobile-dropdown-toggle > span > i:first-child {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 18px !important;
+            min-width: 18px !important;
+            margin: 0 10px 0 0 !important;
+        }
+    }
+
+    /* ============================================
+    ANIMATION DOUCE DES ÉLÉMENTS DU MENU UTILISATEUR
+    ============================================ */
+    .pm-user-dropdown-menu a {
+        position: relative;
+        will-change: transform, background-color, box-shadow;
+        transition:
+            transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+            background-color 0.22s ease,
+            color 0.22s ease,
+            box-shadow 0.22s ease !important;
+    }
+
+    .pm-user-dropdown-menu a:hover,
+    .pm-user-dropdown-menu a:focus-visible {
+        background: #eff6ff !important;
+        transform: translateX(6px);
+        box-shadow: inset 3px 0 0 rgba(37, 99, 235, 0.65);
+        outline: none;
+    }
+
+    .pm-user-dropdown-menu a:not([href*="logout"]):hover,
+    .pm-user-dropdown-menu a:not([href*="logout"]):focus-visible {
+        color: #2563eb !important;
+    }
+
+    .pm-user-dropdown-menu a:not([href*="logout"]):hover i,
+    .pm-user-dropdown-menu a:not([href*="logout"]):focus-visible i {
+        color: #2563eb !important;
+        transform: scale(1.06);
+    }
+
+    .pm-user-dropdown-menu a i {
+        transition: color 0.22s ease, transform 0.22s ease;
+    }
+
+    /* Déconnexion : toujours rouge, y compris au survol */
+    .pm-user-dropdown-menu a[href*="logout"],
+    .pm-user-dropdown-menu a[href*="logout"] i {
+        color: #dc2626 !important;
+    }
+
+    .pm-user-dropdown-menu a[href*="logout"]:hover,
+    .pm-user-dropdown-menu a[href*="logout"]:focus-visible {
+        background: #fef2f2 !important;
+        color: #dc2626 !important;
+        box-shadow: inset 3px 0 0 #dc2626 !important;
+    }
+
+    .pm-user-dropdown-menu a[href*="logout"]:hover i,
+    .pm-user-dropdown-menu a[href*="logout"]:focus-visible i {
+        color: #dc2626 !important;
+        transform: scale(1.06);
+    }
+
+    /* ============================================
+    SPINNER APRÈS CLIC DANS LE MENU MOBILE
+    ============================================ */
+    #pmMobileMenu a.is-mobile-loading {
+        pointer-events: none !important;
+        opacity: 0.82;
+        cursor: wait !important;
+    }
+
+    #pmMobileMenu .pm-mobile-click-spinner {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        margin-left: auto;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    #pmMobileMenu .pm-btn.is-mobile-loading .pm-mobile-click-spinner,
+    #pmMobileMenu .pm-mobile-lang-option.is-mobile-loading .pm-mobile-click-spinner {
+        margin-left: 10px;
+    }
+
+
+
+    /* ============================================
+    BOUTON « MON COMPTE » — DESIGN PREMIUM
+    ============================================ */
+    .pm-user-dropdown .pm-user-btn {
+        position: relative;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 9px !important;
+        min-height: 42px !important;
+        padding: 5px 6px 5px 7px !important;
+        border: 1px solid #dbe4f0 !important;
+        border-radius: 14px !important;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%) !important;
+        color: #0f172a !important;
+        box-shadow:
+            0 1px 2px rgba(15, 23, 42, 0.04),
+            0 6px 18px rgba(15, 23, 42, 0.07) !important;
+        cursor: pointer !important;
+        overflow: hidden;
+        isolation: isolate;
+        transition:
+            transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+            border-color 0.22s ease,
+            background 0.22s ease,
+            box-shadow 0.22s ease !important;
+    }
+
+    .pm-user-dropdown .pm-user-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.10), rgba(79, 70, 229, 0.05));
+        opacity: 0;
+        transition: opacity 0.22s ease;
+    }
+
+    .pm-user-dropdown .pm-user-btn:hover,
+    .pm-user-dropdown .pm-user-btn:focus-visible,
+    .pm-user-dropdown .pm-user-btn[aria-expanded="true"] {
+        border-color: #bfdbfe !important;
+        background: #ffffff !important;
+        color: #1d4ed8 !important;
+        box-shadow:
+            0 1px 2px rgba(37, 99, 235, 0.06),
+            0 10px 24px rgba(37, 99, 235, 0.14) !important;
+        transform: translateY(-1px);
+        outline: none;
+    }
+
+    .pm-user-dropdown .pm-user-btn:hover::before,
+    .pm-user-dropdown .pm-user-btn:focus-visible::before,
+    .pm-user-dropdown .pm-user-btn[aria-expanded="true"]::before {
+        opacity: 1;
+    }
+
+    .pm-user-btn-avatar {
+        width: 31px;
+        height: 31px;
+        min-width: 31px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: 0.02em;
+        box-shadow: 0 5px 12px rgba(37, 99, 235, 0.24);
+        transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .pm-user-btn-avatar img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+    }
+
+    .pm-user-btn:hover .pm-user-btn-avatar,
+    .pm-user-btn[aria-expanded="true"] .pm-user-btn-avatar {
+        transform: scale(1.04);
+        box-shadow: 0 7px 16px rgba(37, 99, 235, 0.30);
+    }
+
+    .pm-user-btn-label {
+        max-width: 104px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: -0.01em;
+    }
+
+    .pm-user-btn-chevron {
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9px;
+        background: #eef2f7;
+        color: #64748b;
+        transition: background-color 0.22s ease, color 0.22s ease;
+    }
+
+    .pm-user-btn-chevron .fa-chevron-down {
+        font-size: 9px;
+        transition: transform 0.25s ease;
+    }
+
+    .pm-user-btn:hover .pm-user-btn-chevron,
+    .pm-user-btn:focus-visible .pm-user-btn-chevron,
+    .pm-user-btn[aria-expanded="true"] .pm-user-btn-chevron {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    /* Accueil avant scroll : conserve la lisibilité sur le hero */
+    .pm-navbar-home:not(.scrolled) .pm-user-dropdown .pm-user-btn {
+        border-color: rgba(255, 255, 255, 0.28) !important;
+        background: rgba(15, 23, 42, 0.24) !important;
+        color: #ffffff !important;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+    }
+
+    .pm-navbar-home:not(.scrolled) .pm-user-btn-chevron {
+        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+    }
+
+    .pm-navbar-home:not(.scrolled) .pm-user-dropdown .pm-user-btn:hover,
+    .pm-navbar-home:not(.scrolled) .pm-user-dropdown .pm-user-btn:focus-visible,
+    .pm-navbar-home:not(.scrolled) .pm-user-dropdown .pm-user-btn[aria-expanded="true"] {
+        border-color: rgba(255, 255, 255, 0.52) !important;
+        background: rgba(15, 23, 42, 0.38) !important;
+        color: #ffffff !important;
+    }
+
+    .pm-user-btn-avatar {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: #ffffff;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+}
+
+.pm-user-btn-avatar i {
+    color: #ffffff !important;
+    line-height: 1;
+}
+</style>

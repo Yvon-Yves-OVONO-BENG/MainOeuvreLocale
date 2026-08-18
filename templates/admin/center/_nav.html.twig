@@ -1,0 +1,11 @@
+<div class="ctr-nav">
+  <a href="{{ path('admin_settings_index') }}" class="ctr-btn {{ currentSection == 'settings' ? 'ctr-btn-primary' : 'ctr-btn-soft' }}">
+    <span class="ctr-dot"></span> {% trans %}Paramètres{% endtrans %}
+  </a>
+  <a href="{{ path('admin_backups_index') }}" class="ctr-btn {{ currentSection == 'backups' ? 'ctr-btn-primary' : 'ctr-btn-soft' }}">
+    <span class="ctr-dot"></span> {% trans %}Backups{% endtrans %}
+  </a>
+  <a href="{{ path('admin_integrations_index') }}" class="ctr-btn {{ currentSection == 'integrations' ? 'ctr-btn-primary' : 'ctr-btn-soft' }}">
+    <span class="ctr-dot"></span> {% trans %}Intégrations{% endtrans %}
+  </a>
+</div>

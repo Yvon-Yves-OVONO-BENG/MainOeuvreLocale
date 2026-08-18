@@ -1,0 +1,242 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Checklist • Livrables & validations'|trans }}{% endblock %}
+
+{% block body %}
+{# ✅ Si Tailwind est déjà compilé chez toi, enlève cette ligne #}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-80px)] bg-gradient-to-b from-slate-50 via-white to-slate-50">
+  <div class="mx-auto max-w-6xl px-4 py-6">
+
+    {# Header VIP #}
+    <div class="rounded-3xl border border-slate-200 bg-white/70 backdrop-blur-xl shadow-[0_18px_60px_rgba(15,23,42,.08)] overflow-hidden">
+      <div class="p-6 sm:p-7 bg-gradient-to-r from-indigo-50 via-white to-emerald-50">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
+              <span>✅</span> {% trans %}Checklist{% endtrans %}
+              <span class="text-slate-400">•</span>
+              <span class="text-slate-500">{% trans %}Livrables & validations{% endtrans %}</span>
+            </div>
+            <h1 class="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">
+              {% trans %}Suivi des livrables{% endtrans %}
+            </h1>
+            <p class="mt-1 text-sm text-slate-600">
+              {% trans %}Dépose, soumets, puis fais valider — avec une traçabilité propre.{% endtrans %}
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <a href="{{ path('deliverable_new') }}"
+               class="group inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow hover:shadow-lg hover:-translate-y-[1px] transition">
+              <span class="text-lg">＋</span> {% trans %}Nouveau livrable{% endtrans %}
+              <span class="opacity-0 group-hover:opacity-100 transition">→</span>
+            </a>
+          </div>
+        </div>
+
+        {# KPIs #}
+        <div class="mt-6 grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {% set total = kpis.total ?? 0 %}
+          {% set todo = kpis.todo ?? 0 %}
+          {% set submitted = kpis.submitted ?? 0 %}
+          {% set validated = kpis.validated ?? 0 %}
+          {% set rejected = kpis.rejected ?? 0 %}
+
+          {% set cards = [
+            {'label':'Total', 'value': total, 'pill':'bg-slate-900 text-white', 'q': null},
+            {'label':'À faire', 'value': todo, 'pill':'bg-slate-100 text-slate-900', 'q':'todo'},
+            {'label':'Soumis', 'value': submitted, 'pill':'bg-indigo-100 text-indigo-900', 'q':'submitted'},
+            {'label':'Validé', 'value': validated, 'pill':'bg-emerald-100 text-emerald-900', 'q':'validated'},
+            {'label':'Rejeté', 'value': rejected, 'pill':'bg-rose-100 text-rose-900', 'q':'rejected'},
+          ] %}
+
+          {% for c in cards %}
+            <a href="{{ path('deliverable_index', c.q ? {'status': c.q} : {}) }}"
+               class="rounded-2xl border border-slate-200 bg-white p-4 hover:bg-slate-50 transition shadow-sm">
+              <div class="text-xs font-semibold text-slate-500">{{ c.label|trans }}</div>
+              <div class="mt-1 flex items-center justify-between">
+                <div class="text-2xl font-black text-slate-900">{{ c.value }}</div>
+                <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ c.pill }}">●</span>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+
+        {# Barre de progression #}
+        {% set pct = (total > 0) ? (validated / total * 100) : 0 %}
+        <div class="mt-5">
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-600">
+            <span>{% trans %}Progression (validés){% endtrans %}</span>
+            <span>{{ pct|number_format(0) }}%</span>
+          </div>
+          <div class="mt-2 h-2.5 rounded-full bg-slate-100 overflow-hidden">
+            <div class="h-full rounded-full bg-slate-900" style="width: {{ pct }}%"></div>
+          </div>
+        </div>
+      </div>
+
+      {# Contenu #}
+      <div class="p-6 sm:p-7">
+        {# filtres #}
+        <div class="flex flex-wrap items-center gap-2">
+          {% set active = status ?? '' %}
+
+          {# Tous #}
+          {% set cls = (active == '') 
+            ? 'bg-slate-900 text-white border-slate-900' 
+            : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200' %}
+          <a class="rounded-full border px-3 py-1.5 text-xs font-bold transition {{ cls }}"
+             href="{{ path('deliverable_index') }}">{% trans %}Tous{% endtrans %}</a>
+
+          {# À faire #}
+          {% set cls = (active == 'todo') 
+            ? 'bg-slate-900 text-white border-slate-900' 
+            : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200' %}
+          <a class="rounded-full border px-3 py-1.5 text-xs font-bold transition {{ cls }}"
+             href="{{ path('deliverable_index', {'status':'todo'}) }}">{% trans %}À faire{% endtrans %}</a>
+
+          {# Soumis #}
+          {% set cls = (active == 'submitted') 
+            ? 'bg-slate-900 text-white border-slate-900' 
+            : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200' %}
+          <a class="rounded-full border px-3 py-1.5 text-xs font-bold transition {{ cls }}"
+             href="{{ path('deliverable_index', {'status':'submitted'}) }}">{% trans %}Soumis{% endtrans %}</a>
+
+          {# Validés #}
+          {% set cls = (active == 'validated') 
+            ? 'bg-slate-900 text-white border-slate-900' 
+            : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200' %}
+          <a class="rounded-full border px-3 py-1.5 text-xs font-bold transition {{ cls }}"
+             href="{{ path('deliverable_index', {'status':'validated'}) }}">{% trans %}Validés{% endtrans %}</a>
+
+          {# Rejetés #}
+          {% set cls = (active == 'rejected') 
+            ? 'bg-slate-900 text-white border-slate-900' 
+            : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200' %}
+          <a class="rounded-full border px-3 py-1.5 text-xs font-bold transition {{ cls }}"
+             href="{{ path('deliverable_index', {'status':'rejected'}) }}">{% trans %}Rejetés{% endtrans %}</a>
+        </div>
+
+        <div class="mt-5 grid gap-4">
+          {% if items is empty %}
+            <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 p-10 text-center">
+              <div class="text-4xl">🗂️</div>
+              <div class="mt-2 text-lg font-black text-slate-900">{% trans %}Aucun livrable{% endtrans %}</div>
+              <div class="mt-1 text-sm text-slate-600">{% trans %}Crée ton premier livrable pour commencer le suivi.{% endtrans %}</div>
+              <a href="{{ path('deliverable_new') }}"
+                 class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white shadow hover:shadow-lg transition">
+                ＋ {% trans %}Nouveau livrable{% endtrans %}
+              </a>
+            </div>
+          {% endif %}
+
+          {% for d in items %}
+            {% set s = d.status %}
+            {% set badge =
+              s == 'validated' ? 'bg-emerald-100 text-emerald-900 border-emerald-200' :
+              s == 'submitted' ? 'bg-indigo-100 text-indigo-900 border-indigo-200' :
+              s == 'rejected' ? 'bg-rose-100 text-rose-900 border-rose-200' :
+              'bg-slate-100 text-slate-900 border-slate-200'
+            %}
+
+            <div class="group rounded-3xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-base sm:text-lg font-black text-slate-900 truncate">
+                      {{ d.title }}
+                    </h3>
+                    <span class="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-extrabold {{ badge }}">
+                      {% if s == 'todo' %}{% trans %}🕒 À faire{% endtrans %}{% endif %}
+                      {% if s == 'submitted' %}{% trans %}📤 Soumis{% endtrans %}{% endif %}
+                      {% if s == 'validated' %}{% trans %}✅ Validé{% endtrans %}{% endif %}
+                      {% if s == 'rejected' %}{% trans %}❌ Rejeté{% endtrans %}{% endif %}
+                    </span>
+
+                    {% if d.dueAt %}
+                      <span class="text-xs font-semibold text-slate-500">
+                        • {% trans %}échéance :{% endtrans %} {{ d.dueAt|date('d/m/Y') }}
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  {% if d.description %}
+                    <p class="mt-2 text-sm text-slate-600 line-clamp-3">
+                      {{ d.description }}
+                    </p>
+                  {% endif %}
+
+                  {% if d.validationNote %}
+                    <div class="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                      <div class="text-xs font-black text-slate-700">{% trans %}Note{% endtrans %}</div>
+                      <div class="text-sm text-slate-700 mt-1">{{ d.validationNote }}</div>
+                    </div>
+                  {% endif %}
+                </div>
+
+                <div class="flex items-center gap-2 sm:justify-end flex-wrap">
+                  {% if s in ['todo','rejected'] %}
+                    <a href="{{ path('deliverable_edit', {'id': d.id}) }}"
+                       class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition">
+                      {% trans %}✏️ Modifier{% endtrans %}
+                    </a>
+
+                    <form method="post" action="{{ path('deliverable_submit', {'id': d.id}) }}" class="inline">
+                      <input type="hidden" name="_token" value="{{ csrf_token('submit_deliverable_' ~ d.id) }}">
+                      <button type="submit"
+                              class="rounded-2xl bg-slate-900 px-3 py-2 text-xs font-black text-white hover:shadow transition"
+                              onclick="return confirm('{{ 'Soumettre ce livrable pour validation ?'|trans|e('js') }}')">
+                        {% trans %}📤 Soumettre{% endtrans %}
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  {% if is_granted('ROLE_ADMIN') and s == 'submitted' %}
+                    <form method="post" action="{{ path('deliverable_validate', {'id': d.id}) }}" class="inline">
+                      <input type="hidden" name="_token" value="{{ csrf_token('validate_deliverable_' ~ d.id) }}">
+                      <input type="hidden" name="note" value="">
+                      <button type="submit"
+                              class="rounded-2xl bg-emerald-600 px-3 py-2 text-xs font-black text-white hover:shadow transition"
+                              onclick="return confirm('{{ 'Valider ce livrable ?'|trans|e('js') }}')">
+                        {% trans %}✅ Valider{% endtrans %}
+                      </button>
+                    </form>
+
+                    <form method="post" action="{{ path('deliverable_reject', {'id': d.id}) }}" class="inline">
+                      <input type="hidden" name="_token" value="{{ csrf_token('reject_deliverable_' ~ d.id) }}">
+                      <input type="hidden" name="note" value="{{ 'À corriger puis resoumettre.'|trans }}">
+                      <button type="submit"
+                              class="rounded-2xl bg-rose-600 px-3 py-2 text-xs font-black text-white hover:shadow transition"
+                              onclick="return confirm('{{ 'Rejeter ce livrable ?'|trans|e('js') }}')">
+                        {% trans %}❌ Rejeter{% endtrans %}
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  {% if s != 'validated' %}
+                    <form method="post" action="{{ path('deliverable_delete', {'id': d.id}) }}" class="inline">
+                      <input type="hidden" name="_token" value="{{ csrf_token('delete_deliverable_' ~ d.id) }}">
+                      <button type="submit"
+                              class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500 hover:text-rose-700 hover:bg-rose-50 transition"
+                              onclick="return confirm('{{ 'Supprimer ce livrable ?'|trans|e('js') }}')">
+                        {% trans %}🗑️ Supprimer{% endtrans %}
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
+                <span>{% trans %}Créé :{% endtrans %} {{ d.createdAt|date('d/m/Y H:i') }}</span>
+                <span>{% trans %}MAJ :{% endtrans %} {{ d.updatedAt|date('d/m/Y H:i') }}</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

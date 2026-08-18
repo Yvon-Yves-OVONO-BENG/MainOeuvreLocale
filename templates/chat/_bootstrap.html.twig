@@ -1,0 +1,81 @@
+{# templates/chat/_bootstrap.html.twig #}
+{% if app.user %}
+<script>
+    window.MOL_CHAT = {
+        version: 'messenger-premium-saas-2.0',
+        baseUrl: {{ app.request.basePath|json_encode|raw }},
+        mercureHub: {{ app.request.server.get('MERCURE_PUBLIC_URL')|default('')|json_encode|raw }},
+        meId: {{ app.user.id }},
+        meName: {{ (app.user.personalProfile ? (app.user.personalProfile.displayIdentity ?? app.user.personalProfile.fullName) : app.user.email)|json_encode|raw }},
+        meAvatar: {{ (app.user.personalProfile and app.user.personalProfile.photo ? asset('uploads/profiles/' ~ app.user.personalProfile.photo) : asset('uploads/profiles/avatar.png'))|json_encode|raw }},
+        urls: {
+            conversations: {{ path('chat_conversations')|json_encode|raw }},
+            withUser: {{ path('chat_with_user', { userId: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
+
+            messages: {{ path('chat_messages', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            send: {{ path('chat_send', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            read: {{ path('chat_mark_read', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            delivered: {{ path('chat_mark_delivered', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            typing: {{ path('chat_typing', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+
+            sendFile: {{ path('chat_conversation_send_file', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            sendVoice: {{ path('chat_conversation_send_voice', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            react: {{ path('message_reaction_toggle', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            messageDelete: {{ path('chat_message_delete', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+
+            conversationDelete: {{ path('chat_delete_conversation', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            markUnread: {{ path('chat_mark_unread', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            mute: {{ path('chat_mute', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            archive: {{ path('chat_archive', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            report: {{ path('chat_report', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+
+            searchMessages: {{ path('chat_search_conversation_messages', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            globalSearch: {{ path('chat_search_messages')|json_encode|raw }},
+            unreadCount: {{ path('chat_unread_count')|json_encode|raw }},
+            notifications: {{ path('chat_notifications_recent')|json_encode|raw }},
+            markAllRead: {{ path('chat_panel_mark_all_read')|json_encode|raw }},
+
+            chatSettings: {{ path('app_chat_settings')|json_encode|raw }},
+            notificationStatus: {{ path('app_notifications_status')|json_encode|raw }},
+            notificationToggle: {{ path('app_notifications_toggle')|json_encode|raw }},
+            messageSoundStatus: {{ path('app_message_sounds_status')|json_encode|raw }},
+            messageSoundSave: {{ path('app_message_sounds_save')|json_encode|raw }},
+            blockSettingsStatus: {{ path('app_chat_block_settings_status')|json_encode|raw }},
+            blockSettingsSave: {{ path('app_chat_block_settings_save')|json_encode|raw }}
+        },
+        groups: {
+            mine: {{ path('chat_group_mine')|json_encode|raw }},
+            discover: {{ path('chat_group_discover')|json_encode|raw }},
+            detail: {{ path('chat_group_detail', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            messages: {{ path('chat_group_messages', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            send: {{ path('chat_group_send', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            sendFile: {{ path('chat_group_send_file', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            deleteMessage: {{ path('chat_group_delete_message', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            react: {{ path('chat_group_toggle_reaction', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            search: {{ path('chat_group_search_messages', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            create: {{ path('chat_group_create')|json_encode|raw }}
+        },
+        presence: {
+            heartbeat: {{ path('presence_heartbeat')|json_encode|raw }},
+            offline: {{ path('presence_offline')|json_encode|raw }},
+            status: {{ path('presence_user_status', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__')
+        },
+        call: {
+            start: {{ path('chat_call_start', { id: 0 })|json_encode|raw }}.replace('/0/', '/__ID__/'),
+            accept: {{ path('chat_call_accept', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
+            decline: {{ path('chat_call_decline', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
+            signal: {{ path('chat_call_signal', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
+            end: {{ path('chat_call_end', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__')
+        },
+        csrf: {
+            notification: {{ csrf_token('notification_preference')|json_encode|raw }},
+            messageSound: {{ csrf_token('message_sound_preference')|json_encode|raw }},
+            blockSettings: {{ csrf_token('chat_block_settings')|json_encode|raw }}
+        },
+        assets: {
+            defaultAvatar: {{ asset('uploads/profiles/avatar.png')|json_encode|raw }},
+            profilesBase: {{ asset('uploads/profiles/')|json_encode|raw }}
+        }
+    };
+</script>
+{% endif %}

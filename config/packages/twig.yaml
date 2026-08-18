@@ -8,7 +8,8 @@ twig:
         - bootstrap_5_layout.html.twig
     globals:
         locales: '%app.locales%'
-        panierService: "@App\\Service\\PanierService"
+        # mercure_public_url: '%env(MERCURE_PUBLIC_URL)%'
+        
 
 when@test:
     twig:

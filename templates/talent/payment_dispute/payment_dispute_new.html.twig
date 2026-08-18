@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{% trans %}Signaler un problème de paiement{% endtrans %}
+{% endblock %}
+
+{% block body %}
+
+{% include "talent/payment_dispute/_vip_ui_payment_dispute_new.html.twig" %}
+
+	<div class="container-fluid py-4 dispute-shell">
+		<div class="dispute-hero p-4 p-lg-5 mb-4">
+			<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+				<div class="d-flex align-items-start gap-3">
+					<div class="dispute-icon">⚠️</div>
+					<div>
+						<h1 class="h3 fw-bold mb-1">{% trans %}Signaler un problème de paiement{% endtrans %}</h1>
+						<div class="dispute-soft">
+							{% trans %}Déclarez un débit anormal, une facture absente, un paiement non reconnu ou tout autre incident lié à vos transactions.{% endtrans %}
+						</div>
+					</div>
+				</div>
+
+				<div class="d-flex flex-wrap gap-2">
+					<a href="javascript:history.back();" class="btn btn-outline-dark rounded-pill px-3">
+						← {% trans %}Retour{% endtrans %}
+					</a>
+					
+                    <a href="{{ path('talent_payment_dispute_index') }}" class="btn btn-outline-dark rounded-pill px-3">
+                        📋 {% trans %}Mes signalements{% endtrans %}
+                    </a>
+                    <a href="{{ path('talent_sanctions_index') }}" class="btn btn-warning rounded-pill px-3">
+                        🛡️ {% trans %}Afficher mes sanctions{% endtrans %}
+                    </a>
+				</div>
+
+			</div>
+		</div>
+
+		{% for label, messages in app.flashes %}
+			{% for message in messages %}
+				<div class="alert alert-{{ label }} shadow-sm rounded-4 border-0 mb-3">{{ message }}</div>
+			{% endfor %}
+		{% endfor %}
+
+		<div class="row g-4">
+			<div class="col-12 col-xl-8">
+				<div class="dispute-card p-4 p-lg-5">
+					<div class="mb-4">
+						<div class="fw-bold fs-5">{% trans %}Créer un signalement{% endtrans %}</div>
+						<div class="dispute-soft">
+							{% trans %}Sélectionnez le paiement concerné et décrivez précisément le problème rencontré.{% endtrans %}
+						</div>
+					</div>
+
+					{{ form_start(form) }}
+
+						<div class="dispute-field mb-3">
+							<label class="form-label fw-semibold mb-2">
+								{% trans %}Paiement concerné{% endtrans %}
+							</label>
+							{{ form_widget(form.payment) }}
+							<div class="mt-2 text-danger small">
+								{{ form_errors(form.payment) }}
+							</div>
+						</div>
+
+                        <div class="dispute-field mb-3">
+                            <label class="form-label fw-semibold mb-2">
+                                {% trans %}Priorité{% endtrans %}
+                            </label>
+                            {{ form_widget(form.priority) }}
+                            <div class="mt-2 text-danger small">
+                                {{ form_errors(form.priority) }}
+                            </div>
+                        </div>
+
+						<div class="dispute-field mb-3">
+							<label class="form-label fw-semibold mb-2">
+								{% trans %}Description du problème{% endtrans %}
+							</label>
+							{{ form_widget(form.reason) }}
+							<div class="mt-2 text-danger small">
+								{{ form_errors(form.reason) }}
+							</div>
+							<div class="dispute-soft small mt-2">
+								{% trans %}Exemples : double débit, montant incorrect, facture introuvable, paiement effectué mais service non activé.{% endtrans %}
+							</div>
+						</div>
+
+						<div class="d-flex flex-wrap gap-2 pt-2">
+							<button type="submit" class="btn btn-danger rounded-pill px-4">
+								📨 {% trans %}Envoyer le signalement{% endtrans %}
+							</button>
+							<a href="javascript:history.back();" class="btn btn-outline-dark rounded-pill px-4">
+								{% trans %}Annuler{% endtrans %}
+							</a>
+						</div>
+
+					{{ form_end(form) }}
+				</div>
+			</div>
+
+			<div class="col-12 col-xl-4">
+				<div class="dispute-side p-4 mb-4">
+					<div class="fw-bold mb-2">{% trans %}Conseils utiles{% endtrans %}</div>
+					<div class="dispute-soft small mb-3">
+						{% trans %}Pour accélérer le traitement, soyez précis et indiquez le paiement exact concerné.{% endtrans %}
+					</div>
+
+					<div class="dispute-list-item">
+						<div class="fw-semibold">{% trans %}Montant exact{% endtrans %}</div>
+						<div class="dispute-soft small">{% trans %}Mentionnez le montant débité ou attendu.{% endtrans %}</div>
+					</div>
+
+					<div class="dispute-list-item">
+						<div class="fw-semibold">{% trans %}Moment du paiement{% endtrans %}</div>
+						<div class="dispute-soft small">{% trans %}Indiquez si possible la date et l’heure approximatives.{% endtrans %}</div>
+					</div>
+
+					<div class="dispute-list-item">
+						<div class="fw-semibold">{% trans %}Nature du problème{% endtrans %}</div>
+						<div class="dispute-soft small">{% trans %}Expliquez clairement ce qui ne va pas : facture, activation, montant, débit multiple, etc.{% endtrans %}</div>
+					</div>
+				</div>
+
+                <div class="dispute-side p-4 mb-4">
+                    <div class="fw-bold mb-2">{% trans %}Vue rapide{% endtrans %}</div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 bg-white h-100">
+                                <div class="small text-muted">{% trans %}Total{% endtrans %}</div>
+                                <div class="fs-4 fw-bold">{{ totalCount }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 bg-white h-100">
+                                <div class="small text-muted">{% trans %}Ouverts{% endtrans %}</div>
+                                <div class="fs-4 fw-bold text-danger">{{ openCount }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="border rounded-4 p-3 bg-white">
+                                <div class="small text-muted">{% trans %}En revue{% endtrans %}</div>
+                                <div class="fs-5 fw-bold" style="color:#8a6d03;">{{ reviewCount }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+				<div class="dispute-side p-4">
+					<div class="fw-bold mb-2">{% trans %}Mes derniers signalements{% endtrans %}</div>
+					<div class="dispute-soft small mb-3">
+						{% trans %}Aperçu de vos demandes récentes liées aux paiements.{% endtrans %}
+					</div>
+
+					{% if recentDisputes|length > 0 %}
+						{% for d in recentDisputes %}
+							<div class="dispute-list-item">
+								<div class="d-flex justify-content-between align-items-center gap-2">
+									<div class="fw-semibold">
+										#{{ d.id }}
+									</div>
+									<span class="badge rounded-pill
+										{% if d.status == constant('App\\Entity\\PaymentDispute::STATUS_OPEN') %}text-bg-danger{% endif %}
+										{% if d.status == constant('App\\Entity\\PaymentDispute::STATUS_REVIEW') %}text-bg-warning{% endif %}
+										{% if d.status == constant('App\\Entity\\PaymentDispute::STATUS_RESOLVED') %}text-bg-success{% endif %}
+										{% if d.status == constant('App\\Entity\\PaymentDispute::STATUS_REJECTED') %}text-bg-dark{% endif %}
+										{% if d.status == constant('App\\Entity\\PaymentDispute::STATUS_REFUNDED') %}text-bg-primary{% endif %}
+									">
+										{% if d.status == constant('App\\Entity\\PaymentDispute::STATUS_OPEN') %}
+											{% trans %}Ouvert{% endtrans %}
+										{% elseif d.status == constant('App\\Entity\\PaymentDispute::STATUS_REVIEW') %}
+											{% trans %}En revue{% endtrans %}
+										{% elseif d.status == constant('App\\Entity\\PaymentDispute::STATUS_RESOLVED') %}
+											{% trans %}Résolu{% endtrans %}
+										{% elseif d.status == constant('App\\Entity\\PaymentDispute::STATUS_REJECTED') %}
+											{% trans %}Rejeté{% endtrans %}
+										{% elseif d.status == constant('App\\Entity\\PaymentDispute::STATUS_REFUNDED') %}
+											{% trans %}Remboursé{% endtrans %}
+										{% else %}
+											{{ d.status }}
+										{% endif %}
+									</span>
+								</div>
+
+								<div class="dispute-soft small mt-1">
+									{{ d.reason|length > 90 ? d.reason|slice(0, 90) ~ '…' : d.reason }}
+								</div>
+
+								<div class="dispute-soft small mt-1">
+									{{ d.createdAt|date('d/m/Y H:i') }}
+								</div>
+							</div>
+						{% endfor %}
+					{% else %}
+						<div class="dispute-soft small">
+							{% trans %}Aucun signalement récent.{% endtrans %}
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}

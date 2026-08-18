@@ -1,0 +1,139 @@
+{% extends 'marketing/layout.html.twig' %}
+{% set seo_description = 'Découvrez l’histoire de Main d’Œuvre Locale, la plateforme créée pour rendre visibles les talents et faciliter le recrutement local au Cameroun.' %}
+
+{% block title %}{{ 'Notre histoire — Main d’Œuvre Locale'|trans }}{% endblock %}
+
+{% block marketing_content %}
+<div class="mol-page-head">
+    <span class="mol-page-label">
+        {% trans %}Notre histoire{% endtrans %}
+    </span>
+
+    <div class="mol-page-actions">
+        <a href="{{ path('app_register') }}" class="mol-cta-primary">
+          {% trans %}Créer mon compte gratuitement{% endtrans %}
+        </a>
+        <a href="{{ path('marketing_services') }}" class="mol-cta-soft">
+          {% trans %}Voir nos services{% endtrans %} →
+        </a>
+    </div>
+</div>
+<section
+  class="mol-hero mol-hero--single"
+  style="--mol-hero-image:url('{{ asset('images/marketing/notre-histoire.jpeg') }}')">
+  <div class="mol-hero-grid mol-hero-grid--single">
+    <div class="flex flex-col justify-end">
+
+      <h1 class="mt-4 mol-hero-title">
+        {% trans %}D’un simple besoin à une plateforme qui redonne de la valeur au travail local.{% endtrans %}
+      </h1>
+
+      {# <p class="mt-4 mol-hero-text">
+        {% trans %}Main d’Œuvre Locale est née d’une réalité simple : des talents incroyables restent invisibles, pendant que des besoins urgents cherchent encore la bonne personne. Nous avons décidé de créer un pont fiable entre talents et opportunités.{% endtrans %}
+      </p> #}
+
+    </div>
+
+
+  </div>
+</section>
+
+<section class="mol-after-hero">
+  <div class="mol-hero-card mol-hero-card--below rounded-[28px] p-5 sm:p-6">
+<div class="mol-after-hero-title">
+     {% trans %}Pourquoi ça marche{% endtrans %}
+  </div>
+
+  <div class="mt-4 grid gap-3">
+    <div class="mol-kpi">
+      <div class="k">{% trans %}Profils vérifiables{% endtrans %}</div>
+      <div class="v">{% trans %}Photo, portfolio, preuves, réputation{% endtrans %}</div>
+    </div>
+    <div class="mol-kpi">
+      <div class="k">{% trans %}Matching rapide{% endtrans %}</div>
+      <div class="v">{% trans %}Besoins → talents en quelques clics{% endtrans %}</div>
+    </div>
+    <div class="mol-kpi">
+      <div class="k">{% trans %}Confiance{% endtrans %}</div>
+      <div class="v">{% trans %}Avis, signalements et modération propre{% endtrans %}</div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div class="mol-card p-5 sm:p-6">
+    <div class="text-xs text-slate-500 font-bold">{% trans %}Promesse{% endtrans %}</div>
+    <div class="mt-2 text-base font-extrabold text-slate-900">{% trans %}Trouver vite, choisir bien.{% endtrans %}</div>
+    <p class="mt-2 mol-section-text">{% trans %}Une expérience simple, claire et rassurante pour les talents comme pour les recruteurs.{% endtrans %}</p>
+  </div>
+
+  <div class="mol-card p-5 sm:p-6">
+    <div class="text-xs text-slate-500 font-bold">{% trans %}Culture{% endtrans %}</div>
+    <div class="mt-2 text-base font-extrabold text-slate-900">{% trans %}Respect • Transparence • Impact{% endtrans %}</div>
+    <p class="mt-2 mol-section-text">{% trans %}Nous valorisons le travail réel, la preuve de compétence et les relations professionnelles saines.{% endtrans %}</p>
+  </div>
+
+  <div class="mol-card p-5 sm:p-6">
+    <div class="text-xs text-slate-500 font-bold">{% trans %}Vision terrain{% endtrans %}</div>
+    <div class="mt-2 text-base font-extrabold text-slate-900">{% trans %}Une solution utile, pas décorative.{% endtrans %}</div>
+    <p class="mt-2 mol-section-text">{% trans %}Chaque écran doit rapprocher un besoin réel d’un talent crédible.{% endtrans %}</p>
+  </div>
+</section>
+
+<section class="mt-8">
+  <div class="flex items-end justify-between gap-4 flex-wrap">
+    <div>
+      <h2 class="mol-section-title">{% trans %}Notre timeline{% endtrans %}</h2>
+      <p class="mt-2 mol-section-text">{% trans %}Des étapes simples, avec un objectif clair : connecter avec confiance.{% endtrans %}</p>
+    </div>
+
+    <a href="{{ path('app_register') }}" class="mol-chip">
+      {% trans %}Rejoindre maintenant{% endtrans %} →
+    </a>
+  </div>
+
+  <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="mol-card p-5 sm:p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-sm font-bold text-slate-500">{% trans %}Étape 1{% endtrans %}</div>
+      <div class="mt-1 text-lg font-extrabold text-slate-900">{% trans %}Le déclic{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">
+        {% trans %}Trop de talents trouvés par hasard. Trop de mauvaises surprises. Il fallait une méthode claire.{% endtrans %}
+      </p>
+    </div>
+
+    <div class="mol-card p-5 sm:p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-sm font-bold text-slate-500">{% trans %}Étape 2{% endtrans %}</div>
+      <div class="mt-1 text-lg font-extrabold text-slate-900">{% trans %}La confiance{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">
+        {% trans %}Portfolios, preuves, avis et signalements structurent une communauté plus sûre et plus crédible.{% endtrans %}
+      </p>
+    </div>
+
+    <div class="mol-card p-5 sm:p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-sm font-bold text-slate-500">{% trans %}Étape 3{% endtrans %}</div>
+      <div class="mt-1 text-lg font-extrabold text-slate-900">{% trans %}L’impact{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">
+        {% trans %}Plus de missions, plus de revenus, plus de visibilité : le travail local reprend sa vraie valeur.{% endtrans %}
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="mt-8 mol-card p-6 sm:p-8">
+  <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+    <div>
+      <h3 class="text-2xl font-extrabold text-slate-900">{% trans %}Prêt à passer au niveau supérieur ?{% endtrans %}</h3>
+      <p class="mt-2 mol-section-text">{% trans %}Crée ton compte et deviens visible là où ça compte vraiment.{% endtrans %}</p>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <a href="{{ path('app_register') }}" class="mol-cta-primary">{% trans %}Créer mon compte{% endtrans %}</a>
+      <a href="{{ path('app_login') }}" class="mol-cta-soft">{% trans %}J’ai déjà un compte{% endtrans %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

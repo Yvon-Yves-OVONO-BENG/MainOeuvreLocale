@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Incidents sécurité{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/security/_vip_ui.html.twig' %}
+
+  <div class="sec-shell" data-security-page="incidents">
+    <div class="sec-container sec-grid">
+
+      <section class="sec-card sec-page-head">
+        <div class="sec-card-inner">
+          <div class="sec-page-head-top">
+            <div class="sec-page-main">
+              <div class="sec-kicker">{% trans %}Sécurité • Incidents{% endtrans %}</div>
+              <h1 class="sec-page-title">{% trans %}Incidents & réponse{% endtrans %}</h1>
+              <p class="sec-page-text">{% trans %}Incidents réels stockés en base, avec sévérité, statut, source IP et responsable.{% endtrans %}</p>
+            </div>
+          </div>
+          <div class="sec-page-actions">{% include 'admin/security/_nav.html.twig' %}</div>
+        </div>
+      </section>
+
+      <section class="sec-grid sec-grid-4">
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Ouverts{% endtrans %}</div><div class="value">{{ stats.open }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Critiques{% endtrans %}</div><div class="value">{{ stats.critical }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}Mitigés 24h{% endtrans %}</div><div class="value">{{ stats.mitigated24h }}</div></div></article>
+        <article class="sec-card sec-kpi"><div class="sec-card-inner"><div class="label">{% trans %}IP bloquées{% endtrans %}</div><div class="value">{{ stats.blockedIps }}</div></div></article>
+      </section>
+
+      <section class="sec-card">
+        <div class="sec-card-inner">
+          <div class="sec-filters">
+            <div style="flex:2 1 360px;">
+              <input type="search" class="sec-input" placeholder="{% trans %}Rechercher incident, type, IP...{% endtrans %}" data-sec-search="incidents">
+            </div>
+            <div style="flex:1 1 220px;">
+              <select class="sec-select" data-sec-severity="incidents">
+                <option value="">{% trans %}Toutes les sévérités{% endtrans %}</option>
+                <option value="low">{% trans %}Low{% endtrans %}</option>
+                <option value="medium">{% trans %}Medium{% endtrans %}</option>
+                <option value="high">{% trans %}High{% endtrans %}</option>
+                <option value="critical">{% trans %}Critical{% endtrans %}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="sec-separator"></div>
+
+          <div class="sec-card-list">
+            {% for i in incidents %}
+              <article class="sec-mini-card js-sec-incident"
+                       data-sec-text="{{ (i.id ~ ' ' ~ i.title ~ ' ' ~ i.type ~ ' ' ~ i.sourceIp ~ ' ' ~ i.owner)|lower }}"
+                       data-sec-severity="{{ i.severity }}">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+                  <div style="min-width:0;flex:1 1 auto;">
+                    <div class="sec-row-title">{{ i.title }}</div>
+                    <div class="sec-row-sub">{{ i.id }} • {{ i.type }} • {{ i.sourceIp ?: 'IP inconnue'|trans }}</div>
+                    <div style="margin-top:10px;color:var(--sec-muted);">
+                      {% trans %}Owner :{% endtrans %} {{ i.owner ?: '—' }} • {% trans %}Créé le{% endtrans %} {{ i.createdAt ? i.createdAt|date('d/m/Y H:i') : '—' }}
+                    </div>
+                  </div>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <span class="sec-badge {{ i.severity }}">{{ i.severity|upper }}</span>
+                    <span class="sec-badge {{ i.status }}">{{ i.status|capitalize }}</span>
+                  </div>
+                </div>
+              </article>
+            {% else %}
+              <div class="sec-mini-card">{% trans %}Aucun incident trouvé.{% endtrans %}</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-security.js') }}"></script>
+{% endblock %}

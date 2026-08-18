@@ -1,0 +1,566 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Vérifications{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_verifications.html.twig" %}
+
+
+<div class="toast-wrap" id="toastWrap" aria-live="polite" aria-atomic="true"></div>
+
+<div class="page">
+    <div class="wrap">
+
+        <div class="card">
+        <div class="hd">
+            <div>
+                <div class="h1">✅ {% trans %}Vérifications profils{% endtrans %}</div>
+                <div class="hint">{% trans %}CNI (Particulier/Company/Talent) + CV (Talent). Télécharge et valide.{% endtrans %}</div>
+
+                <div class="kpis">
+                    <div class="kpi">
+                        <div class="t">CNI</div>
+                        <div class="v">
+                            <span class="chip p">⏳ {% trans %}En attente{% endtrans %} : {{ stats.cni.pending ?? 0 }}</span>
+                            <span class="chip v">✅ {% trans %}Vérifiés{% endtrans %} : {{ stats.cni.verified ?? 0 }}</span>
+                            <span class="chip r">⛔ {% trans %}Rejetés{% endtrans %} : {{ stats.cni.rejected ?? 0 }}</span>
+                        </div>
+                    </div>
+                    <div class="kpi">
+                        <div class="t">CV (Talents)</div>
+                        <div class="v">
+                            <span class="chip p">⏳ {% trans %}En attente{% endtrans %}: {{ stats.cv.pending ?? 0 }}</span>
+                            <span class="chip v">✅ {% trans %}Vérifiés{% endtrans %}: {{ stats.cv.verified ?? 0 }}</span>
+                            <span class="chip r">⛔ {% trans %}Rejetés{% endtrans %}cted: {{ stats.cv.rejected ?? 0 }}</span>
+                        </div>
+                    </div>
+                    <div class="kpi">
+                        <div class="t">Vue</div>
+                        <div class="v">
+                            <span class="chip">👥 Total: {{ total }}</span>
+                            <span class="chip">📄 {{ limit }}/page</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Search top-right #}
+            <form method="get" action="{{ path('moderateur_verifications_index') }}" class="filters">
+                <select class="select" name="state">
+                    {% for s in ['pending','verified','rejected','all'] %}
+                        <option value="{{ s }}" {{ state == s ? 'selected' : '' }}>
+                            {% if s == 'pending' %}
+                                {% trans %}En attente{% endtrans %}
+                            {% elseif s == 'verified' %}
+                                {% trans %}Vérifié{% endtrans %}
+                            {% elseif s == 'rejected' %}
+                                {% trans %}Rejeté{% endtrans %}
+                            {% else %}
+                                {% trans %}Tous{% endtrans %}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+
+                <select class="select" name="role">
+                    <option value="" {{ role == '' ? 'selected' : '' }}>{% trans %}Tous rôles{% endtrans %}</option>
+                    <option value="talent" {{ role == 'talent' ? 'selected' : '' }}>{% trans %}Talents{% endtrans %}</option>
+                    <option value="particulier" {{ role == 'particulier' ? 'selected' : '' }}>{% trans %}Particuliers{% endtrans %}</option>
+                    <option value="company" {{ role == 'company' ? 'selected' : '' }}>{% trans %}Compagnies{% endtrans %}</option>
+                </select>
+
+                <input
+                    class="input"
+                    type="search"
+                    name="q"
+                    value="{{ q }}"
+                    placeholder="{% trans %}Rechercher (email, nom, ville…){% endtrans %}"
+                    style="min-width:260px;"
+                >
+
+                <input type="hidden" name="limit" value="{{ limit }}">
+
+                <button class="btn warn" type="submit">{% trans %}Rechercher{% endtrans %}</button>
+                <a class="btn" href="{{ path('moderateur_verifications_index') }}">{% trans %}Réinitialiser{% endtrans %}</a>
+            </form>
+        </div>
+
+        <div class="bd">
+            <div class="table-responsive">
+                <table class="verif-table">
+                    <thead>
+                        <tr>
+                            <th>{% trans %}Utilisateur{% endtrans %}</th>
+                            <th>{% trans %}Rôle{% endtrans %}</th>
+                            {# <th>{% trans %}Adresse{% endtrans %}</th> #}
+                            <th>{% trans %}CNI{% endtrans %}</th>
+                            <th>{% trans %}CV (talent){% endtrans %}</th>
+                            <th>{% trans %}État du compte{% endtrans %}</th>
+                            <th style="text-align:right;">{% trans %}Options{% endtrans %}</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for u in rows %}
+                        {% set pp = u.personalProfile ?? null %}
+                        {% set pro = u.professionalProfile ?? null %}
+
+                        {% set isTalent = 'ROLE_TALENT' in u.roles %}
+                        {% set isPart = 'ROLE_PARTICULIER' in u.roles %}
+                        {% set isComp = 'ROLE_COMPANY' in u.roles %}
+
+                        {% set hasPP = pp is not null %}
+                        {% set hasSlug = hasPP and pp.slug is not empty %}
+                        {% set hasCni = hasPP and pp.cni is not empty %}
+                        {% set hasCv = isTalent and pro is not null and pro.cv is not empty %}
+
+                        {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+
+                        {# Statuts docs #}
+                        {% set cniSt = hasPP ? (pp.cniStatus ?? 'pending') : 'pending' %}
+                        {% set cvSt = 'none' %}
+                        {% if isTalent %}
+                            {% if pro and pro.isVerified %}
+                                {% set cvSt = 'verified' %}
+                            {% elseif hasCv %}
+                                {% set cvSt = 'pending' %}
+                            {% else %}
+                                {% set cvSt = 'missing' %}
+                            {% endif %}
+                        {% endif %}
+
+                        {# URL de vérification #}
+                        {% set verifyUrl = hasSlug
+                            ? path('moderateur_verifications_show_slug', { slug: pp.slug })
+                            : path('moderateur_verifications_show', { id: u.id })
+                        %}
+
+                        {# Logique bouton "Vérifier" #}
+                        {% set canVerify =
+                            isComp
+                            or (isPart and hasPP and hasCni)
+                            or (isTalent and hasPP and hasCni and hasCv)
+                        %}
+
+                        {# URL "Voir profil" corrigée #}
+                        {% set profileUrl = null %}
+                        {% if hasSlug %}
+                            {% if isTalent %}
+                                {% set profileUrl = path('profil_talent', { slug: pp.slug }) %}
+                            {% elseif isPart or isComp %}
+                                {% set profileUrl = path('reputation_show', { slug: pp.slug }) %}
+                            {% endif %}
+                        {% endif %}
+
+                        <tr>
+                            <td>
+                                <div class="user">
+                                    <img class="avatar" src="{{ photo }}" alt="{% trans %}Photo{% endtrans %}">
+                                    <div>
+                                        <div class="u1">{{ pp and pp.fullName ? pp.fullName : (u.email ?? ('#' ~ u.id)) }}</div>
+                                        <div class="u2">
+                                            {{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="chip">
+                                    {% if isTalent %}
+                                        {% trans %}Talent{% endtrans %}
+                                    {% elseif isComp %}
+                                        {% trans %}Compagnie{% endtrans %}
+                                    {% else %}
+                                        {% trans %}Particulier{% endtrans %}
+                                    {% endif %}
+                                </span>
+                            </td>
+
+                            {# <td class="muted">
+                                {{ pp and pp.adress ? pp.adress : '—' }}
+                                {% if pp and pp.city %}
+                                    <br><span class="u2">{{ pp.city }}</span>
+                                {% endif %}
+                            </td> #}
+
+                            <td>
+                                {% if isComp %}
+                                    <span class="muted">{% trans %}Non requise{% endtrans %}</span>
+                                {% else %}
+                                    {% if cniSt == 'verified' %}
+                                        <span class="chip v">✅ {% trans %}CNI vérifiée{% endtrans %}</span>
+                                    {% elseif cniSt == 'rejected' %}
+                                        <span class="chip r">⛔ {% trans %}CNI rejetée{% endtrans %}</span>
+                                    {% elseif hasCni %}
+                                        <span class="chip p">⏳ {% trans %}CNI en attente{% endtrans %}</span>
+                                    {% else %}
+                                        <span class="chip r">⚠️ {% trans %}CNI manquante{% endtrans %}</span>
+                                    {% endif %}
+
+                                    {% if hasCni %}
+                                        <a class="btn icon-action"
+                                            style="padding:6px 10px; margin-left:6px;"
+                                            target="_blank"
+                                            href="{{ path('moderateur_verifications_download', {id: u.id, type: 'cni'}) }}"
+                                            data-tooltip="{% trans %}Télécharger CNI{% endtrans %}"
+                                            aria-label="{% trans %}Télécharger la CNI{% endtrans %}">
+                                                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                                            </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if not isTalent %}
+                                    <span class="muted">{% trans %}Non requis{% endtrans %}</span>
+                                {% else %}
+                                    {% if cvSt == 'verified' %}
+                                        <span class="chip v">✅ {% trans %}CV vérifié{% endtrans %}</span>
+                                    {% elseif cvSt == 'pending' %}
+                                        <span class="chip p">⏳ {% trans %}CV en attente{% endtrans %}</span>
+                                    {% else %}
+                                        <span class="chip r">⚠️ {% trans %}CV manquant{% endtrans %}</span>
+                                    {% endif %}
+                                        
+                                    {% if hasCv %}
+                                        <a class="btn icon-action"
+                                            style="padding:6px 10px; margin-left:6px;"
+                                            target="_blank"
+                                            href="{{ path('moderateur_verifications_download', {id: u.id, type: 'cv'}) }}"
+                                            data-tooltip="{% trans %}Télécharger CV{% endtrans %}"
+                                            aria-label="{% trans %}Télécharger le CV{% endtrans %}">
+                                                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                                            </a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if u.isActive %}
+                                    <span class="chip v">🟢 {% trans %}Actif{% endtrans %}</span>
+                                {% else %}
+                                    <span class="chip r">🔴 {% trans %}Bloqué{% endtrans %}</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                <div class="opts" style="position:relative;">
+
+                                    {% if canVerify %}
+                                        <a class="btn primary icon-action"
+                                            href="{{ verifyUrl }}"
+                                            data-tooltip="{% trans %}Vérifier{% endtrans %}"
+                                            aria-label="{% trans %}Vérifier cet utilisateur{% endtrans %}">
+                                                <i class="fa-solid fa-check" aria-hidden="true"></i>
+                                            </a>
+                                    {% else %}
+                                        <button type="button"
+                                                class="btn"
+                                                aria-haspopup="true"
+                                                aria-expanded="false"
+                                                data-menu-btn="menu-{{ u.id }}"
+                                                data-tooltip="{% trans %}Actions{% endtrans %}"
+                                                style="padding:10px 10px;">
+                                            <span style="font-size:18px; line-height:1;">⋮</span>
+                                        </button>
+
+                                        <div class="menu" id="menu-{{ u.id }}" role="menu" aria-label="{% trans %}Actions utilisateur{% endtrans %}">
+                                            {% if not hasPP %}
+                                                <div class="menu-note">⚠️ {% trans %}Profil incomplet{% endtrans %}</div>
+                                                <div class="menu-sep"></div>
+                                            {% endif %}
+
+                                            {% if isPart and not hasCni %}
+                                                <div class="menu-note">⚠️ {% trans %}CNI manquante (particulier){% endtrans %}</div>
+                                                <div class="menu-sep"></div>
+                                            {% endif %}
+
+                                            {% if isTalent and (not hasCni or not hasCv) %}
+                                                <div class="menu-note">⚠️ {% trans %}CNI ou CV manquant (talent){% endtrans %}</div>
+                                                <div class="menu-sep"></div>
+                                            {% endif %}
+
+                                            <button type="button"
+                                                    class="menu-item js-notify notify-btn"
+                                                    data-kind="email"
+                                                    data-url="{{ path('moderateur_notify_email', {id: u.id}) }}"
+                                                    data-token="{{ csrf_token('notify_email_' ~ u.id) }}">
+                                                <span class="notify-left">
+                                                    <span class="notify-ico" aria-hidden="true">✉️</span>
+                                                    <span class="notify-text">
+                                                        <span class="notify-title">{% trans %}Envoyer un mail{% endtrans %}</span>
+                                                        <span class="notify-sub">{% trans %}Demander de compléter le profil{% endtrans %}</span>
+                                                    </span>
+                                                </span>
+                                                <span class="notify-right">
+                                                    <span class="notify-spinner" aria-hidden="true"></span>
+                                                    <span class="notify-arrow" aria-hidden="true">›</span>
+                                                </span>
+                                            </button>
+
+                                            <button type="button"
+                                                    class="menu-item js-notify notify-btn"
+                                                    data-kind="sms"
+                                                    data-url="{{ path('moderateur_notify_sms', {id: u.id}) }}"
+                                                    data-token="{{ csrf_token('notify_sms_' ~ u.id) }}"
+                                                    {{ u.phone ? '' : 'disabled' }}>
+                                                <span class="notify-left">
+                                                    <span class="notify-ico" aria-hidden="true">📩</span>
+                                                    <span class="notify-text">
+                                                        <span class="notify-title">{% trans %}Envoyer un SMS{% endtrans %}</span>
+                                                        <span class="notify-sub">
+                                                            {% if u.phone %}
+                                                                {% trans %}Rappel rapide{% endtrans %}
+                                                            {% else %}
+                                                                {% trans %}Numéro manquant{% endtrans %}
+                                                            {% endif %}
+                                                        </span>
+                                                    </span>
+                                                </span>
+                                                <span class="notify-right">
+                                                    <span class="notify-spinner" aria-hidden="true"></span>
+                                                    <span class="notify-arrow" aria-hidden="true">›</span>
+                                                </span>
+                                            </button>
+
+                                            <button type="button"
+                                                    class="menu-item js-notify notify-btn"
+                                                    data-kind="whatsapp"
+                                                    data-url="{{ path('moderateur_notify_whatsapp', {id: u.id}) }}"
+                                                    data-token="{{ csrf_token('notify_whatsapp_' ~ u.id) }}"
+                                                    {{ u.phone ? '' : 'disabled' }}>
+                                                <span class="notify-left">
+                                                    <span class="notify-ico" aria-hidden="true"><span class="wa-ico"></span></span>
+                                                    <span class="notify-text">
+                                                        <span class="notify-title">{% trans %}WhatsApp{% endtrans %}</span>
+                                                        <span class="notify-sub">
+                                                            {% if u.phone %}
+                                                                {% trans %}Ouvrir la conversation{% endtrans %}
+                                                            {% else %}
+                                                                {% trans %}Numéro manquant{% endtrans %}
+                                                            {% endif %}
+                                                        </span>
+                                                    </span>
+                                                </span>
+                                                <span class="notify-right">
+                                                    <span class="notify-spinner" aria-hidden="true"></span>
+                                                    <span class="notify-arrow" aria-hidden="true">›</span>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    {% endif %}
+
+                                    <form method="post" action="{{ path(u.isActive ? 'moderateur_verifications_block' : 'moderateur_verifications_unblock', {id: u.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('verif_' ~ u.id ~ '_block') }}">
+                                        <button class="btn {{ u.isActive ? 'danger' : '' }} icon-action"
+                                                type="submit"
+                                                data-tooltip="{{ u.isActive ? 'Bloquer'|trans : 'Débloquer'|trans }}"
+                                                aria-label="{{ u.isActive ? 'Bloquer cet utilisateur'|trans : 'Débloquer cet utilisateur'|trans }}">
+                                            {% if u.isActive %}
+                                                <i class="fa-solid fa-ban" aria-hidden="true"></i>
+                                            {% else %}
+                                                <i class="fa-solid fa-unlock" aria-hidden="true"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+
+
+                                    {% if profileUrl %}
+                                        <a class="btn icon-action"
+                                        href="{{ profileUrl }}"
+                                        data-tooltip="{% trans %}Voir profil{% endtrans %}"
+                                        aria-label="{% trans %}Voir le profil{% endtrans %}">
+                                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                                        </a>
+                                    {% else %}
+                                        <span class="muted icon-action"
+                                            data-tooltip="{% trans %}Profil indisponible{% endtrans %}"
+                                            aria-label="{% trans %}Profil indisponible{% endtrans %}">
+                                            <i class="fa-solid fa-eye-slash" aria-hidden="true"></i>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="muted" style="padding:18px;text-align:center;">
+                                {% trans %}Aucun utilisateur{% endtrans %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# Pagination #}
+            {% if pages > 1 %}
+            <div class="pager">
+                {% for p in 1..pages %}
+                <a class="btn {{ p == page ? 'primary' : '' }}"
+                    href="{{ path('moderateur_verifications_index', {page: p, limit: limit, q: q, role: role, state: state}) }}">{{ p }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+<script>
+  // menu ⋮ (ouvre/ferme + ferme au clic extérieur)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-menu-btn]');
+    const anyMenu = document.querySelectorAll('.menu.open');
+
+    // si clic sur un bouton menu
+    if (btn) {
+      const id = btn.getAttribute('data-menu-btn');
+      const menu = document.getElementById(id);
+      if (!menu) return;
+
+      // ferme les autres
+      anyMenu.forEach(m => { if (m !== menu) m.classList.remove('open'); });
+
+      // toggle
+      menu.classList.toggle('open');
+      e.preventDefault();
+      return;
+    }
+
+    // clic ailleurs => ferme tout
+    anyMenu.forEach(m => m.classList.remove('open'));
+  });
+</script>
+
+
+<script>
+(function () {
+  // ✅ S'assure que toastWrap existe
+  function ensureToastWrap() {
+    let wrap = document.getElementById('toastWrap');
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'toastWrap';
+      wrap.className = 'toast-wrap';
+      document.body.appendChild(wrap);
+    }
+    return wrap;
+  }
+
+  function toast(message, type = 'ok', sub = '') {
+    const wrap = ensureToastWrap();
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+      <div class="t-ico">${type === 'ok' ? '✅' : type === 'warn' ? '⚠️' : '⛔'}</div>
+      <div>
+        <div class="t-msg">${message}</div>
+        ${sub ? `<div class="t-sub">${sub}</div>` : ``}
+      </div>
+    `;
+    wrap.appendChild(el);
+    setTimeout(() => el.remove(), 3200);
+  }
+
+  async function postJson(url, payload) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(payload || {})
+    });
+
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      throw new Error(data?.message || `Erreur HTTP ${res.status}`);
+    }
+    if (!data) throw new Error('Réponse JSON invalide.');
+    if (data.ok === false) throw new Error(data.message || 'Erreur.');
+    return data;
+  }
+
+  function setLoading(btn, on) {
+    if (!btn) return;
+    if (on) {
+      btn.classList.add('is-loading');
+      btn.disabled = true;
+    } else {
+      btn.classList.remove('is-loading');
+      btn.disabled = false;
+    }
+  }
+
+  function flash(btn, cls, ms = 1200) {
+    if (!btn) return;
+    btn.classList.add(cls);
+    setTimeout(() => btn.classList.remove(cls), ms);
+  }
+
+  // ✅ IMPORTANT: écoute en capture => passe avant d’autres scripts
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.js-notify');
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation(); // évite que d’autres scripts cassent le clic
+
+    if (btn.hasAttribute('disabled') || btn.disabled) {
+      toast('Action indisponible', 'warn', 'Numéro manquant ou action désactivée.');
+      return;
+    }
+
+    const kind = (btn.dataset.kind || '').toLowerCase(); // email|sms|whatsapp
+    const url = btn.dataset.url;
+    const token = btn.dataset.token;
+
+    if (!kind || !url || !token) {
+      toast('Erreur', 'err', 'data-kind / data-url / data-token manquant.');
+      console.warn('[notify] dataset missing', { kind, url, token });
+      return;
+    }
+
+    // Feedback immédiat
+    if (kind === 'email') toast('Envoi du mail…', 'warn');
+    if (kind === 'sms') toast('Envoi du SMS…', 'warn');
+    if (kind === 'whatsapp') toast('Ouverture WhatsApp…', 'warn');
+
+    setLoading(btn, true);
+
+    try {
+      const data = await postJson(url, { _token: token });
+
+      if (kind === 'whatsapp') {
+        if (data.url) {
+          window.open(data.url, '_blank', 'noopener');
+          toast('WhatsApp ouvert ✅', 'ok');
+        } else {
+          toast('WhatsApp', 'warn', 'Lien WhatsApp non renvoyé.');
+        }
+      } else if (kind === 'email') {
+        toast('Mail envoyé ✅', 'ok');
+      } else if (kind === 'sms') {
+        toast('SMS envoyé ✅', 'ok');
+      } else {
+        toast(data.message || 'Action effectuée ✅', 'ok');
+      }
+
+      flash(btn, 'is-success', 1200);
+    } catch (err) {
+      console.error('[notify] error', err);
+      toast('Erreur', 'err', err?.message ? String(err.message) : String(err));
+      flash(btn, 'is-error', 1400);
+    } finally {
+      setLoading(btn, false);
+    }
+  }, true);
+})();
+</script>
+{% endblock %}

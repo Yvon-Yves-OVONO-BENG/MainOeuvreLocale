@@ -1,0 +1,7 @@
+<div class="dir-nav">
+  <a href="{{ path('admin_talents_index') }}" class="dir-btn {{ currentSection == 'talents' ? 'dir-btn-primary' : 'dir-btn-soft' }}"><span class="dir-dot"></span>{% trans %}Talents{% endtrans %}</a>
+  <a href="{{ path('admin_companies_index') }}" class="dir-btn {{ currentSection == 'companies' ? 'dir-btn-primary' : 'dir-btn-soft' }}"><span class="dir-dot"></span>{% trans %}Compagnies{% endtrans %}</a>
+  <a href="{{ path('admin_individuals_index') }}" class="dir-btn {{ currentSection == 'individuals' ? 'dir-btn-primary' : 'dir-btn-soft' }}"><span class="dir-dot"></span>{% trans %}Particuliers{% endtrans %}</a>
+  <a href="{{ path('admin_moderators_index') }}" class="dir-btn {{ currentSection == 'moderators' ? 'dir-btn-primary' : 'dir-btn-soft' }}"><span class="dir-dot"></span>{% trans %}Modérateurs{% endtrans %}</a>
+  <a href="{{ path('admin_jobs_index') }}" class="dir-btn {{ currentSection == 'jobs' ? 'dir-btn-primary' : 'dir-btn-soft' }}"><span class="dir-dot"></span>{% trans %}Offres{% endtrans %}</a>
+</div>

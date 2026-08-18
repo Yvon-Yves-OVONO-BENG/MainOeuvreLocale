@@ -1,0 +1,225 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Paramètres{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_settings.html.twig" %}
+
+{% set settings = settings|default({}) %}
+{% set auto_flag = settings.auto_flag ?? false %}
+{% set hide_suspicious = settings.hide_suspicious ?? false %}
+{% set require_reason_length = settings.require_reason_length ?? 10 %}
+
+<div class="mod-page">
+  <div class="mod-wrap">
+
+    <div class="mod-card" id="modSettings" data-save-url="{{ path('moderateur_settings_save') }}">
+      <div class="hd">
+        <div>
+          <div class="mod-title">⚙️ {% trans %}Paramètres modération{% endtrans %}</div>
+          <div class="hint">{% trans %}Réglages “VIP” — sauvegarde via AJAX. (Je vais persister ensuite en DB.){% endtrans %}</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="mod-btn" href="{{ path('moderateur_rules') }}">🛡️ {% trans %}Policies{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div class="bd">
+
+        {# ===== HERO META ===== #}
+        <div class="panel-hero mb-3">
+          <div class="meta-row">
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+              <span class="pill">
+                <span class="status-dot" id="dirtyDot"></span>
+                {% trans %}État :{% endtrans %} <b id="dirtyText">{% trans %}Aucun changement{% endtrans %}</b>
+              </span>
+              <span class="pill">💾 {% trans %}Save:{% endtrans %} <b>AJAX</b></span>
+              <span class="pill">🧩 {% trans %}Mode:{% endtrans %} <b>VIP</b></span>
+            </div>
+            <div class="hint">{% trans %}Change un réglage → “Enregistrer” devient actif.{% endtrans %}</div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+
+          {# ===== Auto-flag ===== #}
+          <div class="col-12 col-lg-6">
+            <div class="set-card">
+              <div class="set-hd">
+                <div>
+                  <div class="set-title">🚩 {% trans %}Auto-flag{% endtrans %}</div>
+                  <div class="set-sub">{% trans %}Marquer automatiquement les contenus suspects{% endtrans %}</div>
+                </div>
+                <span class="pill">{% trans %}Heuristiques{% endtrans %}</span>
+              </div>
+              <div class="set-bd">
+                <div class="hint">{% trans %}Active un traitement auto (règles simples, scoring, etc.).{% endtrans %}</div>
+                <label class="switch m-0">
+                  <input class="js-setting" type="checkbox" data-key="auto_flag" {{ auto_flag ? 'checked' : '' }}>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {# ===== Hide suspicious ===== #}
+          <div class="col-12 col-lg-6">
+            <div class="set-card">
+              <div class="set-hd">
+                <div>
+                  <div class="set-title">🕶️ {% trans %}Masquer suspects{% endtrans %}</div>
+                  <div class="set-sub">{% trans %}Cache par défaut les profils risqués{% endtrans %}</div>
+                </div>
+                <span class="pill">{% trans %}Safe view{% endtrans %}</span>
+              </div>
+              <div class="set-bd">
+                <div class="hint">{% trans %}Affichage plus “safe” côté modération.{% endtrans %}</div>
+                <label class="switch m-0">
+                  <input class="js-setting" type="checkbox" data-key="hide_suspicious" {{ hide_suspicious ? 'checked' : '' }}>
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {# ===== Require reason length ===== #}
+          <div class="col-12">
+            <div class="set-card">
+              <div class="set-hd">
+                <div>
+                  <div class="set-title">📝 {% trans %}Longueur min. raison{% endtrans %}</div>
+                  <div class="set-sub">{% trans %}Améliore la qualité des signalements{% endtrans %}</div>
+                </div>
+                <span class="pill">{% trans %}Validation{% endtrans %}</span>
+              </div>
+
+              <div class="set-bd" style="align-items:flex-end; flex-wrap:wrap;">
+                <div>
+                  <div class="hint">{% trans %}Ex: 10 caractères minimum (5 → 200).{% endtrans %}</div>
+                  <div class="hint">{% trans %}Astuce : garde une valeur qui force une explication claire.{% endtrans %}</div>
+                </div>
+
+                <div style="min-width: 220px;">
+                  <label class="hint fw-bold mb-1 d-block">{% trans %}Minimum{% endtrans %}</label>
+                  <input
+                    class="form-control mod-input js-setting"
+                    type="number"
+                    min="5" max="200"
+                    data-key="require_reason_length"
+                    value="{{ require_reason_length }}"
+                    style="height:52px; font-weight:900;"
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {# ===== Sticky Save Bar ===== #}
+        <div class="savebar">
+          <div class="d-flex gap-2 flex-wrap align-items-center">
+            <span class="pill">⚙️ {% trans %}Modération{% endtrans %}</span>
+            <span class="pill">🔒 {% trans %}Accès :{% endtrans %} <b>{% trans %}modérateur{% endtrans %}</b></span>
+          </div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="mod-btn mod-btn-primary" type="button" id="saveSettings" disabled>💾 {% trans %}Enregistrer{% endtrans %}</button>
+            <a class="mod-btn" href="{{ path('moderateur_search_advanced') }}">🔎 {% trans %}Retour outils{% endtrans %}</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="mini-toast" id="miniToast">{% trans %}OK{% endtrans %}</div>
+
+<script>
+  (function(){
+    const root = document.getElementById('modSettings');
+    if(!root) return;
+
+    const url = root.dataset.saveUrl;
+    const btnSave = document.getElementById('saveSettings');
+    const toastEl = document.getElementById('miniToast');
+    const dirtyDot = document.getElementById('dirtyDot');
+    const dirtyText = document.getElementById('dirtyText');
+
+    let toastT;
+    let dirty = false;
+
+    function toast(msg, type){
+      if (window.MOLToast) { window.MOLToast(msg, type || 'success'); return; }
+      if (!toastEl) { alert(msg); return; }
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastT);
+      toastT = setTimeout(()=> toastEl.classList.remove('show'), 1400);
+    }
+
+    function collect(){
+      const data = {};
+      root.querySelectorAll('.js-setting').forEach(el=>{
+        const key = el.dataset.key;
+        if(!key) return;
+        data[key] = (el.type === 'checkbox') ? !!el.checked : el.value;
+      });
+      return data;
+    }
+
+    function setDirty(v){
+      dirty = !!v;
+      if (btnSave) btnSave.disabled = !dirty;
+      if (dirtyDot) dirtyDot.classList.toggle('on', dirty);
+      if (dirtyText) dirtyText.textContent = dirty ? '{{ "Modifications en attente"|trans|e("js") }}' : '{{ "Aucun changement"|trans|e("js") }}';
+    }
+
+    // Detect changes
+    root.querySelectorAll('.js-setting').forEach(el=>{
+      el.addEventListener('change', ()=> setDirty(true));
+      el.addEventListener('input',  ()=> setDirty(true));
+    });
+
+    btnSave?.addEventListener('click', async ()=>{
+      if(!dirty) return;
+
+      const old = btnSave.innerHTML;
+      btnSave.disabled = true;
+      btnSave.innerHTML = '⏳ {{ "Enregistrement…"|trans|e("js") }}';
+
+      try{
+        const res = await fetch(url, {
+          method:'POST',
+          headers:{'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+          body: JSON.stringify(collect())
+        });
+
+        let j = null;
+        try { j = await res.json(); } catch(e){}
+
+        if(!res.ok || !j || !j.ok){
+          toast('{{ "Erreur d'enregistrement"|trans|e('js') }}", 'error');
+          btnSave.innerHTML = old;
+          btnSave.disabled = false;
+          return;
+        }
+
+        toast("{{ "Paramètres enregistrés ✅"|trans|e('js') }}", 'success');
+        setDirty(false);
+        btnSave.innerHTML = old;
+
+      }catch(e){
+        toast("{{ "Erreur réseau"|trans|e('js') }}", 'error');
+        btnSave.innerHTML = old;
+        btnSave.disabled = false;
+      }
+    });
+
+    // init state
+    setDirty(false);
+  })();
+</script>
+{% endblock %}

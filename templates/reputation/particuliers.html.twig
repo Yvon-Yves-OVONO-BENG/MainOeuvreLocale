@@ -1,0 +1,501 @@
+{% extends 'base.html.twig' %}
+{% block title %}Particuliers | Main d'oeuvre locale{% endblock %}
+
+{% block body %}
+
+{% include "liste_talents/_vip_ui.html.twig" %}
+
+	<section class="vip-page">
+		<div class="vip-shell">
+
+			<div class="vip-hero">
+				<div class="vip-hero-inner">
+					<div class="vip-title-wrap">
+						<h3>👤 {% trans %}Particuliers{% endtrans %}</h3>
+						<p>{% trans %}Découvrez les particuliers actifs et recommandés sur la plateforme.{% endtrans %}</p>
+					</div>
+
+					<div class="vip-top-actions">
+						<a href="{{ path('liste_talents') }}" class="btn vip-btn-soft">
+							<i class="fa fa-refresh me-1"></i>
+							{% trans %}Rafraîchir{% endtrans %}
+						</a>
+					</div>
+
+					<div class="vip-badges">
+						<span class="vip-pill info">
+							<i class="fa fa-users"></i>
+							{{ talents|length }}
+							{% trans %}résultats{% endtrans %}
+						</span>
+
+						{% if q is not empty %}
+							<span class="vip-pill">
+								<i class="fa fa-search"></i>
+								“{{ q }}”
+							</span>
+						{% endif %}
+
+						<span class="vip-pill success">
+							<i class="fa fa-shield"></i>
+							{% trans %}Profils vérifiés{% endtrans %}
+						</span>
+
+						<form method="get" class="vip-search ms-auto" onsubmit="return false;">
+							<i class="fa fa-search"></i>
+							<input
+								type="text"
+								id="vipTalentSearch"
+								name="q"
+								value="{{ q }}"
+								placeholder="{{ 'Nom, ville, pays, compétence…'|trans }}"
+								autocomplete="off"
+							>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			{% if talents is empty %}
+				<div class="alert alert-info vip-empty mt-3">{% trans %}Aucun talent trouvé.{% endtrans %}</div>
+			{% endif %}
+
+			{% for t in talents %}
+				
+				{% set avatar = t.user.personalProfile.photo
+					? asset('uploads/profiles/' ~ t.user.personalProfile.photo)
+					: null
+				%}
+				{% set flag = t.user.country.flagFile
+					? asset('uploads/flags/' ~ t.user.country.flagFile)
+					: null
+				%}
+				{% set stats = ratingsStats[t.user.id] ?? {'avg': 0, 'voters': 0} %}
+
+				<div class="vip-card">
+					<div class="vip-card-body">
+						{% set skillsSearch = '' %}
+						{% if t.skills is not empty %}
+							{% for skill in t.skills %}
+								{% set skillsSearch = skillsSearch ~ ' ' ~ (skill.profession ?? '') %}
+							{% endfor %}
+						{% endif %}
+
+						<div class="vip-search-data d-none">
+							{{ t.user.publicDisplayName|trans }}
+							
+							{{ t.user.personalProfile.city ?? '' }}
+							{{ t.user.country.country ?? '' }}
+							{{ t.profession.profession ?? '' }}
+							{{ t.profession.categorie.nom ?? '' }}
+							{{ skillsSearch }}
+							{{ t.experienceYears ?? '' }}
+							{{ t.isVerified ? 'verifie compte verifie verified' : 'non verifie compte non verifie not verified' }}
+						</div>
+
+						<div class="vip-head">
+							<div class="vip-head-left">
+								<img class="vip-avatar" src="{{ avatar }}" loading="lazy" decoding="async" alt="{{ 'avatar'|trans }}">
+
+								<div class="vip-id">
+									<div class="vip-name-row">
+										<a href="javascript:void(0);" class="vip-name">
+											{{ t.user.publicDisplayName|trans }}
+										</a>
+
+										{% if t.isVerified %}
+											<span class="vip-verified ok">
+												<i class="bi bi-patch-check-fill"></i>
+												{% trans %}Compte vérifié{% endtrans %}
+											</span>
+										{% else %}
+											<span class="vip-verified no">
+												<i class="bi bi-x-circle-fill"></i>
+												{% trans %}Compte non vérifié{% endtrans %}
+											</span>
+										{% endif %}
+									</div>
+
+									<div class="vip-subtitle">
+										<span><i class="fa fa-folder-open me-1"></i>{{ t.profession.categorie.nom ?? '' }}</span>
+										<span><i class="fa fa-user me-1"></i>{{ t.profession.profession ?? 'Profil professionnel'|trans }}</span>
+									</div>
+								</div>
+							</div>
+
+							<div class="vip-top-right">
+								<div class="mol-rating vip-rating-box"
+									data-rate-url="{{ path('ajax_talent_rate', { id: t.id }) }}"
+									data-avg="{{ stats.avg }}"
+									data-voters="{{ stats.voters }}">
+
+									<div class="mol-stars" role="radiogroup" aria-label="{{ 'Note du talent'|trans }}">
+										{% for i in 1..5 %}
+											<button type="button" class="mol-star" data-value="{{ i }}" aria-label="{{ 'Noter'|trans }} {{ i }} {{ 'sur 5'|trans }}" title="{{ i }}/5">
+												<i class="fa fa-star"></i>
+											</button>
+										{% endfor %}
+									</div>
+
+									<div class="vip-rating-meta">
+										<span class="vip-rating-score">
+											<span class="mol-avg">{{ stats.avg|number_format(1, '.', ' ') }}</span>/5
+										</span>
+										<span class="vip-rating-count">
+											<span class="mol-count">{{ stats.voters }}</span> {% trans %}avis{% endtrans %}
+										</span>
+									</div>
+								</div>
+
+								{% if t.user.professionalProfile.statusProfile %}
+									{% set st = t.user.professionalProfile.statusProfile.status %}
+									{% if st == 'Disponible' %}
+										<span class="vip-status ok">
+											<span class="dot"></span>
+											{% trans %}Disponible{% endtrans %}
+										</span>
+									{% elseif st == 'Occupé' or st == 'occupe' %}
+										<span class="vip-status warn">
+											<span class="dot"></span>
+											{% trans %}Occupé{% endtrans %}
+										</span>
+									{% else %}
+										<span class="vip-status bad">
+											<span class="dot"></span>
+											{% trans %}Indisponible{% endtrans %}
+										</span>
+									{% endif %}
+								{% endif %}
+							</div>
+						</div>
+
+						<div class="vip-grid">
+							<div class="vip-item">
+								<i class="fa fa-map-marker"></i>
+								<div>
+									<small>{% trans %}Ville{% endtrans %}</small>
+									<span>{{ t.user.personalProfile.city ?? '—' }}</span>
+								</div>
+							</div>
+
+							<div class="vip-item">
+								<img src="{{ flag }}" alt="{{ 'flag'|trans }}">
+								<div>
+									<small>{% trans %}Pays{% endtrans %}</small>
+									<span>{{ t.user.country.country ?? 'Cameroun'|trans }}</span>
+								</div>
+							</div>
+
+							<div class="vip-item">
+								<i class="fa fa-briefcase"></i>
+								<div>
+									<small>{% trans %}Expérience{% endtrans %}</small>
+									<span>
+										{% if t.experienceYears is not null %}
+											{{ t.experienceYears }} {{ t.experienceYears > 1 ? 'ans'|trans : 'an'|trans }}
+										{% else %}
+											—
+										{% endif %}
+									</span>
+								</div>
+							</div>
+
+							<div class="vip-item">
+								<i class="fa fa-clock-o"></i>
+								<div>
+									<small>{% trans %}Dernière mise à jour{% endtrans %}</small>
+									<span>{{ t.updatedAt ? t.updatedAt|date('d/m/Y') : '—' }}</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="vip-badges-row">
+							<span class="vip-soft-badge">
+								<i class="fa fa-certificate"></i>
+								{{ t.profession.profession ?? 'Talent'|trans }}
+							</span>
+
+							{% if t.profession.categorie.nom is not empty %}
+								<span class="vip-soft-badge">
+									<i class="fa fa-layer-group"></i>
+									{{ t.profession.categorie.nom }}
+								</span>
+							{% endif %}
+						</div>
+
+					</div>
+
+					<div class="vip-card-footer">
+						<div class="vip-footer-row">
+
+							<div class="vip-footer-left">
+								{% if t.user.phone %}
+									<a href="javascript:void(0);" class="btn vip-btn vip-btn-light vip-btn-icon" onclick="showPhone('{{ t.user.phone }}')">
+										<i class="fa fa-phone text-primary"></i>
+									</a>
+								{% else %}
+									<button class="btn vip-btn vip-btn-light vip-btn-icon" disabled>
+										<i class="fa fa-phone"></i>
+									</button>
+								{% endif %}
+
+								<a href="javascript:void(0);" class="btn vip-btn vip-btn-light vip-btn-icon" onclick="showContact('email', '{{ t.user.slug }}', '')">
+									<i class="fa fa-envelope"></i>
+								</a>
+
+								{% if app.user and app.user.id != t.user.id %}
+								
+									<button type="button" class="btn vip-btn vip-btn-light mol-friend-btn" data-user="{{ t.user.id }}">
+										<span class="label">...</span>
+									</button>
+								{% endif %}
+
+								{% if app.user and t.user and app.user.id != t.user.id %}
+									<button type="button" class="btn vip-btn vip-btn-primary text-white" onclick="MOLChatOpen()">
+										<i class="bi bi-chat-dots me-1"></i>
+										{% trans %}Message{% endtrans %}
+									</button>
+								{% endif %}
+							</div>
+
+							<div class="vip-footer-right">
+								{% if t.cv %}
+									{% set cv = asset('uploads/cv/' ~ t.cv) %}
+									<a href="{{ cv }}" class="btn vip-btn vip-btn-outline" download>
+										<i class="fa fa-download"></i>
+									</a>
+								{% else %}
+									<button class="btn vip-btn btn-outline-secondary" disabled title="{{ 'Aucun CV disponible'|trans }}">
+										<i class="fa fa-download"></i>
+									</button>
+								{% endif %}
+
+								<a href="{{ path('profil_talent', {slug: t.user.personalProfile.slug }) }}" class="btn vip-btn vip-btn-primary text-white">
+									<i class="fa fa-eye me-1"></i>
+									{% trans %}Profil{% endtrans %}
+								</a>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+
+			{% set p = pagination %}
+			{% if p.pages > 1 %}
+				<nav class="d-flex justify-content-center mt-4" aria-label="{{ 'Pagination'|trans }}">
+					<ul class="pagination">
+						<li class="page-item {{ p.page <= 1 ? 'disabled' : '' }}">
+							<a class="page-link" href="{{ path('liste_talents', app.request.query.all | merge({'page': p.page - 1})) }}">
+								{% trans %}Précédent{% endtrans %}
+							</a>
+						</li>
+
+						{% for i in 1..p.pages %}
+							<li class="page-item {{ i == p.page ? 'active' : '' }}">
+								<a class="page-link" href="{{ path('liste_talents', app.request.query.all | merge({'page': i})) }}">{{ i }}</a>
+							</li>
+						{% endfor %}
+
+						<li class="page-item {{ p.page >= p.pages ? 'disabled' : '' }}">
+							<a class="page-link" href="{{ path('liste_talents', app.request.query.all | merge({'page': p.page + 1})) }}">
+								{% trans %}Suivant{% endtrans %}
+							</a>
+						</li>
+					</ul>
+				</nav>
+			{% endif %}
+
+		</div>
+	</section>
+
+	<div class="modal fade mol-modal" id="contactTalent" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-md">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<span class="mol-icon">
+							<i class="fa fa-envelope"></i>
+						</span>
+						{% trans %}Contacter le talent{% endtrans %}
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<div class="mb-3">
+						<label class="form-label">{% trans %}Objet{% endtrans %}</label>
+						<input class="form-control" placeholder="{{ 'Ex: Mission urgente…'|trans }}">
+						<div class="mol-hint">{% trans %}Sois clair : durée, lieu, budget, disponibilité.{% endtrans %}</div>
+					</div>
+					<div class="mb-0">
+						<label class="form-label">{% trans %}Message{% endtrans %}</label>
+						<textarea class="form-control" rows="5" placeholder="{{ 'Décris brièvement ton besoin…'|trans }}"></textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-light" data-bs-dismiss="modal">{% trans %}Annuler{% endtrans %}</button>
+					<button class="btn btn-primary">
+						<i class="fa fa-paper-plane me-2"></i>{% trans %}Envoyer{% endtrans %}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade mol-modal" id="commentTalent" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered modal-md">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						<span class="mol-icon" style="background:rgba(32,201,151,.12);color:#20c997;">
+							<i class="fa fa-comment"></i>
+						</span>
+						{% trans %}Message rapide{% endtrans %}
+					</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<label class="form-label">{% trans %}Ton message{% endtrans %}</label>
+					<textarea class="form-control" rows="5" placeholder="{{ 'Écris un message…'|trans }}"></textarea>
+					<div class="mol-hint">{% trans %}Conseil : pose une question précise pour accélérer la réponse.{% endtrans %}</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-light" data-bs-dismiss="modal">{% trans %}Fermer{% endtrans %}</button>
+					<button class="btn btn-primary">
+						<i class="fa fa-send me-2"></i>{% trans %}Envoyer{% endtrans %}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			['contactTalent', 'commentTalent'].forEach((id) => {
+				const el = document.getElementById(id);
+				if (el) document.body.appendChild(el);
+			});
+
+			function renderStars(block, avg) {
+				const n = Math.round(Number(avg) || 0);
+				block.querySelectorAll('.mol-star').forEach((btn) => {
+					const v = parseInt(btn.dataset.value, 10);
+					btn.classList.toggle('is-on', v <= n);
+				});
+			}
+
+			document.querySelectorAll('.mol-rating').forEach((block) => {
+				renderStars(block, block.dataset.avg);
+			});
+
+			document.addEventListener('click', async (e) => {
+				const btn = e.target.closest('.mol-star');
+				if (!btn) return;
+
+				const block = btn.closest('.mol-rating');
+				const url = block?.dataset.rateUrl;
+				if (!block || !url) return;
+
+				const stars = parseInt(btn.dataset.value, 10);
+				renderStars(block, stars);
+				block.querySelectorAll('.mol-star').forEach(b => b.disabled = true);
+
+				try {
+					const form = new FormData();
+					form.append('stars', String(stars));
+
+					const res = await fetch(url, {
+						method: 'POST',
+						body: form,
+						headers: { 'X-Requested-With': 'XMLHttpRequest' }
+					});
+
+					if (res.status === 401) {
+						const data = await res.json().catch(() => null);
+						window.location.href = (data && data.loginUrl) ? data.loginUrl : "{{ path('app_login') }}";
+						return;
+					}
+
+					const data = await res.json();
+					if (!data.ok) {
+						alert(data.message || "Erreur lors du vote.");
+						return;
+					}
+
+					const avgEl = block.querySelector('.mol-avg');
+					const countEl = block.querySelector('.mol-count');
+
+					if (avgEl) avgEl.textContent = (Number(data.avg) || 0).toFixed(1);
+					if (countEl) countEl.textContent = (Number(data.voters) || 0);
+
+					renderStars(block, data.avg);
+
+				} catch (err) {
+					console.error(err);
+					alert("Impossible de voter. Réessayez.");
+				} finally {
+					block.querySelectorAll('.mol-star').forEach(b => b.disabled = false);
+				}
+			});
+		});
+	</script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const input = document.getElementById('vipTalentSearch');
+			if (!input) return;
+
+			const cards = Array.from(document.querySelectorAll('.vip-card'));
+			const pagination = document.querySelector('nav[aria-label]');
+			const emptyAlert = document.querySelector('.vip-empty, .alert.alert-info');
+
+			function normalizeText(text) {
+				return (text || '')
+					.toString()
+					.normalize('NFD')
+					.replace(/[\u0300-\u036f]/g, '')
+					.toLowerCase()
+					.trim();
+			}
+
+			function filterTalents() {
+				const query = normalizeText(input.value);
+
+				let visibleCount = 0;
+
+				cards.forEach((card) => {
+					const searchableNode = card.querySelector('.vip-search-data');
+					const searchableText = normalizeText(
+						searchableNode ? searchableNode.textContent : card.textContent
+					);
+
+					const matches = query === '' || searchableText.includes(query);
+
+					card.style.display = matches ? '' : 'none';
+
+					if (matches) {
+						visibleCount++;
+					}
+				});
+
+				if (pagination) {
+					pagination.style.display = query !== '' ? 'none' : '';
+				}
+
+				if (emptyAlert) {
+					if (cards.length > 0) {
+						emptyAlert.style.display = visibleCount === 0 ? '' : 'none';
+						if (visibleCount === 0) {
+							emptyAlert.textContent = "Aucun talent ne correspond à votre recherche.";
+						}
+					}
+				}
+			}
+
+			input.addEventListener('input', filterTalents);
+
+			// Si un texte existe déjà dans le champ au chargement
+			filterTalents();
+		});
+	</script>
+{% endblock %}

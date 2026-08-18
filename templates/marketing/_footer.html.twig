@@ -1,0 +1,54 @@
+<footer class="mt-14 border-t border-[rgba(15,23,42,.08)] bg-white">
+  <div class="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <div>
+      <div class="font-semibold">{% trans %}Main d’Œuvre Locale{% endtrans %}</div>
+      <p class="mt-2 text-sm text-slate-600">
+        {% trans %}Une plateforme qui relie le talent au besoin réel — avec dignité, transparence et confiance.{% endtrans %}
+      </p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="px-3 py-1 rounded-full text-xs mol-pill">{% trans %}Confiance{% endtrans %}</span>
+        <span class="px-3 py-1 rounded-full text-xs mol-pill">{% trans %}Rapidité{% endtrans %}</span>
+        <span class="px-3 py-1 rounded-full text-xs mol-pill">{% trans %}Impact{% endtrans %}</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="text-sm font-semibold">{% trans %}Découvrir{% endtrans %}</div>
+      <div class="mt-3 space-y-2 text-sm text-slate-600">
+        <a class="block hover:text-slate-900" href="{{ path('marketing_story') }}">{% trans %}Notre histoire{% endtrans %}</a>
+        <a class="block hover:text-slate-900" href="{{ path('marketing_vision') }}">{% trans %}Vision{% endtrans %}</a>
+        <a class="block hover:text-slate-900" href="{{ path('marketing_mission') }}">{% trans %}Mission{% endtrans %}</a>
+        <a class="block hover:text-slate-900" href="{{ path('marketing_services') }}">{% trans %}Services{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div>
+      <div class="text-sm font-semibold">{% trans %}Pour les talents{% endtrans %}</div>
+      <div class="mt-3 space-y-2 text-sm text-slate-600">
+        <div>{% trans %}Profil pro + portfolio{% endtrans %}</div>
+        <div>{% trans %}Demandes & messagerie{% endtrans %}</div>
+        <div>{% trans %}Réputation & avis{% endtrans %}</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="text-sm font-semibold">{% trans %}Pour les entreprises{% endtrans %}</div>
+      <div class="mt-3 space-y-2 text-sm text-slate-600">
+        <div>{% trans %}Publication d’offres{% endtrans %}</div>
+        <div>{% trans %}Shortlist & recrutement{% endtrans %}</div>
+        <div>{% trans %}Boost & visibilité{% endtrans %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="border-t border-[rgba(15,23,42,.08)]">
+    <div class="max-w-6xl mx-auto px-4 py-4 text-xs text-slate-500 flex flex-col sm:flex-row gap-2 justify-between">
+      <div>© {{ "now"|date("Y") }} {% trans %}Main d’Œuvre Locale — Tous droits réservés{% endtrans %}</div>
+      <div class="flex gap-3">
+        <a class="hover:text-slate-900" href="#">{% trans %}Confidentialité{% endtrans %}</a>
+        <a class="hover:text-slate-900" href="#">{% trans %}Conditions{% endtrans %}</a>
+        <a class="hover:text-slate-900" href="#">{% trans %}Contact{% endtrans %}</a>
+      </div>
+    </div>
+  </div>
+</footer>

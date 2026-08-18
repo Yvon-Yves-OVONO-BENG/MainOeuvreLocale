@@ -1,0 +1,172 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ 'Centre d’aide'|trans }}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{# ✅ FULL WIDTH BREAKOUT: prend 100vw même si base.html.twig a un .container #}
+<div class="w-screen ml-[calc(50%-50vw)]">
+
+  {# Background premium full-bleed #}
+  <div class="min-h-[calc(100vh-80px)] bg-[radial-gradient(1100px_circle_at_10%_0%,rgba(99,102,241,.16),transparent_60%),radial-gradient(900px_circle_at_92%_12%,rgba(16,185,129,.14),transparent_55%),radial-gradient(900px_circle_at_55%_115%,rgba(239,68,68,.10),transparent_55%),linear-gradient(180deg,rgba(248,250,252,.98),rgba(255,255,255,.92))]">
+
+    {# ✅ Contenu: plus de max-w-5xl (on remplit), mais avec des gutters élégants #}
+    <div class="px-[clamp(14px,2.2vw,44px)] pt-3 sm:pt-4 lg:pt-5 pb-10">
+
+      {# HERO (sticky, glass) #}
+      <div class="rounded-[28px] border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_22px_70px_rgba(15,23,42,.10)] overflow-hidden">
+        <div class="p-7 sm:p-8 bg-[radial-gradient(900px_circle_at_10%_0%,rgba(99,102,241,.14),transparent_55%),radial-gradient(800px_circle_at_90%_10%,rgba(16,185,129,.12),transparent_55%),linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,255,255,.86))] sticky top-2 z-10">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-black text-slate-700 shadow-sm">
+                ❓ {% trans %}Centre d’aide{% endtrans %}
+              </div>
+              <h1 class="mt-3 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-slate-900">
+                {% trans %}Support, FAQ & bonnes pratiques{% endtrans %}
+              </h1>
+              <p class="mt-1 text-sm sm:text-base text-slate-600">
+                {% trans %}Trouve vite une réponse et améliore tes recrutements.{% endtrans %}
+              </p>
+            </div>
+
+            <a href="{{ path('deliverable_index') }}"
+               class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-900 hover:bg-slate-50 hover:shadow transition">
+              {% trans %}← Retour{% endtrans %}
+            </a>
+          </div>
+
+          {# Search UI (front only) #}
+          <div class="mt-6">
+            <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm focus-within:shadow-[0_18px_60px_rgba(99,102,241,.18)] transition">
+              <span class="text-slate-400">🔎</span>
+              <input id="helpSearch" type="text"
+                     class="w-full border-0 outline-none text-sm sm:text-base text-slate-800 placeholder:text-slate-400 bg-transparent"
+                     placeholder="{{ 'Rechercher : offre, candidatures, checklist, paiement...'|trans }}" />
+              <span class="hidden sm:inline-flex text-xs font-bold text-slate-500 rounded-full border border-slate-200 px-2 py-1">
+                CTRL / ⌘ + K
+              </span>
+            </div>
+            <div class="mt-2 text-xs text-slate-500">{% trans %}Astuce : tape un mot-clé, la FAQ se filtre automatiquement.{% endtrans %}</div>
+          </div>
+        </div>
+
+        {# ✅ GRID HD : 12 colonnes (tip à gauche, faq large à droite) #}
+        <div class="p-7 sm:p-8 grid gap-6 lg:grid-cols-12">
+
+          {# COL GAUCHE (4/12) #}
+          <div class="lg:col-span-4 space-y-6">
+            <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="text-sm font-black text-slate-900">{% trans %}✨ Bonnes pratiques{% endtrans %}</div>
+              <ul class="mt-3 space-y-2 text-sm text-slate-700">
+                {% for t in tips %}
+                  <li class="flex gap-2">
+                    <span class="mt-[2px]">✅</span>
+                    <span>{{ t }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+
+              <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div class="text-xs font-black text-slate-700">{% trans %}Besoin d’un humain ?{% endtrans %}</div>
+                <div class="mt-1 text-sm text-slate-600">
+                  {% trans %}Contacte le support si tu ne trouves pas la réponse.{% endtrans %}
+                </div>
+
+                <a href="mailto:support@exemple.com"
+                   class="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-2 text-sm font-black text-white hover:shadow-[0_18px_60px_rgba(15,23,42,.25)] transition">
+                  {% trans %}Contacter le support{% endtrans %}
+                </a>
+              </div>
+            </div>
+
+            {# ✅ Petit bloc “raccourcis” VIP #}
+            <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="text-sm font-black text-slate-900">{% trans %}⚡ Raccourcis{% endtrans %}</div>
+              <div class="mt-3 grid gap-2">
+                <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+                  <div class="font-extrabold text-slate-900">{% trans %}Publier une offre{% endtrans %}</div>
+                  <div class="text-slate-600 text-xs mt-1">{% trans %}Crée une annonce claire, avec conditions + salaire.{% endtrans %}</div>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm">
+                  <div class="font-extrabold text-slate-900">{% trans %}Gérer les candidatures{% endtrans %}</div>
+                  <div class="text-slate-600 text-xs mt-1">{% trans %}Filtre, shortlist, et contacte rapidement.{% endtrans %}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {# COL DROITE (8/12) #}
+          <div class="lg:col-span-8">
+            <div class="rounded-[26px] border border-slate-200 bg-white p-5 shadow-sm">
+              <div class="flex items-center justify-between gap-3 flex-wrap">
+                <div class="text-sm font-black text-slate-900">{% trans %}📚 FAQ{% endtrans %}</div>
+                <div class="text-xs font-semibold text-slate-500">
+                  <span id="faqCount">{{ faqs|length }}</span> {% trans %}articles{% endtrans %}
+                </div>
+              </div>
+
+              <div id="faqList" class="mt-4 space-y-3">
+                {% for f in faqs %}
+                  <details class="faqItem group rounded-2xl border border-slate-200 bg-white p-4 hover:bg-slate-50 transition shadow-[0_10px_28px_rgba(15,23,42,.05)]">
+                    <summary class="cursor-pointer list-none flex items-center justify-between gap-3">
+                      <span class="faqQ text-sm sm:text-[15px] font-extrabold text-slate-900">{{ f.q }}</span>
+                      <span class="text-slate-400 group-open:rotate-180 transition">⌄</span>
+                    </summary>
+                    <div class="faqA mt-2 text-sm text-slate-700 leading-relaxed">
+                      {{ f.a }}
+                    </div>
+                  </details>
+                {% endfor %}
+              </div>
+
+              <div id="noResult" class="hidden mt-6 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center">
+                <div class="text-3xl">🤷‍♂️</div>
+                <div class="mt-2 font-black text-slate-900">{% trans %}Aucun résultat{% endtrans %}</div>
+                <div class="mt-1 text-sm text-slate-600">{% trans %}Essaie un autre mot-clé (ex: “offre”, “paiement”, “profil”).{% endtrans %}</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {# footer spacing #}
+      <div class="h-10"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // je fais ci... filtrer la FAQ côté front sans backend
+  const search = document.getElementById('helpSearch');
+  const items = Array.from(document.querySelectorAll('.faqItem'));
+  const noResult = document.getElementById('noResult');
+  const count = document.getElementById('faqCount');
+
+  function normalize(s){ return (s || '').toLowerCase().trim(); }
+
+  // ✅ Bonus: CTRL/⌘ + K focus
+  document.addEventListener('keydown', (e) => {
+    const isK = (e.key || '').toLowerCase() === 'k';
+    if (isK && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      search?.focus();
+    }
+  });
+
+  search?.addEventListener('input', () => {
+    const q = normalize(search.value);
+    let visible = 0;
+
+    items.forEach(d => {
+      const text = normalize(d.innerText);
+      const ok = !q || text.includes(q);
+      d.classList.toggle('hidden', !ok);
+      if (ok) visible++;
+    });
+
+    count.textContent = String(visible);
+    noResult.classList.toggle('hidden', visible !== 0);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+
+	<style>
+		.dispute-shell{
+			min-height: calc(100vh - 90px);
+			background:
+				radial-gradient(1100px circle at 10% 10%, rgba(220,53,69,.10), transparent 40%),
+				radial-gradient(900px circle at 90% 8%, rgba(13,110,253,.10), transparent 36%),
+				radial-gradient(900px circle at 50% 100%, rgba(32,201,151,.08), transparent 42%),
+				linear-gradient(180deg, #f8fafc, #fff, #f8fafc);
+		}
+
+		.dispute-hero{
+			border-radius: 24px;
+			border: 1px solid rgba(0,0,0,.06);
+			background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.84));
+			box-shadow: 0 24px 70px rgba(15,23,42,.08);
+			overflow: hidden;
+			position: relative;
+		}
+		.dispute-hero::before{
+			content: "";
+			position: absolute;
+			inset: 0;
+			background: radial-gradient(700px circle at top right, rgba(220,53,69,.10), transparent 44%);
+			pointer-events: none;
+		}
+
+		.dispute-card{
+			border-radius: 22px;
+			border: 1px solid rgba(0,0,0,.06);
+			background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.86));
+			box-shadow: 0 20px 60px rgba(15,23,42,.07);
+		}
+
+		.dispute-side{
+			border-radius: 22px;
+			border: 1px solid rgba(0,0,0,.06);
+			background: rgba(255,255,255,.86);
+			box-shadow: 0 20px 60px rgba(15,23,42,.06);
+		}
+
+		.dispute-icon{
+			width: 50px;
+			height: 50px;
+			border-radius: 16px;
+			display:grid;
+			place-items:center;
+			font-size: 22px;
+			background: rgba(220,53,69,.10);
+			border: 1px solid rgba(220,53,69,.16);
+		}
+
+		.dispute-soft{
+			color: rgba(15,23,42,.62);
+		}
+
+		.dispute-field{
+			border-radius: 18px;
+			border: 1px solid rgba(0,0,0,.08);
+			background: rgba(255,255,255,.92);
+			padding: 16px;
+			box-shadow: inset 0 1px 0 rgba(255,255,255,.8);
+		}
+
+		.dispute-list-item{
+			padding: 14px 0;
+			border-bottom: 1px solid rgba(0,0,0,.06);
+		}
+		.dispute-list-item:last-child{
+			border-bottom: 0;
+		}
+	</style>

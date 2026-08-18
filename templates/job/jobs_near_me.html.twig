@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Jobs de ma ville{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "job/_vip_ui_job_near_me.html.twig" %}
+
+<div class="near-page">
+
+	<section class="near-hero">
+		<div class="container near-hero-inner">
+			<div class="text-center">
+				<h1 class="near-title">
+					{{ total|default(0) }} {% trans %}offres dans votre ville{% endtrans %}
+				</h1>
+				<p class="near-sub">
+					{% trans %}Retrouvez toutes les opportunités publiées dans votre ville actuelle.{% endtrans %}
+				</p>
+
+				<div class="near-pillrow justify-content-center">
+					<span class="near-pill">📍 {% trans %}Ville{% endtrans %} : <strong>{{ city }}</strong></span>
+					<span class="near-pill">💼 {% trans %}Offres actives{% endtrans %} : <strong>{{ total|default(0) }}</strong></span>
+					<span class="near-pill">🗺️ <a href="{{ path('jobs_map') }}" class="text-decoration-none">{% trans %}Voir la carte{% endtrans %}</a></span>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="near-wrap">
+		<div class="container">
+			<div class="near-card">
+				<div class="near-head">
+					<div>
+						<div class="fw-bold">{% trans %}Opportunités proches de vous{% endtrans %}</div>
+						<div class="small text-muted">{% trans %}Toutes les offres de votre ville{% endtrans %}</div>
+					</div>
+					<a href="{{ path('jobs_map') }}" class="btn btn-sm btn-outline-dark rounded-pill">
+						🗺️ {% trans %}Carte{% endtrans %}
+					</a>
+				</div>
+
+				{% if jobs|length > 0 %}
+					{% for j in jobs %}
+						<div class="near-job">
+							<div class="near-logo">
+								{% if j.createdBy.personalProfile.photo is defined and j.createdBy.personalProfile.photo %}
+									<img loading="lazy" decoding="async" src="{{ asset('uploads/profiles/' ~ j.createdBy.personalProfile.photo ) }}" alt="">
+								{% else %}
+									<img loading="lazy" decoding="async" src="{{ asset('build/assets/images/brand/logo-2.png') }}" alt="">
+								{% endif %}
+							</div>
+
+							<div class="near-body">
+								<a href="{{ path('job_detail', { slug: j.slug }) }}" class="text-decoration-none">
+									<h4 class="near-job-title">{{ j.title ?? 'Offre'|trans }}</h4>
+								</a>
+
+								<div class="near-meta">
+									<span>📍 {{ j.city ?? '—' }}</span>
+									<span>💰 {{ j.salaireMin ?? '—' }} - {{ j.salaireMax ?? '—' }}</span>
+									<span>🏷️ {{ j.profession ? j.profession.profession : '—' }}</span>
+									<span>🕒 {{ j.typeJob ? j.typeJob.typeJob : '—' }}</span>
+									<span>📅 {{ j.createdAt ? j.createdAt|date('d/m/Y') : '—' }}</span>
+								</div>
+
+								<p class="near-desc">{{ j.description ?? '' }}</p>
+							</div>
+
+							<div class="near-actions">
+								{% if j.isUrgent is defined and j.isUrgent %}
+									<span class="near-badge bg-danger text-white border-0">{% trans %}Urgent{% endtrans %}</span>
+								{% else %}
+									<span class="near-badge">{% trans %}Disponible{% endtrans %}</span>
+								{% endif %}
+
+								<a class="near-btn" href="{{ path('job_detail', { slug: j.slug }) }}">
+									{% trans %}Voir les détails{% endtrans %}
+								</a>
+							</div>
+						</div>
+					{% endfor %}
+				{% else %}
+					<div class="near-empty">
+						<div class="fw-bold mb-2">{% trans %}Aucune offre trouvée{% endtrans %}</div>
+						<div class="mb-3">{% trans %}Aucune opportunité active n’est disponible dans votre ville pour le moment.{% endtrans %}</div>
+						<a href="{{ path('profile_edit') }}" class="btn btn-soft rounded-pill">
+							📍 {% trans %}Modifier ma ville{% endtrans %}
+						</a>
+					</div>
+				{% endif %}
+			</div>
+
+			{% if pages|default(1) > 1 %}
+				<div class="near-pager">
+					{% set prev = page - 1 %}
+					{% set next = page + 1 %}
+
+					<a class="near-pagebtn {{ page == 1 ? 'disabled' : '' }}"
+					   href="{{ path('jobs_near_me', {'page': (prev < 1 ? 1 : prev)}) }}">
+						{% trans %}Précédent{% endtrans %}
+					</a>
+
+					{% for p in 1..pages %}
+						<a class="near-pagebtn {{ p == page ? 'active' : '' }}"
+						   href="{{ path('jobs_near_me', {'page': p}) }}">
+							{{ p }}
+						</a>
+					{% endfor %}
+
+					<a class="near-pagebtn {{ page == pages ? 'disabled' : '' }}"
+					   href="{{ path('jobs_near_me', {'page': (next > pages ? pages : next)}) }}">
+						{% trans %}Suivant{% endtrans %}
+					</a>
+				</div>
+			{% endif %}
+		</div>
+	</section>
+</div>
+{% endblock %}

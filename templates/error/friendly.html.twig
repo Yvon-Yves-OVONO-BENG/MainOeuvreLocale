@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>{{ status }} - {{ title }}</title>
+    <style>
+        *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#102a43;background:#f5f8fc}
+        body{min-height:100vh;background:radial-gradient(circle at 12% 8%,rgba(13,110,253,.12),transparent 32%),radial-gradient(circle at 88% 92%,rgba(85,185,0,.12),transparent 30%),#f5f8fc}
+        .mol-error-page{min-height:100vh;display:grid;place-items:center;padding:24px}
+        .mol-error-card{width:min(100%,760px);background:rgba(255,255,255,.96);border:1px solid rgba(15,23,42,.07);border-radius:30px;box-shadow:0 28px 80px rgba(17,39,79,.14);overflow:hidden}
+        .mol-error-top{display:flex;align-items:center;gap:12px;padding:22px 26px;border-bottom:1px solid #edf2f7;background:linear-gradient(135deg,#fff,#f7fbff)}
+        .mol-error-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,#0d6efd,#00a7d8);color:#fff;font-size:22px;font-weight:900;box-shadow:0 10px 24px rgba(13,110,253,.22)}
+        .mol-error-brand strong{display:block;font-size:15px;color:#0b2a58}.mol-error-brand span{display:block;margin-top:2px;color:#7b8ca3;font-size:12px}
+        .mol-error-body{padding:34px 30px 30px;text-align:center}.mol-error-code{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:#eef6ff;color:#1756a9;font-size:12px;font-weight:800}
+        h1{margin:16px auto 10px;max-width:620px;font-size:clamp(28px,5vw,42px);line-height:1.08;letter-spacing:-.035em;color:#102a43}p{margin:0 auto;max-width:610px;color:#61758d;font-size:15px;line-height:1.7}
+        .mol-error-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:24px}.mol-error-btn{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 18px;border:0;border-radius:14px;text-decoration:none;font:inherit;font-size:13px;font-weight:850;cursor:pointer}.mol-error-btn-primary{background:linear-gradient(135deg,#0d6efd,#00a7d8);color:#fff;box-shadow:0 12px 26px rgba(13,110,253,.20)}.mol-error-btn-secondary{background:#f0f4f8;color:#334e68}
+        .mol-error-retry{margin:20px auto 0;max-width:560px;padding:12px 14px;border-radius:14px;background:#f8fbff;border:1px solid #e6eef8;color:#60758d;font-size:12px;line-height:1.55}.mol-error-retry strong{color:#294e7a}
+        .mol-error-ref{margin-top:20px;color:#8a9bad;font-size:11px;overflow-wrap:anywhere}.mol-error-ref code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f5f9;padding:4px 7px;border-radius:7px;color:#4b627a}
+        @media(max-width:560px){.mol-error-page{padding:14px}.mol-error-card{border-radius:22px}.mol-error-top{padding:17px 18px}.mol-error-body{padding:28px 18px 24px}.mol-error-actions{flex-direction:column}.mol-error-btn{width:100%}}
+    </style>
+</head>
+<body>
+<main class="mol-error-page">
+    <section class="mol-error-card" role="alert" aria-live="polite">
+        <div class="mol-error-top">
+            <div class="mol-error-mark" aria-hidden="true">M</div>
+            <div class="mol-error-brand">
+                <strong>Main d’Œuvre Locale</strong>
+                <span>Une erreur technique ne doit jamais devenir votre problème.</span>
+            </div>
+        </div>
+        <div class="mol-error-body">
+            <span class="mol-error-code">Erreur {{ status }}</span>
+            <h1>{{ title }}</h1>
+            <p>{{ message }}</p>
+
+            <div class="mol-error-actions">
+                {% if canRetry|default(false) %}
+                    <button class="mol-error-btn mol-error-btn-primary" type="button" id="molErrorRetry">↻ Réessayer</button>
+                {% endif %}
+                <a class="mol-error-btn {{ canRetry|default(false) ? 'mol-error-btn-secondary' : 'mol-error-btn-primary' }}" href="/">⌂ Retour à l’accueil</a>
+                <button class="mol-error-btn mol-error-btn-secondary" type="button" onclick="history.length > 1 ? history.back() : location.assign('/')">← Page précédente</button>
+            </div>
+
+            {% if canRetry|default(false) %}
+                <div class="mol-error-retry" id="molErrorRetryState">
+                    <strong>Nouvelle tentative automatique :</strong>
+                    la page sera retentée jusqu’à 2 fois, uniquement pour une requête de lecture, afin d’éviter les doubles envois de formulaire.
+                </div>
+            {% endif %}
+
+            <div class="mol-error-ref">
+                Dernière tentative : {{ attemptedAt|default(date())|date('d/m/Y H:i:s') }}<br>
+                Référence incident : <code>{{ reference|default('MOL-ERROR') }}</code>
+            </div>
+        </div>
+    </section>
+</main>
+{% if canRetry|default(false) %}
+<script>
+(function () {
+    const key = 'mol-error-retry:' + location.pathname + location.search;
+    const button = document.getElementById('molErrorRetry');
+    const state = document.getElementById('molErrorRetryState');
+
+    function retry(manual) {
+        if (!manual) {
+            const attempts = Number(sessionStorage.getItem(key) || '0');
+            if (attempts >= 2) {
+                if (state) state.innerHTML = '<strong>Tentatives automatiques terminées.</strong> Utilisez « Réessayer » quand vous le souhaitez.';
+                return;
+            }
+            sessionStorage.setItem(key, String(attempts + 1));
+        }
+        location.reload();
+    }
+
+    if (button) button.addEventListener('click', function () { sessionStorage.removeItem(key); retry(true); });
+
+    const attempts = Number(sessionStorage.getItem(key) || '0');
+    if (attempts < 2) {
+        const delay = attempts === 0 ? 2500 : 5000;
+        let remaining = Math.ceil(delay / 1000);
+        if (state) state.innerHTML = '<strong>Nouvelle tentative automatique dans <span id="molRetryCountdown">' + remaining + '</span>s.</strong> Vous pouvez aussi réessayer maintenant.';
+        const timer = setInterval(function () {
+            remaining -= 1;
+            const node = document.getElementById('molRetryCountdown');
+            if (node) node.textContent = Math.max(0, remaining);
+        }, 1000);
+        setTimeout(function () { clearInterval(timer); retry(false); }, delay);
+    }
+})();
+</script>
+{% endif %}
+</body>
+</html>

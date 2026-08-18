@@ -1,0 +1,719 @@
+{# templates/subscription/payment.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Paiement{% endtrans %}{% endblock %}
+
+{% block body %}
+<section class="payment-page py-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="payment-card">
+                    <div class="payment-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">
+                                <i class="fas fa-lock text-primary me-2"></i>
+                                Paiement sécurisé
+                            </h4>
+                            <span class="badge bg-light text-dark">
+                                {{ selected_duration.price|number_format(0, ',', ' ') }} XAF
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="payment-body">
+                        <!-- Récapitulatif -->
+                        <div class="order-summary">
+                            <div class="d-flex justify-content-between">
+                                <span>Abonnement {{ plan.name }} · {{ selected_duration.label }}</span>
+                                <span class="fw-bold">{{ selected_duration.price|number_format(0, ',', ' ') }} XAF</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-success">
+                                <span>Réduction</span>
+                                <span>-0 XAF</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>Total</span>
+                                <span>{{ selected_duration.price|number_format(0, ',', ' ') }} XAF</span>
+                            </div>
+                        </div>
+
+                        <!-- Formulaire de paiement -->
+                        <form id="paymentForm" method="POST" action="{{ path('subscription_process', {slug: plan.slug}) }}">
+                            <input type="hidden" name="payment_method" value="{{ method }}">
+                            <input type="hidden" name="duration_id" value="{{ selected_duration.id }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('subscription_process_' ~ plan.slug) }}">
+                            <input type="hidden" name="payment_token" id="paymentToken" value="">
+                            
+                            {% if method == 'card' %}
+                                {# Les données bancaires restent dans l'élément sécurisé hébergé par Stripe. #}
+                                <div class="card-payment">
+                                    <div class="form-group">
+                                        <label class="form-label" for="stripeCardElement">Informations de carte</label>
+                                        <div id="stripeCardElement" class="stripe-card-element" role="group" aria-label="Informations de carte bancaire"></div>
+                                        <div id="stripeCardError" class="text-danger small mt-2" role="alert" aria-live="polite"></div>
+                                    </div>
+
+                                    <div class="card-logos mt-3">
+                                        <div class="card-logo" data-card="visa">
+                                            <i class="fab fa-cc-visa fa-2x"></i>
+                                        </div>
+                                        <div class="card-logo" data-card="mastercard">
+                                            <i class="fab fa-cc-mastercard fa-2x"></i>
+                                        </div>
+                                        <div class="card-logo" data-card="amex">
+                                            <i class="fab fa-cc-amex fa-2x"></i>
+                                        </div>
+                                        <div class="card-logo" data-card="discover">
+                                            <i class="fab fa-cc-discover fa-2x"></i>
+                                        </div>
+                                        <div class="card-logo" data-card="diners">
+                                            <i class="fab fa-cc-diners-club fa-2x"></i>
+                                        </div>
+                                        <div class="card-logo" data-card="jcb">
+                                            <i class="fab fa-cc-jcb fa-2x"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="security-badge mt-3">
+                                        <i class="fas fa-lock text-success"></i>
+                                        <span class="small text-muted">Paiement chiffré et traité par Stripe. Les données de carte ne transitent pas par notre serveur.</span>
+                                    </div>
+                                </div>
+                            {% elseif method == 'orange' %}
+                                {# Paiement Orange Money #}
+                                <div class="mobile-payment">
+                                    <div class="text-center mb-4">
+                                        <img src="{{ asset('images/orange-money.png') }}" alt="Orange Money" decoding="async" style="height:48px;">
+                                        <h5 class="mt-2">Orange Money</h5>
+                                        <p class="text-muted small">Saisissez votre numéro Orange Money</p>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Numéro de téléphone</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">+237</span>
+                                            <input type="tel" class="form-control" placeholder="6XX XXX XXX" id="phoneNumber" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info small mt-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Vous allez recevoir un message de confirmation sur votre téléphone.
+                                    </div>
+                                </div>
+                            {% elseif method == 'mtn' %}
+                                {# Paiement MTN Mobile Money #}
+                                <div class="mobile-payment">
+                                    <div class="text-center mb-4">
+                                        <img src="{{ asset('images/mtn-mobile-money.png') }}" alt="MTN Mobile Money" decoding="async" style="height:48px;">
+                                        <h5 class="mt-2">MTN Mobile Money</h5>
+                                        <p class="text-muted small">Saisissez votre numéro MTN Mobile Money</p>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Numéro de téléphone</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">+237</span>
+                                            <input type="tel" class="form-control" placeholder="6XX XXX XXX" id="phoneNumber" required>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info small mt-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Vous allez recevoir un message de confirmation sur votre téléphone.
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="payment-actions mt-4">
+                                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold payment-submit-btn"
+                                        data-loading-text="<i class='fas fa-spinner fa-spin me-2'></i> Traitement en cours...">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Payer {{ selected_duration.price|number_format(0, ',', ' ') }} XAF
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="payment-footer text-center mt-3">
+                            <p class="text-muted small">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Paiement sécurisé par SSL
+                                <span class="mx-2">•</span>
+                                <i class="fas fa-clock me-1"></i>
+                                Annulation possible sous 14 jours
+                            </p>
+                            <a href="{{ path('subscription_choose', {slug: plan.slug, duration: selected_duration.id}) }}" class="text-muted small">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Changer de moyen de paiement
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.payment-page {
+    background: #f8fafc;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.payment-card {
+    background: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+.payment-header {
+    padding: 20px 24px;
+    background: #fafbfc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.payment-body {
+    padding: 24px;
+}
+
+.order-summary {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+}
+
+.order-summary hr {
+    margin: 8px 0;
+}
+
+.card-payment .form-group {
+    margin-bottom: 16px;
+}
+
+.card-payment .form-label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.card-payment .form-control {
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.card-payment .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13,110,253,0.10);
+}
+
+.stripe-card-element {
+    min-height: 46px;
+    padding: 13px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.stripe-card-element.StripeElement--focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, .10);
+}
+
+.stripe-card-element.StripeElement--invalid {
+    border-color: #dc2626;
+}
+
+.card-payment .input-group-text {
+    background: #f1f5f9;
+    border-radius: 12px 0 0 12px;
+    border: 1px solid #e2e8f0;
+    border-right: 0;
+    min-width: 44px;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+/* ✅ Cartes logos avec animation */
+.card-logos {
+    display: flex;
+    gap: 12px;
+    color: #94a3b8;
+    padding: 8px 0;
+}
+
+.card-logo {
+    transition: all 0.3s ease;
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+.card-logo.active {
+    opacity: 1;
+    filter: grayscale(0);
+    transform: scale(1.1);
+}
+
+.card-logo i {
+    font-size: 28px;
+}
+
+.card-logo:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* ✅ Indicateur de type de carte */
+.card-type-indicator {
+    padding: 8px 12px;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-type-indicator img {
+    height: 24px;
+    width: auto;
+}
+
+/* ✅ Sécurité */
+.security-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #f0fdf4;
+    border-radius: 10px;
+    border: 1px solid #bbf7d0;
+}
+
+/* ✅ Mobile payment */
+.mobile-payment {
+    padding: 8px 0;
+}
+
+.mobile-payment .form-group {
+    margin-bottom: 16px;
+}
+
+.mobile-payment .form-label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.mobile-payment .form-control {
+    border-radius: 12px;
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.mobile-payment .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13,110,253,0.10);
+}
+
+.mobile-payment .input-group-text {
+    background: #f1f5f9;
+    border-radius: 12px 0 0 12px;
+    border: 1px solid #e2e8f0;
+    border-right: 0;
+    font-weight: 600;
+}
+
+.payment-actions .btn {
+    border-radius: 16px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.payment-actions .btn:hover:not(.loading) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(13,110,253,0.25);
+}
+
+/* ✅ Spinner */
+.payment-submit-btn {
+    transition: all 0.3s ease;
+}
+
+.payment-submit-btn.loading {
+    pointer-events: none !important;
+    opacity: 0.85 !important;
+    cursor: wait !important;
+}
+
+.payment-submit-btn.loading i:not(.fa-spinner) {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .payment-page {
+        align-items: flex-start;
+        padding-top: 16px !important;
+    }
+
+    .payment-card {
+        border-radius: 16px;
+    }
+    
+    .payment-header {
+        padding: 16px 20px;
+    }
+    
+    .payment-body {
+        padding: 16px 20px;
+    }
+    
+    .order-summary {
+        padding: 12px 16px;
+    }
+
+    .order-summary .d-flex,
+    .payment-header .d-flex {
+        align-items: flex-start !important;
+        gap: 10px;
+    }
+
+    .order-summary span {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+    
+    .card-logos {
+        flex-wrap: wrap;
+    }
+}
+</style>
+
+{% if method == 'card' %}
+    <script src="https://js.stripe.com/v3/"></script>
+{% endif %}
+
+{# ✅ JavaScript pour la détection du type de carte #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cardNumberInput = document.getElementById('cardNumber');
+    const cardIcon = document.getElementById('cardIcon');
+    const cardTypeIndicator = document.getElementById('cardTypeIndicator');
+    const cardTypeLogo = document.getElementById('cardTypeLogo');
+    const cardTypeName = document.getElementById('cardTypeName');
+    const cardTypeBadge = document.getElementById('cardTypeBadge');
+    const cardLogos = document.querySelectorAll('.card-logo');
+    const cvcInput = document.getElementById('cardCvc');
+    const cvcHint = document.getElementById('cvcHint');
+
+    // ✅ Détection du type de carte
+    function detectCardType(number) {
+        // Nettoyer le numéro (enlever les espaces)
+        const clean = number.replace(/\s/g, '');
+        
+        // Détection des types
+        const patterns = {
+            visa: {
+                pattern: /^4/,
+                name: 'Visa',
+                icon: 'fab fa-cc-visa',
+                color: '#1a1f71',
+                cvcLength: 3,
+                badge: 'VISA',
+                badgeClass: 'bg-primary'
+            },
+            mastercard: {
+                pattern: /^5[1-5]|^2[2-7]/,
+                name: 'Mastercard',
+                icon: 'fab fa-cc-mastercard',
+                color: '#eb001b',
+                cvcLength: 3,
+                badge: 'MASTERCARD',
+                badgeClass: 'bg-danger'
+            },
+            amex: {
+                pattern: /^3[47]/,
+                name: 'American Express',
+                icon: 'fab fa-cc-amex',
+                color: '#006fcf',
+                cvcLength: 4,
+                badge: 'AMEX',
+                badgeClass: 'bg-info'
+            },
+            discover: {
+                pattern: /^6(?:011|5|4[4-9])/,
+                name: 'Discover',
+                icon: 'fab fa-cc-discover',
+                color: '#ff6000',
+                cvcLength: 3,
+                badge: 'DISCOVER',
+                badgeClass: 'bg-warning text-dark'
+            },
+            diners: {
+                pattern: /^3(?:0[0-5]|[68])/,
+                name: 'Diners Club',
+                icon: 'fab fa-cc-diners-club',
+                color: '#0079be',
+                cvcLength: 3,
+                badge: 'DINERS',
+                badgeClass: 'bg-secondary'
+            },
+            jcb: {
+                pattern: /^35(2[89]|[3-8])/,
+                name: 'JCB',
+                icon: 'fab fa-cc-jcb',
+                color: '#003b6f',
+                cvcLength: 3,
+                badge: 'JCB',
+                badgeClass: 'bg-dark'
+            }
+        };
+
+        for (const [key, card] of Object.entries(patterns)) {
+            if (card.pattern.test(clean)) {
+                return { key, ...card };
+            }
+        }
+
+        return null;
+    }
+
+    // ✅ Formater le numéro de carte
+    function formatCardNumber(value) {
+        const clean = value.replace(/\D/g, '');
+        const parts = [];
+        
+        // Amex a un format différent : 4-6-5
+        if (clean.length > 0 && detectCardType(clean)?.key === 'amex') {
+            if (clean.length > 0) parts.push(clean.slice(0, 4));
+            if (clean.length > 4) parts.push(clean.slice(4, 10));
+            if (clean.length > 10) parts.push(clean.slice(10, 15));
+        } else {
+            // Format standard : 4-4-4-4
+            for (let i = 0; i < clean.length && i < 16; i += 4) {
+                parts.push(clean.slice(i, i + 4));
+            }
+        }
+        
+        return parts.join(' ');
+    }
+
+    // ✅ Mettre à jour l'UI en fonction du type de carte
+    function updateCardUI(cardType) {
+        // Réinitialiser les logos
+        cardLogos.forEach(logo => logo.classList.remove('active'));
+        
+        // Mettre à jour l'icône
+        const icon = cardIcon.querySelector('i');
+        
+        if (cardType) {
+            // Activer le logo correspondant
+            const logo = document.querySelector(`.card-logo[data-card="${cardType.key}"]`);
+            if (logo) logo.classList.add('active');
+            
+            // Mettre à jour l'icône
+            icon.className = cardType.icon;
+            icon.style.color = cardType.color;
+            
+            // Afficher l'indicateur
+            cardTypeIndicator.classList.remove('d-none');
+            cardTypeLogo.src = '';
+            cardTypeLogo.style.display = 'none';
+            cardTypeName.textContent = cardType.name;
+            cardTypeBadge.textContent = cardType.badge;
+            cardTypeBadge.className = `badge ${cardType.badgeClass}`;
+            
+            // Mettre à jour le CVC hint
+            if (cvcHint) {
+                cvcHint.textContent = `${cardType.cvcLength} chiffres`;
+            }
+            if (cvcInput) {
+                cvcInput.maxLength = cardType.cvcLength;
+            }
+        } else {
+            // Réinitialiser
+            icon.className = 'fas fa-credit-card';
+            icon.style.color = '';
+            cardTypeIndicator.classList.add('d-none');
+            
+            // Réinitialiser CVC hint
+            if (cvcHint) {
+                cvcHint.textContent = '3 ou 4 chiffres';
+            }
+            if (cvcInput) {
+                cvcInput.maxLength = 4;
+            }
+        }
+    }
+
+    // ✅ Événement sur le numéro de carte
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function(e) {
+            // Supprimer les caractères non numériques
+            let value = this.value.replace(/\D/g, '');
+            
+            // Limiter la longueur
+            if (value.length > 19) {
+                value = value.slice(0, 19);
+            }
+            
+            // Détecter le type de carte
+            const cardType = detectCardType(value);
+            updateCardUI(cardType);
+            
+            // Formater l'affichage
+            this.value = formatCardNumber(value);
+        });
+
+        // Détection au chargement si le champ est pré-rempli
+        if (cardNumberInput.value) {
+            const cardType = detectCardType(cardNumberInput.value);
+            updateCardUI(cardType);
+        }
+    }
+
+    // ✅ Événement sur la date d'expiration
+    const expiryInput = document.getElementById('cardExpiry');
+    if (expiryInput) {
+        expiryInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            
+            // Limiter à 4 chiffres (MMAA)
+            if (value.length > 4) {
+                value = value.slice(0, 4);
+            }
+            
+            // Ajouter le slash après le mois
+            if (value.length >= 2) {
+                this.value = value.slice(0, 2) + '/' + value.slice(2);
+            } else {
+                this.value = value;
+            }
+        });
+    }
+
+    // ✅ Événement sur le CVC
+    if (cvcInput) {
+        cvcInput.addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            const maxLength = this.maxLength || 4;
+            if (value.length > maxLength) {
+                value = value.slice(0, maxLength);
+            }
+            this.value = value;
+        });
+    }
+});
+
+// ✅ Paiement Stripe et soumission serveur après confirmation du prestataire
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('paymentForm');
+    const submitBtn = form?.querySelector('.payment-submit-btn');
+    if (!form || !submitBtn) return;
+
+    const loadingText = submitBtn.dataset.loadingText ||
+        '<i class="fas fa-spinner fa-spin me-2"></i> Traitement en cours...';
+
+    {% if method == 'card' %}
+        const errorElement = document.getElementById('stripeCardError');
+        const tokenInput = document.getElementById('paymentToken');
+
+        if (typeof Stripe !== 'function') {
+            errorElement.textContent = 'Le module de paiement sécurisé n’a pas pu être chargé.';
+            submitBtn.disabled = true;
+            return;
+        }
+
+        const stripe = Stripe({{ stripe_public_key|json_encode|raw }});
+        const elements = stripe.elements();
+        const card = elements.create('card', {
+            hidePostalCode: true,
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#0f172a',
+                    '::placeholder': { color: '#94a3b8' }
+                },
+                invalid: { color: '#dc2626' }
+            }
+        });
+        card.mount('#stripeCardElement');
+
+        card.on('change', function (stripeEvent) {
+            errorElement.textContent = stripeEvent.error ? stripeEvent.error.message : '';
+        });
+
+        form.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            if (submitBtn.classList.contains('loading')) return;
+
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = loadingText;
+            submitBtn.disabled = true;
+            errorElement.textContent = '';
+
+            try {
+                const intentResponse = await fetch({{ path('subscription_stripe_intent', {slug: plan.slug})|json_encode|raw }}, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-Token': {{ csrf_token('subscription_stripe_intent_' ~ plan.slug)|json_encode|raw }}
+                    },
+                    body: JSON.stringify({ duration_id: {{ selected_duration.id }} })
+                });
+                const intentData = await intentResponse.json();
+
+                if (!intentResponse.ok || !intentData.clientSecret) {
+                    throw new Error(intentData.message || 'Impossible d’initialiser le paiement.');
+                }
+
+                const result = await stripe.confirmCardPayment(intentData.clientSecret, {
+                    payment_method: { card: card }
+                });
+
+                if (result.error || !result.paymentIntent || result.paymentIntent.status !== 'succeeded') {
+                    throw new Error(result.error?.message || 'Le paiement n’a pas été confirmé.');
+                }
+
+                tokenInput.value = result.paymentIntent.id;
+                HTMLFormElement.prototype.submit.call(form);
+            } catch (paymentError) {
+                errorElement.textContent = paymentError.message || 'Le paiement a échoué. Veuillez réessayer.';
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-lock me-2"></i> Payer {{ selected_duration.price|number_format(0, ',', ' ') }} XAF';
+            }
+        });
+    {% else %}
+        form.addEventListener('submit', function() {
+            submitBtn.classList.add('loading');
+            submitBtn.innerHTML = loadingText;
+            submitBtn.disabled = true;
+        });
+    {% endif %}
+});
+</script>
+{% endblock %}

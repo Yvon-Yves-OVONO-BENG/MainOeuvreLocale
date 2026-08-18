@@ -1,0 +1,158 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Talents à proximité{% endtrans %}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    >
+    <link rel="stylesheet" href="{{ asset('assets/geolocation/nearby-talents.css') }}">
+{% endblock %}
+
+{% block body %}
+    <main class="mol-nearby-page">
+        <section class="mol-nearby-hero">
+            <div class="container">
+                <span class="mol-nearby-kicker">{% trans %}Main d’œuvre locale{% endtrans %}</span>
+                <h1>{% trans %}Trouvez un talent disponible près de vous{% endtrans %}</h1>
+                <p>{% trans %}Choisissez un métier et un rayon. Votre position sert uniquement à cette recherche.{% endtrans %}</p>
+
+                <form method="post" action="{{ path('talents_nearby') }}" id="nearbySearchForm" class="mol-nearby-form" data-turbo="false">
+                    <input type="hidden" name="_token" value="{{ csrf_token('nearby_talent_search') }}">
+                    <input type="hidden" name="latitude" id="nearbyLatitude" value="{{ filters.latitude }}">
+                    <input type="hidden" name="longitude" id="nearbyLongitude" value="{{ filters.longitude }}">
+
+                    <div class="mol-nearby-field">
+                        <label for="nearbyProfession">{% trans %}Profession{% endtrans %}</label>
+                        <select name="profession" id="nearbyProfession">
+                            <option value="">{% trans %}Tous les métiers{% endtrans %}</option>
+                            {% for profession in professions %}
+                                <option
+                                    value="{{ profession.id }}"
+                                    {{ filters.professionId == profession.id ? 'selected' : '' }}
+                                >
+                                    {{ profession.profession }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mol-nearby-field">
+                        <label for="nearbyRadius">{% trans %}Rayon{% endtrans %}</label>
+                        <select name="radius" id="nearbyRadius">
+                            {% for km in [0, 1, 5, 10, 25, 50, 100] %}
+                                <option value="{{ km }}" {{ filters.radius == km ? 'selected' : '' }}>{{ km }} km</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button type="button" id="nearbyLocateButton" class="mol-nearby-btn mol-nearby-btn-light">
+                        <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                        {% trans %}Ma position{% endtrans %}
+                    </button>
+
+                    <button type="submit" class="mol-nearby-btn mol-nearby-btn-primary">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                        {% trans %}Rechercher{% endtrans %}
+                    </button>
+                </form>
+
+                <div id="nearbyLocationStatus" class="mol-nearby-status" role="status" aria-live="polite"></div>
+            </div>
+        </section>
+
+        <section class="container mol-nearby-content">
+            {% if searchError %}
+                <div class="mol-nearby-alert mol-nearby-alert-error">{{ searchError }}</div>
+            {% endif %}
+
+            <div class="mol-nearby-layout">
+                <div class="mol-nearby-results">
+                    <div class="mol-nearby-results-head">
+                        <div>
+                            <span class="mol-nearby-eyebrow">{% trans %}Résultats{% endtrans %}</span>
+                            <h2>
+                                {% if searchPerformed %}
+                                    {{ talents|length }} {% trans %}talent(s) dans ce rayon{% endtrans %}
+                                {% else %}
+                                    {% trans %}Lancez votre recherche{% endtrans %}
+                                {% endif %}
+                            </h2>
+                        </div>
+                        {% if searchPerformed %}
+                            <span class="mol-nearby-radius-pill">{{ filters.radius }} km</span>
+                        {% endif %}
+                    </div>
+
+                    {% if talents is not empty %}
+                        <div class="mol-talent-list">
+                            {% for talent in talents %}
+                                {% set talentPhoto = talent.photo
+                                    ? asset('uploads/profiles/' ~ talent.photo)
+                                    : asset('uploads/profiles/avatar.png')
+                                %}
+                                <article class="mol-talent-card" data-talent-id="{{ talent.id }}">
+                                    <img src="{{ talentPhoto }}" alt="" class="mol-talent-avatar">
+                                    <div class="mol-talent-main">
+                                        <h3>{{ talent.name }}</h3>
+                                        <p class="mol-talent-job">{{ talent.profession }}</p>
+                                        <div class="mol-talent-meta">
+                                            {% if talent.city %}
+                                                <span><i class="fa fa-map-marker"></i> {{ talent.city }}</span>
+                                            {% endif %}
+                                            {% if talent.experienceYears %}
+                                                <span><i class="fa fa-briefcase"></i> {{ talent.experienceYears }} {% trans %}an(s){% endtrans %}</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <strong class="mol-talent-distance">{{ talent.distanceKm|number_format(1, ',', ' ') }} km</strong>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% elseif searchPerformed and not searchError %}
+                        <div class="mol-nearby-empty">
+                            <i class="fa fa-map-o" aria-hidden="true"></i>
+                            <h3>{% trans %}Aucun talent trouvé dans ce rayon{% endtrans %}</h3>
+                            <p>{% trans %}Essayez un rayon plus large ou sélectionnez un autre métier.{% endtrans %}</p>
+                        </div>
+                    {% else %}
+                        <div class="mol-nearby-empty">
+                            <i class="fa fa-location-arrow" aria-hidden="true"></i>
+                            <h3>{% trans %}Autorisez votre position{% endtrans %}</h3>
+                            <p>{% trans %}Votre position n’est pas enregistrée dans votre compte pour cette recherche.{% endtrans %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mol-nearby-map-card">
+                    <div
+                        id="nearbyMap"
+                        data-talents="{{ talents|json_encode|e('html_attr') }}"
+                        data-latitude="{{ filters.latitude }}"
+                        data-longitude="{{ filters.longitude }}"
+                        data-radius="{{ filters.radius }}"
+                        aria-label="{% trans %}Carte des talents à proximité{% endtrans %}"
+                    ></div>
+                    <div class="mol-nearby-map-note">
+                        <i class="fa fa-shield" aria-hidden="true"></i>
+                        {% trans %}Les marqueurs des talents sont volontairement approximatifs afin de protéger leur adresse exacte.{% endtrans %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
+    <script src="{{ asset('assets/geolocation/nearby-talents.js') }}"></script>
+{% endblock %}

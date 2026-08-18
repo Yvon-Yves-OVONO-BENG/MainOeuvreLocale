@@ -1,0 +1,40 @@
+CORRECTIFS MAIN D'ŒUVRE LOCALE — VERSION VÉRIFIÉE
+==================================================
+
+1. Sauvegardez votre projet, puis copiez les dossiers src/, templates/ et
+   migrations/ dans le projet Symfony en remplaçant les fichiers existants.
+
+2. Exécutez les migrations :
+
+   php bin/console doctrine:migrations:migrate --no-interaction
+
+   Les deux migrations fournies sont relançables après un échec partiel. Elles
+   corrigent aussi les limites d'index OAuth, le moteur InnoDB et les différences
+   de collation entre newsletter_subscriber.email et user.email.
+
+3. Videz le cache et contrôlez le schéma :
+
+   php bin/console cache:clear
+   php bin/console doctrine:schema:validate
+
+La migration conserve les abonnés existants et rattache automatiquement à un
+compte les adresses email déjà présentes dans la table user. La profession des
+alertes est désormais récupérée automatiquement depuis
+User -> ProfessionalProfile -> Profession : aucune sélection manuelle n'est
+demandée dans le pied de page.
+
+RÉSULTAT
+--------
+- action Modifier dans la modération des annonces (modérateur/admin) ;
+- badges des cartes transparents ;
+- badges de titre supérieurs retirés des sections Offres et Annonces ;
+- bouton Inscription vert dans le héros et les menus ;
+- module « Alertes offres » sans liste déroulante : compte et profession
+  retrouvés automatiquement depuis l'email saisi ;
+- message explicite si l'email ne correspond à aucun compte ou si le profil
+  professionnel n'a pas encore de profession ;
+- spinner sur le bouton Inscription du héros ;
+- bande des professions ralentie de 45 à 90 secondes ;
+- emails déclenchés lors de l'approbation d'une offre ;
+- interface admin des abonnés avec recherche et pagination par 12 ;
+- pagination publique des offres et annonces par 12.

@@ -1,0 +1,79 @@
+{% extends 'marketing/layout.html.twig' %}
+{% set seo_description = 'La mission de Main d’Œuvre Locale : connecter les talents, artisans, particuliers et entreprises avec confiance et proximité.' %}
+{% block title %}{{ 'Notre mission — Main d’Œuvre Locale'|trans }}{% endblock %}
+
+
+
+{% block marketing_content %}
+<div class="mol-page-head">
+    <span class="mol-page-label">
+        {% trans %}Notre Mission{% endtrans %}
+    </span>
+
+    <div class="mol-page-actions">
+        <a href="{{ path('app_register') }}" class="mol-cta-primary">
+          {% trans %}Démarrer gratuitement{% endtrans %}
+        </a>
+        <a href="{{ path('marketing_services') }}" class="mol-cta-soft">
+          {% trans %}Nos services{% endtrans %} →
+        </a>
+    </div>
+</div>
+<section
+  class="mol-hero mol-hero--single"
+  style="--mol-hero-image:url('{{ asset('images/marketing/notre-mission.jpeg') }}')">
+  <div class="mol-hero-grid mol-hero-grid--single">
+    <div class="flex flex-col justify-end">
+      <h1 class="mt-4 mol-hero-title">
+        {% trans %}Connecter les talents aux besoins réels, avec confiance et simplicité.{% endtrans %}
+      </h1>
+
+    </div>
+
+
+  </div>
+</section>
+
+<section class="mol-after-hero">
+  <div class="mol-hero-card mol-hero-card--below rounded-[28px] p-5 sm:p-6">
+<div class="mol-after-hero-title"> {% trans %}Comment on y arrive{% endtrans %}</div>
+
+  <div class="mt-4 grid gap-3">
+    <div class="mol-kpi">
+      <div class="k">{% trans %}1. Profils {% endtrans %}</div>
+      <div class="v">{% trans %}Portfolio, réalisations, vérification{% endtrans %}</div>
+    </div>
+    <div class="mol-kpi">
+      <div class="k">{% trans %}2. Matching intelligent{% endtrans %}</div>
+      <div class="v">{% trans %}Filtres, localisation, disponibilité{% endtrans %}</div>
+    </div>
+    <div class="mol-kpi">
+      <div class="k">{% trans %}3. Confiance{% endtrans %}</div>
+      <div class="v">{% trans %}Avis, signalements, modération, historique{% endtrans %}</div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section class="mt-8">
+  <h2 class="mol-section-title">{% trans %}Pour qui ?{% endtrans %}</h2>
+  <p class="mt-2 mol-section-text">{% trans %}Une plateforme, trois publics, un même engagement : rendre les compétences locales plus visibles, le recrutement plus efficace et les collaborations plus fiables.{% endtrans %}</p>
+
+  <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="mol-card p-6">
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Talents{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Deviens visible, reçois des opportunités et construis une réputation solide.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Entreprises{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Publie, shortlist et recrute plus vite avec plus de lisibilité.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Particuliers{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Trouve un professionnel fiable près de chez toi, en toute confiance.{% endtrans %}</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

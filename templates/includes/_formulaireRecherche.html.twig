@@ -1,0 +1,28 @@
+<!-- Search bar -->
+<form method="get" action="{{ path('liste_jobs') }}" class="vip-search vip-jobs-hero-search" id="vipLiveSearchForm" data-turbo="false" data-turbo-frame="jobs_results" autocomplete="off">
+	<input type="hidden" name="page" value="1">
+
+	<div class="row g-2">
+		<div class="col-xl-4 col-lg-4 col-md-12">
+			<div class="vip-field" data-smart-search-container>
+				<i class="fa fa-search"></i>
+				<input id="vipLiveQ" class="vip-input" name="q" data-smart-keyword data-suggest-type="keyword" data-suggest-url="{{ path('api_search_suggestions') }}" data-numeric-error="{{ 'Saisissez un métier, un poste ou une compétence, pas uniquement des chiffres.'|trans }}" value="{{ filters.q }}" placeholder="{{ 'Mots-clés (ex: Chauffeur, Ménagère, Maçon)'|trans }}">
+			</div>
+		</div>
+
+		<div class="col-xl-4 col-lg-4 col-md-12">
+			<div class="vip-field" data-smart-search-container>
+				<i class="fa fa-map-marker"></i>
+				<input id="vipLiveCity" class="vip-input" name="city" data-smart-location data-suggest-type="location" data-suggest-url="{{ path('api_search_suggestions') }}" data-numeric-error="{{ 'Saisissez une ville, une région ou un pays, pas uniquement des chiffres.'|trans }}" value="{{ filters.city }}" placeholder="{{ 'Ville, Pays, Région'|trans }}">
+			</div>
+		</div>
+
+
+		<div class="col-xl-4 col-lg-4 col-md-12">
+			<button class="vip-btn" type="submit">
+				<i class="fa fa-search me-2"></i>
+				{% trans %}Entrez{% endtrans %}
+			</button>
+		</div>
+	</div>
+</form>

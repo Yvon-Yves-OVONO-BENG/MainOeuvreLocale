@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Anti-spam{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/moderation/_vip_ui.html.twig' %}
+
+  <div class="mod-shell" data-moderation-page="spam">
+    <div class="mod-container mod-grid">
+
+      <section class="mod-card mod-page-head">
+        <div class="mod-card-inner">
+          <div class="mod-page-head-top">
+            <div class="mod-page-main">
+              <div class="mod-kicker">{% trans %}Modération • Anti-spam{% endtrans %}</div>
+              <h1 class="mod-page-title">{% trans %}Règles anti-spam{% endtrans %}</h1>
+              <p class="mod-page-text">{% trans %}Supervise les signaux, seuils et actions automatiques contre le spam et les comportements abusifs.{% endtrans %}</p>
+            </div>
+          </div>
+
+          <div class="mod-page-actions">
+            {% include 'admin/moderation/_nav.html.twig' %}
+          </div>
+        </div>
+      </section>
+
+      <section class="mod-card">
+        <div class="mod-card-inner">
+          <div class="mod-filters">
+            <div style="flex:2 1 340px;">
+              <input type="search" class="mod-input" placeholder="{% trans %}Rechercher une règle...{% endtrans %}" data-mod-search="spam">
+            </div>
+          </div>
+
+          <div class="mod-separator"></div>
+
+          <div class="mod-table-wrap">
+            <table class="mod-table">
+              <thead>
+                <tr>
+                  <th>{% trans %}Règle{% endtrans %}</th>
+                  <th>{% trans %}Signal{% endtrans %}</th>
+                  <th>{% trans %}Seuil{% endtrans %}</th>
+                  <th>{% trans %}Action{% endtrans %}</th>
+                  <th>{% trans %}Statut{% endtrans %}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for rule in rules %}
+                  <tr class="js-mod-spam" data-mod-text="{{ (rule.name ~ ' ' ~ rule.signal ~ ' ' ~ rule.action)|lower }}">
+                    <td><div class="mod-row-title">{{ rule.name }}</div></td>
+                    <td>{{ rule.signal }}</td>
+                    <td>{{ rule.threshold }}</td>
+                    <td>{{ rule.action }}</td>
+                    <td><span class="mod-badge active">{{ rule.status|capitalize }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-content-moderation.js') }}"></script>
+{% endblock %}

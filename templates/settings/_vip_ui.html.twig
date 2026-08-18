@@ -1,0 +1,79 @@
+<style>
+  :root{
+    --vip-ink:#0f172a;
+    --vip-muted:#64748b;
+    --vip-line:rgba(15,23,42,.10);
+    --vip-card:rgba(255,255,255,.72);
+    --vip-shadow:0 22px 70px rgba(15,23,42,.10);
+    --vip-shadow2:0 14px 40px rgba(15,23,42,.08);
+    --r:28px;
+  }
+
+  .vip-wrap{
+   
+    min-height:calc(100vh - 80px);
+
+    /* ✅ enlève l'espace en haut */
+    padding-top:0;
+
+    /* ✅ ajoute de l'espace avant le footer */
+    padding-bottom:40px;
+  }
+
+  .vip-card{
+    border:1px solid var(--vip-line);
+    border-radius:var(--r);
+    background:var(--vip-card);
+    backdrop-filter:blur(14px);
+    box-shadow:var(--vip-shadow);
+  }
+
+  .vip-soft{
+    border:1px solid var(--vip-line);
+    border-radius:22px;
+    background:rgba(255,255,255,.75);
+    backdrop-filter:blur(12px);
+    box-shadow:var(--vip-shadow2);
+  }
+
+  .tab{
+    border:1px solid rgba(15,23,42,.10);
+    background:rgba(255,255,255,.75);
+    border-radius:999px;
+    padding:8px 12px;
+    font-weight:900;
+    font-size:12px;
+    color:var(--vip-ink);
+    white-space:nowrap;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    flex:0 0 auto;
+  }
+
+  .tab.active{
+    background:#0f172a;
+    color:#fff;
+  }
+
+  .btn{
+    border-radius:18px;
+    padding:10px 14px;
+    font-weight:900;
+    font-size:13px;
+    border:1px solid rgba(15,23,42,.12);
+    background:rgba(255,255,255,.92);
+  }
+
+  .btn.primary{
+    background:#0f172a;
+    color:#fff;
+    border-color:#0f172a;
+  }
+
+  @media(max-width:640px){
+    .vip-wrap{
+      padding-bottom:70px;
+    }
+  }
+</style>

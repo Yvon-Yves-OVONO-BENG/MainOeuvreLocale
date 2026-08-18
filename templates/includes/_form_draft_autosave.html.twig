@@ -1,0 +1,289 @@
+{#
+    Sauvegarde automatique des brouillons de formulaires.
+    Les données sont stockées uniquement dans le navigateur de l'utilisateur.
+    Les mots de passe, fichiers, tokens CSRF et champs techniques cachés sont exclus.
+#}
+<style>
+    .mol-autosave-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        width: fit-content;
+        max-width: 100%;
+        margin: 0 0 14px;
+        padding: 7px 11px;
+        border: 1px solid rgba(37, 99, 235, .14);
+        border-radius: 999px;
+        background: rgba(239, 246, 255, .86);
+        color: #315b8f;
+        font-size: 11px;
+        font-weight: 750;
+        line-height: 1.25;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, .04);
+    }
+
+    .mol-autosave-status::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        flex: 0 0 7px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, .10);
+    }
+
+    .mol-autosave-status.is-restored {
+        background: rgba(236, 253, 245, .92);
+        color: #18734b;
+        border-color: rgba(16, 185, 129, .16);
+    }
+
+    @media (max-width: 575.98px) {
+        .mol-autosave-status {
+            white-space: normal;
+            border-radius: 14px;
+            font-size: 10px;
+        }
+    }
+</style>
+
+<script>
+(function () {
+    'use strict';
+
+    const STORAGE_PREFIX = 'mol-form-draft-v2:';
+    const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+    const timers = new WeakMap();
+
+    /**
+     * Vérifie silencieusement que localStorage est utilisable sur le navigateur courant.
+     */
+    function storageAvailable() {
+        try {
+            const key = '__mol_draft_test__';
+            window.localStorage.setItem(key, '1');
+            window.localStorage.removeItem(key);
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    /**
+     * Construit une clé de brouillon isolée par utilisateur, route et type de formulaire.
+     */
+    function getDraftKey(form) {
+        const userId = document.body.dataset.molUserId || 'guest';
+        const scope = form.dataset.molAutosaveKey || form.id || 'form';
+        const action = form.getAttribute('action') || window.location.pathname;
+        return STORAGE_PREFIX + userId + ':' + window.location.pathname + ':' + scope + ':' + action;
+    }
+
+    /**
+     * Indique si un champ peut être conservé sans stocker de donnée sensible ou technique.
+     */
+    function isDraftableField(field) {
+        if (!field || !field.name || field.disabled) return false;
+
+        const type = String(field.type || '').toLowerCase();
+        if (['password', 'file', 'submit', 'button', 'reset', 'image', 'hidden'].includes(type)) return false;
+        if (field.name === '_token' || field.name.endsWith('[_token]')) return false;
+
+        return true;
+    }
+
+    /**
+     * Sérialise les valeurs utiles du formulaire, y compris checkbox, radio et select multiple.
+     */
+    function serializeForm(form) {
+        const data = {};
+
+        Array.from(form.elements).forEach(function (field) {
+            if (!isDraftableField(field)) return;
+
+            if (field.type === 'radio') {
+                if (field.checked) data[field.name] = { kind: 'radio', value: field.value };
+                return;
+            }
+
+            if (field.type === 'checkbox') {
+                if (!data[field.name] || data[field.name].kind !== 'checkbox') {
+                    data[field.name] = { kind: 'checkbox', values: [] };
+                }
+                if (field.checked) data[field.name].values.push(field.value);
+                return;
+            }
+
+            if (field.tagName === 'SELECT' && field.multiple) {
+                data[field.name] = {
+                    kind: 'multiple',
+                    values: Array.from(field.selectedOptions).map(function (option) { return option.value; })
+                };
+                return;
+            }
+
+            data[field.name] = { kind: 'value', value: field.value };
+        });
+
+        return data;
+    }
+
+    /**
+     * Affiche un indicateur discret sans modifier la structure fonctionnelle du formulaire.
+     */
+    function getStatus(form) {
+        let status = form.querySelector(':scope > .mol-autosave-status');
+        if (status) return status;
+
+        status = document.createElement('div');
+        status.className = 'mol-autosave-status';
+        status.setAttribute('role', 'status');
+        status.setAttribute('aria-live', 'polite');
+        status.textContent = 'Sauvegarde automatique active sur cet appareil.';
+        form.prepend(status);
+
+        return status;
+    }
+
+    /**
+     * Sauvegarde le brouillon courant avec un léger délai pour ne pas ralentir la saisie.
+     */
+    function saveDraft(form) {
+        const status = getStatus(form);
+
+        try {
+            window.localStorage.setItem(getDraftKey(form), JSON.stringify({
+                savedAt: Date.now(),
+                values: serializeForm(form)
+            }));
+            status.classList.remove('is-restored');
+            status.textContent = 'Brouillon sauvegardé automatiquement.';
+        } catch (error) {
+            status.textContent = 'Sauvegarde automatique indisponible sur ce navigateur.';
+        }
+    }
+
+    /**
+     * Programme une sauvegarde après la dernière frappe/changement.
+     */
+    function scheduleSave(form) {
+        if (timers.has(form)) window.clearTimeout(timers.get(form));
+
+        const timer = window.setTimeout(function () {
+            saveDraft(form);
+            timers.delete(form);
+        }, 450);
+
+        timers.set(form, timer);
+    }
+
+    /**
+     * Applique une valeur sauvegardée sur tous les champs portant le même name.
+     */
+    function restoreFieldGroup(form, name, entry) {
+        const fields = Array.from(form.elements).filter(function (field) {
+            return field.name === name && isDraftableField(field);
+        });
+
+        if (!fields.length || !entry) return;
+
+        fields.forEach(function (field) {
+            if (entry.kind === 'radio') {
+                field.checked = field.value === entry.value;
+            } else if (entry.kind === 'checkbox') {
+                field.checked = Array.isArray(entry.values) && entry.values.includes(field.value);
+            } else if (entry.kind === 'multiple' && field.tagName === 'SELECT') {
+                Array.from(field.options).forEach(function (option) {
+                    option.selected = Array.isArray(entry.values) && entry.values.includes(option.value);
+                });
+            } else if (entry.kind === 'value') {
+                field.value = entry.value == null ? '' : String(entry.value);
+            }
+        });
+
+        const first = fields[0];
+        first.dispatchEvent(new Event('input', { bubbles: true }));
+        first.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    /**
+     * Restaure un brouillon récent puis retente une seconde passe pour les selects dynamiques.
+     */
+    function restoreDraft(form) {
+        let raw = null;
+
+        try {
+            raw = window.localStorage.getItem(getDraftKey(form));
+        } catch (error) {
+            return;
+        }
+
+        if (!raw) return;
+
+        try {
+            const draft = JSON.parse(raw);
+            if (!draft || !draft.savedAt || Date.now() - draft.savedAt > MAX_AGE_MS) {
+                window.localStorage.removeItem(getDraftKey(form));
+                return;
+            }
+
+            Object.entries(draft.values || {}).forEach(function ([name, entry]) {
+                restoreFieldGroup(form, name, entry);
+            });
+
+            // Les listes Profession/Compétences peuvent être remplies après un appel AJAX.
+            window.setTimeout(function () {
+                Object.entries(draft.values || {}).forEach(function ([name, entry]) {
+                    restoreFieldGroup(form, name, entry);
+                });
+            }, 900);
+
+            const status = getStatus(form);
+            status.classList.add('is-restored');
+            status.textContent = 'Brouillon restauré automatiquement.';
+        } catch (error) {
+            try { window.localStorage.removeItem(getDraftKey(form)); } catch (ignore) {}
+        }
+    }
+
+    /**
+     * Initialise un formulaire une seule fois et efface son brouillon lors d'une soumission réelle.
+     */
+    function initForm(form) {
+        if (!form || form.dataset.molAutosaveBound === '1') return;
+        form.dataset.molAutosaveBound = '1';
+
+        restoreDraft(form);
+
+        form.addEventListener('input', function () { scheduleSave(form); });
+        form.addEventListener('change', function () { scheduleSave(form); });
+
+        form.addEventListener('submit', function () {
+            form.dataset.molAutosaveSubmitted = '1';
+            try { window.localStorage.removeItem(getDraftKey(form)); } catch (error) {}
+        });
+
+        window.addEventListener('pagehide', function () {
+            // Après une vraie soumission, ne recrée surtout pas un brouillon devenu obsolète.
+            if (form.dataset.molAutosaveSubmitted === '1') return;
+
+            // Si l'utilisateur revient en arrière sans soumettre, les dernières frappes sont conservées.
+            saveDraft(form);
+        });
+    }
+
+    /**
+     * Recherche les formulaires explicitement autorisés à utiliser l'autosauvegarde.
+     */
+    function bootAutosave() {
+        if (!storageAvailable()) return;
+        document.querySelectorAll('form[data-mol-autosave="1"]').forEach(initForm);
+    }
+
+    bootAutosave();
+    document.addEventListener('DOMContentLoaded', bootAutosave);
+    document.addEventListener('turbo:load', bootAutosave);
+    document.addEventListener('turbo:render', bootAutosave);
+    window.addEventListener('pageshow', bootAutosave);
+})();
+</script>

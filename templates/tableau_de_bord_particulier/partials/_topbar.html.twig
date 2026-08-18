@@ -1,0 +1,25 @@
+{# ===================== TOPBAR ===================== #}
+        <header class="mol-topbar sticky top-0 z-40">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex min-h-[66px] items-center justify-between gap-3 py-2">
+                    <div class="mol-topbar-copy min-w-0">
+                        <div class="truncate text-sm font-semibold text-slate-900">
+                            {% trans %}Tableau de bord de{% endtrans %} {{ displayName }}
+                        </div>
+                        <div class="mt-0.5 hidden truncate text-xs text-slate-500 sm:block">
+                            {% trans %}Pilotez vos publications, candidatures, favoris et paiements{% endtrans %}
+                        </div>
+                    </div>
+
+                    <a href="{{ path('tableau_de_bord') }}" data-turbo="false"
+                        class="mol-profile-button flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white p-1.5 pr-2.5 shadow-sm hover:border-blue-200 hover:bg-slate-50">
+                        <img src="{{ avatar }}" alt="{{ 'Photo de profil'|trans }}"
+                            class="h-9 w-9 min-h-[36px] min-w-[36px] shrink-0 rounded-lg object-cover ring-1 ring-slate-200">
+                        <div class="hidden max-w-[180px] text-left leading-tight md:block">
+                            <div class="truncate text-sm font-semibold text-slate-900">{{ displayName }}</div>
+                            <div class="mt-0.5 text-[11px] text-slate-500">{% trans %}Mon espace{% endtrans %}</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </header>

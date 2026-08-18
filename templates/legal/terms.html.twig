@@ -1,0 +1,252 @@
+{% extends 'base.html.twig' %}
+{% set seo_description = 'Consultez les conditions générales d’utilisation de la plateforme Main d’Œuvre Locale.' %}
+{% block title %}{{ 'Termes & Conditions'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "legal/_vip_ui_terms.html.twig" %}
+
+<div class="legal-page">
+  <div class="legal-wrap">
+
+    <div class="legal-hero">
+      <div>
+        <h1>📜 {% trans %}Termes & Conditions{% endtrans %}</h1>
+        <div class="sub">
+          {% trans %}Ces conditions encadrent l’utilisation de{% endtrans %} <strong>{{ companyName }}</strong>.
+          {% trans %}Elles protègent à la fois les utilisateurs et la plateforme.{% endtrans %}
+        </div>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <span class="legal-chip">🗓️ {% trans %}Dernière mise à jour :{% endtrans %} {{ lastUpdated|date('d/m/Y') }}</span>
+        <a class="legal-btn primary" href="{{ path('legal_privacy') }}">🔒 {% trans %}Politique de confidentialité{% endtrans %}</a>
+      </div>
+    </div>
+
+    <div class="legal-grid">
+
+      {# CONTENT #}
+      <div class="legal-card">
+        <div class="hd">
+          <div class="fw-bold">{% trans %}Vue rapide{% endtrans %}</div>
+          <div class="small text-muted">{% trans %}Règles d’utilisation, responsabilités et sécurité.{% endtrans %}</div>
+        </div>
+
+        <div class="bd">
+          <div class="callout mb-3">
+            ✅ {% trans %}Pour toute question concernant ces conditions, contactez le support :{% endtrans %} <strong>{{ supportEmail }}</strong>.
+          </div>
+
+          <section id="sec-1" class="sec mb-4">
+            <h2>{% trans %}1. Introduction{% endtrans %}</h2>
+            <p>
+              {% trans %}Bienvenue sur{% endtrans %} <strong>{{ companyName }}</strong>.
+              <strong>{{ companyName }}</strong>
+              {% trans %}est une plateforme numérique qui facilite les échanges de proximité entre particuliers et professionnels.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Notre site permet aux utilisateurs de publier des annonces pour des demandes ou offres d’emplois, d’acheter ou vendre des biens neufs ou d’occasion, ainsi que de faire des dons d’objets qui ne leur sont plus utiles.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Notre préoccupation est de faciliter l’accès à l’emploi, de promouvoir les échanges locaux et de contribuer à la réduction du gaspillage.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="sec-2" class="sec mb-4">
+            <h2>{% trans %}2. Définitions des termes clés{% endtrans %}</h2>
+            <ul>
+              <li>
+                <strong>{% trans %}Plateforme :{% endtrans %}</strong>
+                {% trans %}désigne le site ou le service numérique{% endtrans %} <strong>{{ companyName }}</strong>.
+              </li>
+              <li>
+                <strong>{% trans %}Utilisateur :{% endtrans %}</strong>
+                {% trans %}désigne toute personne qui accède à la plateforme, qu’elle soit inscrite ou non.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Abonné :{% endtrans %}</strong>
+                {% trans %}désigne tout utilisateur disposant d’un compte sur la plateforme.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Annonce :{% endtrans %}</strong>
+                {% trans %}désigne toute publication faite par un utilisateur, notamment une offre, une demande d’emploi, une vente, un achat ou un don.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Contenu :{% endtrans %}</strong>
+                {% trans %}désigne les textes, images, informations, documents ou messages publiés ou transmis sur la plateforme.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Service :{% endtrans %}</strong>
+                {% trans %}désigne l’ensemble des fonctionnalités proposées par la plateforme.{% endtrans %}
+              </li>
+            </ul>
+          </section>
+
+          <section id="sec-3" class="sec mb-4">
+            <h2>{% trans %}3. Conditions d’utilisation{% endtrans %}</h2>
+            <p>
+              {% trans %}En accédant à nos services, vous acceptez les présentes conditions d’utilisation. Veuillez les lire attentivement avant de vous inscrire ou d’utiliser notre plateforme.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}3.1. Collecte des données personnelles{% endtrans %}</h3>
+            <p>
+              {% trans %}Les utilisateurs reconnaissent qu’en s’inscrivant sur notre site, ils consentent à la collecte, l’utilisation et la conservation de certaines données personnelles, comme le nom, le numéro de téléphone et l’adresse e-mail.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Ces données sont nécessaires pour identifier les utilisateurs et faciliter leur mise en relation avec les autres abonnés.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}3.2. Éligibilité{% endtrans %}</h3>
+            <p>
+              {% trans %}L’utilisation du site est réservée aux personnes âgées de 14 ans et plus. En utilisant notre service, vous confirmez avoir l’âge requis.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Pour les adolescents âgés de 14 à 18 ans, il est préférable d’être accompagné par un parent ou un tuteur légal dans l’utilisation de la plateforme.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Au Cameroun, l’âge minimum à partir duquel un enfant peut travailler légalement est de 14 ans. Cette indication s’appuie notamment sur la Convention n°138 sur l’âge minimum, 1973, ratifiée par le Cameroun en 2001.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}3.3. Utilisation acceptable{% endtrans %}</h3>
+            <p>
+              {% trans %}En utilisant le site, vous acceptez de fournir des informations exactes, complètes et à jour. Vous êtes responsable des informations présentes sur votre profil.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Vous vous engagez également à respecter la confidentialité des autres utilisateurs et à ne pas divulguer leurs informations sans autorisation.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}3.4. Comportements interdits{% endtrans %}</h3>
+            <ul>
+              <li>
+                <strong>{% trans %}Spam :{% endtrans %}</strong>
+                {% trans %}l’envoi de messages non sollicités, de publicités ou de promotions abusives est strictement interdit.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Harcèlement et intimidation :{% endtrans %}</strong>
+                {% trans %}toute forme de harcèlement, d’intimidation ou de comportement menaçant envers d’autres utilisateurs est interdite.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Contenu inapproprié :{% endtrans %}</strong>
+                {% trans %}la publication de contenu diffamatoire, offensant, obscène ou autrement inapproprié est interdite.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Activités illégales :{% endtrans %}</strong>
+                {% trans %}vous ne pouvez pas utiliser le site pour une activité frauduleuse ou illégale.{% endtrans %}
+              </li>
+              <li>
+                <strong>{% trans %}Utilisation d’automates :{% endtrans %}</strong>
+                {% trans %}l’utilisation de scripts, robots, bots ou technologies visant à manipuler les fonctionnalités du site est interdite.{% endtrans %}
+              </li>
+            </ul>
+
+            <h3>{% trans %}3.5. Suspension et résiliation de compte{% endtrans %}</h3>
+            <p>
+              {% trans %}Nous nous réservons le droit de suspendre ou de résilier votre compte en cas de violation des présentes conditions d’utilisation, avec ou sans préavis selon la gravité de la situation.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="sec-4" class="sec mb-4">
+            <h2>{% trans %}4. Propriété intellectuelle{% endtrans %}</h2>
+
+            <h3>{% trans %}4.1. Droits d’auteur{% endtrans %}</h3>
+            <p>
+              {% trans %}Tous les contenus et éléments disponibles sur{% endtrans %} <strong>{{ companyName }}</strong>,
+              {% trans %}y compris les textes, graphiques, logos, icônes, images, clips audio, vidéos et logiciels, sont la propriété exclusive de{% endtrans %}
+              <strong>{{ companyName }}</strong>.
+            </p>
+            <p>
+              {% trans %}Ces éléments sont protégés par les lois relatives au droit d’auteur. Toute reproduction, distribution, modification ou utilisation non autorisée est strictement interdite sans consentement préalable.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}4.2. Marques déposées{% endtrans %}</h3>
+            <p>
+              {% trans %}Les marques, logos et noms commerciaux affichés sur le site, y compris{% endtrans %} <strong>{{ companyName }}</strong>,
+              {% trans %}sont protégés par les lois applicables en matière de marques. Leur utilisation sans autorisation est interdite et peut constituer une violation des droits de propriété intellectuelle.{% endtrans %}
+            </p>
+
+            <h3>{% trans %}4.3. Licence d’utilisation limitée{% endtrans %}</h3>
+            <p>
+              {% trans %}Nous vous accordons une licence limitée, non exclusive et non transférable pour accéder au site et l’utiliser à des fins personnelles. Cette licence ne vous confère aucun droit de propriété sur notre contenu.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Elle n’autorise en aucun cas la reproduction, la modification ou l’utilisation commerciale de nos éléments protégés sans autorisation écrite préalable.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="sec-5" class="sec mb-4">
+            <h2>{% trans %}5. Limitation de responsabilité{% endtrans %}</h2>
+            <p>
+              {% trans %}L’utilisation de cette plateforme se fait sous l’entière responsabilité de l’utilisateur. Nous déclinons toute responsabilité pour les dommages, pertes de données, interruptions de service ou toute autre conséquence pouvant découler de l’utilisation ou de l’incapacité d’utiliser la plateforme.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Nous ne sommes pas responsables des échanges, transactions ou relations établies entre abonnés via cette plateforme. En utilisant le service, les abonnés agissent sous leur propre responsabilité et doivent prendre les précautions nécessaires avant d’engager toute collaboration, communication ou transaction.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}La plateforme ne garantit ni la véracité des informations échangées ni la sécurité des interactions entre abonnés. Elle ne pourra être tenue responsable en cas de dommage, litige ou perte résultant de ces interactions.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="sec-6" class="sec mb-4">
+            <h2>{% trans %}6. Modifications des termes{% endtrans %}</h2>
+            <p>
+              {% trans %}Nous nous réservons le droit de modifier les présents termes et conditions à tout moment, afin de les adapter aux évolutions légales, techniques ou commerciales.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Toute modification sera publiée sur le site et, le cas échéant, les utilisateurs en seront informés par e-mail. Les modifications entreront en vigueur dès leur publication.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}En continuant d’utiliser le site après la mise à jour des termes, l’utilisateur accepte les modifications apportées. Nous encourageons les utilisateurs à consulter régulièrement les conditions d’utilisation pour rester informés des éventuels changements.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="sec-7" class="sec mb-4">
+            <h2>{% trans %}7. Loi applicable{% endtrans %}</h2>
+            <p>
+              {% trans %}Les présentes conditions d’utilisation de{% endtrans %} <strong>{{ companyName }}</strong>
+              {% trans %}sont régies par la législation camerounaise, conformément aux normes et réglementations applicables, notamment celles encadrées par l’Agence Nationale des Technologies de l’Information et de la Communication, ANTIC.{% endtrans %}
+            </p>
+            <p>
+              {% trans %}Tout différend découlant de l’utilisation du site ou lié aux présentes conditions sera soumis aux lois et juridictions compétentes du Cameroun.{% endtrans %}
+            </p>
+          </section>
+
+          <section id="sec-8" class="sec">
+            <h2>{% trans %}8. Contact{% endtrans %}</h2>
+            <p>
+              {% trans %}Pour toute question, réclamation ou demande relative aux présentes conditions d’utilisation, vous pouvez contacter notre équipe support à l’adresse suivante :{% endtrans %}
+              <strong>{{ supportEmail }}</strong>.
+            </p>
+          </section>
+        </div>
+      </div>
+
+      {# TOC #}
+      <div class="legal-toc">
+        <div class="legal-card">
+          <div class="hd">
+            <p class="toc-title mb-0">{% trans %}Sommaire{% endtrans %}</p>
+            <div class="small text-muted">{% trans %}Navigation rapide{% endtrans %}</div>
+          </div>
+          <div class="bd toc">
+            <a href="#sec-1">{% trans %}1. Introduction{% endtrans %}</a>
+            <a href="#sec-2">{% trans %}2. Définitions{% endtrans %}</a>
+            <a href="#sec-3">{% trans %}3. Conditions d’utilisation{% endtrans %}</a>
+            <a href="#sec-4">{% trans %}4. Propriété intellectuelle{% endtrans %}</a>
+            <a href="#sec-5">{% trans %}5. Limitation de responsabilité{% endtrans %}</a>
+            <a href="#sec-6">{% trans %}6. Modifications des termes{% endtrans %}</a>
+            <a href="#sec-7">{% trans %}7. Loi applicable{% endtrans %}</a>
+            <a href="#sec-8">{% trans %}8. Contact{% endtrans %}</a>
+          </div>
+        </div>
+
+        <div class="legal-footer">
+          <a class="legal-btn" href="{{ path('accueil') }}">🏠 {% trans %}Accueil{% endtrans %}</a>
+          <a class="legal-btn primary" href="{{ path('help_index') }}">💬 {% trans %}Support{% endtrans %}</a>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

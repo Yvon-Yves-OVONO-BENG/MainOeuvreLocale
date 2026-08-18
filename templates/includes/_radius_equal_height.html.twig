@@ -1,0 +1,74 @@
+{#
+    Harmonise les champs "rayon" des formulaires de recherche horizontaux.
+    Le libellé reste disponible pour les lecteurs d’écran, sans occuper
+    une ligne visible au-dessus du curseur.
+#}
+<style>
+    .mol-job-nearby__range,
+    .anpub-range,
+    .vip-directory-range-field {
+        position: relative !important;
+        box-sizing: border-box !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        margin: 0 !important;
+        padding: 5px 12px 4px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    .mol-job-nearby__range-head,
+    .anpub-range-head,
+    .vip-directory-range-head {
+        position: absolute !important;
+        z-index: 3 !important;
+        top: 3px !important;
+        right: 8px !important;
+        width: auto !important;
+        height: 18px !important;
+        margin: 0 !important;
+        display: block !important;
+        line-height: 18px !important;
+        pointer-events: none !important;
+    }
+
+    .mol-job-nearby__range-head output,
+    .anpub-range-head output,
+    .vip-directory-range-head output {
+        min-width: 44px !important;
+        height: 18px !important;
+        padding: 0 7px !important;
+        font-size: 9px !important;
+        line-height: 18px !important;
+    }
+
+    .mol-job-nearby__range input[type="range"],
+    .anpub-range input[type="range"],
+    .vip-directory-range-field input[type="range"] {
+        width: 100% !important;
+        height: 14px !important;
+        margin: 9px 0 0 !important;
+        padding: 0 !important;
+        flex: 0 0 14px !important;
+    }
+
+    .mol-job-nearby__scale,
+    .anpub-range-scale,
+    .vip-directory-range-scale {
+        width: 100% !important;
+        margin: 1px 0 0 !important;
+        font-size: 8px !important;
+        line-height: 1 !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .mol-job-nearby__range,
+        .anpub-range,
+        .vip-directory-range-field {
+            width: 100% !important;
+            height: 50px !important;
+            min-height: 50px !important;
+        }
+    }
+</style>

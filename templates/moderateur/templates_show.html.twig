@@ -1,0 +1,124 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur •{% endtrans %} {{ tpl.title }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_templates_show.html.twig" %}
+
+<div class="mod-page" data-template-page>
+  <div class="mod-wrap">
+
+    <div class="mod-card">
+      <div class="hd">
+        <div>
+          <div class="mod-title">{{ tpl.title }}</div>
+          <div class="hint">{% trans %}Clique pour copier. Ton ton reste cohérent, rapide, pro.{% endtrans %}</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="mod-btn" href="{{ path('moderateur_search_advanced') }}">🔎 {% trans %}Recherche{% endtrans %}</a>
+        </div>
+      </div>
+
+      <div class="bd">
+
+        {# ===== VIP HERO / Tips ===== #}
+        <div class="tpl-hero mb-3">
+          <div class="tpl-hero-row">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="tpl-pill">{% trans %}⚡ Action rapide :{% endtrans %} <span class="tpl-kbd">{% trans %}Copier{% endtrans %}</span> {% trans %}puis coller{% endtrans %}</span>
+              <span class="tpl-pill">{% trans %}🧩 Format :{% endtrans %} <span class="tpl-kbd">{% trans %}templates{% endtrans %}</span></span>
+            </div>
+            <div class="hint">{% trans %}Astuce : double-clique dans le code pour sélectionner un paragraphe.{% endtrans %}</div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          {% for b in tpl.blocks %}
+            <div class="col-12 col-lg-6">
+              <div class="block-card">
+                <div class="block-hd">
+                  <div style="min-width:0">
+                    <div class="block-title">{{ b.title }}</div>
+                    <div class="block-sub">
+                      <span class="tpl-pill">{% trans %}📄 Bloc{% endtrans %}</span>
+                      <span class="tpl-pill">{% trans %}📋 Copie instant{% endtrans %}</span>
+                    </div>
+                  </div>
+
+                  <button type="button"
+                          class="mod-btn mod-btn-primary js-copy"
+                          data-text="{{ b.text|e('html_attr') }}"
+                          aria-label="{{ 'Copier le bloc'|trans }}">
+                    📋 {% trans %}Copier{% endtrans %}
+                  </button>
+                </div>
+
+                <div class="block-bd">
+                  <div class="codebox">
+                    <div class="codebar">
+                      <div class="dots" aria-hidden="true">
+                        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                      </div>
+                      <div class="hint">{% trans %}Clique sur “Copier” pour envoyer au presse-papiers{% endtrans %}</div>
+                    </div>
+
+                    <pre class="tpl-pre">{{ b.text }}</pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="mini-toast" id="miniToast">{% trans %}Copié ✅{% endtrans %}</div>
+
+<script>
+  (function(){
+    const page = document.querySelector('[data-template-page]');
+    if(!page) return;
+
+    const toastEl = document.getElementById('miniToast');
+    let toastT;
+
+    function toast(msg){
+      if (window.MOLToast) { window.MOLToast(msg, 'success'); return; }
+      if (!toastEl) { alert(msg); return; }
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastT);
+      toastT = setTimeout(()=> toastEl.classList.remove('show'), 1400);
+    }
+
+    page.querySelectorAll('.js-copy').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const text = btn.dataset.text || '';
+        if(!text) return;
+
+        // micro-UX: état loading
+        const old = btn.innerHTML;
+        btn.setAttribute('aria-disabled', 'true');
+        btn.innerHTML = '⏳ {{ "Copie…"|trans|e("js") }}';
+
+        try{
+          await navigator.clipboard.writeText(text);
+          toast('{{ "Copié ✅"|trans|e("js") }}');
+          btn.innerHTML = '✅ {{ "Copié"|trans|e("js") }}';
+          setTimeout(()=> (btn.innerHTML = old), 900);
+        }catch(e){
+          alert('{{ "Copie impossible : sélectionne le texte et copie manuellement."|trans|e("js") }}');
+          btn.innerHTML = old;
+        }finally{
+          btn.removeAttribute('aria-disabled');
+        }
+      });
+    });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Transactions{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 space-y-5">
+
+    <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <div class="bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.16),transparent_60%),radial-gradient(800px_circle_at_90%_30%,rgba(6,182,212,.12),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.72))] p-5">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div class="text-sm font-semibold text-slate-500">{% trans %}Finance • Paiements{% endtrans %}</div>
+            <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">💳 {% trans %}Transactions{% endtrans %}</h1>
+            <p class="mt-2 max-w-3xl text-sm font-medium text-slate-600">
+              {% trans %}Vue consolidée des paiements, utilisateurs, fournisseurs, montants et états financiers.{% endtrans %}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('admin_invoices_index') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              🧾 {% trans %}Factures{% endtrans %}
+            </a>
+            <a href="{{ path('admin_subscriptions_index') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              📦 {% trans %}Abonnements{% endtrans %}
+            </a>
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white hover:opacity-95">
+              ← {% trans %}Tableau de bord{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <form method="get" class="grid gap-3 lg:grid-cols-[1fr,180px]">
+        <div class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2.5">
+          <span class="text-slate-500">🔎</span>
+          <input id="paymentsSearch"
+                 name="q"
+                 value="{{ q }}"
+                 type="text"
+                 class="w-full bg-transparent text-sm font-semibold text-slate-800 placeholder:text-slate-400 outline-none"
+                 placeholder="{% trans %}Email, montant, devise, fournisseur…{% endtrans %}">
+        </div>
+
+        <button class="rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2.5 text-sm font-extrabold text-white hover:opacity-95">
+          {% trans %}Filtrer{% endtrans %}
+        </button>
+      </form>
+    </section>
+
+    <section class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-slate-500">{% trans %}Total transactions{% endtrans %}</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-slate-900">{{ total|number_format(0, ',', ' ') }}</div>
+      </div>
+
+      <div class="rounded-3xl border border-emerald-200/70 bg-emerald-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-emerald-700">{% trans %}Page courante{% endtrans %}</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-emerald-900">{{ page }}</div>
+      </div>
+
+      <div class="rounded-3xl border border-cyan-200/70 bg-cyan-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-cyan-700">{% trans %}Par page{% endtrans %}</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-cyan-900">{{ perPage }}</div>
+      </div>
+    </section>
+
+    <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50/60">
+            <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-extrabold">{% trans %}Utilisateur{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Montant{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Fournisseur{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Statut{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Date{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Factures{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200/70">
+            {% for p in items %}
+              <tr class="hover:bg-indigo-50/20">
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">{{ p.user ? p.user.email : '—' }}</div>
+                </td>
+                <td class="px-5 py-3">
+                  <div class="font-black text-slate-900">{{ p.amount }} {{ p.currency }}</div>
+                </td>
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-extrabold text-slate-700">
+                    {{ p.provider ? p.provider.provider : '—' }}
+                  </span>
+                </td>
+                <td class="px-5 py-3">
+                
+                  <span class="inline-flex items-center rounded-full border border-cyan-200/70 bg-cyan-50 px-2.5 py-1 text-[11px] font-extrabold text-cyan-700">
+                    {{ p.satusPayment ? (p.satusPayment.statusPayment ?? p.satusPayment.satusPayment) : '—' }}
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-xs font-semibold text-slate-500">
+                  {{ p.paidAt ? p.paidAt|date('d/m/Y H:i') : '—' }}
+                </td>
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center rounded-full border border-indigo-200/70 bg-indigo-50 px-2.5 py-1 text-[11px] font-extrabold text-indigo-700">
+                    {{ p.invoices|length }}
+                  </span>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="px-5 py-10 text-center text-sm font-semibold text-slate-500">
+                  {% trans %}Aucune transaction trouvée.{% endtrans %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between gap-2 border-t border-slate-200/70 bg-white/60 px-5 py-4">
+        {% set prev = page > 1 ? page - 1 : 1 %}
+        {% set next = page < pages ? page + 1 : pages %}
+        <div class="text-xs font-semibold text-slate-500">
+          {% trans %}Total :{% endtrans %} <span class="font-black text-slate-900">{{ total|number_format(0, ',', ' ') }}</span>
+        </div>
+        <div class="flex gap-2">
+          <a href="{{ path('admin_payments_index', {'q': q, 'page': prev, 'perPage': perPage}) }}"
+             class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ page <= 1 ? 'pointer-events-none opacity-40' : '' }}">
+            ← {% trans %}Préc{% endtrans %}
+          </a>
+          <a href="{{ path('admin_payments_index', {'q': q, 'page': next, 'perPage': perPage}) }}"
+             class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50 {{ page >= pages ? 'pointer-events-none opacity-40' : '' }}">
+            {% trans %}Suiv{% endtrans %} →
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const search = document.getElementById('paymentsSearch');
+  search?.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      search.focus();
+      search.select();
+    }
+  });
+})();
+</script>
+{% endblock %}

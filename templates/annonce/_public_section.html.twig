@@ -1,0 +1,154 @@
+<link rel="stylesheet" href="{{ asset('css/annonce/public-section.css') }}">
+{% include 'includes/_radius_equal_height.html.twig' %}
+<link rel="stylesheet" href="{{ asset('css/annonce/public-section-kjd.css') }}?v=20260805">
+<section class="anpub" id="annonces" data-home-ajax-pagination="annonces" aria-labelledby="annonces-title" aria-live="polite">
+	<div class="container">
+		<div class="anpub-head home-annonces-heading">
+			<div class="home-annonces-heading__main">
+				<span class="home-annonces-heading__icon" aria-hidden="true">
+					<i class="fa-solid fa-bullhorn"></i>
+				</span>
+				<div class="home-annonces-heading__content">
+					<span class="home-annonces-heading__eyebrow">{% trans %}Demande d'emploi{% endtrans %}</span>
+					<h2 id="annonces-title">{% trans %}Ce que nos talents proposent aujourd’hui{% endtrans %}</h2>
+				</div>
+			</div>
+			<div class="anpub-count">
+				<i class="fa-solid fa-sparkles me-1"></i>
+				{{ annonceTotal }}
+				{% if annonceTotal > 1 %}{% trans %}annonces publiées{% endtrans %}{% else %}{% trans %}annonce publiée{% endtrans %}{% endif %}
+			</div>
+		</div>
+
+		<form class="anpub-search" id="annonceNearbySearchForm" method="get" action="{{ path('annonce_search') }}" data-turbo="false" data-no-submit-spinner="1" autocomplete="off">
+			<div class="anpub-search-grid">
+				<div class="anpub-field" data-smart-search-container>
+					<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+					<label class="visually-hidden" for="annonce_q">{% trans %}Mots-clés{% endtrans %}</label>
+					<input class="form-control" id="annonce_q" name="q" data-smart-keyword data-suggest-type="keyword" data-suggest-url="{{ path('api_search_suggestions') }}" data-numeric-error="{{ 'Saisissez un métier, un service ou une disponibilité, pas uniquement des chiffres.'|trans }}" value="" placeholder="{% trans %}Métier, service ou disponibilité{% endtrans %}">
+				</div>
+				<div class="anpub-field" data-smart-search-container>
+					<i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+					<label class="visually-hidden" for="annonce_city">{% trans %}Ville{% endtrans %}</label>
+					<input class="form-control" id="annonce_city" name="city" data-smart-location data-suggest-type="location" data-suggest-url="{{ path('api_search_suggestions') }}" data-numeric-error="{{ 'Saisissez une ville, une région ou un pays, pas uniquement des chiffres.'|trans }}" value="" placeholder="{% trans %}Ville, région ou pays{% endtrans %}">
+				</div>
+				<div class="anpub-range">
+					<div class="anpub-range-head">
+						<label class="visually-hidden" for="annonce_radius">{% trans %}Rayon{% endtrans %}</label>
+						{# <output id="annonceRadiusValue" for="annonce_radius">10 km</output> #}
+					</div>
+                    <input id="annonce_radius" name="radius" type="range" min="0" max="100" step="10" value="0" aria-label="{% trans %}Rayon{% endtrans %}" aria-describedby="annonceRadiusScale"><div class="anpub-range-scale" id="annonceRadiusScale">
+						<span>0 km</span>
+						<span>25 km</span>
+						<span>50 km</span>
+						<span>75 km</span>
+						<span>100 km</span>
+					</div>
+				</div>
+				<button class="anpub-submit" id="annonceNearbySearchButton" type="submit">
+					<i class="fa-solid fa-magnifying-glass mol-search-button__icon" aria-hidden="true"></i>
+					<span class="mol-search-button__label">{% trans %}Rechercher{% endtrans %}</span>
+				</button>
+			</div>
+		</form>
+
+		<section class="anpub-map-card" id="annonceNearbyMapSection" hidden aria-label="{% trans %}Carte des annonces proches{% endtrans %}">
+			<header class="anpub-map-head">
+				<div>
+					<h3>{% trans %}Annonces disponibles dans votre rayon{% endtrans %}</h3>
+					<p id="annonceNearbyMapSummary">{% trans %}Votre position est détectée automatiquement.{% endtrans %}</p>
+				</div>
+				<button class="anpub-map-close" id="annonceNearbyMapClose" type="button" aria-label="{% trans %}Fermer la carte{% endtrans %}">
+					<i class="fa-solid fa-xmark"></i>
+				</button>
+			</header>
+			<div class="anpub-map" id="annonceNearbyMap" data-search-url="{{ path('api_annonces_nearby_map') }}" data-csrf-token="{{ csrf_token('nearby_annonce_map') }}">
+				<div class="anpub-map-message" id="annonceNearbyMapMessage">{% trans %}Chargement de la carte…{% endtrans %}</div>
+			</div>
+			<div class="anpub-map-foot">
+				<i class="fa-solid fa-shield-halved"></i>{% trans %}Les positions sont approximatives afin de protéger les adresses des talents.{% endtrans %}</div>
+		</section>
+
+		{% if annonces is empty %}
+			<div class="anpub-empty">
+				<i class="fa-regular fa-folder-open"></i>
+				<strong>{% trans %}Aucune annonce ne correspond à cette recherche.{% endtrans %}</strong>
+				<div>{% trans %}Essayez un autre mot-clé, une autre ville ou retirez un filtre.{% endtrans %}</div>
+			</div>
+		{% else %}
+			{% set ratings = ratingStats|default({}) %}
+			<div class="anpub-grid">
+				{% for annonce in annonces %}
+					{% set owner = annonce.user %}{% set personal = owner ? owner.personalProfile : null %}
+					{% set stats = owner ? (ratings[owner.id] ?? {'avg': 0, 'voters': 0}) : {'avg': 0, 'voters': 0} %}
+					<article class="anpub-card">
+						<div class="anpub-cover">
+							<div class="anpub-media">
+								{% if annonce.profession and annonce.profession.photo %}<img loading="lazy" decoding="async" src="{{ asset('uploads/professions/' ~ annonce.profession.photo) }}" alt="{{ annonce.profession.profession }}">
+								{% else %}
+									<div class="anpub-cover-empty">
+										<i class="fa-solid fa-screwdriver-wrench"></i>
+									</div>
+								{% endif %}
+							</div>
+							{# <span class="anpub-badge">
+								<i class="fa-solid fa-bullhorn"></i>
+								{% trans %}Demande d'emploi{% endtrans %}
+							</span> #}
+							<div class="anpub-avatar">
+								{% if personal and personal.photo %}<img loading="lazy" decoding="async" src="{{ asset('uploads/profiles/' ~ personal.photo) }}" alt="{{ personal.fullName }}">
+								{% else %}
+									<i class="fa-solid fa-user"></i>
+								{% endif %}
+							</div>
+						</div>
+						<div class="anpub-body">
+							<a class="anpub-title" href="{{ path('annonce_show', {slug: annonce.slug}) }}" title="{{ annonce.titre }}" data-turbo="false">{{ annonce.titre }}</a>
+							<div class="anpub-meta">
+								<i class="fa-solid fa-location-dot"></i>
+								<span>{{ annonce.ville }}</span>
+								{# <span class="anpub-price">{{ annonce.salaireJournalier ? annonce.salaireJournalier|number_format(0, ',', ' ') ~ ' FCFA/jour' : 'Tarif à convenir' }}</span> #}
+								<span class="anpub-rating" title="{{ stats.voters }} {% trans %}avis{% endtrans %}">
+									<i class="fa-solid fa-star"></i>
+									{{ stats.avg|number_format(1, '.', '') }}</span>
+
+							</div>
+							{# <div class="anpub-offer-info">
+							
+							                                <span class="anpub-price">{{ annonce.salaireJournalier ? annonce.salaireJournalier|number_format(0, ',', ' ') ~ ' FCFA/jour' : 'Tarif à convenir' }}</span>
+							                                <span class="anpub-rating" title="{{ stats.voters }} avis"><i class="fa-solid fa-star"></i>{{ stats.avg|number_format(1, '.', '') }}</span>
+							                            
+							                            </div> #}
+							{# <div class="anpub-tags">
+								<span class="anpub-tag">{{ annonce.categorie.nom }}</span>
+								<span class="anpub-tag">{{ annonce.profession.profession }}</span>
+							</div> #}
+							<p class="anpub-desc">{{ annonce.description|striptags }}</p>
+						</div>
+						<div class="anpub-footer">
+							<span class="anpub-date">
+								<i class="fa-regular fa-calendar-days" aria-hidden="true"></i>
+								{{ annonce.dateCreation|ago }}</span>
+							<a class="anpub-view" href="{{ path('annonce_show', {slug: annonce.slug}) }}" data-mol-view-announcement data-turbo="false">{% trans %}VOIR L'ANNONCE{% endtrans %}</a>
+						</div>
+					</article>
+				{% endfor %}
+			</div>
+
+			{% if annoncePages > 1 %}
+				<nav class="anpub-pager" aria-label="{% trans %}Pagination des annonces{% endtrans %}">
+					<a class="anpub-page wide {{ annoncePage <= 1 ? 'disabled' : '' }}" href="{{ path('accueil', {'annonce_page': max(1, annoncePage - 1)}) }}#annonces" data-turbo="false">{% trans %}Précédent{% endtrans %}</a>
+					{% for p in 1..annoncePages %}
+						{% if p == 1 or p == annoncePages or (p >= annoncePage - 1 and p <= annoncePage + 1) %}
+							<a class="anpub-page {{ p == annoncePage ? 'active' : '' }}" href="{{ path('accueil', {'annonce_page': p}) }}#annonces" data-turbo="false">{{ p }}</a>
+						{% elseif p == annoncePage - 2 or p == annoncePage + 2 %}
+							<span class="anpub-page">…</span>
+						{% endif %}
+					{% endfor %}
+					<a class="anpub-page wide {{ annoncePage >= annoncePages ? 'disabled' : '' }}" href="{{ path('accueil', {'annonce_page': min(annoncePages, annoncePage + 1)}) }}#annonces" data-turbo="false">{% trans %}Suivant{% endtrans %}</a>
+				</nav>
+			{% endif %}
+		{% endif %}
+	</div>
+</section>
+<script src="{{ asset('js/annonce/public-section.js') }}" defer></script>

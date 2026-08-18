@@ -1,0 +1,1269 @@
+{#
+  HOTFIX RÉEL — MES OFFRES PUBLIÉES PREMIUM V2
+  Ce fichier transforme la structure .pub-page déjà rendue.
+  Aucun changement de nom de template ni de route existante n'est requis.
+#}
+<style>
+  .pub-page {
+    --mj-ink: #0f172a;
+    --mj-muted: #64748b;
+    --mj-line: rgba(15, 23, 42, .09);
+    --mj-blue: #2563eb;
+    --mj-blue-dark: #1d4ed8;
+    --mj-red: #dc2626;
+    --mj-bg: #f5f7fb;
+    min-height: 100vh;
+    padding: 22px 0 42px !important;
+    background:
+      radial-gradient(900px circle at 0% 0%, rgba(37, 99, 235, .08), transparent 52%),
+      radial-gradient(760px circle at 100% 8%, rgba(14, 165, 233, .07), transparent 48%),
+      linear-gradient(180deg, #f8fafc 0%, var(--mj-bg) 100%) !important;
+  }
+
+  .pub-page .container-fluid {
+    padding-inline: clamp(14px, 2.8vw, 42px) !important;
+  }
+
+  .pub-page .pub-shell {
+    max-width: 1440px !important;
+    margin: 0 auto !important;
+  }
+
+  .pub-page .pub-wrap {
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .pub-page .pub-wrap::before,
+  .pub-page .pub-wrap::after {
+    display: none !important;
+  }
+
+  .mol-jobs-v2,
+  .mol-jobs-v2 * {
+    box-sizing: border-box;
+  }
+
+  .mol-jobs-v2 {
+    color: var(--mj-ink);
+  }
+
+  .mol-jobs-v2__hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    padding: clamp(22px, 3vw, 34px);
+    border: 1px solid var(--mj-line);
+    border-radius: 26px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 18px 48px rgba(15, 23, 42, .07);
+  }
+
+  .mol-jobs-v2__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 11px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .mol-jobs-v2__title {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(25px, 3vw, 38px);
+    font-weight: 800;
+    letter-spacing: -.04em;
+    line-height: 1.08;
+  }
+
+  .mol-jobs-v2__subtitle {
+    max-width: 720px;
+    margin: 10px 0 0;
+    color: var(--mj-muted);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .mol-jobs-v2__back,
+  .mol-jobs-v2__button,
+  .mol-jobs-v2__action,
+  .mol-jobs-v2__page-btn {
+    text-decoration: none !important;
+    transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+
+  .mol-jobs-v2__back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 16px;
+    border: 1px solid #dbe3ef;
+    border-radius: 13px;
+    background: #fff;
+    color: #334155 !important;
+    font-size: 13px;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+
+  .mol-jobs-v2__back:hover {
+    transform: translateY(-1px);
+    border-color: #bfdbfe;
+    background: #f8fbff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, .07);
+  }
+
+  .mol-jobs-v2__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .mol-jobs-v2__stat {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 88px;
+    padding: 17px 18px;
+    border: 1px solid var(--mj-line);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .045);
+  }
+
+  .mol-jobs-v2__stat-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 14px;
+    background: #eff6ff;
+    font-size: 18px;
+  }
+
+  .mol-jobs-v2__stat strong {
+    display: block;
+    color: #0f172a;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .mol-jobs-v2__stat span:last-child {
+    display: block;
+    margin-top: 6px;
+    color: var(--mj-muted);
+    font-size: 12px;
+  }
+
+  .mol-jobs-v2__panel {
+    margin-top: 16px;
+    overflow: hidden;
+    border: 1px solid var(--mj-line);
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 18px 46px rgba(15, 23, 42, .06);
+  }
+
+  .mol-jobs-v2__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 20px;
+    border-bottom: 1px solid #edf1f6;
+  }
+
+  .mol-jobs-v2__toolbar-title {
+    color: #0f172a;
+    font-size: 15px;
+    font-weight: 750;
+  }
+
+  .mol-jobs-v2__toolbar-subtitle {
+    margin-top: 3px;
+    color: var(--mj-muted);
+    font-size: 12px;
+  }
+
+  .mol-jobs-v2__controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .mol-jobs-v2__search {
+    position: relative;
+    width: min(340px, 36vw);
+  }
+
+  .mol-jobs-v2__search-icon {
+    position: absolute;
+    top: 50%;
+    left: 13px;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  .mol-jobs-v2__search input {
+    width: 100%;
+    height: 42px;
+    padding: 0 38px 0 38px;
+    border: 1px solid #dbe3ef;
+    border-radius: 13px;
+    outline: none;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 13px;
+    transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  }
+
+  .mol-jobs-v2__search input:focus {
+    border-color: #93c5fd;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, .09);
+  }
+
+  .mol-jobs-v2__search-clear {
+    position: absolute;
+    top: 50%;
+    right: 9px;
+    width: 26px;
+    height: 26px;
+    transform: translateY(-50%);
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #64748b;
+    font-size: 18px;
+  }
+
+  .mol-jobs-v2__limit {
+    height: 42px;
+    padding: 0 11px;
+    border: 1px solid #dbe3ef;
+    border-radius: 13px;
+    outline: none;
+    background: #fff;
+    color: #334155;
+    font-size: 13px;
+  }
+
+  .mol-jobs-v2__bulk {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 20px;
+    border-bottom: 1px solid #dbeafe;
+    background: #eff6ff;
+  }
+
+  .mol-jobs-v2__bulk[hidden] {
+    display: none !important;
+  }
+
+  .mol-jobs-v2__bulk-copy {
+    color: #1e3a8a;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .mol-jobs-v2__button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 39px;
+    padding: 9px 13px;
+    border: 0;
+    border-radius: 11px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .mol-jobs-v2__button--danger {
+    background: #fff;
+    color: #b91c1c;
+    box-shadow: inset 0 0 0 1px #fecaca;
+  }
+
+  .mol-jobs-v2__button--danger:hover {
+    transform: translateY(-1px);
+    background: #fef2f2;
+  }
+
+  .mol-jobs-v2__table-wrap {
+    overflow-x: auto;
+  }
+
+  .mol-jobs-v2__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .mol-jobs-v2__table th {
+    padding: 13px 14px;
+    border-bottom: 1px solid #e9eef5;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 10.5px;
+    font-weight: 750;
+    letter-spacing: .07em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .mol-jobs-v2__table td {
+    padding: 15px 14px;
+    border-bottom: 1px solid #edf1f6;
+    color: #334155;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  .mol-jobs-v2__table tbody tr {
+    transition: background .18s ease;
+  }
+
+  .mol-jobs-v2__table tbody tr:hover {
+    background: #fbfdff;
+  }
+
+  .mol-jobs-v2__table tbody tr.is-selected {
+    background: #f0f7ff;
+  }
+
+  .mol-jobs-v2__checkbox {
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: var(--mj-blue);
+    cursor: pointer;
+  }
+
+  .mol-jobs-v2__sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-transform: inherit;
+  }
+
+  .mol-jobs-v2__mission {
+    min-width: 260px;
+  }
+
+  .mol-jobs-v2__mission-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.4;
+  }
+
+  .mol-jobs-v2__mission-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 11.5px;
+  }
+
+  .mol-jobs-v2__new {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 7px;
+    border-radius: 999px;
+    background: #fff1f2;
+    color: #be123c;
+    font-size: 9.5px;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+
+  .mol-jobs-v2__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 32px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .mol-jobs-v2__count--new {
+    background: #fff7ed;
+    color: #c2410c;
+  }
+
+  .mol-jobs-v2__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .mol-jobs-v2__action {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 8px 12px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    background: #fff;
+    color: #334155 !important;
+    font-size: 11.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .mol-jobs-v2__action--primary {
+    border-color: var(--mj-blue);
+    background: var(--mj-blue);
+    color: #fff !important;
+  }
+
+  .mol-jobs-v2__action:hover {
+    transform: translateY(-1px);
+    border-color: #bfdbfe;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .07);
+  }
+
+  .mol-jobs-v2__action--primary:hover {
+    border-color: var(--mj-blue-dark);
+    background: var(--mj-blue-dark);
+  }
+
+  .mol-jobs-v2__action.is-loading {
+    pointer-events: none;
+    color: transparent !important;
+  }
+
+  .mol-jobs-v2__action.is-loading::after {
+    content: "";
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: molJobsSpin .65s linear infinite;
+  }
+
+  .mol-jobs-v2__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    border-top: 1px solid #edf1f6;
+    background: #fbfcfe;
+  }
+
+  .mol-jobs-v2__range {
+    color: var(--mj-muted);
+    font-size: 12px;
+  }
+
+  .mol-jobs-v2__pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mol-jobs-v2__page-btn {
+    display: grid;
+    place-items: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 9px;
+    border: 1px solid #dbe3ef;
+    border-radius: 10px;
+    background: #fff;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 650;
+  }
+
+  .mol-jobs-v2__page-btn:hover:not(:disabled),
+  .mol-jobs-v2__page-btn.is-active {
+    border-color: var(--mj-blue);
+    background: var(--mj-blue);
+    color: #fff;
+  }
+
+  .mol-jobs-v2__page-btn:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+  }
+
+  .mol-jobs-v2__empty {
+    padding: 54px 22px;
+    text-align: center;
+  }
+
+  .mol-jobs-v2__empty-icon {
+    display: grid;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    margin: 0 auto 14px;
+    border-radius: 19px;
+    background: #eff6ff;
+    font-size: 25px;
+  }
+
+  .mol-jobs-v2__empty strong {
+    display: block;
+    color: #0f172a;
+    font-size: 15px;
+  }
+
+  .mol-jobs-v2__empty span {
+    display: block;
+    margin-top: 7px;
+    color: var(--mj-muted);
+    font-size: 12px;
+  }
+
+  .mol-jobs-v2__toast {
+    position: fixed;
+    right: 20px;
+    bottom: 22px;
+    z-index: 1080;
+    max-width: min(380px, calc(100vw - 28px));
+    padding: 13px 16px;
+    border-radius: 13px;
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 18px 44px rgba(15, 23, 42, .24);
+    font-size: 12.5px;
+  }
+
+  .mol-jobs-v2__toast.is-error {
+    background: #991b1b;
+  }
+
+  .mol-jobs-v2__modal[hidden] {
+    display: none !important;
+  }
+
+  .mol-jobs-v2__modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    display: grid;
+    place-items: center;
+    padding: 18px;
+    background: rgba(15, 23, 42, .48);
+    backdrop-filter: blur(5px);
+  }
+
+  .mol-jobs-v2__modal-card {
+    width: min(440px, 100%);
+    padding: 24px;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 26px 70px rgba(15, 23, 42, .24);
+  }
+
+  .mol-jobs-v2__modal-card h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 780;
+  }
+
+  .mol-jobs-v2__modal-card p {
+    margin: 9px 0 0;
+    color: var(--mj-muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .mol-jobs-v2__modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 20px;
+  }
+
+  .mol-jobs-v2__modal-cancel,
+  .mol-jobs-v2__modal-confirm {
+    min-height: 40px;
+    padding: 9px 14px;
+    border: 0;
+    border-radius: 11px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .mol-jobs-v2__modal-cancel {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .mol-jobs-v2__modal-confirm {
+    background: #dc2626;
+    color: #fff;
+  }
+
+  .mol-jobs-v2__modal-confirm:disabled {
+    opacity: .65;
+  }
+
+  @keyframes molJobsSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 900px) {
+    .mol-jobs-v2__hero,
+    .mol-jobs-v2__toolbar,
+    .mol-jobs-v2__footer {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .mol-jobs-v2__back {
+      width: 100%;
+    }
+
+    .mol-jobs-v2__controls {
+      width: 100%;
+      justify-content: stretch;
+    }
+
+    .mol-jobs-v2__search {
+      width: 100%;
+    }
+
+    .mol-jobs-v2__table-wrap {
+      overflow: visible;
+      padding: 12px;
+      background: #f8fafc;
+    }
+
+    .mol-jobs-v2__table,
+    .mol-jobs-v2__table tbody,
+    .mol-jobs-v2__table tr,
+    .mol-jobs-v2__table td {
+      display: block;
+      width: 100%;
+    }
+
+    .mol-jobs-v2__table thead {
+      display: none;
+    }
+
+    .mol-jobs-v2__table tbody {
+      display: grid;
+      gap: 11px;
+    }
+
+    .mol-jobs-v2__table tbody tr {
+      position: relative;
+      padding: 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, .04);
+    }
+
+    .mol-jobs-v2__table td {
+      padding: 7px 0;
+      border: 0;
+    }
+
+    .mol-jobs-v2__table td:first-child {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: auto;
+      padding: 0;
+    }
+
+    .mol-jobs-v2__mission {
+      min-width: 0;
+      padding-right: 34px;
+    }
+
+    .mol-jobs-v2__table td[data-label]::before {
+      content: attr(data-label);
+      display: block;
+      margin-bottom: 4px;
+      color: #94a3b8;
+      font-size: 9px;
+      font-weight: 750;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .mol-jobs-v2__actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 5px;
+    }
+
+    .mol-jobs-v2__action {
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .pub-page {
+      padding-top: 12px !important;
+    }
+
+    .pub-page .container-fluid {
+      padding-inline: 10px !important;
+    }
+
+    .mol-jobs-v2__hero {
+      padding: 20px;
+      border-radius: 20px;
+    }
+
+    .mol-jobs-v2__stats {
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+
+    .mol-jobs-v2__stat {
+      min-height: 74px;
+    }
+
+    .mol-jobs-v2__panel {
+      border-radius: 20px;
+    }
+
+    .mol-jobs-v2__controls {
+      flex-direction: column;
+    }
+
+    .mol-jobs-v2__limit {
+      width: 100%;
+    }
+
+    .mol-jobs-v2__bulk {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .mol-jobs-v2__footer {
+      text-align: center;
+    }
+
+    .mol-jobs-v2__pagination {
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .mol-jobs-v2__actions {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+(() => {
+  'use strict';
+
+  const BULK_DELETE_URL = '/mes-offres/suppression-multiple';
+  const BULK_DELETE_TOKEN = {{ csrf_token('bulk_delete_jobs')|json_encode|raw }};
+
+  const escapeHtml = (value) => String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+
+  const normalize = (value) => String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+
+  const numberFrom = (value) => {
+    const match = String(value ?? '').match(/\d+/);
+    return match ? Number(match[0]) : 0;
+  };
+
+  const parseDate = (value) => {
+    const match = String(value ?? '').match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if (!match) return 0;
+    return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1])).getTime();
+  };
+
+  const extractId = (href) => {
+    const value = String(href ?? '');
+    const queryMatch = value.match(/[?&]id=(\d+)/i);
+    if (queryMatch) return queryMatch[1];
+    const pathNumbers = value.match(/\d+/g);
+    return pathNumbers?.length ? pathNumbers[pathNumbers.length - 1] : '';
+  };
+
+  const pageItems = (current, total) => {
+    if (total <= 7) return Array.from({ length: total }, (_, index) => index + 1);
+    const values = new Set([1, total, current - 1, current, current + 1]);
+    if (current <= 3) [2, 3, 4].forEach((page) => values.add(page));
+    if (current >= total - 2) [total - 3, total - 2, total - 1].forEach((page) => values.add(page));
+    const pages = [...values].filter((page) => page > 0 && page <= total).sort((a, b) => a - b);
+    const result = [];
+    pages.forEach((page, index) => {
+      if (index && page - pages[index - 1] > 1) result.push('gap');
+      result.push(page);
+    });
+    return result;
+  };
+
+  const init = () => {
+    const page = document.querySelector('.pub-page');
+    if (!page || page.dataset.molPremiumReady === '1') return;
+
+    const wrap = page.querySelector('.pub-wrap');
+    const originalItems = [...page.querySelectorAll('.pub-list .pub-item')];
+    const originalEmpty = page.querySelector('.pub-list .empty-state');
+    const oldBack = page.querySelector('.pub-head a[href]');
+    if (!wrap) return;
+
+    page.dataset.molPremiumReady = '1';
+
+    const records = originalItems.map((item, index) => {
+      const titleNode = item.querySelector('.fw-bold');
+      const titleClone = titleNode?.cloneNode(true);
+      titleClone?.querySelectorAll('.badge').forEach((badge) => badge.remove());
+      const title = titleClone?.textContent?.trim() || `Mission ${index + 1}`;
+      const isNew = Boolean(item.querySelector('.badge'));
+      const meta = item.querySelector('.text-muted.small')?.textContent?.replace(/\s+/g, ' ').trim() || '';
+      const metaParts = meta.split('•').map((part) => part.replace('📍', '').trim());
+      const city = metaParts[0] || '—';
+      const date = metaParts[1] || '—';
+      const pills = [...item.querySelectorAll('.pill')];
+      const total = numberFrom(pills[0]?.textContent);
+      const remaining = numberFrom(pills[1]?.textContent);
+      const links = [...item.querySelectorAll('a[href]')];
+      const editLink = links[0];
+      const viewLink = links[1];
+      const editHref = editLink?.getAttribute('href') || '#';
+      const viewHref = viewLink?.getAttribute('href') || '#';
+      const id = extractId(editHref) || String(index + 1);
+
+      return {
+        id,
+        title,
+        city,
+        date,
+        timestamp: parseDate(date),
+        total,
+        remaining,
+        isNew,
+        editHref,
+        viewHref,
+        originalItem: item
+      };
+    });
+
+    const backHref = oldBack?.getAttribute('href') || 'javascript:history.back()';
+    const emptyLinks = originalEmpty ? [...originalEmpty.querySelectorAll('a[href]')] : [];
+    const publishHref = emptyLinks[0]?.getAttribute('href') || '';
+    const templateHref = emptyLinks[1]?.getAttribute('href') || '';
+
+    wrap.innerHTML = `
+      <div class="mol-jobs-v2" data-mol-jobs-v2>
+        <section class="mol-jobs-v2__hero">
+          <div>
+            <h1 class="mol-jobs-v2__title">Mes offres publiées</h1>
+            <p class="mol-jobs-v2__subtitle">Recherchez, triez et gérez vos missions et les candidatures reçues dans un tableau clair et professionnel.</p>
+          </div>
+          <a href="${escapeHtml(backHref)}" class="mol-jobs-v2__back" data-action-link><span aria-hidden="true">←</span> Retour au tableau de bord</a>
+        </section>
+
+        <section class="mol-jobs-v2__stats" aria-label="Résumé des missions">
+          <article class="mol-jobs-v2__stat"><span class="mol-jobs-v2__stat-icon">📄</span><div><strong data-stat-offers>0</strong><span>Offres publiées</span></div></article>
+          <article class="mol-jobs-v2__stat"><span class="mol-jobs-v2__stat-icon">👥</span><div><strong data-stat-total>0</strong><span>Candidatures reçues</span></div></article>
+          <article class="mol-jobs-v2__stat"><span class="mol-jobs-v2__stat-icon">🕒</span><div><strong data-stat-remaining>0</strong><span>Candidatures non vues</span></div></article>
+        </section>
+
+        <section class="mol-jobs-v2__panel">
+          <header class="mol-jobs-v2__toolbar">
+            <div>
+              <div class="mol-jobs-v2__toolbar-title">Toutes mes missions</div>
+              <div class="mol-jobs-v2__toolbar-subtitle" data-result-summary aria-live="polite"></div>
+            </div>
+            <div class="mol-jobs-v2__controls">
+              <div class="mol-jobs-v2__search">
+                <span class="mol-jobs-v2__search-icon" aria-hidden="true">⌕</span>
+                <input type="search" data-search placeholder="Rechercher une mission, une ville…" autocomplete="off" aria-label="Rechercher une mission">
+                <button type="button" class="mol-jobs-v2__search-clear" data-search-clear aria-label="Effacer la recherche" hidden>×</button>
+              </div>
+              <select class="mol-jobs-v2__limit" data-page-size aria-label="Nombre de missions par page">
+                <option value="5">5 par page</option>
+                <option value="10" selected>10 par page</option>
+                <option value="25">25 par page</option>
+                <option value="50">50 par page</option>
+              </select>
+            </div>
+          </header>
+
+          <div class="mol-jobs-v2__bulk" data-bulk-bar hidden>
+            <div class="mol-jobs-v2__bulk-copy"><strong data-selected-count>0</strong> mission(s) sélectionnée(s)</div>
+            <button type="button" class="mol-jobs-v2__button mol-jobs-v2__button--danger" data-bulk-delete>🗑️ Supprimer la sélection</button>
+          </div>
+
+          <div class="mol-jobs-v2__table-wrap" data-table-wrap>
+            <table class="mol-jobs-v2__table">
+              <thead>
+                <tr>
+                  <th><input type="checkbox" class="mol-jobs-v2__checkbox" data-select-page aria-label="Sélectionner la page"></th>
+                  <th><button type="button" class="mol-jobs-v2__sort" data-sort="title">Mission <span>↕</span></button></th>
+                  <th><button type="button" class="mol-jobs-v2__sort" data-sort="date">Publication <span>↓</span></button></th>
+                  <th><button type="button" class="mol-jobs-v2__sort" data-sort="total">Candidatures <span>↕</span></button></th>
+                  <th><button type="button" class="mol-jobs-v2__sort" data-sort="remaining">Non vues <span>↕</span></button></th>
+                  <th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody data-tbody></tbody>
+            </table>
+          </div>
+
+          <div class="mol-jobs-v2__empty" data-empty hidden>
+            <span class="mol-jobs-v2__empty-icon">📂</span>
+            <strong>Aucune mission trouvée</strong>
+            <span>Modifiez votre recherche ou publiez une nouvelle mission.</span>
+            ${publishHref ? `<div style="margin-top:16px"><a href="${escapeHtml(publishHref)}" class="mol-jobs-v2__action mol-jobs-v2__action--primary" data-action-link>＋ Publier une offre</a>${templateHref ? ` <a href="${escapeHtml(templateHref)}" class="mol-jobs-v2__action" data-action-link>🧩 Utiliser un modèle</a>` : ''}</div>` : ''}
+          </div>
+
+          <footer class="mol-jobs-v2__footer">
+            <div class="mol-jobs-v2__range" data-range></div>
+            <nav class="mol-jobs-v2__pagination" data-pagination aria-label="Pagination"></nav>
+          </footer>
+        </section>
+
+        <div class="mol-jobs-v2__modal" data-delete-modal hidden>
+          <div class="mol-jobs-v2__modal-card" role="dialog" aria-modal="true" aria-labelledby="molDeleteJobsTitle">
+            <h3 id="molDeleteJobsTitle">Supprimer les missions sélectionnées ?</h3>
+            <p>Cette action est définitive. <strong data-modal-count>0</strong> mission(s) seront supprimée(s).</p>
+            <div class="mol-jobs-v2__modal-actions">
+              <button type="button" class="mol-jobs-v2__modal-cancel" data-modal-cancel>Annuler</button>
+              <button type="button" class="mol-jobs-v2__modal-confirm" data-modal-confirm>Supprimer définitivement</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mol-jobs-v2__toast" data-toast hidden></div>
+      </div>
+    `;
+
+    const root = wrap.querySelector('[data-mol-jobs-v2]');
+    const tbody = root.querySelector('[data-tbody]');
+    const search = root.querySelector('[data-search]');
+    const searchClear = root.querySelector('[data-search-clear]');
+    const pageSize = root.querySelector('[data-page-size]');
+    const pagination = root.querySelector('[data-pagination]');
+    const range = root.querySelector('[data-range]');
+    const resultSummary = root.querySelector('[data-result-summary]');
+    const selectPage = root.querySelector('[data-select-page]');
+    const bulkBar = root.querySelector('[data-bulk-bar]');
+    const selectedCount = root.querySelector('[data-selected-count]');
+    const bulkDelete = root.querySelector('[data-bulk-delete]');
+    const empty = root.querySelector('[data-empty]');
+    const tableWrap = root.querySelector('[data-table-wrap]');
+    const modal = root.querySelector('[data-delete-modal]');
+    const modalCount = root.querySelector('[data-modal-count]');
+    const modalCancel = root.querySelector('[data-modal-cancel]');
+    const modalConfirm = root.querySelector('[data-modal-confirm]');
+    const toast = root.querySelector('[data-toast]');
+
+    const state = {
+      query: '',
+      page: 1,
+      size: 10,
+      sortKey: 'date',
+      sortDirection: 'desc',
+      selected: new Set(),
+      visible: []
+    };
+
+    let mutableRecords = [...records];
+    let toastTimer = null;
+
+    const rowHtml = (record) => `
+      <tr data-id="${escapeHtml(record.id)}">
+        <td><input type="checkbox" class="mol-jobs-v2__checkbox" data-row-check="${escapeHtml(record.id)}" aria-label="Sélectionner ${escapeHtml(record.title)}"></td>
+        <td data-label="Mission">
+          <div class="mol-jobs-v2__mission">
+            <div class="mol-jobs-v2__mission-title">${escapeHtml(record.title)} ${record.isNew ? '<span class="mol-jobs-v2__new">Nouveau</span>' : ''}</div>
+            <div class="mol-jobs-v2__mission-meta"><span>📍 ${escapeHtml(record.city)}</span><span>📅 ${escapeHtml(record.date)}</span></div>
+          </div>
+        </td>
+        <td data-label="Publication">${escapeHtml(record.date)}</td>
+        <td data-label="Candidatures"><span class="mol-jobs-v2__count">${record.total}</span></td>
+        <td data-label="Non vues"><span class="mol-jobs-v2__count ${record.remaining > 0 ? 'mol-jobs-v2__count--new' : ''}">${record.remaining}</span></td>
+        <td data-label="Actions">
+          <div class="mol-jobs-v2__actions">
+            <a href="${escapeHtml(record.editHref)}" class="mol-jobs-v2__action" data-action-link>✎ Optimiser</a>
+            <a href="${escapeHtml(record.viewHref)}" class="mol-jobs-v2__action mol-jobs-v2__action--primary" data-action-link>Voir plus →</a>
+          </div>
+        </td>
+      </tr>
+    `;
+
+    const getFiltered = () => {
+      const filtered = mutableRecords.filter((record) => {
+        if (!state.query) return true;
+        return normalize(`${record.title} ${record.city} ${record.date}`).includes(state.query);
+      });
+
+      return filtered.sort((a, b) => {
+        const direction = state.sortDirection === 'asc' ? 1 : -1;
+        if (state.sortKey === 'title') return a.title.localeCompare(b.title, 'fr', { sensitivity: 'base' }) * direction;
+        if (state.sortKey === 'total') return (a.total - b.total) * direction;
+        if (state.sortKey === 'remaining') return (a.remaining - b.remaining) * direction;
+        return (a.timestamp - b.timestamp) * direction;
+      });
+    };
+
+    const updateStats = () => {
+      root.querySelector('[data-stat-offers]').textContent = String(mutableRecords.length);
+      root.querySelector('[data-stat-total]').textContent = String(mutableRecords.reduce((sum, record) => sum + record.total, 0));
+      root.querySelector('[data-stat-remaining]').textContent = String(mutableRecords.reduce((sum, record) => sum + record.remaining, 0));
+    };
+
+    const updateSelection = () => {
+      root.querySelectorAll('[data-row-check]').forEach((checkbox) => {
+        const checked = state.selected.has(String(checkbox.dataset.rowCheck));
+        checkbox.checked = checked;
+        checkbox.closest('tr')?.classList.toggle('is-selected', checked);
+      });
+
+      bulkBar.hidden = state.selected.size === 0;
+      selectedCount.textContent = String(state.selected.size);
+      modalCount.textContent = String(state.selected.size);
+
+      const ids = state.visible.map((record) => String(record.id));
+      const selectedVisible = ids.filter((id) => state.selected.has(id)).length;
+      selectPage.checked = ids.length > 0 && selectedVisible === ids.length;
+      selectPage.indeterminate = selectedVisible > 0 && selectedVisible < ids.length;
+      selectPage.disabled = ids.length === 0;
+    };
+
+    const renderPagination = (pages) => {
+      pagination.innerHTML = '';
+      const createButton = (label, target, active = false, disabled = false) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `mol-jobs-v2__page-btn${active ? ' is-active' : ''}`;
+        button.textContent = label;
+        button.disabled = disabled;
+        button.addEventListener('click', () => {
+          state.page = target;
+          render();
+          root.querySelector('.mol-jobs-v2__panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return button;
+      };
+
+      pagination.appendChild(createButton('‹', Math.max(1, state.page - 1), false, state.page === 1));
+      pageItems(state.page, pages).forEach((item) => {
+        if (item === 'gap') {
+          const gap = document.createElement('span');
+          gap.textContent = '…';
+          gap.style.color = '#94a3b8';
+          pagination.appendChild(gap);
+        } else {
+          pagination.appendChild(createButton(String(item), item, item === state.page));
+        }
+      });
+      pagination.appendChild(createButton('›', Math.min(pages, state.page + 1), false, state.page === pages));
+    };
+
+    const render = () => {
+      const filtered = getFiltered();
+      const pages = Math.max(1, Math.ceil(filtered.length / state.size));
+      state.page = Math.min(Math.max(state.page, 1), pages);
+      const start = (state.page - 1) * state.size;
+      state.visible = filtered.slice(start, start + state.size);
+
+      tbody.innerHTML = state.visible.map(rowHtml).join('');
+      const noRows = filtered.length === 0;
+      tableWrap.hidden = noRows;
+      empty.hidden = !noRows;
+      range.textContent = noRows ? '0 mission' : `Affichage de ${start + 1} à ${Math.min(start + state.size, filtered.length)} sur ${filtered.length} mission(s)`;
+      resultSummary.textContent = state.query ? `${filtered.length} résultat(s) trouvé(s)` : `${filtered.length} mission(s) disponible(s)`;
+      searchClear.hidden = !search.value;
+
+      renderPagination(pages);
+      updateStats();
+      updateSelection();
+    };
+
+    const showToast = (message, isError = false) => {
+      clearTimeout(toastTimer);
+      toast.textContent = message;
+      toast.classList.toggle('is-error', isError);
+      toast.hidden = false;
+      toastTimer = setTimeout(() => { toast.hidden = true; }, 4200);
+    };
+
+    const closeModal = () => {
+      modal.hidden = true;
+      document.body.style.removeProperty('overflow');
+    };
+
+    search.addEventListener('input', () => {
+      state.query = normalize(search.value);
+      state.page = 1;
+      render();
+    });
+
+    searchClear.addEventListener('click', () => {
+      search.value = '';
+      state.query = '';
+      state.page = 1;
+      search.focus();
+      render();
+    });
+
+    pageSize.addEventListener('change', () => {
+      state.size = Number(pageSize.value) || 10;
+      state.page = 1;
+      render();
+    });
+
+    root.addEventListener('click', (event) => {
+      const sort = event.target.closest('[data-sort]');
+      if (sort) {
+        const key = sort.dataset.sort;
+        if (state.sortKey === key) state.sortDirection = state.sortDirection === 'asc' ? 'desc' : 'asc';
+        else {
+          state.sortKey = key;
+          state.sortDirection = key === 'title' ? 'asc' : 'desc';
+        }
+        state.page = 1;
+        root.querySelectorAll('[data-sort] span').forEach((indicator) => { indicator.textContent = '↕'; });
+        sort.querySelector('span').textContent = state.sortDirection === 'asc' ? '↑' : '↓';
+        render();
+        return;
+      }
+
+      const action = event.target.closest('[data-action-link]');
+      if (action && action.getAttribute('href') && !action.getAttribute('href').startsWith('javascript:')) {
+        action.classList.add('is-loading');
+      }
+    });
+
+    tbody.addEventListener('change', (event) => {
+      const checkbox = event.target.closest('[data-row-check]');
+      if (!checkbox) return;
+      const id = String(checkbox.dataset.rowCheck);
+      checkbox.checked ? state.selected.add(id) : state.selected.delete(id);
+      updateSelection();
+    });
+
+    selectPage.addEventListener('change', () => {
+      state.visible.forEach((record) => {
+        const id = String(record.id);
+        selectPage.checked ? state.selected.add(id) : state.selected.delete(id);
+      });
+      updateSelection();
+    });
+
+    bulkDelete.addEventListener('click', () => {
+      if (!state.selected.size) return;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      modalConfirm.focus();
+    });
+
+    modalCancel.addEventListener('click', closeModal);
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) closeModal();
+    });
+
+    modalConfirm.addEventListener('click', async () => {
+      if (!state.selected.size) return;
+      const ids = [...state.selected];
+      const initialText = modalConfirm.textContent;
+      modalConfirm.disabled = true;
+      modalConfirm.textContent = 'Suppression…';
+
+      try {
+        const response = await fetch(BULK_DELETE_URL, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': BULK_DELETE_TOKEN
+          },
+          body: JSON.stringify({ ids, _token: BULK_DELETE_TOKEN })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || payload.success === false) throw new Error(payload.message || 'Suppression impossible.');
+
+        const deleted = new Set((payload.deleted || ids).map(String));
+        mutableRecords = mutableRecords.filter((record) => !deleted.has(String(record.id)));
+        deleted.forEach((id) => state.selected.delete(id));
+        closeModal();
+        state.page = 1;
+        render();
+        showToast(payload.message || `${deleted.size} mission(s) supprimée(s).`);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : 'Une erreur est survenue.', true);
+      } finally {
+        modalConfirm.disabled = false;
+        modalConfirm.textContent = initialText;
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !modal.hidden) closeModal();
+    });
+
+    render();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init, { once: true });
+  } else {
+    init();
+  }
+  document.addEventListener('turbo:load', init);
+})();
+</script>

@@ -1,0 +1,141 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}Admin • Templates{% endtrans %}{% endblock %}
+
+{% block body %}
+  {% include 'admin/support/_vip_ui.html.twig' %}
+
+  <div class="vip-shell" data-admin-support-page="templates">
+    <div class="vip-container vip-grid">
+
+      <section class="vip-card vip-page-head">
+        <div class="vip-card-inner">
+          <div class="vip-page-head-top">
+            <div class="vip-page-head-main">
+              <div class="vip-page-kicker">{% trans %}Support • Templates{% endtrans %}</div>
+              <h1 class="vip-page-head-title">{% trans %}Réponses prêtes à l’emploi{% endtrans %}</h1>
+              <p class="vip-page-head-text">
+                {% trans %}Gagne du temps avec des modèles cohérents, faciles à retrouver, rapides à copier et adaptés au support client.{% endtrans %}
+              </p>
+            </div>
+
+            <div class="vip-page-head-side">
+              <span class="vip-badge vip-badge-neutral">{{ templates|length }} {% trans %}modèles{% endtrans %}</span>
+            </div>
+          </div>
+
+          <div class="vip-page-head-actions">
+            {% include 'admin/support/_quick_actions.html.twig' %}
+          </div>
+        </div>
+      </section>
+
+      <section class="vip-grid vip-grid-main">
+        <article class="vip-card">
+          <div class="vip-card-inner">
+            <div class="vip-toolbar">
+              <div>
+                <h2 class="vip-section-title">{% trans %}Bibliothèque{% endtrans %}</h2>
+                <p class="vip-section-subtitle">{% trans %}Parcours, filtre et sélectionne un template.{% endtrans %}</p>
+              </div>
+            </div>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-filters">
+              <div style="flex:2 1 320px;">
+                <input
+                  type="search"
+                  class="vip-input"
+                  placeholder="{% trans %}Rechercher un template, un objet, un texte...{% endtrans %}"
+                  data-template-search
+                >
+              </div>
+
+              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                {% for category in categories %}
+                  <button
+                    type="button"
+                    class="vip-chip {{ loop.first ? 'is-active' : '' }}"
+                    data-template-chip="{{ category == 'Tous' ? '' : category }}"
+                  >
+                    {{ category }}
+                  </button>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-card-list">
+              {% for tpl in templates %}
+                <article class="vip-mini-card vip-template-card js-template-card"
+                         data-template-category="{{ tpl.category }}"
+                         data-template-title="{{ tpl.title }}"
+                         data-template-subject="{{ tpl.subject }}"
+                         data-template-body="{{ tpl.body }}"
+                         data-template-text="{{ (tpl.title ~ ' ' ~ tpl.subject ~ ' ' ~ tpl.body ~ ' ' ~ tpl.category ~ ' ' ~ tpl.tone)|lower }}">
+                  <div class="vip-template-card-top">
+                    <div class="vip-template-main">
+                      <div class="vip-template-title">{{ tpl.title }}</div>
+                      <div class="vip-template-subject">{{ tpl.subject }}</div>
+                    </div>
+
+                    <span class="vip-badge medium">{{ tpl.category }}</span>
+                  </div>
+
+                  <div class="vip-template-bottom">
+                    <span class="vip-chip">{% trans %}Ton{% endtrans %} {{ tpl.tone }}</span>
+                  </div>
+                </article>
+              {% else %}
+                <div class="vip-empty">{% trans %}Aucun template disponible.{% endtrans %}</div>
+              {% endfor %}
+            </div>
+          </div>
+        </article>
+
+        <aside class="vip-card">
+          <div class="vip-card-inner">
+            <div class="vip-toolbar">
+              <div>
+                <h2 class="vip-section-title">{% trans %}Prévisualisation{% endtrans %}</h2>
+                <p class="vip-section-subtitle">{% trans %}Sélectionne un modèle dans la colonne de gauche.{% endtrans %}</p>
+              </div>
+
+              <button type="button" class="vip-btn vip-btn-primary" data-template-copy>{% trans %}Copier{% endtrans %}</button>
+            </div>
+
+            <div class="vip-separator"></div>
+
+            <div class="vip-preview" style="min-height:420px;">
+              <div>
+                <div class="vip-preview-label">{% trans %}Titre{% endtrans %}</div>
+                <div data-template-preview-title class="vip-preview-title">{% trans %}Aucun template sélectionné{% endtrans %}</div>
+              </div>
+
+              <div class="vip-separator"></div>
+
+              <div>
+                <div class="vip-preview-label">{% trans %}Objet{% endtrans %}</div>
+                <div data-template-preview-subject class="vip-preview-body">—</div>
+              </div>
+
+              <div class="vip-separator"></div>
+
+              <div>
+                <div class="vip-preview-label">{% trans %}Message{% endtrans %}</div>
+                <div data-template-preview-body class="vip-preview-body">
+                  {% trans %}Choisis un template dans la liste pour l’afficher ici.{% endtrans %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="{{ asset('js/admin-support.js') }}"></script>
+{% endblock %}

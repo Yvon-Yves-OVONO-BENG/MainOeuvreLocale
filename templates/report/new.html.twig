@@ -1,0 +1,164 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Signaler un compte{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "report/_vip_ui_new.html.twig" %}
+
+
+<div class="vip-wrap">
+  <div class="vip-shell">
+    <div class="vip-hero">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+          <div class="vip-kicker">
+            <i class="fa fa-shield"></i>
+            {% trans %}Sécurité & modération{% endtrans %}
+          </div>
+
+          <h1 class="vip-title">{% trans %}Signaler un compte{% endtrans %}</h1>
+
+          <div class="vip-subtitle">
+            {% trans %}Aidez-nous à maintenir une plateforme fiable et sécurisée. Sélectionnez la catégorie appropriée puis décrivez clairement le problème rencontré.{% endtrans %}
+          </div>
+
+          <div class="vip-target">
+            <i class="fa fa-user-circle"></i>
+            <span>{% trans %}Vous signalez :{% endtrans %} <strong>{{ target.email }}</strong></span>
+          </div>
+        </div>
+
+        <div class="vip-top-actions">
+          <a href="{{ path('report_my_list') }}" class="btn vip-btn vip-btn-light">
+            <i class="fa fa-list-ul me-2"></i>{% trans %}Mes signalements{% endtrans %}
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="vip-main">
+      <div class="vip-card">
+        <div class="vip-card-h">
+          <div class="vip-icon">
+            <i class="fa fa-flag"></i>
+          </div>
+
+          <div>
+            <div class="vip-badge">{% trans %}Action sensible{% endtrans %}</div>
+            <h2 class="vip-card-title">{% trans %}Formulaire de signalement{% endtrans %}</h2>
+            <div class="vip-card-subtitle">
+              {% trans %}Merci de fournir des informations précises afin de faciliter le traitement de votre demande par l’équipe de modération.{% endtrans %}
+            </div>
+          </div>
+        </div>
+
+        <div class="vip-card-b">
+          {{ form_start(form) }}
+            <div class="row">
+              <div class="col-md-6">
+                <div class="vip-field">
+                  <div class="vip-label">
+                    <span>{% trans %}Catégorie{% endtrans %}</span>
+                    <small>{% trans %}Obligatoire{% endtrans %}</small>
+                  </div>
+                  {{ form_widget(form.categorie, {
+                    'attr': {
+                      'class': 'form-select',
+                      'data-ui': 'premium'
+                    }
+                  }) }}
+                  <div class="vip-help">
+                    {% trans %}Choisissez le type de problème qui correspond le mieux à votre signalement.{% endtrans %}
+                  </div>
+                  {{ form_errors(form.categorie) }}
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="vip-field">
+                  <div class="vip-label">
+                    <span>{% trans %}Raison{% endtrans %}</span>
+                    <small>{% trans %}Décrivez clairement la situation{% endtrans %}</small>
+                  </div>
+                  {{ form_widget(form.reason, {
+                    'attr': {
+                      'class': 'form-control',
+                      'rows': 6,
+                      'placeholder': 'Expliquez brièvement les faits observés…'
+                    }
+                  }) }}
+                  <div class="vip-help">
+                    {% trans %}Évitez les messages trop courts. Plus votre description est claire, plus le traitement sera efficace.{% endtrans %}
+                  </div>
+                  {{ form_errors(form.reason) }}
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="vip-actions">
+                  <a class="btn vip-btn vip-btn-outline" href="{{ path('accueil') }}">
+                    <i class="fa fa-arrow-left me-2"></i>{% trans %}Retour{% endtrans %}
+                  </a>
+
+                  <button class="btn vip-btn vip-btn-danger" type="submit">
+                    <i class="fa fa-paper-plane me-2"></i>{% trans %}Envoyer le signalement{% endtrans %}
+                  </button>
+                </div>
+              </div>
+            </div>
+          {{ form_end(form) }}
+        </div>
+      </div>
+
+      <div class="vip-side">
+        <div class="vip-card">
+          <div class="vip-card-h">
+            <div class="vip-icon">
+              <i class="fa fa-info-circle"></i>
+            </div>
+            <div>
+              <h3 class="vip-card-title mb-1">{% trans %}Bonnes pratiques{% endtrans %}</h3>
+              <div class="vip-card-subtitle">
+                {% trans %}Quelques recommandations avant l’envoi.{% endtrans %}
+              </div>
+            </div>
+          </div>
+
+          <div class="vip-card-b">
+            <div class="vip-info-list">
+              <div class="vip-info-item">
+                <i class="fa fa-check"></i>
+                <div>
+                  <strong>{% trans %}Soyez précis{% endtrans %}</strong>
+                  <span>{% trans %}Indiquez clairement le comportement ou le contenu concerné.{% endtrans %}</span>
+                </div>
+              </div>
+
+              <div class="vip-info-item">
+                <i class="fa fa-clock-o"></i>
+                <div>
+                  <strong>{% trans %}Traitement plus rapide{% endtrans %}</strong>
+                  <span>{% trans %}Une description détaillée aide l’équipe à examiner votre demande plus efficacement.{% endtrans %}</span>
+                </div>
+              </div>
+
+              <div class="vip-info-item">
+                <i class="fa fa-lock"></i>
+                <div>
+                  <strong>{% trans %}Confidentialité{% endtrans %}</strong>
+                  <span>{% trans %}Votre signalement est traité avec sérieux dans le cadre des règles de modération de la plateforme.{% endtrans %}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="vip-note mt-3">
+              <strong>{% trans %}Note :{% endtrans %}</strong>
+              {% trans %}Les abus de signalement peuvent également faire l’objet d’un examen par la modération.{% endtrans %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

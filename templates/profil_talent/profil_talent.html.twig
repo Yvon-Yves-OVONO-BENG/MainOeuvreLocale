@@ -1,0 +1,839 @@
+{% extends 'base.html.twig' %}
+
+{% set professional_profile = professionalProfile|default(null) %}
+{% set public_name = profil.user.publicDisplayName|default('Profil sans nom') %}
+{% set professional_profession = professional_profile ? professional_profile.profession|default(null) : null %}
+{% set account_verified = professional_profile
+  ? professional_profile.isVerified
+  : profil.user.isEmailVerified|default(false)
+%}
+{% set seo_profession = professional_profession
+  ? professional_profession.profession
+  : 'particulier local'
+%}
+{% set seo_description = 'Découvrez le profil de ' ~ public_name ~ ', ' ~ seo_profession ~ ' à ' ~ (profil.city|default('proximité')) ~ ', ses compétences et ses avis sur Main d’Œuvre Locale.' %}
+{% block title %}{{ public_name|trans }} – {{ seo_profession }} | Main d’Œuvre Locale{% endblock %}
+
+{% block page_structured_data %}
+  {% set seo_avatar = profil.photo ? mol_site_url ~ asset('uploads/profiles/' ~ profil.photo) : mol_og_image %}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    "url": {{ mol_canonical_url|json_encode|raw }},
+    "mainEntity": {
+      "@type": "Person",
+      "name": {{ public_name|json_encode|raw }},
+      "jobTitle": {{ seo_profession|json_encode|raw }},
+      "image": {{ seo_avatar|json_encode|raw }}{% if profil.city is defined and profil.city %},
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": {{ profil.city|json_encode|raw }},
+        "addressCountry": "CM"
+      }{% endif %}
+    }
+  }
+  </script>
+{% endblock %}
+
+{% block body %}
+
+{% include "profil_talent/_vip_ui_profil_talent.html.twig" %}
+
+	<section class="sptb mol-page">
+		<div class="container">
+			<div class="row g-4">
+
+				{# ================= LEFT: PROFIL ================= #}
+				<div class="col-xl-12 col-lg-12 col-md-12">
+
+					{# HERO #}
+					<div class="mol-hero mt-4">
+						<div class="d-flex flex-column flex-md-row gap-3 align-items-md-center justify-content-between">
+
+							<div class="d-flex gap-3 align-items-center">
+								{% set avatar = profil.photo ? asset('uploads/profiles/' ~ profil.photo) : asset('uploads/profiles/avatar.png') %}
+								<img src="{{ avatar }}" class="mol-avatar" loading="eager" fetchpriority="high" decoding="async" alt="{% trans %}Photo du talent{% endtrans %}">
+
+								<div>
+									<div class="d-flex align-items-center gap-2 flex-wrap">
+										<h2 class="mol-title mb-0">
+											{{ public_name|trans }}
+										</h2>
+
+										{# RATING #}
+										{% set avg = averageRating / 2 ?? 0 %}
+                                        {% set voters = ratingsCount ?? 0 %}
+                                        {% set stars = (avg)|round(0, 'common') %}
+        
+										<div class="mol-rating-inline d-flex align-items-center gap-2 mt-1" aria-label="{% trans %}Note moyenne du talent{% endtrans %}">
+											<div class="mol-stars-inline">
+												{% for i in 1..5 %}
+                                                    <i class="fa fa-star {{ i <= stars ? 'is-on' : 'is-off' }}"></i>
+                                                {% endfor %}
+                                                											</div>
+
+											<small class="text-muted">
+												{{ avg|number_format(1, '.', ' ') }}/5
+												<span class="ms-1">({{ voters }})</span>
+											</small>
+										</div>
+
+									</div>
+
+									<div class="mt-2 d-flex gap-2 flex-wrap">
+										<span class="mol-chip">
+											<i class="fa fa-briefcase"></i>
+											{{ professional_profession ? professional_profession.profession : 'Particulier'|trans }}
+										</span>
+
+										<span class="mol-chip">
+											<i class="fa fa-map-marker"></i>
+											{{ profil.city is defined ? profil.city : 'Ville'|trans }}
+										</span>
+
+										{% if profil.salaryMin is defined %}
+											<span class="mol-chip">
+												<i class="fa fa-money"></i>
+												{{ profil.salaryMin }}
+												{% if profil.salaryMax is defined %}
+													- {{ profil.salaryMax }}
+												{% endif %}
+											</span>
+										{% endif %}
+
+										{% if profil.contractType is defined %}
+											<span class="mol-chip">
+												<i class="fa fa-clock-o"></i>
+												{{ profil.contractType }}
+											</span>
+										{% endif %}
+									</div>
+
+									<div class="mt-2 mol-soft">
+										<small>
+											{% if account_verified %}
+												<span class="badge rounded-pill bg-success">
+													<i class="bi bi-patch-check-fill me-1"></i> {% trans %}Compte vérifié{% endtrans %}
+												</span>
+											{% else %}
+												<span class="badge rounded-pill bg-danger">
+													<i class="bi bi-x-circle-fill me-1"></i> {% trans %}Compte non vérifié{% endtrans %}
+												</span>
+											{% endif %}
+										</small>
+									</div>
+								</div>
+							</div>
+
+							<div class="mol-actions d-flex gap-2 flex-wrap justify-content-md-end">
+								{# 📱 TÉLÉPHONE - AVEC COMPTEUR DE CONTACTS #}
+								{% if profil.user.phone is defined and profil.user.phone %}
+									{% if app.user and app.user.id != profil.user.id %}
+										<a href="javascript:void(0);" class="btn btn-light" onclick="showContact('phone', '{{ profil.user.slug }}', '')">
+											<i class="fa fa-phone text-primary"></i>
+											{% trans %}Appeler{% endtrans %}
+										</a>
+									{% endif %}
+								{% endif %}
+
+								{# ✉️ EMAIL - AVEC COMPTEUR DE CONTACTS #}
+								{% if app.user and app.user.id != profil.user.id %}
+									<a href="javascript:void(0);" class="btn btn-light" onclick="showContact('email', '{{ profil.user.slug }}', '')">
+										<i class="fa fa-envelope"></i>
+										{% trans %}Email{% endtrans %}
+									</a>
+								{% elseif app.user and app.user.id == profil.user.id %}
+									<a href="mailto:{{ profil.user.email }}" class="btn btn-light">
+										<i class="fa fa-envelope"></i>
+										{% trans %}Email{% endtrans %}
+									</a>
+								{% endif %}
+
+								{% if profil.cv is defined and profil.cv %}
+									<a href="{{ asset(profil.cvPath) }}" class="btn btn-primary" download>
+										<i class="fa fa-download"></i>
+										{% trans %}Télécharger CV{% endtrans %}
+									</a>
+								{% endif %}
+
+								{% if professional_profile %}
+									<a href="{{ path('talent_portfolio_show', { slug: profil.user.slug }) }}" class="btn btn-light" data-turbo="false">
+										<i class="fa fa-photo text-white"></i>
+										{% trans %}Voir les travaux{% endtrans %}
+									</a>
+								{% endif %}
+
+								{% if app.user and app.user != profil.user %}
+									<button type="button"
+										class="mol-fav-btn js-fav-toggle {{ isFavorite is defined and isFavorite ? 'is-active' : '' }}"
+										title="{{ (isFavorite is defined and isFavorite) ? 'Retirer des favoris'|trans : 'Ajouter aux favoris'|trans }}"
+										data-url="{{ path('favorite_toggle_user', { id: profil.user.id }) }}"
+										data-token="{{ csrf_token('favorite_toggle_user_' ~ profil.user.id) }}">
+										<i class="{{ (isFavorite is defined and isFavorite) ? 'fa fa-heart' : 'fa fa-heart-o' }}"></i>
+									</button>
+								{% endif %}
+
+								{% if app.user and app.user != profil.user %}
+									<button type="button"
+											class="mol-report-btn {{ isReported is defined and isReported ? 'is-active' : '' }}"
+											title="{{ (isReported is defined and isReported) ? 'Vous avez déjà signalé'|trans : 'Signaler ce compte'|trans }}"
+											data-user="{{ profil.user.id }}"
+											data-create-url="{{ path('report_user_create', { id: profil.user.id }) }}">
+										<i class="fa {{ (isReported is defined and isReported) ? 'fa-flag' : 'fa-flag-o' }}"></i>
+									</button>
+								{% endif %}
+							</div>
+
+						</div>
+					</div>
+
+					{# CARD CONTENT #}
+						<div class="mol-card mt-4 mb-4">
+
+						{# NAV PILLS #}
+							<div class="mol-sections">
+								<a href="#about"><i class="fa fa-user"></i> {% trans %}À propos{% endtrans %}</a>
+								{% if professional_profile %}
+									<a href="#experience"><i class="fa fa-briefcase"></i> {% trans %}Expérience{% endtrans %}</a>
+									<a href="#skills"><i class="fa fa-star"></i> {% trans %}Compétences{% endtrans %}</a>
+								{% endif %}
+								<a href="#contact"><i class="fa fa-paper-plane"></i> {% trans %}Contact{% endtrans %}</a>
+						</div>
+
+						<div class="mol-block">
+
+							{# ================= ABOUT ================= #}
+							<div id="about" class="mb-4">
+								<h3 class="mol-h">
+									<i class="fa fa-user"></i> {% trans %}À propos{% endtrans %}
+								</h3>
+
+
+									<p class="mol-soft mb-0">
+										{% if professional_profile and professional_profile.bio %}
+											{{ professional_profile.bio }}
+										{% elseif professional_profile %}
+											{% trans %}Aucune présentation renseignée.{% endtrans %}
+										{% else %}
+											{% trans %}Ce particulier n’a pas encore ajouté de présentation.{% endtrans %}
+										{% endif %}
+									</p>
+								</div>
+
+								{% if professional_profile %}
+								<hr style="border-color: var(--mol-border);">
+
+							{# ================= EXPERIENCE ================= #}
+							<div id="experience" class="mb-4">
+								<h3 class="mol-h">
+									<i class="fa fa-briefcase"></i> {% trans %}Expérience{% endtrans %}
+								</h3>
+
+									{% if professional_profile.experience %}
+									<div class="mol-timeline mt-3">
+										<div class="mol-item">
+											<p class="t mb-1">
+												<i class="fa fa-check-circle text-success me-1"></i>
+												{% trans %}Expérience principale{% endtrans %}
+											</p>
+											<div class="s">
+												{% if professional_profile.experienceYears %}
+													<i class="fa fa-calendar me-1"></i>
+													{{ professional_profile.experienceYears }} {% trans %}an(s){% endtrans %}
+												{% else %}
+													<i class="fa fa-calendar me-1"></i>
+													{% trans %}Années d'expérience non renseignées{% endtrans %}
+												{% endif %}
+											</div>
+											<p class="d">{{ professional_profile.experience }}</p>
+										</div>
+									</div>
+								{% else %}
+									<div class="alert alert-light border mb-0">
+										<i class="fa fa-info-circle me-1"></i>
+										{% trans %}Aucune expérience renseignée.{% endtrans %}
+									</div>
+								{% endif %}
+							</div>
+
+							<hr style="border-color: var(--mol-border);">
+
+							{# ================= SKILLS ================= #}
+							<div id="skills" class="mb-4">
+								<h3 class="mol-h">
+									<i class="fa fa-star"></i> {% trans %}Autres compétences{% endtrans %}
+								</h3>
+
+									{% set proProfile = professional_profile %}
+								{% if proProfile and proProfile.skills|length > 0 %}
+									<div class="mt-2">
+										{% for profession in proProfile.skills %}
+											<span class="mol-skill">
+												<i class="fa fa-check"></i> {{ profession.profession }}
+											</span>
+										{% endfor %}
+									</div>
+								{% else %}
+									<div class="alert alert-light border mb-0">
+										<i class="fa fa-info-circle me-1"></i>
+										{% trans %}Aucune profession renseignée.{% endtrans %}
+									</div>
+								{% endif %}
+							</div>
+
+							<hr style="border-color: var(--mol-border);">
+
+							{# ================= DISPONIBILITÉS ================= #}
+								<div id="availability" class="mb-4">
+								<h3 class="mol-h">
+									<i class="fa fa-calendar"></i> {% trans %}Disponibilités{% endtrans %}
+								</h3>
+
+								<div class="mol-availability-box">
+									<div class="mol-availability-top">
+										<div class="d-flex align-items-center gap-2 flex-wrap">
+											{% set st = statusText ?? 'Non défini'|trans %}
+
+											{% if st == 'Disponible' %}
+												<span class="mol-chip">
+													<span class="text-success">●</span>
+													{% trans %}Disponible{% endtrans %}
+												</span>
+											{% elseif st == 'Occupé' or st == 'occupe' %}
+												<span class="mol-chip">
+													<span class="text-warning">●</span>
+													{% trans %}Occupé{% endtrans %}
+												</span>
+											{% else %}
+												<span class="mol-chip">
+													<span class="text-danger">●</span>
+													{% trans %}Indisponible{% endtrans %}
+												</span>
+											{% endif %}
+
+											<span class="mol-availability-count">
+												<i class="fa fa-check-circle"></i>
+												{{ availabilityDates|default([])|length }}
+												{% trans %}jour(s) disponible(s){% endtrans %}
+											</span>
+										</div>
+
+										<div class="mol-soft">
+											<small>{% trans %}Jours renseignés par le talent{% endtrans %}</small>
+										</div>
+									</div>
+
+									{% if availabilityDates is defined and availabilityDates|length > 0 %}
+										<div class="mol-availability-grid">
+											{% for day in availabilityDates %}
+												<span class="mol-day-pill">
+													<i class="fa fa-calendar-o"></i>
+													{{ day|date('d/m/Y') }}
+												</span>
+											{% endfor %}
+										</div>
+									{% else %}
+										<div class="mol-empty-soft">
+											<i class="fa fa-info-circle me-1"></i>
+											{% trans %}Aucun jour disponible n’a encore été renseigné.{% endtrans %}
+										</div>
+									{% endif %}
+								</div>
+								</div>
+								{% endif %}
+
+								<hr style="border-color: var(--mol-border);">
+
+
+							{# ================= CONTACT ================= #}
+							<div id="contact">
+								<h3 class="mol-h">
+									<i class="fa fa-paper-plane"></i> {% trans %}Contact & liens{% endtrans %}
+								</h3>
+
+								<div class="d-flex gap-2 flex-wrap">
+									{% if profil.portfolioUrl is defined and profil.portfolioUrl %}
+										<a href="{{ profil.portfolioUrl }}" target="_blank" class="btn btn-outline-primary rounded-4">
+											<i class="fa fa-external-link me-2"></i>
+											{% trans %}Portfolio{% endtrans %}
+										</a>
+									{% endif %}
+
+									{% if app.user and profil.user and app.user.id != profil.user.id %}
+										<button type="button" class="btn btn-primary" onclick="MOLChatStartWith({{ profil.user.id }})">
+											<i class="bi bi-chat-dots me-1"></i>
+											{% trans %}Message{% endtrans %}
+										</button>
+									{% endif %}
+
+									{% if profil.user.phone is defined and profil.user.phone %}
+										{% if app.user and app.user.id != profil.user.id %}
+											<a href="javascript:void(0);" class="btn btn-light rounded-4" onclick="showContact('phone', '{{ profil.user.slug }}', '')">
+												<i class="fa fa-phone me-2 text-primary"></i>
+												{% trans %}Appeler{% endtrans %}
+											</a>
+										{% endif %}
+									{% endif %}
+
+									{% if app.user and app.user.id != profil.user.id %}
+										<a href="javascript:void(0);" class="btn btn-light rounded-4" onclick="showContact('email', '{{ profil.user.slug }}', '')">
+											<i class="fa fa-envelope me-2"></i>
+											{% trans %}Email{% endtrans %}
+										</a>
+									{% elseif app.user and app.user.id == profil.user.id %}
+										<a href="mailto:{{ profil.user.email }}" class="btn btn-light rounded-4">
+											<i class="fa fa-envelope me-2"></i>
+											{% trans %}Email{% endtrans %}
+										</a>
+									{% endif %}
+
+									{% if professional_profile %}
+										<a href="{{ path('talent_portfolio_show', { slug: profil.user.slug }) }}" class="btn btn-outline-primary rounded-4">
+											<i class="fa fa-photo me-2"></i>
+											{% trans %}Voir les travaux{% endtrans %}
+										</a>
+									{% endif %}
+								</div>
+
+								<div class="mt-3 mol-soft">
+									<small>
+										<i class="fa fa-shield me-1"></i>
+										{% trans %}Conseil : évite de partager des informations sensibles dans la première discussion.{% endtrans %}
+									</small>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</section>
+
+	{# ===== MODAL REPORT ===== #}
+	<div class="modal fade" id="molReportModal" tabindex="-1" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">{% trans %}Signaler ce compte{% endtrans %}</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans %}Fermer{% endtrans %}"></button>
+				</div>
+
+				<div class="modal-body">
+					<input type="hidden" id="molReportUserId" value="">
+					<label class="form-label">{% trans %}Raison du signalement{% endtrans %}</label>
+					<textarea id="molReportReason" class="form-control" rows="4" placeholder="{% trans %}Décris le problème… (min 10 caractères){% endtrans %}"></textarea>
+					<div class="small text-muted mt-2">{% trans %}Sois clair et factuel.{% endtrans %}</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-light" data-bs-dismiss="modal">{% trans %}Annuler{% endtrans %}</button>
+					<button type="button" class="btn btn-danger" id="molReportSubmit">{% trans %}Envoyer{% endtrans %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{# ===== INCLUSION DES SCRIPTS ===== #}
+	{# On inclut les scripts depuis liste_talents #}
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	
+	<script>
+	// ============================================
+	// GESTION DES CONTACTS AVEC LIMITE D'ABONNEMENT
+	// ============================================
+
+	let remainingContacts = 0;
+	let currentPlan = '';
+	window.MOL_CONTACT_AUTHENTICATED = {{ app.user ? 'true' : 'false' }};
+
+	// Charger le nombre de contacts restants au chargement de la page
+	document.addEventListener('DOMContentLoaded', function() {
+	    if (!window.MOL_CONTACT_AUTHENTICATED) return;
+
+	    fetch('{{ path('contact_remaining') }}')
+	        .then(response => response.json())
+	        .then(data => {
+	            remainingContacts = data.remaining;
+	            currentPlan = data.plan;
+	            
+	            // Mettre à jour l'affichage du compteur si présent
+	            const counterEl = document.getElementById('remainingContactsCounter');
+	            if (counterEl) {
+	                if (remainingContacts >= 99999) {
+	                    counterEl.textContent = '♾️ Illimité';
+	                } else {
+	                    counterEl.textContent = `${remainingContacts} contact${remainingContacts > 1 ? 's' : ''} restant${remainingContacts > 1 ? 's' : ''}`;
+	                }
+	            }
+	        })
+	        .catch(error => console.error('Erreur chargement contacts:', error));
+	});
+
+	function showContact(type, userSlug, value) {
+	    // Vérifier s'il reste des contacts
+	    if (remainingContacts <= 0 && remainingContacts !== 99999) {
+        Swal.fire({
+            title: 'Vous cartonnez ! 🚀',
+            html: `
+                <div style="padding:6px 0 2px;text-align:left;max-width:520px;margin:auto;overflow-wrap:anywhere;">
+                    <div style="width:64px;height:64px;margin:0 auto 16px;display:grid;place-items:center;border-radius:20px;background:linear-gradient(135deg,#eef5ff,#e9fff2);font-size:34px;">🔓</div>
+                    <p style="font-size:15px;line-height:1.65;color:#475569;margin:0 0 14px;text-align:center;">
+                        Vous avez utilisé tous vos contacts ce mois-ci. Passez au plan <strong>Pro</strong> pour contacter davantage de clients et améliorer la visibilité de votre profil.
+                    </p>
+                    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;">
+                        <div style="padding:14px;border:1px solid #e2e8f0;border-radius:14px;background:#f8fafc;min-width:0;">
+                            <span style="display:block;font-size:11px;color:#64748b;margin-bottom:5px;">Plan actuel</span>
+                            <strong style="display:block;color:#0f172a;overflow-wrap:anywhere;">${currentPlan || 'Découverte'}</strong>
+                            <small style="display:block;margin-top:6px;color:#94a3b8;">Quota mensuel atteint</small>
+                        </div>
+                        <div style="padding:14px;border:1px solid #bfdbfe;border-radius:14px;background:linear-gradient(135deg,#eff6ff,#ecfeff);min-width:0;">
+                            <span style="display:block;font-size:11px;color:#2563eb;margin-bottom:5px;">Plan Pro</span>
+                            <strong style="display:block;color:#0f3b82;">Plus de contacts</strong>
+                            <small style="display:block;margin-top:6px;color:#44719f;">+ avantages et visibilité renforcée</small>
+                        </div>
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Passer au Pro',
+            cancelButtonText: 'Peut-être plus tard',
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#94a3b8',
+            background: '#ffffff',
+            backdrop: 'rgba(15, 23, 42, 0.46)',
+            width: 590,
+            customClass: {
+                popup: 'swal-premium-popup'
+            }
+        }).then((result) => {
+	            if (result.isConfirmed) {
+	                window.location.href = '{{ path('subscription_plans') }}';
+	            }
+	        });
+	        return;
+	    }
+
+	    // Montrer le chargement
+	    Swal.fire({
+	        title: 'Chargement...',
+	        text: 'Récupération des informations',
+	        allowOutsideClick: false,
+	        didOpen: () => {
+	            Swal.showLoading();
+	        }
+	    });
+
+	    // Appel AJAX pour récupérer le contact
+	    const contactRoutePlaceholder = '0000000000000000000000000000000000000000000000000000000000000000';
+	    const contactEndpoint = {{ path('contact_show', {slug: '0000000000000000000000000000000000000000000000000000000000000000'})|json_encode|raw }}
+	        .replace(contactRoutePlaceholder, encodeURIComponent(userSlug));
+
+	    fetch(contactEndpoint, {
+	        method: 'POST',
+	        headers: {
+	            'Content-Type': 'application/x-www-form-urlencoded',
+	            'X-Requested-With': 'XMLHttpRequest'
+	        },
+	        body: `type=${type}`
+	    })
+	    .then(response => response.json())
+	    .then(data => {
+	        Swal.close();
+
+	        if (data.error) {
+	            Swal.fire({
+	                title: '❌ Accès refusé',
+	                html: `
+	                    <div style="padding: 10px 0;">
+	                        <div style="font-size: 40px; margin-bottom: 15px;">🔒</div>
+	                        <p style="font-size: 15px; color: #475569;">
+	                            ${data.error}
+	                        </p>
+	                    </div>
+	                `,
+	                icon: 'error',
+	                confirmButtonText: 'Voir les offres',
+	                confirmButtonColor: '#6366f1'
+	            }).then(() => {
+	                if (data.limit_reached) {
+	                    window.location.href = '{{ path('subscription_plans') }}';
+	                }
+	            });
+	            return;
+	        }
+
+	        // Mettre à jour le compteur local
+	        if (data.remaining !== undefined && data.remaining < 99999) {
+	            remainingContacts = data.remaining;
+	        }
+
+	        // Ouvrir directement l'application native après le contrôle du quota.
+	        const contactValue = String(data.value || '').trim();
+	        if (!contactValue) {
+	            throw new Error('Coordonnée de contact indisponible.');
+	        }
+	        const contactTarget = type === 'phone'
+	            ? `tel:${contactValue.replace(/[^0-9+*#]/g, '')}`
+	            : `mailto:${contactValue}`;
+
+	        // Mettre à jour le compteur dans l'interface
+	        const counterEl = document.getElementById('remainingContactsCounter');
+	        if (counterEl && data.remaining !== undefined) {
+	            if (data.remaining >= 99999) {
+	                counterEl.textContent = '♾️ Illimité';
+	            } else {
+	                counterEl.textContent = `${data.remaining} contact${data.remaining > 1 ? 's' : ''} restant${data.remaining > 1 ? 's' : ''}`;
+	            }
+	        }
+	        // Laisser l'interface mettre à jour le quota puis lancer l'application système.
+	        Swal.fire({toast:true,position:'top',icon:'success',title:type === 'phone' ? 'Ouverture du téléphone…' : 'Ouverture de votre messagerie…',showConfirmButton:false,timer:900,timerProgressBar:true});
+	        window.setTimeout(() => { window.location.href = contactTarget; }, 120);
+
+	    })
+	    .catch(error => {
+	        Swal.close();
+	        console.error('Erreur:', error);
+	        Swal.fire({
+	            title: '❌ Erreur',
+	            text: 'Impossible de récupérer les informations. Veuillez réessayer.',
+	            icon: 'error',
+	            confirmButtonColor: '#6366f1'
+	        });
+	    });
+	}
+
+	// Les coordonnées ne sont jamais intégrées dans le HTML : elles sont obtenues
+	// uniquement via showContact(), après contrôle d’authentification et d’abonnement.
+	function escapeHtml(text) {
+	    const div = document.createElement('div');
+	    div.textContent = text;
+	    return div.innerHTML;
+	}
+	</script>
+
+	{# ===== SCRIPTS EXISTANTS ===== #}
+
+	{# ✅ FAVORI AJAX #}
+	<script>
+		document.addEventListener('click', async (e) => {
+		const btn = e.target.closest('.js-fav-toggle');
+		if (!btn) return;
+
+		const url = btn.dataset.url;
+		const token = btn.dataset.token;
+
+		// UI loading
+		btn.disabled = true;
+
+		try {
+			const res = await fetch(url, {
+			method: 'POST',
+			headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8',
+			'X-Requested-With': 'XMLHttpRequest'},
+			body: new URLSearchParams({_token: token}).toString()
+			});
+
+			const data = await res.json().catch(() => null);
+
+			if (!res.ok || !data || !data.ok) {
+			console.log(data?.message || 'Erreur');
+			return;
+			}
+
+			// ✅ Update UI
+			btn.classList.toggle('is-active', data.favorited);
+			btn.title = data.favorited ? 'Retirer des favoris' : 'Ajouter aux favoris';
+
+			const icon = btn.querySelector('i');
+			if (icon) {
+			icon.className = data.favorited ? 'fa fa-heart' : 'fa fa-heart-o';
+			}
+
+			// si tu as un compteur affiché quelque part : data.count
+			} catch (err) {
+				console.log('Erreur réseau', err);
+			} finally {
+				btn.disabled = false;
+			}
+		});
+	</script>
+
+	{# ✅ REVIEW AJAX (load form + submit) #}
+	<script>
+		document.addEventListener('click', async (e) => {
+		const btn = e.target.closest('.js-review-toggle');
+		if (! btn) 
+		return;
+
+
+		const targetSelector = btn.getAttribute('data-bs-target');
+		const collapseEl = document.querySelector(targetSelector);
+		if (! collapseEl) 
+		return;
+
+
+		const zone = collapseEl.querySelector('.js-review-zone');
+		if (! zone) 
+		return;
+
+
+		if (zone.dataset.loaded === '1') 
+		return;
+
+
+		try {
+		const url = zone.dataset.url;
+		const res = await fetch(url, {
+		headers: {
+		'X-Requested-With': 'XMLHttpRequest'
+		}
+		});
+		const data = await res.json();
+
+		if (! data.success) {
+		zone.innerHTML = `<div class="alert alert-danger rounded-4 mb-0">${
+		data.message || 'Erreur'
+		}</div>`;
+		return;
+		}
+
+		zone.innerHTML = data.html;
+		zone.dataset.loaded = '1';
+		} catch (err) {
+		zone.innerHTML = `<div class="alert alert-danger rounded-4 mb-0">Impossible de charger le formulaire.</div>`;
+		}
+		});
+
+		document.addEventListener('submit', async (e) => {
+		const form = e.target.closest('.js-review-form');
+		if (! form) 
+		return;
+
+
+		e.preventDefault();
+
+		const feedback = form.closest('.card-body') ?. querySelector('.js-review-feedback');
+		const formData = new FormData(form);
+
+		try {
+		const res = await fetch(form.action, {
+		method: 'POST',
+		body: formData,
+		headers: {
+		'X-Requested-With': 'XMLHttpRequest'
+		}
+		});
+
+		const data = await res.json();
+
+		if (! data.success) {
+		if (feedback) {
+		feedback.innerHTML = `<div class="alert alert-danger rounded-4 mb-0">${
+		data.message || 'Erreur'
+		}</div>`;
+		}
+		return;
+		}
+
+		if (feedback) {
+		feedback.innerHTML = `<div class="alert alert-success rounded-4 mb-0">${
+		data.message || 'Avis envoyé ✅'
+		}</div>`;
+		}
+
+		const list = document.querySelector('.js-reviews-list');
+		if (list && data.reviewHtml) { // on ajoute en haut des derniers avis
+		list.insertAdjacentHTML('afterbegin', data.reviewHtml);
+		}
+
+		form.reset();
+		} catch (err) {
+		if (feedback) {
+		feedback.innerHTML = `<div class="alert alert-danger rounded-4 mb-0">Erreur réseau.</div>`;
+		}
+		}
+		});
+	</script>
+
+	{# ✅ Emoji picker (EmojiButton) - nécessite le script CDN dans base.html.twig #}
+	<script>
+		document.addEventListener('click', (e) => {
+			const btn = e.target.closest('.js-emoji-btn');
+			if (! btn) 
+			return;
+
+
+			const wrap = btn.closest('.position-relative');
+			const picker = wrap.querySelector('.js-emoji-picker');
+			picker.classList.toggle('d-none');
+			});
+
+			document.addEventListener('emoji-click', (event) => {
+			const picker = event.target.closest('.js-emoji-picker');
+			if (! picker) 
+			return;
+
+
+			const wrap = picker.closest('.position-relative');
+			const textarea = wrap.querySelector('.js-review-text');
+			if (! textarea) 
+			return;
+
+
+			const emoji = event.detail.unicode;
+
+			const start = textarea.selectionStart ?? textarea.value.length;
+			const end = textarea.selectionEnd ?? textarea.value.length;
+
+			textarea.value = textarea.value.slice(0, start) + emoji + textarea.value.slice(end);
+			textarea.focus();
+			textarea.selectionStart = textarea.selectionEnd = start + emoji.length;
+		});
+	</script>
+
+		{# Signalement : confirmation compacte puis ouverture du formulaire serveur sécurisé. #}
+		<script>
+		(function () {
+			'use strict';
+
+			document.addEventListener('click', async function (event) {
+				const btn = event.target.closest('.mol-report-btn');
+				if (!btn) return;
+
+				event.preventDefault();
+				const createUrl = btn.dataset.createUrl;
+				if (!createUrl) return;
+
+				if (!window.Swal) {
+					if (window.confirm('Voulez-vous vraiment signaler ce profil ?')) {
+						window.location.href = createUrl;
+					}
+					return;
+				}
+
+				const result = await Swal.fire({
+					icon: 'warning',
+					title: 'Signaler ce compte ?',
+					text: 'Vous pourrez préciser la raison du signalement à l’étape suivante.',
+					showCancelButton: true,
+					confirmButtonText: 'Continuer',
+					cancelButtonText: 'Annuler',
+					reverseButtons: true,
+					confirmButtonColor: '#dc2626',
+					cancelButtonColor: '#64748b',
+					width: 390,
+					padding: '1.1rem',
+					customClass: { popup: 'mol-swal-compact-confirm' }
+				});
+
+				if (result.isConfirmed) {
+					window.location.href = createUrl;
+				}
+			});
+		})();
+		</script>
+
+{% endblock %}

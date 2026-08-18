@@ -1,133 +1,740 @@
-{% extends 'baseConnexion.html.twig' %}
+{% extends 'baseLoginRegister.html.twig' %}
 
-{% block title %}Connexion{% endblock %}
+{% block title %}{% trans %}Connexion – Main d'Oeuvre Locale{% endtrans %}{% endblock %}
+
 {% block stylesheets %}
-	<link href="{{ asset ('assetsold/iconfonts/feather/feather.css')}}" rel="stylesheet"/>
-	<link rel="stylesheet" href="{{ asset ('assetsold/plugins/notify/css/notifIt.css')}}">
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('css/auth/login.css') }}?v=compact-spacing-20260804">
+  <style>
+    /* Login compact : la carte suit la hauteur réelle de son contenu. */
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      overscroll-behavior: none;
+    }
 
-	<style>
-		/*.login-bg {
-			width: 100%;
-			height: 100%;
-			background-size: cover;
-			background-position: center;
-			animation: slide 30s infinite;
-		}
+    body {
+      margin: 0 !important;
+    }
 
-		@keyframes slide {
-			25% { background-image: url({{ asset ('assets/images/1.png')}}); }
-			50% { background-image: url({{ asset ('assets/images/2.jpeg')}}); }
-			75% { background-image: url({{ asset ('assets/images/6.png')}}); }
-			100% { background-image: url({{ asset ('assets/images/1.jpg')}}); }
-			
-		}*/
-	</style>
+    .auth-wrap.login-page {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100vh !important;
+      height: 100dvh !important;
+      min-height: 0 !important;
+      max-height: 100dvh;
+      padding: 16px !important;
+      overflow: hidden !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-page .auth-split-card {
+      display: grid !important;
+      grid-template-columns: minmax(0, 58fr) minmax(0, 42fr) !important;
+      width: min(980px, 100%) !important;
+      max-width: 980px !important;
+      height: auto !important;
+      max-height: calc(100dvh - 32px) !important;
+      min-height: 0 !important;
+      margin: 0 auto !important;
+      overflow: hidden !important;
+    }
+
+    .login-page .auth-manual-panel {
+      width: 100% !important;
+      padding: 34px 42px !important;
+    }
+
+    .login-page .auth-social-panel {
+      width: 100% !important;
+      padding: 34px 38px !important;
+    }
+
+    .login-page .auth-manual-panel,
+    .login-page .auth-social-panel {
+      height: auto !important;
+      min-height: 0 !important;
+    }
+
+    .login-page .auth-manual-panel,
+    .login-page .auth-social-panel,
+    .login-page .social-panel-inner,
+    .login-page .manual-login-form {
+      box-sizing: border-box;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .login-page .auth-title {
+      font-size: clamp(1.7rem, 2.5vw, 2.1rem) !important;
+      margin-bottom: 4px !important;
+    }
+
+    .login-page .auth-subtitle {
+      margin-bottom: 14px !important;
+    }
+
+    .login-page .manual-login-form,
+    .login-page .social-row {
+      gap: 10px !important;
+    }
+
+    .login-page .floating-field,
+    .login-page .btn-login,
+    .login-page .social-btn {
+      min-height: 48px !important;
+    }
+
+    .login-page .register-link {
+      margin-top: 2px !important;
+    }
+
+    @media (max-height: 760px) and (min-width: 768px) {
+      .login-page .auth-manual-panel,
+      .login-page .auth-social-panel {
+        padding-top: 24px !important;
+        padding-bottom: 24px !important;
+      }
+
+      .login-page .auth-title,
+      .login-page .social-title {
+        margin-bottom: 5px !important;
+      }
+
+      .login-page .auth-subtitle,
+      .login-page .social-subtitle {
+        margin-bottom: 14px !important;
+      }
+
+      .login-page .manual-login-form,
+      .login-page .social-row {
+        gap: 10px !important;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .auth-wrap.login-page {
+        padding: 8px !important;
+      }
+
+      .login-page .auth-split-card {
+        display: flex !important;
+        flex-direction: column !important;
+        width: min(430px, 100%) !important;
+        max-width: 430px !important;
+        height: auto !important;
+        max-height: calc(100dvh - 16px) !important;
+        min-height: 0 !important;
+        border-radius: 20px !important;
+      }
+
+      .login-page .auth-social-panel {
+        order: -1;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        padding: 10px 14px !important;
+      }
+
+      .login-page .social-panel-inner {
+        width: 100%;
+      }
+
+      .login-page .social-title,
+      .login-page .social-subtitle,
+      .login-page .social-assurance {
+        display: none !important;
+      }
+
+      .login-page .social-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 9px !important;
+        margin: 0 !important;
+      }
+
+      .login-page .social-btn {
+        min-width: 0 !important;
+        min-height: 42px !important;
+        padding: 7px 10px !important;
+      }
+
+      .login-page .auth-manual-panel {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        padding: 14px 18px 16px !important;
+        overflow: hidden !important;
+      }
+
+      .login-page .home-btn {
+        top: 10px !important;
+        left: 12px !important;
+      }
+
+      .login-page .auth-title {
+        margin: 0 0 2px !important;
+        font-size: clamp(1.4rem, 6vw, 1.75rem) !important;
+      }
+
+      .login-page .auth-subtitle {
+        margin: 0 0 7px !important;
+      }
+
+      .login-page .mobile-email-divider {
+        margin: 5px 0 8px !important;
+      }
+
+      .login-page .manual-login-form {
+        display: grid;
+        gap: 8px !important;
+      }
+
+      .login-page .floating-field,
+      .login-page .btn-login {
+        min-height: 46px !important;
+      }
+
+      .login-page .login-options,
+      .login-page .register-link {
+        margin: 0 !important;
+      }
+    }
+
+    @media (max-width: 390px), (max-height: 620px) {
+      .login-page .auth-subtitle,
+      .login-page .mobile-email-divider {
+        display: none !important;
+      }
+
+      .login-page .auth-manual-panel {
+        padding: 10px 14px 12px !important;
+      }
+
+      .login-page .manual-login-form {
+        gap: 6px !important;
+      }
+
+      .login-page .floating-field,
+      .login-page .btn-login {
+        min-height: 44px !important;
+      }
+    }
+
+    /* Lorsque le clavier mobile réduit fortement la hauteur, le formulaire
+       essentiel reste entièrement visible et les boutons sociaux reviennent
+       automatiquement dès la fermeture du clavier. */
+    @media (max-width: 767px) and (max-height: 520px) {
+      .login-page .auth-social-panel,
+      .login-page .auth-title,
+      .login-page .auth-subtitle,
+      .login-page .mobile-email-divider {
+        display: none !important;
+      }
+
+      .login-page .auth-manual-panel {
+        padding: 12px 14px !important;
+      }
+
+      .login-page .manual-login-form {
+        gap: 6px !important;
+      }
+
+      .login-page .register-link {
+        font-size: .78rem !important;
+      }
+    }
+  </style>
 {% endblock %}
+
 {% block body %}
-{% for message in app.flashes('info')  %}
-	{# <div class="alert alert-danger">{{ message }}</div> #}
-	<!-- NOTIFICATIONS js-->
-	<script src="{{ asset ('assetsold/js/notifications.js')}}"></script>
+{% set login_text_hide_password %}{% trans %}Masquer le mot de passe{% endtrans %}{% endset %}
+{% set login_text_show_password %}{% trans %}Afficher le mot de passe{% endtrans %}{% endset %}
+{% set login_text_loading %}{% trans %}Connexion...{% endtrans %}{% endset %}
+{% set login_text_submit %}{% trans %}Se connecter{% endtrans %}{% endset %}
+{% set login_text_success_title %}{% trans %}Connexion réussie !{% endtrans %}{% endset %}
+{% set login_text_success_message %}{% trans %}Vous êtes maintenant connecté(e) !{% endtrans %}{% endset %}
+{% set login_text_redirect_review %}{% trans %}Redirection vers la page d’avis...{% endtrans %}{% endset %}
+{% set login_text_continue %}{% trans %}Continuer{% endtrans %}{% endset %}
+<section class="auth-wrap login-page login-split-page">
+  <div class="auth-split-card">
 
-	<!-- INTERNAL Notifications js -->
-	<script src="{{ asset ('assetsold/plugins/notify/js/rainbow.js')}}"></script>
-	<script src="{{ asset ('assetsold/plugins/notify/js/sample.js')}}"></script>
-	<script src="{{ asset ('assetsold/plugins/notify/js/notifIt.js')}}"></script>
-	<script>
-		notif({
-				type: "success",
-				msg: "<b>{{ message }}</b>",
-				position: "center",
-				width: 500,
-				height: 60,
-				autohide: true
-			});
-	</script>
+    <div class="auth-manual-panel">
+      <a href="{{ path('accueil') }}" class="home-btn" data-turbo="false">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M3 10.5 12 3l9 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>{% trans %}Accueil{% endtrans %}</span>
+      </a>
 
-{% endfor %}
+      <h1 class="auth-title">{% trans %}Connexion{% endtrans %}</h1>
+      <p class="auth-subtitle">{% trans %}Accédez à votre espace{% endtrans %}</p>
 
-{% if error %}
-	<script src="{{ asset ('assetsold/js/notifications.js')}}"></script>
+      <div class="mobile-email-divider" aria-hidden="true">
+        <span>{% trans %}Ou avec votre adresse e-mail{% endtrans %}</span>
+      </div>
 
-	<!-- INTERNAL Notifications js -->
-	<script src="{{ asset ('assetsold/plugins/notify/js/rainbow.js')}}"></script>
-	<script src="{{ asset ('assetsold/plugins/notify/js/sample.js')}}"></script>
-	<script src="{{ asset ('assetsold/plugins/notify/js/notifIt.js')}}"></script>
-	<script>
-		notif({type: 'error', position: 'left', msg: "<b>{{ error.messageKey|trans(error.messageData, 'security') }}<b>"});
-	</script>
-{% endif %}
+      {% for message in app.flashes('success') %}
+        <div class="alert alert-success" role="alert">{{ message }}</div>
+      {% endfor %}
 
+      {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger" role="alert">{{ message }}</div>
+      {% endfor %}
 
-<body class="login-bg" style="
-	background: #0f1115 url({{ asset ('assets/images/2.jpeg')}}) no-repeat;
-	background-size: cover;
-	background-position: bottom center;
-	background-attachment: fixed;
-	">
+      {% for message in app.flashes('warning') %}
+        <div class="alert alert-warning" role="alert">{{ message }}</div>
+      {% endfor %}
 
-    <!-- Container starts -->
-    <div class="container">
+      {% for message in app.flashes('info') %}
+        <div class="alert alert-info" role="alert">{{ message }}</div>
+      {% endfor %}
 
-		<!-- Auth wrapper starts -->
-		<div class="auth-wrapper border-primary">
+      <form id="loginForm"
+            class="manual-login-form"
+            method="post"
+            action="{{ path('app_login') }}"
+            data-turbo="false"
+            novalidate>
 
-			<!-- Form starts -->
-			<form method="post" class="mt-5">
-				
-				{% if app.user %}
-					<div class="mb-3">
-						{% trans %}Vous êtes connectés sous {% endtrans %} : {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">{% trans %}Déconnexion{% endtrans %}</a>
-					</div>
-				{% endif %}
+        {% if error %}
+          <div class="alert alert-danger" role="alert">
+            {{ error.messageKey|trans(error.messageData, 'security') }}
+          </div>
+        {% endif %}
 
-				<div class="auth-box">
-					{# <a href="javascript:void(0);" class="auth-logo mb-4">
-						<img src="{{ asset('assets/images/logo2.png')}}" alt="Bootstrap Gallery">
-					</a> #}
+        {% if app.user %}
+          <div class="logged-in-box">
+            {% trans %}Vous êtes connecté en tant que{% endtrans %} {{ app.user.userIdentifier }},
+            <a href="{{ logout_path() }}" class="muted-link">{% trans %}Déconnexion{% endtrans %}</a>
+          </div>
+        {% endif %}
 
-					<h4 class="mb-4">{% trans %}Connexion{% endtrans %}</h4>
-						{% if error %}
-							<div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-						{% endif %}
-					<div class="mb-3">
-						<label class="form-label" for="email">{% trans %}Nom utilisateur{% endtrans %}<span class="text-danger">*</span></label>
-						<input type="text" value="{{ last_username }}" name="username" id="inputUsername" class="form-control" autocomplete="username" required autofocus placeholder="Nom de connexion">
-																
-					</div>
+        <div class="floating-field">
+          <span class="field-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="2"/>
+              <path d="M5.5 7.5 12 12l6.5-4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
 
-					<div class="mb-2">
-						<label class="form-label" for="pwd">{% trans %}Mot de passe{% endtrans %}<span class="text-danger">*</span></label>
-						<div class="input-group">   
-							<input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required placeholder="Mot de passe">
-																		
-							<button class="btn btn-outline-secondary" type="button">
-								<i class="ri-eye-line text-primary"></i>
-							</button>
-						</div>
-					</div>
-					<input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-																
-					<div class="d-flex justify-content-end mb-3">
-						<a href="{{ path ('mot_de_passe_oublie') }}" class="text-decoration-underline">{% trans %}Mot de passe oublié ?{% endtrans %}</a>
-					</div>
+          <input type="email"
+                 id="login_email"
+                 name="_username"
+                 value="{{ last_username }}"
+                 class="form-control in floating-control"
+                 placeholder=" "
+                 autocomplete="email"
+                 inputmode="email"
+                 spellcheck="false"
+                 required
+                 autofocus
+                 aria-label="{% trans %}Adresse email{% endtrans %}">
 
-					<div class="mb-3 d-grid gap-2">
-						<button type="submit" class="btn btn-primary">{% trans %}Connexion{% endtrans %}</button>
-						{# <a href="signup.html" class="btn btn-secondary">Not registered? Signup</a> #}
-					</div>
+          <label for="login_email" class="floating-label">
+            {% trans %}Adresse email{% endtrans %}
+          </label>
+        </div>
 
-				</div>
+        <div class="floating-field password-field">
+          <span class="field-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M7.5 10V8.2A4.5 4.5 0 0 1 12 3.7a4.5 4.5 0 0 1 4.5 4.5V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M6.5 10h11A2.5 2.5 0 0 1 20 12.5v6A2.5 2.5 0 0 1 17.5 21h-11A2.5 2.5 0 0 1 4 18.5v-6A2.5 2.5 0 0 1 6.5 10Z" stroke="currentColor" stroke-width="2"/>
+            </svg>
+          </span>
 
-			</form>
-			<!-- Form ends -->
+          <input type="password"
+                 id="login_password"
+                 name="_password"
+                 class="form-control in floating-control"
+                 placeholder=" "
+                 autocomplete="current-password"
+                 required
+                 aria-label="{% trans %}Mot de passe{% endtrans %}">
 
-		</div>
-		<!-- Auth wrapper ends -->
+          <label for="login_password" class="floating-label">
+            {% trans %}Mot de passe{% endtrans %}
+          </label>
 
+          <button type="button"
+                  class="password-toggle"
+                  id="togglePassword"
+                  aria-label="{% trans %}Afficher le mot de passe{% endtrans %}"
+                  title="{% trans %}Afficher le mot de passe{% endtrans %}">
+            <svg id="iconEye" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+
+            <svg id="iconEyeOff" class="d-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 3l18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M10.58 10.58A2 2 0 0 0 13.42 13.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M9.88 5.09A11.37 11.37 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.06 3.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6.71 6.72C4.03 8.14 2 12 2 12a17.62 17.62 0 0 0 5.09 5.28A10.86 10.86 0 0 0 12 19c1.61 0 3.09-.33 4.41-.91" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <div class="login-options">
+          <label class="remember-option" for="remember_me">
+            <input type="checkbox"
+                   id="remember_me"
+                   name="_remember_me"
+                   value="1">
+            <span>{% trans %}Se souvenir de moi{% endtrans %}</span>
+          </label>
+
+          <a href="{{ path('app_forgot_password') }}" class="muted-link" data-turbo="false">
+            {% trans %}Mot de passe oublié ?{% endtrans %}
+          </a>
+        </div>
+
+        <button class="btn-login"
+                id="submitLoginBtn"
+                type="submit"
+                disabled
+                aria-disabled="true">
+          <span class="btn-login-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M10 17l5-5-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M14 4h4a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          <span class="btn-login-label">{% trans %}Se connecter{% endtrans %}</span>
+          <span class="btn-login-spinner" aria-hidden="true"></span>
+        </button>
+
+        <div class="register-link">
+          {% trans %}Pas encore de compte ?{% endtrans %}
+          <a href="{{ path('app_register') }}" data-turbo="false">{% trans %}Créer un compte{% endtrans %}</a>
+        </div>
+      </form>
+
+      {# <form method="post" action="{{ path('app_resend_activation') }}" class="mol-resend-activation" data-turbo="false">
+        <input type="hidden" name="_token" value="{{ csrf_token('resend_activation') }}">
+        <input type="hidden" name="email" value="{{ last_username }}" data-resend-email>
+        <button type="submit" class="mol-resend-activation__btn">
+          <i class="fa-regular fa-paper-plane" aria-hidden="true"></i>
+          <span>{% trans %}Renvoyer l’email d’activation{% endtrans %}</span>
+        </button>
+        <small>{% trans %}Si vous n’avez rien reçu, vérifiez aussi le dossier spam/indésirables.{% endtrans %}</small>
+      </form> #}
     </div>
-    <!-- Container ends -->
 
-  </body>
+    <div class="auth-social-panel">
+      <div class="social-panel-inner">
+        <h2 class="social-title">{% trans %}Connexion rapide{% endtrans %}</h2>
+        <p class="social-subtitle">
+          {% trans %}Connectez-vous rapidement avec votre réseau social préféré.{% endtrans %}
+        </p>
 
+        <div class="social-row">
+          <a href="{{ path('connect_google_start') }}"
+             class="social-btn"
+             data-turbo="false"
+             data-social-login="true"
+             aria-label="{% trans %}Continuer avec Google{% endtrans %}">
+            <span class="social-logo social-icon-google" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="img">
+                <path fill="#FFC107" d="M43.61 20.08H42V20H24v8h11.3C33.65 32.66 29.22 36 24 36c-6.63 0-12-5.37-12-12S17.37 12 24 12c3.06 0 5.84 1.15 7.96 3.04l5.66-5.66C34.05 6.05 29.27 4 24 4 12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20c0-1.34-.14-2.63-.39-3.92Z"/>
+                <path fill="#FF3D00" d="M6.31 14.69l6.57 4.82C14.66 15.1 18.96 12 24 12c3.06 0 5.84 1.15 7.96 3.04l5.66-5.66C34.05 6.05 29.27 4 24 4 16.32 4 9.66 8.34 6.31 14.69Z"/>
+                <path fill="#4CAF50" d="M24 44c5.16 0 9.86-1.97 13.41-5.18l-6.19-5.24C29.15 35.15 26.64 36 24 36c-5.2 0-9.62-3.32-11.28-7.95l-6.52 5.02C9.51 39.56 16.24 44 24 44Z"/>
+                <path fill="#1976D2" d="M43.61 20.08H42V20H24v8h11.3a12.04 12.04 0 0 1-4.08 5.58l6.19 5.24C36.97 39.22 44 34 44 24c0-1.34-.14-2.63-.39-3.92Z"/>
+              </svg>
+            </span>
+            <span class="social-btn-label">{% trans %}Google{% endtrans %}</span>
+            <span class="social-spinner" aria-hidden="true"></span>
+          </a>
+
+          <a href="{{ path('connect_facebook_start') }}"
+             class="social-btn"
+             data-turbo="false"
+             data-social-login="true"
+             aria-label="{% trans %}Continuer avec Facebook{% endtrans %}">
+            <span class="social-logo social-icon-facebook" aria-hidden="true">
+              <svg viewBox="0 0 48 48" role="img">
+                <circle cx="24" cy="24" r="22" fill="#1877F2"/>
+                <path fill="#FFFFFF" d="M29.6 25.4h-3.9V39h-5.6V25.4h-2.8v-4.8h2.8v-3.1c0-2.3 1.1-5.9 5.9-5.9l4.3.02v4.8h-3.1c-.5 0-1.5.26-1.5 1.63v2.55h4.7l-.8 4.8Z"/>
+              </svg>
+            </span>
+            <span class="social-btn-label">{% trans %}Facebook{% endtrans %}</span>
+            <span class="social-spinner" aria-hidden="true"></span>
+          </a>
+        </div>
+
+        <div class="social-assurance">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7 10V8a5 5 0 0 1 10 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <rect x="5" y="10" width="14" height="11" rx="3" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 14v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <span>{% trans %}Connexion sécurisée. Vos identifiants restent protégés.{% endtrans %}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<style>
+  .mol-resend-activation{margin-top:14px;padding-top:14px;border-top:1px solid #e8eef7;text-align:center}
+  .mol-resend-activation__btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;background:transparent;color:#2563eb;font-weight:700;font-size:.88rem;padding:7px 10px;border-radius:10px;transition:.2s ease}
+  .mol-resend-activation__btn:hover,.mol-resend-activation__btn:focus-visible{background:#eff6ff;color:#1d4ed8;outline:none}
+  .mol-resend-activation small{display:block;color:#7c8aa0;font-size:.75rem;margin-top:3px;line-height:1.4}
+</style>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('loginForm');
+    const emailInput = document.getElementById('login_email');
+    const passwordInput = document.getElementById('login_password');
+    const submitBtn = document.getElementById('submitLoginBtn');
+    const submitLabel = submitBtn ? submitBtn.querySelector('.btn-login-label') : null;
+
+    const toggleBtn = document.getElementById('togglePassword');
+    const iconEye = document.getElementById('iconEye');
+    const iconEyeOff = document.getElementById('iconEyeOff');
+
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+
+    function refreshFloatingField(input) {
+      if (!input) return;
+
+      const field = input.closest('.floating-field');
+      if (!field) return;
+
+      field.classList.toggle('has-value', (input.value || '').trim() !== '');
+    }
+
+    function getFieldBox(input) {
+      return input ? (input.closest('.floating-field') || input.parentElement) : null;
+    }
+
+    function clearInvalid(input) {
+      if (!input) return;
+
+      input.classList.remove('is-invalid');
+
+      const box = getFieldBox(input);
+      if (box) {
+        box.classList.remove('login-vibrate');
+      }
+    }
+
+    function shake(input) {
+      if (!input) return;
+
+      const box = getFieldBox(input);
+      input.classList.add('is-invalid');
+
+      if (box) {
+        box.classList.remove('login-vibrate');
+        void box.offsetWidth;
+        box.classList.add('login-vibrate');
+
+        window.setTimeout(function () {
+          box.classList.remove('login-vibrate');
+        }, 420);
+      }
+    }
+
+    function emailIsValid() {
+      return !!emailInput && emailRegex.test(emailInput.value.trim());
+    }
+
+    function passwordIsValid() {
+      return !!passwordInput && passwordInput.value.trim().length > 0;
+    }
+
+    function formIsValid() {
+      return emailIsValid() && passwordIsValid();
+    }
+
+    function updateSubmitButton() {
+      if (!submitBtn || submitBtn.classList.contains('is-loading')) return;
+
+      const enabled = formIsValid();
+      submitBtn.disabled = !enabled;
+      submitBtn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+    }
+
+    const resendEmail = document.querySelector('[data-resend-email]');
+    if (emailInput && resendEmail) {
+      const syncResendEmail = function () { resendEmail.value = emailInput.value.trim().toLowerCase(); };
+      emailInput.addEventListener('input', syncResendEmail);
+      syncResendEmail();
+    }
+
+    [emailInput, passwordInput].filter(Boolean).forEach(function (input) {
+      refreshFloatingField(input);
+
+      input.addEventListener('input', function () {
+        refreshFloatingField(input);
+        clearInvalid(input);
+        updateSubmitButton();
+      });
+
+      input.addEventListener('change', function () {
+        refreshFloatingField(input);
+        clearInvalid(input);
+        updateSubmitButton();
+      });
+    });
+
+    if (toggleBtn && passwordInput && iconEye && iconEyeOff) {
+      toggleBtn.addEventListener('click', function () {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+
+        iconEye.classList.toggle('d-none', isPassword);
+        iconEyeOff.classList.toggle('d-none', !isPassword);
+
+        const label = isPassword
+          ? {{ login_text_hide_password|json_encode|raw }}
+          : {{ login_text_show_password|json_encode|raw }};
+        toggleBtn.setAttribute('aria-label', label);
+        toggleBtn.setAttribute('title', label);
+      });
+    }
+
+    if (form) {
+      form.addEventListener('submit', function (event) {
+        if (!formIsValid()) {
+          event.preventDefault();
+
+          let firstInvalid = null;
+
+          if (!emailIsValid()) {
+            shake(emailInput);
+            firstInvalid = emailInput;
+          }
+
+          if (!passwordIsValid()) {
+            shake(passwordInput);
+            firstInvalid = firstInvalid || passwordInput;
+          }
+
+          if (navigator.vibrate) {
+            navigator.vibrate([70, 40, 70]);
+          }
+
+          if (firstInvalid) {
+            firstInvalid.focus();
+          }
+
+          updateSubmitButton();
+          return;
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.setAttribute('aria-disabled', 'true');
+          submitBtn.setAttribute('aria-busy', 'true');
+          submitBtn.classList.add('is-loading');
+        }
+
+        if (submitLabel) {
+          submitLabel.textContent = {{ login_text_loading|json_encode|raw }};
+        }
+      });
+    }
+
+    function resetSubmitButton() {
+      if (!submitBtn) return;
+
+      submitBtn.classList.remove('is-loading');
+      submitBtn.removeAttribute('aria-busy');
+
+      if (submitLabel) {
+        submitLabel.textContent = {{ login_text_submit|json_encode|raw }};
+      }
+
+      updateSubmitButton();
+    }
+
+    window.addEventListener('pageshow', resetSubmitButton);
+    updateSubmitButton();
+
+    const socialLinks = Array.from(document.querySelectorAll('[data-social-login="true"]'));
+
+    function resetSocialButtons() {
+      socialLinks.forEach(function (link) {
+        link.classList.remove('is-loading');
+        link.removeAttribute('aria-busy');
+        link.removeAttribute('aria-disabled');
+      });
+    }
+
+    socialLinks.forEach(function (link) {
+      link.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (link.classList.contains('is-loading')) return;
+
+        const href = link.getAttribute('href');
+        if (!href) return;
+
+        socialLinks.forEach(function (socialLink) {
+          socialLink.setAttribute('aria-disabled', 'true');
+        });
+
+        link.classList.add('is-loading');
+        link.setAttribute('aria-busy', 'true');
+
+        window.setTimeout(function () {
+          window.location.assign(href);
+        }, 90);
+      }, true);
+    });
+
+    window.addEventListener('pageshow', resetSocialButtons);
+  });
+</script>
+
+{% if app.session.get('_redirect_after_login') %}
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const redirectUrl = "{{ app.session.get('_redirect_after_login')|raw }}";
+
+      Swal.fire({
+        title: `✅ {{ login_text_success_title|e('js') }}`,
+        html: `
+          <div style="padding: 10px 0;">
+            <div style="font-size: 48px; margin-bottom: 15px;">🎉</div>
+            <p style="font-size: 16px; color: #475569;">{{ login_text_success_message|e('js') }}</p>
+            <p style="font-size: 14px; color: #94a3b8;">{{ login_text_redirect_review|e('js') }}</p>
+          </div>
+        `,
+        icon: 'success',
+        iconColor: '#10b981',
+        confirmButtonText: `{{ login_text_continue|e('js') }} ✨`,
+        confirmButtonColor: '#6366f1',
+        background: '#ffffff',
+        backdrop: 'rgba(15, 23, 42, 0.4)',
+        timer: 2000,
+        timerProgressBar: true,
+        showClass: {
+          popup: 'animate__animated animate__fadeInUp animate__faster'
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutDown animate__faster'
+        }
+      }).then(function () {
+        fetch('{{ path('clear_redirect_session') }}', { method: 'POST' });
+        window.location.href = redirectUrl;
+      });
+    });
+  </script>
+{% endif %}
 {% endblock %}

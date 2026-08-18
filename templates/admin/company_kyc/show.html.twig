@@ -1,0 +1,477 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{% trans %}KYC Entreprise{% endtrans %} #{{ case.id }}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% set statusMap = {
+    'draft': {'label':'Brouillon'|trans, 'classes':'bg-slate-100 text-slate-700 ring-slate-200'},
+    'pending': {'label':'En attente'|trans, 'classes':'bg-amber-100 text-amber-800 ring-amber-200'},
+    'in_review': {'label':'En revue'|trans, 'classes':'bg-sky-100 text-sky-800 ring-sky-200'},
+    'approved': {'label':'Approuvé'|trans, 'classes':'bg-emerald-100 text-emerald-800 ring-emerald-200'},
+    'rejected': {'label':'Rejeté'|trans, 'classes':'bg-rose-100 text-rose-800 ring-rose-200'}
+} %}
+
+{% set riskMap = {
+    'low': {'label':'Faible'|trans, 'classes':'bg-emerald-100 text-emerald-800 ring-emerald-200'},
+    'medium': {'label':'Moyen'|trans, 'classes':'bg-amber-100 text-amber-800 ring-amber-200'},
+    'high': {'label':'Élevé'|trans, 'classes':'bg-rose-100 text-rose-800 ring-rose-200'}
+} %}
+
+{% set currentStatus = statusMap[case.status]|default({'label': case.status|default('—'), 'classes':'bg-slate-100 text-slate-700 ring-slate-200'}) %}
+{% set currentRisk = riskMap[case.riskLevel]|default({'label': case.riskLevel|default('—'), 'classes':'bg-slate-100 text-slate-700 ring-slate-200'}) %}
+
+<div class="min-h-screen bg-[radial-gradient(1000px_circle_at_0%_0%,rgba(59,130,246,.10),transparent_35%),radial-gradient(1200px_circle_at_100%_0%,rgba(16,185,129,.10),transparent_35%),linear-gradient(180deg,#f8fafc,#eef2ff_45%,#f8fafc)] text-slate-900">
+    <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+
+        {# FLASHES #}
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="mb-4 rounded-2xl px-4 py-3 text-sm font-semibold ring-1
+                    {{ label == 'success' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : '' }}
+                    {{ label == 'warning' ? 'bg-amber-50 text-amber-700 ring-amber-200' : '' }}
+                    {{ label == 'error' ? 'bg-rose-50 text-rose-700 ring-rose-200' : '' }}
+                    {{ label not in ['success', 'warning', 'error'] ? 'bg-slate-50 text-slate-700 ring-slate-200' : '' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        {# HEADER #}
+        <section class="rounded-[2rem] border border-white/70 bg-white/75 p-5 shadow-[0_20px_80px_rgba(15,23,42,.08)] backdrop-blur xl:p-7">
+            <div class="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="inline-flex items-center rounded-full bg-slate-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-600 ring-1 ring-slate-200">
+                            {% trans %}KYC Entreprise{% endtrans %}
+                        </span>
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 {{ currentStatus.classes }}">
+                            {{ currentStatus.label }}
+                        </span>
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 {{ currentRisk.classes }}">
+                            {% trans %}Risque{% endtrans %} {{ currentRisk.label }}
+                        </span>
+                    </div>
+
+                    <h1 class="mt-4 truncate text-2xl font-black tracking-tight text-slate-950 lg:text-4xl">
+                        {{ case.displayCompanyName }}
+                    </h1>
+
+                    <div class="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-500">
+                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 ring-1 ring-slate-200">
+                            <span>🏙️</span>
+                            <span>{{ case.displayCity }}</span>
+                        </span>
+
+                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 ring-1 ring-slate-200">
+                            <span>🆔</span>
+                            <span>{% trans %}Dossier{% endtrans %} #{{ case.id }}</span>
+                        </span>
+
+                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-50 px-3 py-1.5 ring-1 ring-slate-200">
+                            <span>📅</span>
+                            <span>{% trans %}Créé le{% endtrans %} {{ case.createdAt ? case.createdAt|date('d/m/Y à H:i') : '—' }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-3">
+                    <a href="javascript:history.back()" class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50">
+                        ← {% trans %}Retour{% endtrans %}
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        {# KPI CARDS #}
+        <section class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/75 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Entreprise{% endtrans %}</div>
+                <div class="mt-3 text-lg font-black text-slate-950">{{ case.displayCompanyName }}</div>
+                <div class="mt-2 text-sm text-slate-500">
+                    {{ case.company and case.company.email ? case.company.email : 'Email indisponible'|trans }}
+                </div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/75 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Statut{% endtrans %}</div>
+                <div class="mt-3">
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-bold ring-1 {{ currentStatus.classes }}">
+                        {{ currentStatus.label }}
+                    </span>
+                </div>
+                <div class="mt-2 text-sm text-slate-500">{% trans %}État actuel du workflow KYC{% endtrans %}</div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/75 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Niveau de risque{% endtrans %}</div>
+                <div class="mt-3">
+                    <span class="inline-flex items-center rounded-full px-3 py-1 text-sm font-bold ring-1 {{ currentRisk.classes }}">
+                        {{ currentRisk.label }}
+                    </span>
+                </div>
+                <div class="mt-2 text-sm text-slate-500">{% trans %}Notation actuelle du dossier{% endtrans %}</div>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-white/70 bg-white/75 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur">
+                <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Documents{% endtrans %}</div>
+                <div class="mt-3 text-3xl font-black tracking-tight text-slate-950">
+                    {{ case.documents|length }}
+                </div>
+                <div class="mt-2 text-sm text-slate-500">{% trans %}Pièces associées au dossier{% endtrans %}</div>
+            </div>
+        </section>
+
+        <section class="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-12">
+            {# COLONNE GAUCHE #}
+            <div class="space-y-5 xl:col-span-8">
+
+                {# RÉSUMÉ DU DOSSIER #}
+                <div class="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6">
+                    <div>
+                        <h2 class="text-lg font-black tracking-tight text-slate-950">{% trans %}Résumé du dossier{% endtrans %}</h2>
+                        <p class="mt-1 text-sm text-slate-500">{% trans %}Vue globale des informations KYC entreprise.{% endtrans %}</p>
+                    </div>
+
+                    <div class="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Nom entreprise{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">{{ case.displayCompanyName }}</div>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Ville{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">{{ case.displayCity }}</div>
+                        </div>
+
+                        <div class="rounded-3xl border border-emerald-200/70 bg-emerald-50/70 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-emerald-700">{% trans %}N° d'immatriculation / RCCM{% endtrans %}</div>
+                            <div class="mt-2 break-all text-sm font-black text-slate-950">
+                                {{ case.company and case.company.personalProfile ? (case.company.personalProfile.companyRegistrationNumber ?: '—') : '—' }}
+                            </div>
+                            <div class="mt-2 text-xs font-semibold text-emerald-700">{% trans %}À contrôler avant validation du dossier KYC.{% endtrans %}</div>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Présentation de l'entreprise{% endtrans %}</div>
+                            <div class="mt-2 text-sm leading-6 text-slate-800">
+                                {{ case.company and case.company.personalProfile ? (case.company.personalProfile.companyDescription ?: '—') : '—' }}
+                            </div>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Compte entreprise{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                                {{ case.company and case.company.email ? case.company.email : '—' }}
+                            </div>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Relecteur{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                                {% if case.reviewedBy %}
+                                    {{ attribute(case.reviewedBy, 'email') is defined ? case.reviewedBy.email : 'Utilisateur lié'|trans }}
+                                {% else %}
+                                    {% trans %}Non attribué{% endtrans %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Soumis le{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                                {{ case.submittedAt ? case.submittedAt|date('d/m/Y à H:i') : 'Non soumis'|trans }}
+                            </div>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Revu le{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                                {{ case.reviewedAt ? case.reviewedAt|date('d/m/Y à H:i') : 'Pas encore revu'|trans }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-[1.5rem] border border-slate-200/70 bg-white p-4">
+                        <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Note administrative{% endtrans %}</div>
+                        <div class="mt-3 text-sm leading-7 text-slate-700">
+                            {{ case.adminNote ?: 'Aucune note administrative pour le moment.'|trans }}
+                        </div>
+                    </div>
+                </div>
+
+                {# DOCUMENTS #}
+                <div class="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-black tracking-tight text-slate-950">{% trans %}Documents KYC{% endtrans %}</h2>
+                            <p class="mt-1 text-sm text-slate-500">{% trans %}Pièces rattachées au dossier entreprise.{% endtrans %}</p>
+                        </div>
+                        <div class="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700 ring-1 ring-slate-200">
+                            {{ case.documents|length }} {% trans %}document(s){% endtrans %}
+                        </div>
+                    </div>
+
+                    <div class="mt-5">
+                        {% if case.documents|length > 0 %}
+                            <div class="overflow-hidden rounded-[1.5rem] border border-slate-200/70">
+                                <div class="overflow-x-auto">
+                                    <table class="min-w-full divide-y divide-slate-200">
+                                        <thead class="bg-slate-50">
+                                            <tr>
+                                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Document{% endtrans %}</th>
+                                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Type{% endtrans %}</th>
+                                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Statut{% endtrans %}</th>
+                                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Date{% endtrans %}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 bg-white">
+                                            {% for doc in case.documents %}
+                                                <tr class="hover:bg-slate-50/70">
+                                                    <td class="px-4 py-4 text-sm font-semibold text-slate-900">
+                                                        {{ doc.originalName ?? doc.name ?? ('Document #' ~ doc.id) }}
+                                                    </td>
+                                                    <td class="px-4 py-4 text-sm text-slate-600">
+                                                        {{ doc.type ?? doc.documentType ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-4 text-sm text-slate-600">
+                                                        {{ doc.status ?? '—' }}
+                                                    </td>
+                                                    <td class="px-4 py-4 text-sm text-slate-600">
+                                                        {% if doc.createdAt is defined and doc.createdAt %}
+                                                            {{ doc.createdAt|date('d/m/Y H:i') }}
+                                                        {% else %}
+                                                            —
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
+                                <div class="text-base font-black text-slate-900">{% trans %}Aucun document associé{% endtrans %}</div>
+                                <div class="mt-2 text-sm text-slate-500">{% trans %}Ce dossier ne contient pas encore de pièces KYC.{% endtrans %}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# HISTORIQUE DES REVUES #}
+                <div class="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6">
+                    <div>
+                        <h2 class="text-lg font-black tracking-tight text-slate-950">{% trans %}Historique des revues{% endtrans %}</h2>
+                        <p class="mt-1 text-sm text-slate-500">{% trans %}Suivi des actions et validations sur le dossier.{% endtrans %}</p>
+                    </div>
+
+                    <div class="mt-5">
+                        {% if case.reviews|length > 0 %}
+                            <div class="space-y-4">
+                                {% for review in case.reviews %}
+                                    <div class="rounded-[1.5rem] border border-slate-200/70 bg-white p-4 shadow-sm">
+                                        <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                            <div>
+                                                <div class="text-sm font-black text-slate-900">
+                                                    {{ review.action ?? review.status ?? 'Action de revue'|trans }}
+                                                </div>
+                                                <div class="mt-1 text-sm text-slate-500">
+                                                    {% if review.reviewer is defined and review.reviewer %}
+                                                        {% trans %}Par{% endtrans %} {{ review.reviewer.email ?? 'Utilisateur interne'|trans }}
+                                                    {% elseif review.createdBy is defined and review.createdBy %}
+                                                        {% trans %}Par{% endtrans %} {{ review.createdBy.email ?? 'Utilisateur interne'|trans }}
+                                                    {% else %}
+                                                        {% trans %}Auteur non renseigné{% endtrans %}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+
+                                            <div class="text-xs font-bold text-slate-500">
+                                                {% if review.createdAt is defined and review.createdAt %}
+                                                    {{ review.createdAt|date('d/m/Y à H:i') }}
+                                                {% else %}
+                                                    —
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-3 text-sm leading-7 text-slate-700">
+                                            {{ review.comment ?? review.note ?? review.message ?? 'Aucun commentaire.'|trans }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="rounded-[1.5rem] border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
+                                <div class="text-base font-black text-slate-900">{% trans %}Aucune revue enregistrée{% endtrans %}</div>
+                                <div class="mt-2 text-sm text-slate-500">{% trans %}Le workflow de contrôle n’a pas encore généré d’historique.{% endtrans %}</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {# COLONNE DROITE #}
+            <div class="space-y-5 xl:col-span-4">
+
+                {# PANNEAU DE SYNTHÈSE #}
+                <div class="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6">
+                    <h3 class="text-lg font-black tracking-tight text-slate-950">{% trans %}Panneau de synthèse{% endtrans %}</h3>
+
+                    <div class="mt-5 space-y-3">
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+                            <span class="text-sm font-semibold text-slate-600">{% trans %}ID dossier{% endtrans %}</span>
+                            <span class="text-sm font-black text-slate-900">#{{ case.id }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+                            <span class="text-sm font-semibold text-slate-600">{% trans %}Statut{% endtrans %}</span>
+                            <span class="text-sm font-black text-slate-900">{{ currentStatus.label }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+                            <span class="text-sm font-semibold text-slate-600">{% trans %}Risque{% endtrans %}</span>
+                            <span class="text-sm font-black text-slate-900">{{ currentRisk.label }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+                            <span class="text-sm font-semibold text-slate-600">{% trans %}Ville{% endtrans %}</span>
+                            <span class="text-sm font-black text-slate-900">{{ case.displayCity }}</span>
+                        </div>
+
+                        <div class="flex items-center justify-between rounded-2xl bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+                            <span class="text-sm font-semibold text-slate-600">{% trans %}Soumission{% endtrans %}</span>
+                            <span class="text-sm font-black text-slate-900">{{ case.submittedAt ? 'Oui'|trans : 'Non'|trans }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {# ACTIONS KYC #}
+                <div class="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-lg font-black tracking-tight text-slate-950">{% trans %}Actions KYC{% endtrans %}</h3>
+                            <p class="mt-1 text-sm text-slate-500">{% trans %}Modifier rapidement le statut du dossier.{% endtrans %}</p>
+                        </div>
+
+                        <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 {{ currentStatus.classes }}">
+                            {{ currentStatus.label }}
+                        </span>
+                    </div>
+
+                    <div class="mt-5 grid grid-cols-1 gap-3">
+                        <form method="post" action="{{ path('admin_company_kyc_update_status', {id: case.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('kyc_status_' ~ case.id) }}">
+                            <input type="hidden" name="status" value="draft">
+                            <button type="submit"
+                                    class="flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition {{ case.status == 'draft' ? 'border-slate-900 bg-slate-900 text-white shadow-lg cursor-not-allowed' : 'border-slate-200 bg-white text-slate-800 hover:-translate-y-0.5 hover:bg-slate-50' }}"
+                                    {{ case.status == 'draft' ? 'disabled' : '' }}>
+                                <span>
+                                    <span class="block text-sm font-black">{% trans %}Mettre en brouillon{% endtrans %}</span>
+                                    <span class="block text-xs opacity-70">STATUS_DRAFT</span>
+                                </span>
+                                <span class="text-xs font-bold">{{ case.status == 'draft' ? 'Actuel'|trans : 'Choisir'|trans }}</span>
+                            </button>
+                        </form>
+
+                        <form method="post" action="{{ path('admin_company_kyc_update_status', {id: case.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('kyc_status_' ~ case.id) }}">
+                            <input type="hidden" name="status" value="pending">
+                            <button type="submit"
+                                    class="flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition {{ case.status == 'pending' ? 'border-amber-500 bg-amber-500 text-white shadow-lg cursor-not-allowed' : 'border-slate-200 bg-white text-slate-800 hover:-translate-y-0.5 hover:bg-slate-50' }}"
+                                    {{ case.status == 'pending' ? 'disabled' : '' }}>
+                                <span>
+                                    <span class="block text-sm font-black">{% trans %}Mettre en attente{% endtrans %}</span>
+                                    <span class="block text-xs opacity-70">STATUS_PENDING</span>
+                                </span>
+                                <span class="text-xs font-bold">{{ case.status == 'pending' ? 'Actuel'|trans : 'Choisir'|trans }}</span>
+                            </button>
+                        </form>
+
+                        <form method="post" action="{{ path('admin_company_kyc_update_status', {id: case.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('kyc_status_' ~ case.id) }}">
+                            <input type="hidden" name="status" value="in_review">
+                            <button type="submit"
+                                    class="flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition {{ case.status == 'in_review' ? 'border-sky-500 bg-sky-500 text-white shadow-lg cursor-not-allowed' : 'border-slate-200 bg-white text-slate-800 hover:-translate-y-0.5 hover:bg-slate-50' }}"
+                                    {{ case.status == 'in_review' ? 'disabled' : '' }}>
+                                <span>
+                                    <span class="block text-sm font-black">{% trans %}Mettre en revue{% endtrans %}</span>
+                                    <span class="block text-xs opacity-70">STATUS_IN_REVIEW</span>
+                                </span>
+                                <span class="text-xs font-bold">{{ case.status == 'in_review' ? 'Actuel'|trans : 'Choisir'|trans }}</span>
+                            </button>
+                        </form>
+
+                        <form method="post" action="{{ path('admin_company_kyc_update_status', {id: case.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('kyc_status_' ~ case.id) }}">
+                            <input type="hidden" name="status" value="approved">
+                            <button type="submit"
+                                    class="flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition {{ case.status == 'approved' ? 'border-emerald-500 bg-emerald-500 text-white shadow-lg cursor-not-allowed' : 'border-slate-200 bg-white text-slate-800 hover:-translate-y-0.5 hover:bg-slate-50' }}"
+                                    {{ case.status == 'approved' ? 'disabled' : '' }}>
+                                <span>
+                                    <span class="block text-sm font-black">{% trans %}Approuver{% endtrans %}</span>
+                                    <span class="block text-xs opacity-70">STATUS_APPROVED</span>
+                                </span>
+                                <span class="text-xs font-bold">{{ case.status == 'approved' ? 'Actuel'|trans : 'Choisir'|trans }}</span>
+                            </button>
+                        </form>
+
+                        <form method="post" action="{{ path('admin_company_kyc_update_status', {id: case.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('kyc_status_' ~ case.id) }}">
+                            <input type="hidden" name="status" value="rejected">
+                            <button type="submit"
+                                    class="flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition {{ case.status == 'rejected' ? 'border-rose-500 bg-rose-500 text-white shadow-lg cursor-not-allowed' : 'border-slate-200 bg-white text-slate-800 hover:-translate-y-0.5 hover:bg-slate-50' }}"
+                                    {{ case.status == 'rejected' ? 'disabled' : '' }}>
+                                <span>
+                                    <span class="block text-sm font-black">{% trans %}Rejeter{% endtrans %}</span>
+                                    <span class="block text-xs opacity-70">STATUS_REJECTED</span>
+                                </span>
+                                <span class="text-xs font-bold">{{ case.status == 'rejected' ? 'Actuel'|trans : 'Choisir'|trans }}</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {# CHRONOLOGIE #}
+                <div class="rounded-[2rem] border border-white/70 bg-white/80 p-5 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-6">
+                    <h3 class="text-lg font-black tracking-tight text-slate-950">{% trans %}Chronologie{% endtrans %}</h3>
+
+                    <div class="mt-5 space-y-4">
+                        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Création{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                                {{ case.createdAt ? case.createdAt|date('d/m/Y à H:i') : '—' }}
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Soumission{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                                {{ case.submittedAt ? case.submittedAt|date('d/m/Y à H:i') : 'Pas encore'|trans }}
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl border border-slate-200/70 bg-white p-4">
+                            <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Revue finale{% endtrans %}</div>
+                            <div class="mt-2 text-sm font-bold text-slate-900">
+                                {{ case.reviewedAt ? case.reviewedAt|date('d/m/Y à H:i') : 'Pas encore'|trans }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# CARTE VIP #}
+                <div class="rounded-[2rem] border border-white/70 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-5 text-white shadow-[0_18px_60px_rgba(15,23,42,.22)] xl:p-6">
+                    <div class="text-xs font-extrabold uppercase tracking-[0.18em] text-slate-300">SaaS VIP</div>
+                    <div class="mt-3 text-xl font-black tracking-tight">{% trans %}Dossier KYC premium{% endtrans %}</div>
+                    <p class="mt-3 text-sm leading-7 text-slate-300">
+                        {% trans %}Cette vue centralise l’identité entreprise, le niveau de risque, les documents et l’historique de revue dans une interface d’administration haut de gamme.{% endtrans %}
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

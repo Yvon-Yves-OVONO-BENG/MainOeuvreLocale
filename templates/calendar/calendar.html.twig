@@ -1,0 +1,943 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Planning • Entretiens{% endtrans %}{% endblock %}
+
+{% block body %}
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.css">
+
+	{% include "calendar/_vip_ui.html.twig" %}
+
+	<div class="vip-page">
+		<div class="container-fluid px-3 px-lg-4">
+			<div class="vip-toast-wrap" id="vipToasts"></div>
+
+			<section class="vip-card vip-hero mb-3">
+				<div class="in">
+					<div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
+						<div>
+							<div class="d-flex flex-wrap gap-2 mb-2">
+								<span class="vip-chip">🗓️ {% trans %}Calendrier d’entretiens{% endtrans %}</span>
+								<span class="vip-chip">🧲 {% trans %}Drag & Drop{% endtrans %}</span>
+								<span class="vip-chip">💬 {% trans %}Message auto{% endtrans %}</span>
+								<span class="vip-chip">📧 {% trans %}Mail auto{% endtrans %}</span>
+								<span class="vip-chip">⚡ {% trans %}Temps réel{% endtrans %}</span>
+							</div>
+							<h1 class="vip-title">{% trans %}Planifier des rendez-vous en glisser-déposer{% endtrans %}</h1>
+							<p class="vip-sub">
+								{% trans %}Glisse un candidat depuis une mission vers le calendrier pour créer directement un rendez-vous.{% endtrans %}
+								{% trans %}Un clic sur le rendez-vous permet ensuite de le modifier.{% endtrans %}
+							</p>
+						</div>
+
+						
+					</div>
+				</div>
+			</section>
+
+			{% set s = statusStats ?? {} %}
+			{% set proposedCount = s['proposed'] ?? 0 %}
+			{% set confirmedCount = s['confirmed'] ?? 0 %}
+			{% set doneCount = s['done'] ?? 0 %}
+
+			<section style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
+				<div style="flex:1 1 200px;min-width:200px;">
+					<div class="vip-kpi h-100">
+						<div class="d-flex align-items-start justify-content-between gap-2">
+							<div>
+								<div class="lbl">{% trans %}RDV du jour{% endtrans %}</div>
+								<div class="val" id="kpiToday">0</div>
+								<div class="hint">{% trans %}Aujourd’hui (tous statuts){% endtrans %}</div>
+							</div>
+							<div class="vip-ico">📅</div>
+						</div>
+					</div>
+				</div>
+
+				<div style="flex:1 1 200px;min-width:200px;">
+					<div class="vip-kpi h-100">
+						<div class="d-flex align-items-start justify-content-between gap-2">
+							<div>
+								<div class="lbl">{% trans %}En attente{% endtrans %}</div>
+								<div class="val" id="kpiProposed">{{ proposedCount }}</div>
+								<div class="hint">{% trans %}Proposés / à confirmer{% endtrans %}</div>
+							</div>
+							<div class="vip-ico">🕓</div>
+						</div>
+					</div>
+				</div>
+
+				<div style="flex:1 1 200px;min-width:200px;">
+					<div class="vip-kpi h-100">
+						<div class="d-flex align-items-start justify-content-between gap-2">
+							<div>
+								<div class="lbl">{% trans %}Confirmés{% endtrans %}</div>
+								<div class="val" id="kpiConfirmed">{{ confirmedCount }}</div>
+								<div class="hint">{% trans %}Rendez-vous validés{% endtrans %}</div>
+							</div>
+							<div class="vip-ico">✅</div>
+						</div>
+					</div>
+				</div>
+
+				<div style="flex:1 1 200px;min-width:200px;">
+					<div class="vip-kpi h-100">
+						<div class="d-flex align-items-start justify-content-between gap-2">
+							<div>
+								<div class="lbl">{% trans %}Terminés{% endtrans %}</div>
+								<div class="val" id="kpiDone">{{ doneCount }}</div>
+								<div class="hint">{% trans %}Entretiens effectués{% endtrans %}</div>
+							</div>
+							<div class="vip-ico">🏁</div>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<div class="row g-3 planner-board">
+				<div class="col-12 col-xl-4 col-xxl-3">
+					<div class="vip-card left-panel">
+						<div class="panel-h">
+							<div>
+								<h3>📋 {% trans %}Missions & candidats{% endtrans %}</h3>
+								<div class="s">{% trans %}Glisse un candidat vers une date{% endtrans %}</div>
+							</div>
+							<span class="badge rounded-pill text-bg-light text-black border">{{ jobsWithApplications|length }}</span>
+						</div>
+
+						<div class="p-3">
+							<input id="candidateSearch" type="text" class="form-control searchbox" placeholder="{% trans %}Rechercher un candidat ou une mission...{% endtrans %}">
+
+							<div class="mt-3" id="externalCandidates">
+								{% if jobsWithApplications is empty %}
+									<div class="vip-soft p-3 text-muted fw-bold">
+										{% trans %}Aucune mission / candidature disponible.{% endtrans %}
+									</div>
+								{% else %}
+									<div class="accordion" id="jobsAccordion">
+										{% for job in jobsWithApplications %}
+											{% set apps = job.applications|default([]) %}
+											<div class="accordion-item vip-acc" data-search="{{ (job.title ?: ('Mission ' ~ job.id))|lower }}">
+												<h2 class="accordion-header" id="heading{{ job.id }}">
+													<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ job.id }}" aria-expanded="false" aria-controls="collapse{{ job.id }}">
+														<div class="w-100 pe-2">
+															<div class="d-flex align-items-center justify-content-between gap-2">
+																<span class="text-truncate">{{ job.title ?: ('Mission #' ~ job.id) }}</span>
+																<span class="badge rounded-pill text-bg-light text-black border">{{ apps|length }}</span>
+															</div>
+															<div class="job-meta">
+																{% if job.reference %}
+																	{{ job.reference }} •
+																{% endif %}
+																{{ job.city ?: 'Ville non précisée' }}
+															</div>
+														</div>
+													</button>
+												</h2>
+
+												<div id="collapse{{ job.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ job.id }}" data-bs-parent="#jobsAccordion">
+													<div class="accordion-body">
+														{% if apps is empty %}
+															<div class="vip-soft p-3 text-muted fw-bold">
+																{% trans %}Aucune candidature sur cette mission.{% endtrans %}
+															</div>
+														{% else %}
+															<div class="drag-list">
+																{% for app in apps %}
+																	{% set cand = app.user ?? null %}
+																	{% set candProfile = cand ? cand.personalProfile : null %}
+																	{% set candName = cand ? ((candProfile and candProfile.fullName) ? candProfile.fullName : (cand.email ?? ('Talent #' ~ cand.id))) : ('Candidat #' ~ app.id) %}
+																	{% set candEmail = cand ? (cand.email ?? '') : '' %}
+
+																	<div class="drag-item"
+																		data-application-id="{{ app.id }}"
+																		data-job-id="{{ job.id }}"
+																		data-job-title="{{ (job.title ?: ('Mission #' ~ job.id))|e('html_attr') }}"
+																		data-job-reference="{{ (job.reference ?: '')|e('html_attr') }}"
+																		data-candidate-id="{{ cand ? cand.id : '' }}"
+																		data-candidate-name="{{ candName|e('html_attr') }}"
+																		data-candidate-email="{{ candEmail|e('html_attr') }}"
+																		data-type="interview"
+																		data-search="{{ (candName ~ ' ' ~ candEmail ~ ' ' ~ (job.title ?: ''))|lower }}"
+																	>
+																		<div class="d-flex align-items-start justify-content-between gap-2">
+																			<div class="min-w-0">
+																				<div class="name text-truncate">🎤 {{ candName }}</div>
+																				<div class="sub text-truncate">
+																					{{ candEmail ?: 'Déposer sur une date du calendrier' }}
+																				</div>
+																			</div>
+																			<span class="pill">App #{{ app.id }}</span>
+																		</div>
+
+																		<div class="tags">
+																			<span class="pill">{% trans %}Entretien{% endtrans %}</span>
+																			{% if job.reference %}
+																				<span class="pill">{{ job.reference }}</span>
+																			{% endif %}
+																			<span class="pill">{% trans %}Drag →{% endtrans %}</span>
+																		</div>
+																	</div>
+																{% endfor %}
+															</div>
+														{% endif %}
+													</div>
+												</div>
+											</div>
+										{% endfor %}
+									</div>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-12 col-xl-8 col-xxl-9">
+					<div class="vip-card calendar-panel">
+						<div class="panel-h">
+							<div>
+								<h3>🗓️ {% trans %}Calendrier premium{% endtrans %}</h3>
+								<div class="s">{% trans %}Drop candidat → création directe • Drag event → édition{% endtrans %}</div>
+							</div>
+							<div class="d-flex flex-wrap gap-2">
+								<span class="badge-status st-proposed">🕓 {% trans %}Proposé{% endtrans %}</span>
+								<span class="badge-status st-confirmed">✅ {% trans %}Confirmé{% endtrans %}</span>
+								<span class="badge-status st-refused">🚫 {% trans %}Refusé{% endtrans %}</span>
+								<span class="badge-status st-done">🏁 {% trans %}Terminé{% endtrans %}</span>
+							</div>
+						</div>
+
+						<div class="drop-help">
+							💡 {% trans %}Glisse un candidat sur une date pour créer immédiatement un rendez-vous.{% endtrans %}
+							{% trans %}En vue Mois, l’heure par défaut sera 10:00. Ensuite clique sur le rendez-vous pour modifier l’heure, la durée, le lieu ou la note.{% endtrans %}
+						</div>
+
+						<div class="p-3">
+							<div id="calendar"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{# ===================== MODAL EDIT ===================== #}
+	{# ===================== MODAL EDIT CUSTOM ===================== #}
+<div id="editModal" class="mol-modal" aria-hidden="true">
+	<div class="mol-modal-backdrop" data-close-edit-modal></div>
+
+	<div class="mol-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="emTitleModal">
+		<div class="mol-modal-content">
+			<div class="mol-modal-header">
+				<h5 class="mol-modal-title" id="emTitleModal">🛠️ {% trans %}Gérer un rendez-vous{% endtrans %}</h5>
+				<button type="button" class="mol-close-btn" data-close-edit-modal aria-label="{% trans %}Fermer{% endtrans %}">×</button>
+			</div>
+
+			<div class="mol-modal-body">
+				<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+					<span class="badge-status" id="emStatusBadge">{% trans %}Statut{% endtrans %}</span>
+					<span class="badge-status" id="emTypeBadge">{% trans %}Type{% endtrans %}</span>
+				</div>
+
+				<div class="alert alert-light border rounded-4 mb-3">
+					<div class="fw-bold" id="emTitle">{% trans %}Rendez-vous{% endtrans %}</div>
+					<div class="small text-muted" id="emMeta">—</div>
+				</div>
+
+				<div class="row g-3">
+					<div class="col-12 col-md-6">
+						<label class="form-label fw-bold">{% trans %}Date{% endtrans %}</label>
+						<input type="date" class="form-control rounded-3" id="emDate">
+					</div>
+
+					<div class="col-12 col-md-6">
+						<label class="form-label fw-bold">{% trans %}Heure{% endtrans %}</label>
+						<input type="time" class="form-control rounded-3" id="emTime">
+					</div>
+
+					<div class="col-12 col-md-6">
+						<label class="form-label fw-bold">{% trans %}Durée (min){% endtrans %}</label>
+						<select class="form-select rounded-3" id="emDuration">
+							<option value="15">15</option>
+							<option value="30">30</option>
+							<option value="45">45</option>
+							<option value="60">60</option>
+							<option value="90">90</option>
+						</select>
+					</div>
+
+					<div class="col-12 col-md-6">
+						<label class="form-label fw-bold">{% trans %}Type{% endtrans %}</label>
+						<select class="form-select rounded-3" id="emType">
+							<option value="interview">{% trans %}Entretien{% endtrans %}</option>
+							<option value="call">{% trans %}Appel{% endtrans %}</option>
+							<option value="meeting">{% trans %}Meeting{% endtrans %}</option>
+						</select>
+					</div>
+
+					<div class="col-12">
+						<label class="form-label fw-bold">{% trans %}Lieu{% endtrans %}</label>
+						<input type="text" class="form-control rounded-3" id="emLocation">
+					</div>
+
+					<div class="col-12">
+						<label class="form-label fw-bold">{% trans %}Note{% endtrans %}</label>
+						<textarea class="form-control rounded-3" id="emNotes" rows="3"></textarea>
+					</div>
+
+					<div class="col-12">
+						<label class="form-label fw-bold text-danger">{% trans %}Motif annulation (optionnel){% endtrans %}</label>
+						<input type="text" class="form-control rounded-3" id="emCancelReason" placeholder="{% trans %}Ex: indisponibilité, report...{% endtrans %}">
+					</div>
+				</div>
+			</div>
+
+			<div class="mol-modal-footer">
+				<div class="d-flex gap-2 flex-wrap">
+					<button type="button" class="btn btn-outline-danger rounded-3 fw-bold" id="emCancelBtn">❌ {% trans %}Annuler{% endtrans %}</button>
+					<button type="button" class="btn btn-outline-primary rounded-3 fw-bold" id="emDoneBtn">🏁 {% trans %}Terminer{% endtrans %}</button>
+				</div>
+
+				<div class="d-flex gap-2 flex-wrap">
+					<button type="button" class="btn btn-outline-secondary rounded-3 fw-bold" data-close-edit-modal>{% trans %}Fermer{% endtrans %}</button>
+					<button type="button" class="btn btn-dark rounded-3 fw-bold" id="emSaveBtn">💾 {% trans %}Enregistrer{% endtrans %}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js"></script>
+	<script>
+		const EVENTS_FEED_URL = {{ eventsFeedUrl|json_encode|raw }};
+		const CREATE_DROP_URL = {{ createDropUrl|json_encode|raw }};
+		const MOVE_URL_TPL = {{ path('calendar_move', {'id': '__ID__'})|json_encode|raw }};
+		const CANCEL_URL_TPL = {{ path('calendar_cancel', {'id': '__ID__'})|json_encode|raw }};
+		const DONE_URL_TPL = {{ path('calendar_done', {'id': '__ID__'})|json_encode|raw }};
+		const MERCURE_URL = {{ (mercure_public_url ?? '')|json_encode|raw }};
+		const MY_USER_ID = {{ app.user ? app.user.id : 0 }};
+	</script>
+
+	<script>
+		(function () {
+			function initPlanner() {
+				const calendarEl = document.getElementById('calendar');
+				if (!calendarEl) return;
+				if (calendarEl.dataset.initialized === '1') return;
+				calendarEl.dataset.initialized = '1';
+
+				if (!window.bootstrap || !window.FullCalendar) {
+					console.error('Bootstrap ou FullCalendar non chargé');
+					return;
+				}
+
+				const eventsFeedUrl = EVENTS_FEED_URL;
+				const createDropUrl = CREATE_DROP_URL;
+				const moveUrlTpl = MOVE_URL_TPL;
+				const cancelUrlTpl = CANCEL_URL_TPL;
+				const doneUrlTpl = DONE_URL_TPL;
+				const mercureUrl = MERCURE_URL;
+				const myUserId = MY_USER_ID;
+
+				const toastWrap = document.getElementById('vipToasts');
+				const externalContainer = document.getElementById('externalCandidates');
+				const searchInput = document.getElementById('candidateSearch');
+
+				const kpiToday = document.getElementById('kpiToday');
+				const kpiProposed = document.getElementById('kpiProposed');
+				const kpiCanceled = document.getElementById('kpiCanceled');
+				const kpiDone = document.getElementById('kpiDone');
+
+				const editModalEl = document.getElementById('editModal');
+				const emStatusBadge = document.getElementById('emStatusBadge');
+				const emTypeBadge = document.getElementById('emTypeBadge');
+				const emTitle = document.getElementById('emTitle');
+				const emMeta = document.getElementById('emMeta');
+				const emDate = document.getElementById('emDate');
+				const emTime = document.getElementById('emTime');
+				const emDuration = document.getElementById('emDuration');
+				const emType = document.getElementById('emType');
+				const emLocation = document.getElementById('emLocation');
+				const emNotes = document.getElementById('emNotes');
+				const emCancelReason = document.getElementById('emCancelReason');
+				const emCancelBtn = document.getElementById('emCancelBtn');
+				const emDoneBtn = document.getElementById('emDoneBtn');
+				const emSaveBtn = document.getElementById('emSaveBtn');
+
+				let currentEditEvent = null;
+				let pendingOpenEventId = null;
+
+				function cleanupModalArtifacts() {
+					document.querySelectorAll('.modal-backdrop').forEach((b) => b.remove());
+					document.body.classList.remove('modal-open');
+					document.body.style.removeProperty('overflow');
+					document.body.style.removeProperty('padding-right');
+				}
+
+				function toast(msg, isError = false) {
+					if (!toastWrap) return;
+
+					const el = document.createElement('div');
+					el.className = 'vip-toast';
+					el.style.background = isError ? 'rgba(127,29,29,.95)' : 'rgba(15,23,42,.92)';
+					el.innerHTML = `<div style="font-weight:900;margin-bottom:4px;">${isError ? '❌ Erreur' : '✅ OK'}</div><div>${msg}</div>`;
+					toastWrap.appendChild(el);
+
+					setTimeout(() => {
+						el.style.transition = 'opacity .25s ease, transform .25s ease';
+						el.style.opacity = '0';
+						el.style.transform = 'translateY(-4px)';
+						setTimeout(() => el.remove(), 260);
+					}, 3200);
+				}
+
+				function statusBadgeClass(status) {
+					switch (status) {
+						case 'done':
+							return 'badge-status st-done';
+						case 'canceled':
+							return 'badge-status st-canceled';
+						default:
+							return 'badge-status st-proposed';
+					}
+				}
+
+				function statusLabel(status) {
+					switch (status) {
+						case 'done':
+							return '🏁 Terminé';
+						case 'canceled':
+							return '❌ Annulé';
+						default:
+							return '🕓 Proposé';
+					}
+				}
+
+				function typeLabel(type) {
+					switch (type) {
+						case 'call':
+							return '📞 Appel';
+						case 'meeting':
+							return '🤝 Meeting';
+						default:
+							return '🎤 Entretien';
+					}
+				}
+
+				function statusColor(status) {
+					switch (status) {
+						case 'done':
+							return '#0ea5e9';
+						case 'canceled':
+							return '#6b7280';
+						default:
+							return '#f59e0b';
+					}
+				}
+
+				function buildUrl(tpl, id) {
+					return String(tpl).replace('__ID__', String(id));
+				}
+
+				function sameDay(d1, d2) {
+					return d1.getFullYear() === d2.getFullYear()
+						&& d1.getMonth() === d2.getMonth()
+						&& d1.getDate() === d2.getDate();
+				}
+
+				function computeKpisFromEvents(events) {
+					const today = new Date();
+					let todayCount = 0;
+					let proposed = 0;
+					let canceled = 0;
+					let done = 0;
+
+					for (const e of events) {
+						const start = e.start ? new Date(e.start) : null;
+						const st = e.extendedProps && e.extendedProps.status ? e.extendedProps.status : null;
+
+						if (start && sameDay(start, today)) todayCount++;
+						if (st === 'proposed') proposed++;
+						if (st === 'canceled') canceled++;
+						if (st === 'done') done++;
+					}
+
+					if (kpiToday) kpiToday.textContent = String(todayCount);
+					if (kpiProposed) kpiProposed.textContent = String(proposed);
+					if (kpiCanceled) kpiCanceled.textContent = String(canceled);
+					if (kpiDone) kpiDone.textContent = String(done);
+				}
+
+				function openEditModal(event) {
+					currentEditEvent = event;
+
+					const p = currentEditEvent.extendedProps || {};
+					const st = p.status || 'proposed';
+					const type = p.type || 'interview';
+
+					if (emStatusBadge) {
+						emStatusBadge.className = statusBadgeClass(st);
+						emStatusBadge.textContent = statusLabel(st);
+					}
+
+					if (emTypeBadge) {
+						emTypeBadge.className = 'badge-status';
+						emTypeBadge.textContent = typeLabel(type);
+					}
+
+					if (emTitle) emTitle.textContent = currentEditEvent.title || 'Rendez-vous';
+
+					if (emMeta) {
+						const jobTitle = p.jobTitle || 'Mission';
+						const talent = p.talentName || p.candidateName || 'Talent';
+						emMeta.textContent = `${talent} • ${jobTitle}`;
+					}
+
+					const start = currentEditEvent.start ? new Date(currentEditEvent.start) : new Date();
+					const end = currentEditEvent.end ? new Date(currentEditEvent.end) : new Date(start.getTime() + 30 * 60000);
+
+					const yyyy = start.getFullYear();
+					const mm = String(start.getMonth() + 1).padStart(2, '0');
+					const dd = String(start.getDate()).padStart(2, '0');
+					if (emDate) emDate.value = `${yyyy}-${mm}-${dd}`;
+
+					const hh = String(start.getHours()).padStart(2, '0');
+					const mi = String(start.getMinutes()).padStart(2, '0');
+					if (emTime) emTime.value = `${hh}:${mi}`;
+
+					const duration = Math.max(15, Math.round((end.getTime() - start.getTime()) / 60000));
+					if (emDuration) emDuration.value = String(duration);
+
+					if (emType) emType.value = type;
+					if (emLocation) emLocation.value = p.location || '';
+					if (emNotes) emNotes.value = p.notes || '';
+					if (emCancelReason) emCancelReason.value = '';
+
+					const canEdit = st === 'proposed';
+					if (emSaveBtn) emSaveBtn.disabled = !canEdit;
+					if (emCancelBtn) emCancelBtn.disabled = !canEdit;
+					if (emDoneBtn) emDoneBtn.disabled = !canEdit;
+
+					openEditModalBox();
+				}
+
+				if (searchInput) {
+					searchInput.addEventListener('input', () => {
+						const q = (searchInput.value || '').trim().toLowerCase();
+
+						document.querySelectorAll('#jobsAccordion .accordion-item').forEach((item) => {
+							const hay = (item.getAttribute('data-search') || '').toLowerCase();
+							let match = hay.includes(q);
+
+							item.querySelectorAll('.drag-item').forEach((c) => {
+								const cHay = (c.getAttribute('data-search') || '').toLowerCase();
+								const show = q === '' ? true : cHay.includes(q);
+								c.style.display = show ? '' : 'none';
+								if (show) match = true;
+							});
+
+							item.style.display = (q === '' || match) ? '' : 'none';
+						});
+					});
+				}
+
+				function openEditModalBox() {
+					if (!editModalEl) return;
+					editModalEl.classList.add('is-open');
+					editModalEl.setAttribute('aria-hidden', 'false');
+					document.body.classList.add('mol-modal-open');
+				}
+
+				function closeEditModalBox() {
+					if (!editModalEl) return;
+					editModalEl.classList.remove('is-open');
+					editModalEl.setAttribute('aria-hidden', 'true');
+					document.body.classList.remove('mol-modal-open');
+					currentEditEvent = null;
+				}
+
+				editModalEl?.querySelectorAll('[data-close-edit-modal]').forEach((btn) => {
+					btn.addEventListener('click', closeEditModalBox);
+				});
+
+				document.addEventListener('keydown', (e) => {
+					if (e.key === 'Escape' && editModalEl?.classList.contains('is-open')) {
+						closeEditModalBox();
+					}
+				});
+
+				if (externalContainer && FullCalendar.Draggable) {
+					new FullCalendar.Draggable(externalContainer, {
+						itemSelector: '.drag-item',
+						eventData: function (eventEl) {
+							return {
+								create: false,
+								extendedProps: {
+									applicationId: Number(eventEl.dataset.applicationId || 0),
+									jobId: Number(eventEl.dataset.jobId || 0),
+									jobTitle: eventEl.dataset.jobTitle || 'Mission',
+									jobReference: eventEl.dataset.jobReference || '',
+									candidateId: Number(eventEl.dataset.candidateId || 0),
+									candidateName: eventEl.dataset.candidateName || 'Talent',
+									candidateEmail: eventEl.dataset.candidateEmail || '',
+									type: eventEl.dataset.type || 'interview'
+								}
+							};
+						}
+					});
+				}
+
+				const calendar = new FullCalendar.Calendar(calendarEl, {
+					locale: 'fr',
+					initialView: 'dayGridMonth',
+					firstDay: 1,
+					height: '100%',
+					droppable: true,
+					editable: true,
+					eventDurationEditable: true,
+
+					headerToolbar: {
+						left: 'prev,next today',
+						center: 'title',
+						right: 'dayGridMonth,timeGridWeek,timeGridDay'
+					},
+
+					buttonText: {
+						today: "Aujourd'hui",
+						month: 'Mois',
+						week: 'Semaine',
+						day: 'Jour'
+					},
+
+					events(fetchInfo, successCallback, failureCallback) {
+						const url = new URL(eventsFeedUrl, window.location.origin);
+						url.searchParams.set('start', fetchInfo.startStr);
+						url.searchParams.set('end', fetchInfo.endStr);
+
+						fetch(url.toString(), {
+							headers: { 'X-Requested-With': 'XMLHttpRequest' }
+						})
+						.then(r => r.json())
+						.then(data => {
+							computeKpisFromEvents(data || []);
+							successCallback(data || []);
+						})
+						.catch(err => {
+							console.error(err);
+							failureCallback(err);
+							toast("Impossible de charger les rendez-vous.", true);
+						});
+					},
+
+					eventsSet(events) {
+						if (!pendingOpenEventId) return;
+
+						const found = events.find(e => String(e.id) === String(pendingOpenEventId));
+						if (found) {
+							pendingOpenEventId = null;
+							const eventObj = calendar.getEventById(String(found.id));
+							if (eventObj) {
+								openEditModal(eventObj);
+							}
+						}
+					},
+
+					eventContent(arg) {
+						const status = arg.event.extendedProps.status || 'proposed';
+						const chip = document.createElement('span');
+						chip.style.display = 'inline-flex';
+						chip.style.alignItems = 'center';
+						chip.style.gap = '6px';
+						chip.style.fontWeight = '900';
+						chip.style.whiteSpace = 'nowrap';
+
+						const dot = document.createElement('span');
+						dot.style.width = '8px';
+						dot.style.height = '8px';
+						dot.style.borderRadius = '999px';
+						dot.style.background = statusColor(status);
+
+						const t = document.createElement('span');
+						t.textContent = arg.event.title;
+
+						chip.appendChild(dot);
+						chip.appendChild(t);
+
+						return { domNodes: [chip] };
+					},
+
+					drop: async function(info) {
+						const el = info.draggedEl;
+						if (!el) return;
+
+						const applicationId = Number(el.dataset.applicationId || 0);
+						const type = el.dataset.type || 'interview';
+
+						if (!applicationId) {
+							toast("Candidature invalide.", true);
+							return;
+						}
+
+						const droppedDate = info.date ? new Date(info.date) : new Date();
+
+						if (info.allDay || calendar.view.type === 'dayGridMonth') {
+							droppedDate.setHours(10, 0, 0, 0);
+						}
+
+						try {
+							const res = await fetch(createDropUrl, {
+								method: 'POST',
+								headers: {
+									'Content-Type': 'application/json',
+									'X-Requested-With': 'XMLHttpRequest'
+								},
+								body: JSON.stringify({
+									applicationId: applicationId,
+									startAt: droppedDate.toISOString(),
+									durationMinutes: 30,
+									type: type,
+									location: null,
+									notes: null
+								})
+							});
+
+							const data = await res.json();
+
+							if (!res.ok || !data.ok) {
+								throw new Error(data.message || "Création impossible.");
+							}
+
+							toast("Rendez-vous créé ✅");
+							pendingOpenEventId = data.id || null;
+							calendar.refetchEvents();
+						} catch (e) {
+							console.error(e);
+							toast(e.message || "Erreur création rendez-vous.", true);
+						}
+					},
+
+					eventDrop(info) {
+						const ev = info.event;
+						const id = ev.id;
+						const status = ev.extendedProps.status || 'proposed';
+
+						if (status !== 'proposed') {
+							toast("Seuls les rendez-vous proposés peuvent être déplacés.", true);
+							info.revert();
+							return;
+						}
+
+						const start = ev.start;
+						const end = ev.end || new Date(start.getTime() + 30 * 60000);
+						const durationMinutes = Math.round((end.getTime() - start.getTime()) / 60000);
+
+						fetch(buildUrl(moveUrlTpl, id), {
+							method: 'PATCH',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-Requested-With': 'XMLHttpRequest'
+							},
+							body: JSON.stringify({
+								startAt: start.toISOString(),
+								durationMinutes,
+								type: ev.extendedProps.type || 'interview',
+								location: ev.extendedProps.location || null,
+								notes: ev.extendedProps.notes || null
+							})
+						})
+						.then(r => r.json())
+						.then(data => {
+							if (!data.ok) {
+								info.revert();
+								toast(data.message || "Impossible de déplacer le rendez-vous.", true);
+								return;
+							}
+
+							toast("Rendez-vous reprogrammé ✅");
+							calendar.refetchEvents();
+						})
+						.catch(() => {
+							info.revert();
+							toast("Erreur réseau pendant le déplacement.", true);
+						});
+					},
+
+					eventClick(info) {
+						info.jsEvent.preventDefault();
+						info.jsEvent.stopPropagation();
+						openEditModal(info.event);
+					}
+				});
+
+				calendar.render();
+				window._fcCalendar = calendar;
+
+				emSaveBtn?.addEventListener('click', async () => {
+					if (!currentEditEvent) return;
+
+					const id = currentEditEvent.id;
+					const st = currentEditEvent.extendedProps.status || 'proposed';
+
+					if (st !== 'proposed') {
+						toast("Seuls les rendez-vous proposés peuvent être modifiés.", true);
+						return;
+					}
+
+					const dateVal = emDate?.value || '';
+					const timeVal = emTime?.value || '10:00';
+					const durationMinutes = parseInt(emDuration?.value || '30', 10);
+					const typeVal = emType?.value || 'interview';
+					const locationVal = (emLocation?.value || '').trim();
+					const notesVal = (emNotes?.value || '').trim();
+
+					const startLocal = new Date(`${dateVal}T${timeVal}:00`);
+					if (Number.isNaN(startLocal.getTime())) {
+						toast("Date/heure invalide.", true);
+						return;
+					}
+
+					emSaveBtn.disabled = true;
+					emSaveBtn.textContent = '⏳ Sauvegarde...';
+
+					try {
+						const res = await fetch(buildUrl(moveUrlTpl, id), {
+							method: 'PATCH',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-Requested-With': 'XMLHttpRequest'
+							},
+							body: JSON.stringify({
+								startAt: startLocal.toISOString(),
+								durationMinutes,
+								location: locationVal || null,
+								notes: notesVal || null,
+								type: typeVal
+							})
+						});
+
+						const data = await res.json();
+						if (!res.ok || !data.ok) {
+							throw new Error(data.message || 'Sauvegarde impossible.');
+						}
+
+						toast('Modifications enregistrées ✅');
+						closeEditModalBox();
+						setTimeout(() => calendar.refetchEvents(), 250);
+					} catch (e) {
+						console.error(e);
+						toast(e.message || 'Erreur sauvegarde.', true);
+					} finally {
+						emSaveBtn.disabled = false;
+						emSaveBtn.textContent = '💾 Enregistrer';
+					}
+				});
+
+				emCancelBtn?.addEventListener('click', async () => {
+					if (!currentEditEvent) return;
+
+					const id = currentEditEvent.id;
+					const st = currentEditEvent.extendedProps.status || 'proposed';
+
+					if (st !== 'proposed') {
+						toast("Seuls les rendez-vous proposés peuvent être annulés.", true);
+						return;
+					}
+
+					const reason = (emCancelReason?.value || '').trim();
+
+					emCancelBtn.disabled = true;
+					emCancelBtn.textContent = '⏳ Annulation...';
+
+					try {
+						const res = await fetch(buildUrl(cancelUrlTpl, id), {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'X-Requested-With': 'XMLHttpRequest'
+							},
+							body: JSON.stringify({ reason: reason || null })
+						});
+
+						const data = await res.json();
+						if (!res.ok || !data.ok) {
+							throw new Error(data.message || 'Annulation impossible.');
+						}
+
+						toast('Rendez-vous annulé ✅');
+						closeEditModalBox();
+						setTimeout(() => calendar.refetchEvents(), 250);
+					} catch (e) {
+						console.error(e);
+						toast(e.message || 'Erreur annulation.', true);
+					} finally {
+						emCancelBtn.disabled = false;
+						emCancelBtn.textContent = '❌ Annuler';
+					}
+				});
+
+				emDoneBtn?.addEventListener('click', async () => {
+					if (!currentEditEvent) return;
+
+					const id = currentEditEvent.id;
+					const st = currentEditEvent.extendedProps.status || 'proposed';
+
+					if (st !== 'proposed') {
+						toast("Seuls les rendez-vous proposés peuvent être terminés.", true);
+						return;
+					}
+
+					emDoneBtn.disabled = true;
+					emDoneBtn.textContent = '⏳ Traitement...';
+
+					try {
+						const res = await fetch(buildUrl(doneUrlTpl, id), {
+							method: 'POST',
+							headers: {
+								'X-Requested-With': 'XMLHttpRequest'
+							}
+						});
+
+						const data = await res.json();
+						if (!res.ok || !data.ok) {
+							throw new Error(data.message || 'Impossible de terminer.');
+						}
+
+						toast('Rendez-vous terminé ✅');
+						closeEditModalBox();
+						setTimeout(() => calendar.refetchEvents(), 250);
+					} catch (e) {
+						console.error(e);
+						toast(e.message || 'Erreur.', true);
+					} finally {
+						emDoneBtn.disabled = false;
+						emDoneBtn.textContent = '🏁 Terminer';
+					}
+				});
+
+				if (mercureUrl && myUserId && window.EventSource) {
+					try {
+						const url = new URL(mercureUrl);
+						url.searchParams.append('topic', `/users/${myUserId}/notifications`);
+
+						const es = new EventSource(url.toString());
+						es.onmessage = (e) => {
+							try {
+								const payload = JSON.parse(e.data);
+								if (payload && payload.event && String(payload.event).startsWith('appointment.')) {
+									toast("Mise à jour reçue (temps réel) ⚡");
+									calendar.refetchEvents();
+								}
+							} catch (_) {}
+						};
+					} catch (_) {}
+				}
+			}
+
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', initPlanner);
+			} else {
+				initPlanner();
+			}
+
+			document.addEventListener('turbo:load', initPlanner);
+		})();
+	</script>
+{% endblock %}

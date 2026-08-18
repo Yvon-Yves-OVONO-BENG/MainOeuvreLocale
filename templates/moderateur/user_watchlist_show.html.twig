@@ -1,0 +1,377 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Watchlist •{% endtrans %} {{ u.email }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_user_watchlist_show.html.twig" %}
+
+
+{% set roles = u.roles ?? [] %}
+{% set isTalent = 'ROLE_TALENT' in roles %}
+{% set isComp   = 'ROLE_COMPANY' in roles %}
+{% set roleLabel = isTalent ? ('Talent'|trans) : (isComp ? ('Entreprise'|trans) : ('Particulier'|trans)) %}
+
+{% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+
+{% set cniSt = pp ? (pp.cniStatus ?? 'pending') : 'pending' %}
+{% set cvSt = '—' %}
+{% if isTalent %}
+  {% if pro and pro.isVerified %}
+    {% set cvSt = 'verified' %}
+  {% elseif pro and (pro.verifiedAt is not null) %}
+    {% set cvSt = 'rejected' %}
+  {% else %}
+    {% set cvSt = 'pending' %}
+  {% endif %}
+{% endif %}
+
+<div class="page">
+  <div class="card">
+    <div class="hd">
+      <div>
+        <div class="h1">👀 {% trans %}Watchlist • Détails{% endtrans %}</div>
+        <div class="hint">
+          {{ u.email }} • {% trans %}Rôle :{% endtrans %} <b>{{ roleLabel }}</b> • {% trans %}Élément{% endtrans %} #{{ w.id }}
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="btn" href="{{ path('moderateur_watchlist_index') }}">← {% trans %}Retour{% endtrans %}</a>
+        <a class="btn primary" href="/moderateur/verifications/u/{{ u.id }}">✅ {% trans %}Vérifications{% endtrans %}</a>
+
+        <button class="btn warn js-watch-toggle"
+                data-url="{{ path('moderateur_watchlist_toggle', {id: w.id}) }}"
+                data-token="{{ csrf_token('watch_toggle_' ~ w.id) }}"
+                data-active="{{ w.isActive ? '1' : '0' }}">
+          {{ w.isActive ? '➖ Retirer (désactiver)'|trans : '➕ Réactiver'|trans }}
+        </button>
+      </div>
+    </div>
+
+    <div class="bd">
+      <div class="grid">
+
+        {# =======================
+           LEFT: Identité + docs
+           ======================= #}
+        <div class="box">
+          <div class="label">{% trans %}Identité & profil{% endtrans %}</div>
+
+          <div class="userline">
+            <img class="avatar" src="{{ photo }}" alt="photo">
+            <div>
+              <div style="font-weight:950;">
+                {{ pp and pp.fullName ? pp.fullName : u.email }}
+              </div>
+              <div class="muted" style="font-size:12px;margin-top:2px;">
+                {{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}
+              </div>
+            </div>
+
+            <span class="chip info">{{ roleLabel }}</span>
+            {% if u.isActive %}
+              <span class="chip ok">🟢 {% trans %}Actif{% endtrans %}</span>
+            {% else %}
+              <span class="chip bad">🔴 {% trans %}Bloqué{% endtrans %}</span>
+            {% endif %}
+            {% if w.isActive %}
+              <span class="chip warn">👀 {% trans %}Watchlist active{% endtrans %}</span>
+            {% else %}
+              <span class="chip">📌 {% trans %}Watchlist inactive{% endtrans %}</span>
+            {% endif %}
+          </div>
+
+          <div style="margin-top:12px;">
+            <div class="label">{% trans %}Adresse{% endtrans %}</div>
+            <div class="muted" style="margin-top:6px;">
+              {{ pp and pp.adress ? pp.adress : '—' }}{% if pp and pp.city %} • {{ pp.city }}{% endif %}
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <div class="label">{% trans %}Motif watchlist{% endtrans %}</div>
+            <div class="muted" style="font-size:12px;margin-top:6px;">
+              {% trans %}Ajouté par :{% endtrans %} <b>{{ w.createdBy ? (w.createdBy.email ?? ('#' ~ w.createdBy.id)) : '—' }}</b>
+              • {% trans %}le{% endtrans %} <b>{{ w.createdAt ? w.createdAt|date('d/m/Y H:i') : '—' }}</b>
+            </div>
+
+            <textarea class="ta" id="reasonBox">{{ w.reason ?? '' }}</textarea>
+
+            <div class="actions" style="margin-top:10px;justify-content:flex-end;">
+              <button class="btn primary js-watch-note"
+                      data-url="{{ path('moderateur_watchlist_note', {id: w.id}) }}"
+                      data-token="{{ csrf_token('watch_note_' ~ w.id) }}">
+                💾 {% trans %}Enregistrer la note{% endtrans %}
+              </button>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <div class="label">{% trans %}Vérifications (documents){% endtrans %}</div>
+
+            {# COMPANY : pas de CNI/CV chez toi #}
+            {% if isComp %}
+              <div class="muted" style="margin-top:8px;font-size:12px;">
+                ✅ {% trans %}Entreprise : pas besoin de CNI ni CV pour valider.{% endtrans %}
+              </div>
+            {% else %}
+              {# CNI #}
+              <div style="margin-top:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+                <div>
+                  <b>{% trans %}CNI{% endtrans %}</b>
+                  {% if cniSt == 'verified' %}
+                    <span class="chip ok">✅ {% trans %}validée{% endtrans %}</span>
+                  {% elseif cniSt == 'rejected' %}
+                    <span class="chip bad">⛔ {% trans %}rejetée{% endtrans %}</span>
+                  {% else %}
+                    <span class="chip warn">⏳ {% trans %}en attente{% endtrans %}</span>
+                  {% endif %}
+                  <span class="muted" style="font-size:12px;margin-left:6px;">
+                    {{ pp and pp.cni ? pp.cni : 'aucun fichier'|trans }}
+                  </span>
+                </div>
+
+                <div class="actions">
+                  {% if pp and pp.cni %}
+                    <a class="btn" target="_blank" href="{{ path('moderateur_verifications_download', {id: u.id, type:'cni'}) }}">⬇️ {% trans %}Télécharger{% endtrans %}</a>
+                  {% endif %}
+                  <a class="btn primary" href="{{ path('moderateur_verifications_show', {id: u.id}) }}">{% trans %}Ouvrir vérification{% endtrans %}</a>
+                </div>
+              </div>
+
+              {# CV (talent uniquement) #}
+              {% if isTalent %}
+                <div style="margin-top:10px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;">
+                  <div>
+                    <b>{% trans %}CV{% endtrans %}</b>
+                    {% if cvSt == 'verified' %}
+                      <span class="chip ok">✅ {% trans %}validé{% endtrans %}</span>
+                    {% elseif cvSt == 'rejected' %}
+                      <span class="chip bad">⛔ {% trans %}rejeté{% endtrans %}</span>
+                    {% else %}
+                      <span class="chip warn">⏳ {% trans %}en attente{% endtrans %}</span>
+                    {% endif %}
+                    <span class="muted" style="font-size:12px;margin-left:6px;">
+                      {{ pro and pro.cv ? pro.cv : 'aucun fichier'|trans }}
+                    </span>
+                  </div>
+
+                  <div class="actions">
+                    {% if pro and pro.cv %}
+                      <a class="btn" target="_blank" href="{{ path('moderateur_verifications_download', {id: u.id, type:'cv'}) }}">⬇️ {% trans %}Télécharger{% endtrans %}</a>
+                    {% endif %}
+                    <a class="btn primary" href="{{ path('moderateur_verifications_show', {id: u.id}) }}">{% trans %}Ouvrir vérification{% endtrans %}</a>
+                  </div>
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+
+        {# =======================
+           RIGHT: Risque + actions
+           ======================= #}
+        <div class="box">
+          <div class="label">{% trans %}Risque & signaux (30 jours){% endtrans %}</div>
+
+          <div style="margin-top:10px;display:grid;gap:10px;">
+            <div>
+              <div style="font-weight:950;">{% trans %}Signalements comptes{% endtrans %}</div>
+              <div class="muted" style="font-size:12px;margin-top:4px;">
+                <span class="chip warn">OPEN: {{ stats.reports30d.open ?? 0 }}</span>
+                <span class="chip ok">RESOLVED: {{ stats.reports30d.resolved ?? 0 }}</span>
+                <span class="chip">CANCELED: {{ stats.reports30d.canceled ?? 0 }}</span>
+                <span class="chip info">TOTAL: {{ stats.reports30d.total ?? 0 }}</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-weight:950;">{% trans %}Signalements jobs (sur ses annonces){% endtrans %}</div>
+              <div class="muted" style="font-size:12px;margin-top:4px;">
+                <span class="chip warn">PENDING: {{ stats.jobReports30d.pending ?? 0 }}</span>
+                <span class="chip info">REVIEWED: {{ stats.jobReports30d.reviewed ?? 0 }}</span>
+                <span class="chip bad">REJECTED: {{ stats.jobReports30d.rejected ?? 0 }}</span>
+                <span class="chip ok">RESOLVED: {{ stats.jobReports30d.resolved ?? 0 }}</span>
+                <span class="chip">TOTAL: {{ stats.jobReports30d.total ?? 0 }}</span>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-weight:950;">{% trans %}Activité récente{% endtrans %}</div>
+              <div class="muted" style="font-size:12px;margin-top:4px;">
+                {% trans %}Jobs créés (30j) :{% endtrans %} <b>{{ stats.jobs30d ?? 0 }}</b>
+              </div>
+
+              {% if stats.lastJobs is defined and stats.lastJobs|length %}
+                <div class="muted" style="font-size:12px;margin-top:6px;">
+                  {% trans %}Derniers jobs :{% endtrans %}
+                  <ul style="margin:6px 0 0;padding-left:16px;">
+                    {% for j in stats.lastJobs %}
+                      <li>
+                        <b>{{ j.title ?? ('Job #' ~ j.id) }}</b>
+                        <span class="muted">({{ j.createdAt ? j.createdAt|date('d/m H:i') : '—' }})</span>
+                      </li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div style="margin-top:14px;">
+            <div class="label">{% trans %}Actions rapides{% endtrans %}</div>
+            <div class="actions" style="margin-top:10px;">
+              <a class="btn" href="/moderateur/reports?status=open&q={{ u.email|url_encode }}">🔎 {% trans %}Signalements{% endtrans %}</a>
+              <a class="btn" href="/moderateur/content/suspects?q={{ u.email|url_encode }}">🧾 {% trans %}Contenus suspects{% endtrans %}</a>
+              <a class="btn primary" href="/moderateur/verifications/u/{{ u.id }}">✅ {% trans %}Vérifier / Valider{% endtrans %}</a>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <div class="label">{% trans %}Contacter (AJAX){% endtrans %}</div>
+            <div class="actions" style="margin-top:10px;">
+              <button type="button"
+                      class="btn js-notify"
+                      data-kind="email"
+                      data-url="{{ path('moderateur_notify_email', {id: u.id}) }}"
+                      data-token="{{ csrf_token('notify_email_' ~ u.id) }}">
+                ✉️ {% trans %}Mail{% endtrans %}
+              </button>
+
+              <button type="button"
+                      class="btn js-notify"
+                      data-kind="sms"
+                      data-url="{{ path('moderateur_notify_sms', {id: u.id}) }}"
+                      data-token="{{ csrf_token('notify_sms_' ~ u.id) }}"
+                      {{ u.phone ? '' : 'disabled' }}>
+                📩 SMS
+              </button>
+
+              <button type="button"
+                      class="btn js-notify"
+                      data-kind="whatsapp"
+                      data-url="{{ path('moderateur_notify_whatsapp', {id: u.id}) }}"
+                      data-token="{{ csrf_token('notify_whatsapp_' ~ u.id) }}"
+                      {{ u.phone ? '' : 'disabled' }}>
+                💬 WhatsApp
+              </button>
+            </div>
+            <div class="muted" style="font-size:12px;margin-top:6px;">
+              {% trans %}Si SMS/WhatsApp est grisé : numéro de téléphone manquant.{% endtrans %}
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+  function toast(message, type='ok', sub=''){
+    const wrap = document.getElementById('toastWrap');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `
+      <div class="t-ico">${type==='ok'?'✅':type==='warn'?'⚠️':'⛔'}</div>
+      <div>
+        <div class="t-msg">${message}</div>
+        ${sub ? `<div class="t-sub">${sub}</div>` : ``}
+      </div>
+    `;
+    wrap.appendChild(el);
+    setTimeout(()=>el.remove(), 3200);
+  }
+
+  async function postJson(url, payload){
+    const res = await fetch(url, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest' },
+      body: JSON.stringify(payload || {})
+    });
+    const data = await res.json().catch(()=>null);
+    if (!res.ok || !data || data.ok !== true) throw new Error(data?.message || 'Erreur');
+    return data;
+  }
+
+  // ✅ Toggle watchlist active/inactive
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.js-watch-toggle');
+    if (!btn) return;
+    e.preventDefault();
+
+    const active = btn.dataset.active === '1';
+    const next = !active;
+
+    try{
+      toast('{{ "Mise à jour…"|trans|e("js") }}', 'warn');
+      await postJson(btn.dataset.url, { _token: btn.dataset.token, active: next });
+      btn.dataset.active = next ? '1' : '0';
+      btn.textContent = next ? '{{ "➖ Retirer (désactiver)"|trans|e("js") }}' : '{{ "➕ Réactiver"|trans|e("js") }}';
+      toast('{{ "OK ✅"|trans|e("js") }}', 'ok');
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }
+  });
+
+  // ✅ Save note
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.js-watch-note');
+    if (!btn) return;
+    e.preventDefault();
+
+    const reason = (document.getElementById('reasonBox')?.value || '').trim();
+
+    try{
+      toast('{{ "Sauvegarde…"|trans|e("js") }}', 'warn');
+      await postJson(btn.dataset.url, { _token: btn.dataset.token, reason });
+      toast('{{ "Note enregistrée ✅"|trans|e("js") }}', 'ok');
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }
+  });
+
+  // ✅ Notify (email/sms/whatsapp)
+  document.addEventListener('click', async (e)=>{
+    const btn = e.target.closest('.js-notify');
+    if (!btn) return;
+
+    if (btn.hasAttribute('disabled')) {
+      toast('{{ "Action indisponible"|trans|e("js") }}', 'warn', '{{ "Numéro de téléphone manquant."|trans|e("js") }}');
+      return;
+    }
+
+    e.preventDefault();
+
+    const kind = btn.dataset.kind;
+    const url = btn.dataset.url;
+    const token = btn.dataset.token;
+
+    btn.disabled = true;
+    btn.style.opacity = '.75';
+
+    try{
+      const data = await postJson(url, { _token: token });
+
+      if (kind === 'whatsapp' && data.url) {
+        window.open(data.url, '_blank', 'noopener');
+        toast('{{ "WhatsApp ouvert ✅"|trans|e("js") }}', 'ok');
+      } else if (kind === 'email') {
+        toast('{{ "Mail envoyé ✅"|trans|e("js") }}', 'ok');
+      } else if (kind === 'sms') {
+        toast('{{ "SMS envoyé ✅"|trans|e("js") }}', 'ok');
+      } else {
+        toast(data.message || '{{ "Action effectuée ✅"|trans|e("js") }}', 'ok');
+      }
+    }catch(err){
+      toast('{{ "Erreur"|trans|e("js") }}', 'err', err.message || String(err));
+    }finally{
+      btn.disabled = false;
+      btn.style.opacity = '';
+    }
+  });
+</script>
+{% endblock %}

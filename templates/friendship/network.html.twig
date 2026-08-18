@@ -1,0 +1,323 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'Mon réseau'|trans }}{% endblock %}
+
+{% block body %}
+
+{% include "friendship/_vip_ui.html.twig" %}
+
+<style>
+    /* Hero réseau compact : contenu à gauche, compteurs en haut à droite. */
+    .network-page .network-hero {
+        position: relative;
+        min-height: 0 !important;
+        padding: 20px 340px 20px 28px !important;
+        margin-bottom: 18px !important;
+        border-radius: 22px !important;
+    }
+
+    .network-page .network-hero__badge {
+        margin: 0 0 9px !important;
+        padding: 7px 14px !important;
+        font-size: .78rem !important;
+        line-height: 1.1;
+    }
+
+    .network-page .network-hero h1 {
+        margin: 0 0 5px !important;
+        font-size: clamp(1.65rem, 3vw, 2.1rem) !important;
+        line-height: 1.08 !important;
+    }
+
+    .network-page .network-hero > p {
+        max-width: 690px;
+        margin: 0 !important;
+        font-size: .9rem !important;
+        line-height: 1.45 !important;
+    }
+
+    .network-page .network-hero__stats {
+        position: absolute !important;
+        top: 20px !important;
+        right: 24px !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(128px, 1fr));
+        width: 280px;
+        gap: 10px !important;
+        margin: 0 !important;
+    }
+
+    .network-page .network-stat {
+        min-width: 0 !important;
+        min-height: 68px !important;
+        padding: 11px 14px !important;
+        border-radius: 15px !important;
+    }
+
+    .network-page .network-stat__label {
+        margin-bottom: 4px !important;
+        font-size: .7rem !important;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .network-page .network-stat__value {
+        font-size: 1.35rem !important;
+        line-height: 1 !important;
+    }
+
+    @media (max-width: 991.98px) {
+        .network-page .network-hero {
+            padding: 20px 22px !important;
+        }
+
+        .network-page .network-hero > p {
+            max-width: 100%;
+        }
+
+        .network-page .network-hero__stats {
+            position: static !important;
+            width: min(100%, 320px);
+            margin-top: 14px !important;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .network-page .network-hero {
+            padding: 17px 16px !important;
+            border-radius: 18px !important;
+        }
+
+        .network-page .network-hero__stats {
+            width: 100%;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px !important;
+        }
+
+        .network-page .network-stat {
+            padding: 10px 11px !important;
+        }
+
+        .network-page .network-stat__label {
+            white-space: normal;
+        }
+    }
+</style>
+
+<script>
+  window.MOL_FRIEND = {
+    accept: "{{ path('friendship_accept', {id: 987654321})|replace({'987654321': '__ID__'}) }}",
+    reject: "{{ path('friendship_reject', {id: 987654321})|replace({'987654321': '__ID__'}) }}",
+    cancel: "{{ path('friendship_cancel', {userId: 987654321})|replace({'987654321': '__ID__'}) }}",
+    block:  "{{ path('friendship_block', {userId: 987654321})|replace({'987654321': '__ID__'}) }}"
+  };
+</script>
+
+<div class="container network-page">
+
+    <div class="network-hero">
+        <div class="network-hero__badge">🤝 {% trans %}Espace relationnel premium{% endtrans %}</div>
+
+        <h1>{% trans %}Mon réseau{% endtrans %}</h1>
+        <p>{% trans %}Gérez vos connexions, suivez vos demandes et développez votre réseau professionnel avec une expérience fluide, premium et moderne.{% endtrans %}</p>
+
+        <div class="network-hero__stats">
+            <div class="network-stat">
+                <div class="network-stat__label">{% trans %}Mes amis{% endtrans %}</div>
+                <div class="network-stat__value">{{ friends|length }}</div>
+            </div>
+
+            <div class="network-stat">
+                <div class="network-stat__label">{% trans %}Demandes reçues{% endtrans %}</div>
+                <div class="network-stat__value">{{ pendingRequests|length }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="network-shell">
+        <ul class="nav nav-pills network-tabs mb-0">
+            <li class="nav-item">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#friendsTab">
+                    {% trans %}Mes amis{% endtrans %} ({{ friends|length }})
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#pendingTab">
+                    {% trans %}Demandes d’amitié{% endtrans %} ({{ pendingRequests|length }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content network-grid">
+
+            {# ================= FRIENDS ================= #}
+            <div class="tab-pane fade show active" id="friendsTab">
+                {% if friends|length > 0 %}
+                    <div class="row g-3">
+                        {% for f in friends %}
+                            {% set fullName = f.fullName ?? f.email %}
+                            {% set initials = fullName|slice(0,1)|upper %}
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="network-card">
+                                    <div class="network-card__body">
+                                        <div class="network-card__top">
+                                            <div class="network-avatar">
+                                                {% if f.personalProfile.photo ?? null %}
+                                                    <img src="{{ asset('uploads/profiles/' ~ f.personalProfile.photo) }}" alt="{{ fullName }}">
+                                                {% else %}
+                                                    {{ initials }}
+                                                {% endif %}
+                                                <span class="network-avatar__dot"></span>
+                                            </div>
+
+                                            <div class="network-main">
+                                                <div class="network-name">{{ fullName }}</div>
+                                                <div class="network-meta">{{ f.email }}</div>
+
+                                                <div class="network-badges">
+                                                    <span class="network-badge network-badge--green">✅ {% trans %}Connecté à votre réseau{% endtrans %}</span>
+
+                                                    {% if f.personalProfile and f.personalProfile.city is defined and f.personalProfile.city %}
+                                                        <span class="network-badge">📍 {{ f.personalProfile.city }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="network-actions">
+                                            <button class="btn btn-outline-danger network-btn"
+                                                    onclick="cancelFriendship({{ f.id }})">
+                                                {% trans %}Annuler{% endtrans %}
+                                            </button>
+
+                                            <button class="btn network-btn network-btn-outline"
+                                                    onclick="blockUser({{ f.id }})">
+                                                {% trans %}Bloquer{% endtrans %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-network">
+                        <div class="empty-network__icon">👥</div>
+                        <div class="empty-network__title">{% trans %}Aucun ami pour le moment{% endtrans %}</div>
+                        <div class="empty-network__text">{% trans %}Vos connexions apparaîtront ici dès que vous commencerez à agrandir votre réseau.{% endtrans %}</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            {# ================= PENDING ================= #}
+            <div class="tab-pane fade" id="pendingTab">
+                {% if pendingRequests|length > 0 %}
+                    <div class="row g-3">
+                        {% for fr in pendingRequests %}
+                            {% set u = fr.requester %}
+                            {% set fullName = u.fullName ?? u.email %}
+                            {% set initials = fullName|slice(0,1)|upper %}
+
+                            <div class="col-12 col-md-6 col-xl-4 fade-in" id="pending-{{ fr.id }}" data-user="{{ u.id }}">
+                                <div class="network-card">
+                                    <div class="network-card__body">
+                                        <div class="network-card__top">
+                                            <div class="network-avatar">
+                                                {% if u.personalProfile.photo ?? null %}
+                                                    <img src="{{ asset('uploads/profiles/' ~ u.personalProfile.photo) }}" alt="{{ fullName }}">
+                                                {% else %}
+                                                    {{ initials }}
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="network-main">
+                                                <div class="network-name">{{ fullName }}</div>
+                                                <div class="network-meta">{{ u.email }}</div>
+
+                                                <div class="network-badges">
+                                                    <span class="network-badge network-badge--blue">📩 {% trans %}Demande reçue{% endtrans %}</span>
+
+                                                    {% if u.personalProfile and u.personalProfile.city is defined and u.personalProfile.city %}
+                                                        <span class="network-badge network-badge--orange">📍 {{ u.personalProfile.city }}</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="network-actions">
+                                            <button type="button"
+                                                    class="btn btn-success network-btn js-friend-action"
+                                                    data-action="accept"
+                                                    data-url="{{ path('friendship_accept', {id: fr.id}) }}"
+                                                    data-target="#pending-{{ fr.id }}">
+                                                {% trans %}Accepter{% endtrans %}
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn btn-outline-secondary network-btn js-friend-action"
+                                                    data-action="reject"
+                                                    data-url="{{ path('friendship_reject', {id: fr.id}) }}"
+                                                    data-target="#pending-{{ fr.id }}">
+                                                {% trans %}Refuser{% endtrans %}
+                                            </button>
+
+                                            <button type="button"
+                                                    class="btn network-btn network-btn-outline js-friend-action"
+                                                    data-action="block"
+                                                    data-url="{{ path('friendship_block', {userId: u.id}) }}"
+                                                    data-target='[data-user="{{ u.id }}"]'>
+                                                {% trans %}Bloquer{% endtrans %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-network">
+                        <div class="empty-network__icon">✨</div>
+                        <div class="empty-network__title">{% trans %}Aucune demande d’amitié{% endtrans %}</div>
+                        <div class="empty-network__text">{% trans %}Les nouvelles demandes reçues apparaîtront ici automatiquement.{% endtrans %}</div>
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    async function post(url){
+        console.log("POST =>", url);
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+
+        if (!res.ok) {
+            const txt = await res.text().catch(()=> "");
+            console.error("HTTP", res.status, txt);
+        }
+        return res.ok;
+    }
+
+    document.addEventListener('click', async (e) => {
+        const btn = e.target.closest('.js-friend-action');
+        if (!btn) return;
+
+        const url = btn.dataset.url;
+        if (!url) {
+            console.error("data-url manquant sur le bouton", btn);
+            return;
+        }
+
+        const ok = await post(url);
+        if (!ok) return;
+
+        const target = btn.dataset.target;
+        if (target) document.querySelectorAll(target).forEach(el => el.remove());
+    });
+</script>
+
+{% endblock %}

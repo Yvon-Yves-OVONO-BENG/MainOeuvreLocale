@@ -1,0 +1,211 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_users_list.html.twig" %}
+
+
+<div class="page">
+  <div class="card">
+
+    <div class="hd">
+      <div>
+        <div class="h1">{{ title }}</div>
+        <div class="hint">{% trans %}Recherche, filtrage, pagination — affichage responsive (table desktop + cards mobile).{% endtrans %}</div>
+
+        <div class="tabs" style="margin-top:10px;">
+          <a class="tab {{ scope=='all' ? 'active' : '' }}" href="{{ path('moderateur_users_index') }}">👥 {% trans %}Tous{% endtrans %}</a>
+          <a class="tab {{ scope=='company' ? 'active' : '' }}" href="{{ path('moderateur_companies_index') }}">🏢 {% trans %}Compagnies{% endtrans %}</a>
+          <a class="tab {{ scope=='particulier' ? 'active' : '' }}" href="{{ path('moderateur_particuliers_index') }}">👤 {% trans %}Particuliers{% endtrans %}</a>
+          <a class="tab {{ scope=='talent' ? 'active' : '' }}" href="{{ path('moderateur_talents_index') }}">🧑‍💼 {% trans %}Talents{% endtrans %}</a>
+        </div>
+      </div>
+
+      <form class="filters" method="get" action="{{ path(routeName) }}">
+        <input class="input js-q" name="q" value="{{ q }}" placeholder="{{ 'Rechercher (email, nom, ville…)'|trans }}">
+        <select class="select" name="limit">
+          {% for n in [10,12,15,20,30,50] %}
+            <option value="{{ n }}" {{ limit==n?'selected':'' }}>{{ n }}/page</option>
+          {% endfor %}
+        </select>
+        <button class="btn primary" type="submit">{% trans %}Filtrer{% endtrans %}</button>
+        <a class="btn" href="{{ path(routeName) }}">{% trans %}Reset{% endtrans %}</a>
+      </form>
+    </div>
+
+    <div class="bd">
+      <div class="chip">{% trans %}Total :{% endtrans %} {{ total }}</div>
+
+      {# ===== TABLE DESKTOP ===== #}
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{% trans %}Utilisateur{% endtrans %}</th>
+              <th>{% trans %}Rôle{% endtrans %}</th>
+              <th>{% trans %}Adresse{% endtrans %}</th>
+              <th>{% trans %}Date{% endtrans %}</th>
+              <th style="text-align:right;">{% trans %}Options{% endtrans %}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in items %}
+              {% set pp = u.personalProfile ?? null %}
+              {% set pro = u.professionalProfile ?? null %}
+              {% set roles = u.roles ?? [] %}
+              {% set isTalent = 'ROLE_TALENT' in roles %}
+              {% set isComp = 'ROLE_COMPANY' in roles %}
+              {% set roleLabel = isTalent ? ('Talent'|trans) : (isComp ? ('Entreprise'|trans) : ('Particulier'|trans)) %}
+              {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+
+              <tr>
+                <td>#{{ u.id }}</td>
+                <td>
+                  <div style="display:flex;gap:10px;align-items:center;">
+                    <img class="avatar" src="{{ photo }}" alt="photo">
+                    <div>
+                      <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : u.email }}</div>
+                      <div class="muted" style="font-size:12px;">
+                        {{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="chip">{{ roleLabel }}</span></td>
+                <td class="muted" style="font-size:12px;">
+                  {{ pp and pp.adress ? pp.adress : '—' }}{% if pp and pp.city %} • {{ pp.city }}{% endif %}
+                </td>
+                <td class="muted" style="font-size:12px;">{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '—' }}</td>
+
+                <td style="text-align:right;">
+                  <div class="opts">
+                    {% if u.personalProfile and u.personalProfile.slug %}
+                      <a class="btn primary" href="{{ path('moderateur_verifications_show_slug', {slug: u.personalProfile.slug}) }}">✅ {% trans %}Vérifier{% endtrans %}</a>
+                    {% else %}
+                      <span class="muted">{% trans %}Aucune action{% endtrans %}</span>
+                    {% endif %}
+
+                    <button type="button"
+                            class="btn js-menu-btn"
+                            data-menu="menu-{{ u.id }}"
+                            title="{{ 'Actions'|trans }}"
+                            style="padding:10px 10px;">
+                      <span style="font-size:18px;line-height:1;">⋮</span>
+                    </button>
+
+                    <div class="menu" id="menu-{{ u.id }}">
+                      {% if u.personalProfile and u.personalProfile.slug %}
+                        <a class="menu-item" href="{{ path('moderateur_verifications_show_slug', {slug: u.personalProfile.slug}) }}">✅ {% trans %}Vérifier profil{% endtrans %} <span>›</span></a>
+                        <a class="menu-item" href="{{ path('moderateur_reports_show', {slug: u.personalProfile.slug}) }}">🚨 {% trans %}Signalements{% endtrans %} <span>›</span></a>
+                      {% else %}
+                        <a class="menu-item">{% trans %}Profil incomplet{% endtrans %} <span>›</span></a>
+                        <a class="menu-item">{% trans %}Profil incomplet{% endtrans %} <span>›</span></a>
+                      {% endif %}
+                      <a class="menu-item" href="{{ path('moderateur_watchlist_show', {id: u.id}) }}">👀 {% trans %}Watchlist{% endtrans %} <span>›</span></a>
+                      <div class="menu-sep"></div>
+                      <a class="menu-item" type="button" onclick="MOLChatOpen()">💬 {% trans %}Messages{% endtrans %} <span>›</span></a>
+                      <a class="menu-item" href="{{ path('moderateur_logs_index', {q: u.email}) }}">🧾 {% trans %}Logs{% endtrans %} <span>›</span></a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted" style="padding:18px;text-align:center;">{% trans %}Aucun utilisateur{% endtrans %}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {# ===== CARDS MOBILE ===== #}
+      <div class="cards">
+        {% for u in items %}
+          {% set pp = u.personalProfile ?? null %}
+          {% set roles = u.roles ?? [] %}
+          {% set isTalent = 'ROLE_TALENT' in roles %}
+          {% set isComp = 'ROLE_COMPANY' in roles %}
+          {% set roleLabel = isTalent ? ('Talent'|trans) : (isComp ? ('Entreprise'|trans) : ('Particulier'|trans)) %}
+          {% set photo = (pp and pp.photo) ? asset('uploads/profiles/' ~ pp.photo) : asset('uploads/profiles/avatar.png') %}
+
+          <div class="ucard">
+            <div class="ucard-top">
+              <img class="avatar" src="{{ photo }}" alt="photo">
+              <div>
+                <div style="font-weight:950;">{{ pp and pp.fullName ? pp.fullName : u.email }}</div>
+                <div class="muted" style="font-size:12px;">{{ u.email }}{% if u.phone %} • {{ u.phone }}{% endif %}</div>
+                <div class="muted" style="font-size:12px;margin-top:4px;">
+                  {{ pp and pp.adress ? pp.adress : '—' }}{% if pp and pp.city %} • {{ pp.city }}{% endif %}
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <span class="chip">{{ roleLabel }}</span>
+              <span class="chip">#{{ u.id }}</span>
+              <span class="chip muted">{{ u.createdAt ? u.createdAt|date('d/m H:i') : '—' }}</span>
+            </div>
+
+            <div class="ucard-actions">
+              {% if u.personalProfile and u.personalProfile.slug %}
+                <a class="btn primary" href="{{ path('moderateur_verifications_show_slug', {slug: u.personalProfile.slug}) }}">✅ {% trans %}Vérifier{% endtrans %}</a>
+              {% else %}
+                <span class="muted">{% trans %}Profil incomplet{% endtrans %}</span>
+              {% endif %}
+
+              <a class="btn" href="{{ path('moderateur_reports_index', {status:'open', q:u.email}) }}">🚨 {% trans %}Signalements{% endtrans %}</a>
+              <a class="btn" href="{{ path('moderateur_logs_index', {q:u.email}) }}">🧾 {% trans %}Logs{% endtrans %}</a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      {# ===== PAGINATION ===== #}
+      {% if pages > 1 %}
+        <div class="pager">
+          {% for p in 1..pages %}
+            <a class="btn {{ p==page ? 'primary' : '' }}"
+               href="{{ path(routeName, {page:p, limit:limit, q:q}) }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Menu ⋮ (open/close)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.js-menu-btn');
+    const anyMenu = document.querySelectorAll('.menu.open');
+
+    // Close all if click outside
+    if (!btn && !e.target.closest('.menu')) {
+      anyMenu.forEach(m => m.classList.remove('open'));
+      return;
+    }
+
+    if (!btn) return;
+
+    e.preventDefault();
+    anyMenu.forEach(m => m.classList.remove('open'));
+    const id = btn.dataset.menu;
+    const menu = document.getElementById(id);
+    if (menu) menu.classList.toggle('open');
+  });
+
+  // Search debounce (sans AJAX, mais UX fluide)
+  const qInput = document.querySelector('.js-q');
+  if (qInput) {
+    let t = null;
+    qInput.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        const form = qInput.closest('form');
+        if (form) form.submit();
+      }, 450);
+    });
+  }
+</script>
+{% endblock %}

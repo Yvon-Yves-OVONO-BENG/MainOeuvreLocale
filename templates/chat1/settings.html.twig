@@ -1,0 +1,338 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres du chat{% endblock %}
+
+{% block body %}
+<main class="container py-4">
+    <div class="mb-4 p-4 rounded-4 text-white" style="background: linear-gradient(135deg, {{ chatSettings.primaryColor }}, #38bdf8);">
+        <h1 class="h2 fw-bold mb-2">Paramètres du chat</h1>
+        <p class="mb-0 opacity-75">Configuration réelle avec sauvegarde en base de données et test du chat.</p>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <form method="post" action="{{ path('app_chat_settings_save') }}" class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <input type="hidden" name="_token" value="{{ csrf_token('chat_settings') }}">
+
+                    <h2 class="h5 fw-bold mb-3">Général</h2>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="chatEnabled" name="chat_enabled" {% if chatSettings.chatEnabled %}checked{% endif %}>
+                        <label class="form-check-label" for="chatEnabled">Activer le chat</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="chatName" name="chat_name" value="{{ chatSettings.chatName }}" placeholder="Nom du chat">
+                        <label for="chatName">Nom du chat</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" id="welcomeMessage" name="welcome_message" placeholder="Message d’accueil" style="height: 120px">{{ chatSettings.welcomeMessage }}</textarea>
+                        <label for="welcomeMessage">Message d’accueil</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <select class="form-select" id="defaultDepartment" name="default_department">
+                            {% set departments = {
+                                'support': 'Support',
+                                'recrutement': 'Recrutement',
+                                'commercial': 'Commercial',
+                                'technique': 'Technique'
+                            } %}
+
+                            {% for value, label in departments %}
+                                <option value="{{ value }}" {% if chatSettings.defaultDepartment == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="defaultDepartment">Service par défaut</label>
+                    </div>
+
+                    <h2 class="h5 fw-bold mb-3">Apparence</h2>
+
+                    <label class="form-label fw-semibold">Couleur principale</label>
+                    <div class="d-flex gap-2 mb-3">
+                        {% for color in ['#2563eb', '#16a34a', '#dc2626', '#7c3aed', '#111827'] %}
+                            <button
+                                type="button"
+                                class="btn rounded-circle border color-btn {% if chatSettings.primaryColor == color %}border-3{% endif %}"
+                                data-color="{{ color }}"
+                                style="width: 36px; height: 36px; background: {{ color }};"
+                                aria-label="{{ color }}"
+                            ></button>
+                        {% endfor %}
+                    </div>
+
+                    <input type="hidden" id="primaryColor" name="primary_color" value="{{ chatSettings.primaryColor }}">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="chatPosition" name="chat_position">
+                                    {% set positions = {
+                                        'bottom_right': 'En bas à droite',
+                                        'bottom_left': 'En bas à gauche',
+                                        'inline': 'Intégré dans la page'
+                                    } %}
+
+                                    {% for value, label in positions %}
+                                        <option value="{{ value }}" {% if chatSettings.chatPosition == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="chatPosition">Position</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="chatTheme" name="chat_theme">
+                                    {% for value, label in {'light': 'Clair', 'dark': 'Sombre', 'system': 'Système'} %}
+                                        <option value="{{ value }}" {% if chatSettings.chatTheme == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="chatTheme">Thème</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" id="showAvatar" name="show_avatar" {% if chatSettings.showAvatar %}checked{% endif %}>
+                        <label class="form-check-label" for="showAvatar">Afficher l’avatar de l’agent</label>
+                    </div>
+
+                    <h2 class="h5 fw-bold mb-3">Disponibilité</h2>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="time" class="form-control" id="openTime" name="open_time" value="{{ chatSettings.openTime }}" placeholder="Ouverture">
+                                <label for="openTime">Ouverture</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="time" class="form-control" id="closeTime" name="close_time" value="{{ chatSettings.closeTime }}" placeholder="Fermeture">
+                                <label for="closeTime">Fermeture</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="timezone" name="timezone">
+                                    {% for tz in ['Africa/Douala', 'Europe/Paris', 'UTC'] %}
+                                        <option value="{{ tz }}" {% if chatSettings.timezone == tz %}selected{% endif %}>{{ tz }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="timezone">Fuseau horaire</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <textarea class="form-control" id="offlineMessage" name="offline_message" placeholder="Message hors ligne" style="height: 110px">{{ chatSettings.offlineMessage }}</textarea>
+                        <label for="offlineMessage">Message hors ligne</label>
+                    </div>
+
+                    <h2 class="h5 fw-bold mb-3">Comportement</h2>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="autoOpen" name="auto_open" {% if chatSettings.autoOpen %}checked{% endif %}>
+                        <label class="form-check-label" for="autoOpen">Ouverture automatique</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="number" min="0" class="form-control" id="autoOpenDelay" name="auto_open_delay" value="{{ chatSettings.autoOpenDelay }}" placeholder="Délai">
+                        <label for="autoOpenDelay">Délai avant ouverture automatique, en secondes</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="requireContact" name="require_contact" {% if chatSettings.requireContact %}checked{% endif %}>
+                        <label class="form-check-label" for="requireContact">Demander un contact avant conversation</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" id="humanTransfer" name="human_transfer" {% if chatSettings.humanTransfer %}checked{% endif %}>
+                        <label class="form-check-label" for="humanTransfer">Autoriser le transfert vers un agent humain</label>
+                    </div>
+
+                    <h2 class="h5 fw-bold mb-3">Notifications</h2>
+
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="notificationEmail" name="notification_email" value="{{ chatSettings.notificationEmail }}" placeholder="Email">
+                        <label for="notificationEmail">Email de notification</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifyNewMessage" name="notify_new_message" {% if chatSettings.notifyNewMessage %}checked{% endif %}>
+                        <label class="form-check-label" for="notifyNewMessage">Notifier à chaque nouveau message</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" id="dailySummary" name="daily_summary" {% if chatSettings.dailySummary %}checked{% endif %}>
+                        <label class="form-check-label" for="dailySummary">Envoyer un résumé quotidien</label>
+                    </div>
+
+                    <h2 class="h5 fw-bold mb-3">Confidentialité</h2>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="requireConsent" name="require_consent" {% if chatSettings.requireConsent %}checked{% endif %}>
+                        <label class="form-check-label" for="requireConsent">Afficher le consentement</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="number" min="1" class="form-control" id="retentionDays" name="retention_days" value="{{ chatSettings.retentionDays }}" placeholder="Durée">
+                        <label for="retentionDays">Durée de conservation, en jours</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <textarea class="form-control" id="consentText" name="consent_text" placeholder="Texte de consentement" style="height: 110px">{{ chatSettings.consentText }}</textarea>
+                        <label for="consentText">Texte de consentement</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary px-4">Enregistrer les paramètres</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Aperçu</h2>
+
+                    <div class="border rounded-4 overflow-hidden">
+                        <div id="previewHeader" class="text-white p-3" style="background: {{ chatSettings.primaryColor }};">
+                            <strong id="previewName">{{ chatSettings.chatName }}</strong>
+                            <div class="small opacity-75">En ligne</div>
+                        </div>
+
+                        <div class="p-3 bg-light">
+                            <div id="previewWelcome" class="bg-white border rounded-4 p-3 mb-2">
+                                {{ chatSettings.welcomeMessage }}
+                            </div>
+                            <div class="text-white rounded-4 p-3 ms-auto" style="max-width: 85%; background: {{ chatSettings.primaryColor }};">
+                                Je cherche une mission locale.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Tester le chat</h2>
+
+                    <div id="testMessages" class="border rounded-4 p-3 mb-3 bg-light" style="min-height: 180px;">
+                        <div class="bg-white border rounded-4 p-2 mb-2">
+                            {{ chatSettings.welcomeMessage }}
+                        </div>
+                    </div>
+
+                    <form id="testChatForm">
+                        <input type="hidden" name="_token" value="{{ csrf_token('chat_settings') }}">
+
+                        <div class="input-group">
+                            <input type="text" name="message" class="form-control" placeholder="Écrire un message de test...">
+                            <button class="btn btn-primary" type="submit">Tester</button>
+                        </div>
+                    </form>
+
+                    {% if lastTests is defined and lastTests|length > 0 %}
+                        <hr>
+                        <h3 class="h6 fw-bold">Derniers tests</h3>
+
+                        {% for test in lastTests %}
+                            <div class="small border-bottom py-2">
+                                <div class="text-muted">{{ test.createdAt|date('d/m/Y H:i') }}</div>
+                                <div><strong>Vous :</strong> {{ test.visitorMessage }}</div>
+                                <div><strong>Chat :</strong> {{ test.botReply }}</div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const chatName = document.getElementById('chatName');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const previewName = document.getElementById('previewName');
+    const previewWelcome = document.getElementById('previewWelcome');
+    const primaryColor = document.getElementById('primaryColor');
+    const previewHeader = document.getElementById('previewHeader');
+    const testChatForm = document.getElementById('testChatForm');
+    const testMessages = document.getElementById('testMessages');
+
+    chatName?.addEventListener('input', () => {
+        previewName.textContent = chatName.value || 'Nom du chat';
+    });
+
+    welcomeMessage?.addEventListener('input', () => {
+        previewWelcome.textContent = welcomeMessage.value || 'Message d’accueil';
+    });
+
+    document.querySelectorAll('[data-color]').forEach(button => {
+        button.addEventListener('click', () => {
+            const color = button.dataset.color;
+
+            primaryColor.value = color;
+            previewHeader.style.background = color;
+
+            document.querySelectorAll('[data-color]').forEach(item => item.classList.remove('border-3'));
+            button.classList.add('border-3');
+        });
+    });
+
+    testChatForm?.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const formData = new FormData(testChatForm);
+        const message = formData.get('message');
+
+        if (!message || !message.trim()) {
+            return;
+        }
+
+        testMessages.insertAdjacentHTML('beforeend', `
+            <div class="text-white rounded-4 p-2 mb-2 ms-auto" style="max-width: 85%; background: ${primaryColor.value};">
+                ${escapeHtml(message)}
+            </div>
+        `);
+
+        testChatForm.querySelector('input[name="message"]').value = '';
+
+        const response = await fetch('{{ path('app_chat_test') }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+
+        const data = await response.json();
+
+        testMessages.insertAdjacentHTML('beforeend', `
+            <div class="bg-white border rounded-4 p-2 mb-2">
+                ${escapeHtml(data.reply || data.error || 'Erreur pendant le test.')}
+            </div>
+        `);
+
+        testMessages.scrollTop = testMessages.scrollHeight;
+    });
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+</script>
+{% endblock %}

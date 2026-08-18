@@ -1,0 +1,359 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Litiges paiements{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 space-y-4">
+
+    <section class="overflow-visible rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)]">
+      <div class="border-b border-slate-200/70 bg-white/60 p-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Finance{% endtrans %}</div>
+            <div class="text-2xl font-black tracking-tight text-slate-900">💳 {% trans %}Litiges de paiements{% endtrans %}</div>
+            <div class="mt-1 text-sm font-medium text-slate-600">
+              {% trans %}Gère les contestations, remboursements et transactions sensibles.{% endtrans %}
+            </div>
+          </div>
+
+          <div class="flex gap-2">
+            <a href="{{ path('admin_payment_dispute_new') }}"
+               class="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2.5 text-xs font-extrabold text-white hover:opacity-95">
+              ➕ {% trans %}Nouveau{% endtrans %}
+            </a>
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              ← {% trans %}Tableau de bord{% endtrans %}
+            </a>
+          </div>
+        </div>
+
+        <form method="get" class="mt-4 grid gap-3 lg:grid-cols-12">
+          <div class="lg:col-span-4">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Recherche{% endtrans %}</label>
+            <input name="q" value="{{ filters.q|default('') }}"
+                   class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none"
+                   placeholder="{% trans %}email, facture, raison...{% endtrans %}">
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Statut{% endtrans %}</label>
+            <select name="status" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="">{% trans %}Tous{% endtrans %}</option>
+              <option value="open" {{ filters.status|default('') == 'open' ? 'selected' : '' }}>{% trans %}Ouvert{% endtrans %}</option>
+              <option value="review" {{ filters.status|default('') == 'review' ? 'selected' : '' }}>{% trans %}En revue{% endtrans %}</option>
+              <option value="resolved" {{ filters.status|default('') == 'resolved' ? 'selected' : '' }}>{% trans %}Résolu{% endtrans %}</option>
+              <option value="refunded" {{ filters.status|default('') == 'refunded' ? 'selected' : '' }}>{% trans %}Remboursé{% endtrans %}</option>
+              <option value="rejected" {{ filters.status|default('') == 'rejected' ? 'selected' : '' }}>{% trans %}Rejeté{% endtrans %}</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Priorité{% endtrans %}</label>
+            <select name="priority" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="">{% trans %}Toutes{% endtrans %}</option>
+              <option value="low" {{ filters.priority|default('') == 'low' ? 'selected' : '' }}>Low</option>
+              <option value="medium" {{ filters.priority|default('') == 'medium' ? 'selected' : '' }}>Medium</option>
+              <option value="high" {{ filters.priority|default('') == 'high' ? 'selected' : '' }}>High</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="text-[11px] font-extrabold text-slate-600">{% trans %}Source{% endtrans %}</label>
+            <select name="source" class="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none">
+              <option value="">{% trans %}Toutes{% endtrans %}</option>
+              <option value="user" {{ filters.source|default('') == 'user' ? 'selected' : '' }}>User</option>
+              <option value="admin" {{ filters.source|default('') == 'admin' ? 'selected' : '' }}>Admin</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2 flex items-end">
+            <button class="w-full rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2.5 text-xs font-extrabold text-white hover:opacity-95">
+              🔎 {% trans %}Filtrer{% endtrans %}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50/60">
+            <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+              <th class="px-5 py-3 font-extrabold">{% trans %}Utilisateur{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Paiement{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Facture{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Source{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Motif{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Priorité{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold">{% trans %}Statut{% endtrans %}</th>
+              <th class="px-5 py-3 font-extrabold text-right min-w-[90px]">{% trans %}Actions{% endtrans %}</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-slate-200/70">
+            {% for d in items %}
+              <tr data-url="{{ path('admin_payment_dispute_set_status', {id: d.id}) }}" class="hover:bg-slate-50/40">
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">{{ d.user ? d.user.email : '—' }}</div>
+                  <div class="text-xs font-semibold text-slate-500">
+                    {{ d.createdAt ? d.createdAt|date('d/m/Y H:i') : '—' }}
+                  </div>
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="font-bold text-slate-900">
+                    {{ d.payment ? ((d.payment.amount ?? '0') ~ ' ' ~ (d.payment.currency ?? '')) : '—' }}
+                  </div>
+                </td>
+
+                <td class="px-5 py-3">
+                  {{ d.invoice ? d.invoice.invoiceNumber : '—' }}
+                </td>
+
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold
+                    {{ d.source == 'admin'
+                      ? 'border-indigo-200/70 bg-indigo-50 text-indigo-700'
+                      : 'border-cyan-200/70 bg-cyan-50 text-cyan-700' }}">
+                    {{ d.source }}
+                  </span>
+                </td>
+
+                <td class="px-5 py-3">
+                  <div class="max-w-[280px] truncate font-semibold text-slate-700" title="{{ d.reason }}">
+                    {{ d.reason }}
+                  </div>
+                </td>
+
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold
+                    {{ d.priority == 'high'
+                      ? 'border-rose-200/70 bg-rose-50 text-rose-700'
+                      : (d.priority == 'medium'
+                        ? 'border-amber-200/70 bg-amber-50 text-amber-700'
+                        : 'border-slate-200 bg-white text-slate-700') }}">
+                    {{ d.priority }}
+                  </span>
+                </td>
+
+                <td class="px-5 py-3">
+                  <span class="js-status inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold
+                    {{ d.status == 'resolved'
+                      ? 'border-emerald-200/70 bg-emerald-50 text-emerald-700'
+                      : (d.status == 'refunded'
+                        ? 'border-violet-200/70 bg-violet-50 text-violet-700'
+                        : (d.status == 'review'
+                          ? 'border-cyan-200/70 bg-cyan-50 text-cyan-700'
+                          : (d.status == 'rejected'
+                            ? 'border-rose-200/70 bg-rose-50 text-rose-700'
+                            : 'border-amber-200/70 bg-amber-50 text-amber-700'))) }}">
+                    {{ d.status }}
+                  </span>
+                </td>
+
+                <td class="px-5 py-3 text-right">
+  <div class="relative inline-block text-left" data-dispute-menu>
+    <button type="button"
+        class="inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-200/80 bg-white text-slate-500 shadow-[0_2px_8px_rgba(2,6,23,.04)] transition hover:bg-slate-50 hover:border-slate-300 hover:text-slate-700"
+        data-menu-toggle
+        aria-haspopup="true"
+        aria-expanded="false"
+        title="{% trans %}Actions{% endtrans %}">
+  <span class="text-[10px] leading-none">☰</span>
+</button>
+
+    <div class="absolute right-0 z-30 mt-2 hidden w-56 overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-[0_14px_40px_rgba(2,6,23,.12)] backdrop-blur-xl"
+         data-menu-panel>
+      <div class="border-b border-slate-100 px-3 py-2.5">
+        <div class="text-[10px] font-extrabold uppercase tracking-[.18em] text-slate-400">{% trans %}Actions{% endtrans %}</div>
+      </div>
+
+      <div class="py-1.5">
+        <button type="button" data-status="review"
+                class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="text-[12px] text-cyan-600">◉</span>
+          <span>{% trans %}Mettre en revue{% endtrans %}</span>
+        </button>
+
+        <button type="button" data-status="resolved"
+                class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="text-[12px] text-emerald-600">✓</span>
+          <span>{% trans %}Marquer résolu{% endtrans %}</span>
+        </button>
+
+        <button type="button" data-status="refunded"
+                class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="text-[12px] text-violet-600">↺</span>
+          <span>{% trans %}Marquer remboursé{% endtrans %}</span>
+        </button>
+
+        <button type="button" data-status="rejected"
+                class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="text-[12px] text-rose-600">✕</span>
+          <span>{% trans %}Rejeter{% endtrans %}</span>
+        </button>
+
+        <button type="button" data-status="open"
+                class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="text-[12px] text-amber-600">↩</span>
+          <span>{% trans %}Réouvrir{% endtrans %}</span>
+        </button>
+
+        <div class="my-1.5 border-t border-slate-100"></div>
+
+        <a href="{{ path('admin_payment_dispute_show', {id: d.id}) }}"
+           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="text-[12px] text-slate-500">⌕</span>
+          <span>{% trans %}Voir détails{% endtrans %}</span>
+        </a>
+
+        <a href="{{ path('admin_payment_dispute_edit', {id: d.id}) }}"
+           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 transition hover:bg-slate-50">
+          <span class="text-[12px] text-indigo-600">✎</span>
+          <span>{% trans %}Modifier{% endtrans %}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="8" class="px-5 py-10 text-center text-sm font-semibold text-slate-500">
+                  {% trans %}Aucun litige trouvé.{% endtrans %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div id="toastHost" class="fixed right-4 top-4 z-[9999] space-y-2"></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(() => {
+  const toastHost = document.getElementById('toastHost');
+
+  const toast = (message, kind = 'info') => {
+    const el = document.createElement('div');
+    el.className =
+      'rounded-2xl border bg-white/90 px-4 py-3 text-sm font-semibold shadow-[0_18px_55px_rgba(2,6,23,.12)] backdrop-blur ' +
+      (kind === 'error'
+        ? 'border-rose-200 text-rose-700'
+        : kind === 'ok'
+          ? 'border-emerald-200 text-emerald-700'
+          : 'border-slate-200 text-slate-700');
+
+    el.textContent = message;
+    toastHost.appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  };
+
+  async function postStatus(url, status) {
+    const body = new URLSearchParams();
+    body.append('status', status);
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok || data.ok === false) {
+      throw new Error(data.error || 'Erreur');
+    }
+
+    return data;
+  }
+
+  function badgeClass(status) {
+    if (status === 'resolved') {
+      return 'js-status inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold border-emerald-200/70 bg-emerald-50 text-emerald-700';
+    }
+    if (status === 'refunded') {
+      return 'js-status inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold border-violet-200/70 bg-violet-50 text-violet-700';
+    }
+    if (status === 'review') {
+      return 'js-status inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold border-cyan-200/70 bg-cyan-50 text-cyan-700';
+    }
+    if (status === 'rejected') {
+      return 'js-status inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold border-rose-200/70 bg-rose-50 text-rose-700';
+    }
+    return 'js-status inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-extrabold border-amber-200/70 bg-amber-50 text-amber-700';
+  }
+
+  function closeAllMenus() {
+    document.querySelectorAll('[data-menu-panel]').forEach(panel => {
+      panel.classList.add('hidden');
+    });
+    document.querySelectorAll('[data-menu-toggle]').forEach(btn => {
+      btn.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const toggle = e.target.closest('[data-menu-toggle]');
+    if (toggle) {
+      const wrap = toggle.closest('[data-dispute-menu]');
+      const panel = wrap?.querySelector('[data-menu-panel]');
+      const isHidden = panel?.classList.contains('hidden');
+
+      closeAllMenus();
+
+      if (panel && isHidden) {
+        panel.classList.remove('hidden');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+      return;
+    }
+
+    if (!e.target.closest('[data-dispute-menu]')) {
+      closeAllMenus();
+    }
+  });
+
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-status]');
+    if (!btn) return;
+
+    const tr = btn.closest('tr[data-url]');
+    if (!tr) return;
+
+    btn.disabled = true;
+
+    try {
+      const data = await postStatus(tr.dataset.url, btn.dataset.status);
+      const badge = tr.querySelector('.js-status');
+
+      if (badge) {
+        badge.className = badgeClass(data.status);
+        badge.textContent = data.status;
+      }
+
+      closeAllMenus();
+      toast('Statut du litige mis à jour.', 'ok');
+    } catch (err) {
+      toast(err.message || 'Erreur', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllMenus();
+    }
+  });
+})();
+</script>
+{% endblock %}

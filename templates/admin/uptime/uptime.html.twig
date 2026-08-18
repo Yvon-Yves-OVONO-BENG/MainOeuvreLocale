@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{% trans %}Disponibilité plateforme{% endtrans %}{% endblock %}
+<script src="https://cdn.tailwindcss.com"></script>
+{% block body %}
+<div class="min-h-screen bg-slate-50">
+    <div class="mx-auto max-w-7xl px-4 py-6">
+        <div class="mb-6">
+            <h1 class="text-3xl font-black text-slate-900">🟢 {% trans %}Disponibilité plateforme{% endtrans %}</h1>
+            <p class="mt-2 text-sm text-slate-500">
+                {% trans %}Suivi technique de la disponibilité, des temps de réponse et des incidents récents.{% endtrans %}
+            </p>
+        </div>
+
+        <div class="grid gap-4 md:grid-cols-4">
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs uppercase tracking-wider text-slate-400">Uptime 24h</div>
+                <div class="mt-2 text-3xl font-black text-slate-900">{{ uptime24h|number_format(2, ',', ' ') }}%</div>
+            </div>
+
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs uppercase tracking-wider text-slate-400">Uptime 30j</div>
+                <div class="mt-2 text-3xl font-black text-slate-900">{{ uptime30d|number_format(2, ',', ' ') }}%</div>
+            </div>
+
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs uppercase tracking-wider text-slate-400">{% trans %}Latence moyenne 24h{% endtrans %}</div>
+                <div class="mt-2 text-3xl font-black text-slate-900">{{ avgLatency24h }}ms</div>
+            </div>
+
+            <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="text-xs uppercase tracking-wider text-slate-400">{% trans %}Échecs 24h{% endtrans %}</div>
+                <div class="mt-2 text-3xl font-black text-slate-900">{{ failures24h }}</div>
+            </div>
+        </div>
+
+        <div class="mt-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="mb-4 text-lg font-bold text-slate-900">{% trans %}Derniers checks{% endtrans %}</div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-slate-500">
+                            <th class="px-3 py-2">{% trans %}Service{% endtrans %}</th>
+                            <th class="px-3 py-2">URL</th>
+                            <th class="px-3 py-2">{% trans %}Statut{% endtrans %}</th>
+                            <th class="px-3 py-2">{% trans %}Code{% endtrans %}</th>
+                            <th class="px-3 py-2">{% trans %}Latence{% endtrans %}</th>
+                            <th class="px-3 py-2">{% trans %}Date{% endtrans %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for check in latestChecks %}
+                            <tr class="border-t border-slate-100">
+                                <td class="px-3 py-3 font-semibold text-slate-800">{{ check.serviceName }}</td>
+                                <td class="px-3 py-3 text-slate-500">{{ check.url }}</td>
+                                <td class="px-3 py-3">
+                                    {% if check.isUp %}
+                                        <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
+                                            {% trans %}UP{% endtrans %}
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 border border-rose-200">
+                                            {% trans %}DOWN{% endtrans %}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 py-3 text-slate-700">{{ check.statusCode ?? '-' }}</td>
+                                <td class="px-3 py-3 text-slate-700">{{ check.responseTimeMs ?? '-' }} ms</td>
+                                <td class="px-3 py-3 text-slate-500">{{ check.checkedAt ? check.checkedAt|date('d/m/Y H:i:s') : '-' }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="px-3 py-6 text-center text-slate-400">
+                                    {% trans %}Aucune donnée uptime disponible{% endtrans %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{% trans %}Mes sanctions{% endtrans %}
+{% endblock %}
+
+{% block body %}
+
+{% include "talent/sanction/_vip_ui.html.twig" %}
+
+	<div class="container-fluid py-4 san-shell">
+		<div class="san-hero p-4 p-lg-5 mb-4">
+			<div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-between gap-3">
+				<div>
+					<div class="d-flex align-items-center gap-3">
+						<div class="san-icon">🛡️</div>
+						<div>
+							<h1 class="h3 fw-bold mb-1">{% trans %}Mes sanctions{% endtrans %}</h1>
+							<div class="san-soft">
+								{% trans %}Consultez vos avertissements, restrictions, suspensions ou autres mesures appliquées à votre compte.{% endtrans %}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="d-flex flex-wrap gap-2">
+					<a href="javascript:history.back();" class="btn btn-outline-dark rounded-pill px-3">
+						← {% trans %}Retour{% endtrans %}
+					</a>
+					<a href="{{ path('talent_payment_dispute_new') }}" class="btn btn-danger rounded-pill px-3">
+						⚠️ {% trans %}Signaler un problème de paiement{% endtrans %}
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="row g-3 mb-4">
+			<div class="col-12 col-md-6 col-xl-3">
+				<div class="san-kpi p-3 h-100">
+					<div class="d-flex justify-content-between align-items-center">
+						<div>
+							<div class="san-soft small">{% trans %}Total{% endtrans %}</div>
+							<div class="fs-3 fw-bold">{{ totalCount }}</div>
+						</div>
+						<div class="san-icon">📚</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-xl-3">
+				<div class="san-kpi p-3 h-100">
+					<div class="d-flex justify-content-between align-items-center">
+						<div>
+							<div class="san-soft small">{% trans %}Sanctions actives{% endtrans %}</div>
+							<div class="fs-3 fw-bold text-danger">{{ activeCount }}</div>
+						</div>
+						<div class="san-icon">⛔</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-xl-3">
+				<div class="san-kpi p-3 h-100">
+					<div class="d-flex justify-content-between align-items-center">
+						<div>
+							<div class="san-soft small">{% trans %}Sanctions temporaires{% endtrans %}</div>
+							<div class="fs-3 fw-bold">{{ temporaryCount }}</div>
+						</div>
+						<div class="san-icon">⏳</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 col-md-6 col-xl-3">
+				<div class="san-kpi p-3 h-100">
+					<div class="d-flex justify-content-between align-items-center">
+						<div>
+							<div class="san-soft small">{% trans %}Sanctions permanentes{% endtrans %}</div>
+							<div class="fs-3 fw-bold">{{ permanentCount }}</div>
+						</div>
+						<div class="san-icon">🔒</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="san-card">
+			<div class="p-4 border-bottom">
+				<div class="fw-bold">{% trans %}Historique détaillé{% endtrans %}</div>
+				<div class="san-soft small">{% trans %}Toutes les sanctions liées à votre compte, de la plus récente à la plus ancienne.{% endtrans %}</div>
+			</div>
+
+			{% if sanctions|length > 0 %}
+				{% for s in sanctions %}
+					<div class="san-row">
+						<div class="d-flex flex-column flex-lg-row justify-content-between align-items-start gap-3">
+							<div class="flex-grow-1">
+								<div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+									<span class="san-badge
+										{% if s.type == constant('App\\Entity\\Sanction::TYPE_WARNING') %}san-type-warning{% endif %}
+										{% if s.type == constant('App\\Entity\\Sanction::TYPE_SUSPEND') %}san-type-suspend{% endif %}
+										{% if s.type == constant('App\\Entity\\Sanction::TYPE_BAN') %}san-type-ban{% endif %}
+										{% if s.type == constant('App\\Entity\\Sanction::TYPE_RESTRICT') %}san-type-restrict{% endif %}
+									">
+										{% if s.type == constant('App\\Entity\\Sanction::TYPE_WARNING') %}
+											{% trans %}Avertissement{% endtrans %}
+										{% elseif s.type == constant('App\\Entity\\Sanction::TYPE_SUSPEND') %}
+											{% trans %}Suspension{% endtrans %}
+										{% elseif s.type == constant('App\\Entity\\Sanction::TYPE_BAN') %}
+											{% trans %}Bannissement{% endtrans %}
+										{% elseif s.type == constant('App\\Entity\\Sanction::TYPE_RESTRICT') %}
+											{% trans %}Restriction{% endtrans %}
+										{% else %}
+											{{ s.type }}
+										{% endif %}
+									</span>
+
+									<span class="san-badge
+										{% if s.status == constant('App\\Entity\\Sanction::STATUS_ACTIVE') %}san-status-active{% endif %}
+										{% if s.status == constant('App\\Entity\\Sanction::STATUS_EXPIRED') %}san-status-expired{% endif %}
+										{% if s.status == constant('App\\Entity\\Sanction::STATUS_CANCELED') %}san-status-canceled{% endif %}
+										{% if s.status == constant('App\\Entity\\Sanction::STATUS_REVOKED') %}san-status-revoked{% endif %}
+									">
+										{% if s.status == constant('App\\Entity\\Sanction::STATUS_ACTIVE') %}
+											{% trans %}Active{% endtrans %}
+										{% elseif s.status == constant('App\\Entity\\Sanction::STATUS_EXPIRED') %}
+											{% trans %}Expirée{% endtrans %}
+										{% elseif s.status == constant('App\\Entity\\Sanction::STATUS_CANCELED') %}
+											{% trans %}Annulée{% endtrans %}
+										{% elseif s.status == constant('App\\Entity\\Sanction::STATUS_REVOKED') %}
+											{% trans %}Révoquée{% endtrans %}
+										{% else %}
+											{{ s.status }}
+										{% endif %}
+									</span>
+								</div>
+
+								<div class="fw-bold mb-1">
+									{% trans %}Motif{% endtrans %} :
+								</div>
+								<div class="san-soft mb-3">{{ s.reason }}</div>
+
+								{% if s.message %}
+									<div class="fw-semibold mb-1">{% trans %}Message affiché à l’utilisateur{% endtrans %}</div>
+									<div class="san-soft mb-3">{{ s.message }}</div>
+								{% endif %}
+
+								{% if s.adminNote %}
+									<div class="fw-semibold mb-1">{% trans %}Note interne{% endtrans %}</div>
+									<div class="san-soft">{{ s.adminNote }}</div>
+								{% endif %}
+							</div>
+
+							<div class="text-lg-end">
+								<div class="small san-soft mb-1">
+									{% trans %}Créée le{% endtrans %} {{ s.createdAt|date('d/m/Y H:i') }}
+								</div>
+
+								{% if s.startsAt %}
+									<div class="small san-soft mb-1">
+										{% trans %}Début{% endtrans %} : {{ s.startsAt|date('d/m/Y H:i') }}
+									</div>
+								{% endif %}
+
+								{% if s.endsAt %}
+									<div class="small san-soft mb-1">
+										{% trans %}Fin{% endtrans %} : {{ s.endsAt|date('d/m/Y H:i') }}
+									</div>
+								{% else %}
+									<div class="small san-soft mb-1">
+										{% trans %}Durée{% endtrans %} : {% trans %}Indéterminée{% endtrans %}
+									</div>
+								{% endif %}
+
+								{% if s.createdBy %}
+									<div class="small san-soft">
+										{% trans %}Par{% endtrans %} {{ s.createdBy.fullName ?? s.createdBy.email }}
+									</div>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				{% endfor %}
+			{% else %}
+				<div class="p-4">
+					<div class="san-empty">
+						<div class="fw-bold mb-1">{% trans %}Aucune sanction{% endtrans %}</div>
+						<div class="san-soft">{% trans %}Votre compte ne présente actuellement aucune sanction visible.{% endtrans %}</div>
+					</div>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+{% endblock %}

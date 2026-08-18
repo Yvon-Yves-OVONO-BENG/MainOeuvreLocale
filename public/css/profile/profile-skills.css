@@ -1,0 +1,78 @@
+/* =========================================================
+   profile-skills.css
+   TomSelect multi + correction champ Autres compétences
+   ========================================================= */
+
+.ts-wrapper.multi .ts-control {
+    width: 100% !important;
+    min-height: 48px !important;
+    max-height: none !important;
+    padding: 8px 10px !important;
+    border-radius: 12px !important;
+    border: 1px solid #ced4da !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.ts-wrapper.multi .ts-control > div,
+.ts-wrapper.multi .ts-control > .item {
+    margin: 0 !important;
+    padding: 5px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(13, 110, 253, .18) !important;
+    background: rgba(13, 110, 253, .08) !important;
+    color: #0d6efd !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+}
+
+.ts-wrapper.multi .ts-control > input {
+    min-width: 160px !important;
+    flex: 1 1 160px !important;
+    margin: 0 !important;
+    padding: 5px 0 !important;
+}
+
+.ts-wrapper.plugin-remove_button .item .remove {
+    border-left: 0 !important;
+    margin-left: 6px !important;
+    color: #0d6efd !important;
+    font-weight: 900 !important;
+    font-size: 16px;
+}
+
+.ts-dropdown {
+    border-radius: 14px !important;
+    border: 1px solid #dbe3f0 !important;
+    overflow: hidden;
+    z-index: 9999 !important;
+}
+
+.ts-dropdown .option {
+    padding: 10px 14px !important;
+    font-size: 15px !important;
+}
+
+.ts-dropdown .active {
+    background: #eef4ff !important;
+    color: #1f3b73 !important;
+}
+
+.skills-field,
+.js-skills {
+    width: 100%;
+}
+
+select.js-skills.tomselected,
+select.js-skills.ts-hidden-accessible {
+    display: none !important;
+}
+
+.ts-wrapper.js-skills,
+.ts-wrapper.multi {
+    width: 100% !important;
+}

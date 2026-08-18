@@ -1,0 +1,283 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Analytics complet{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 space-y-5">
+
+    <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)]">
+      <div class="p-5 bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.16),transparent_60%),radial-gradient(800px_circle_at_90%_30%,rgba(6,182,212,.12),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.72))]">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div class="text-sm font-semibold text-slate-500">{% trans %}Analytics • Plateforme • Finance • Risque{% endtrans %}</div>
+            <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">📊 {% trans %}Centre Analytics complet{% endtrans %}</h1>
+            <p class="mt-2 max-w-3xl text-sm font-medium text-slate-600">
+              {% trans %}Vue consolidée des utilisateurs, offres, paiements, factures, abonnements et litiges.{% endtrans %}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              ← {% trans %}Tableau de bord{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <form method="get" class="flex flex-wrap gap-3">
+        <select name="range" class="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none">
+          <option value="7d" {{ range == '7d' ? 'selected' : '' }}>{% trans %}7 jours{% endtrans %}</option>
+          <option value="30d" {{ range == '30d' ? 'selected' : '' }}>{% trans %}30 jours{% endtrans %}</option>
+          <option value="90d" {{ range == '90d' ? 'selected' : '' }}>{% trans %}90 jours{% endtrans %}</option>
+          <option value="12m" {{ range == '12m' ? 'selected' : '' }}>{% trans %}12 mois{% endtrans %}</option>
+        </select>
+
+        <button class="rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2.5 text-sm font-extrabold text-white hover:opacity-95">
+          {% trans %}Actualiser{% endtrans %}
+        </button>
+      </form>
+    </section>
+
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-6">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 p-4"><div class="text-xs font-semibold text-slate-500">{% trans %}Utilisateurs{% endtrans %}</div><div class="mt-1 text-3xl font-black text-slate-900">{{ userKpis.totalUsers|number_format(0, ',', ' ') }}</div></div>
+      <div class="rounded-3xl border border-cyan-200/70 bg-cyan-50/70 p-4"><div class="text-xs font-semibold text-cyan-700">{% trans %}Offres actives{% endtrans %}</div><div class="mt-1 text-3xl font-black text-cyan-900">{{ jobKpis.activeJobs|number_format(0, ',', ' ') }}</div></div>
+      <div class="rounded-3xl border border-emerald-200/70 bg-emerald-50/70 p-4"><div class="text-xs font-semibold text-emerald-700">{% trans %}Transactions{% endtrans %}</div><div class="mt-1 text-3xl font-black text-emerald-900">{{ paymentKpis.totalPayments|number_format(0, ',', ' ') }}</div></div>
+      <div class="rounded-3xl border border-indigo-200/70 bg-indigo-50/70 p-4"><div class="text-xs font-semibold text-indigo-700">{% trans %}Factures{% endtrans %}</div><div class="mt-1 text-3xl font-black text-indigo-900">{{ invoiceKpis.totalInvoices|number_format(0, ',', ' ') }}</div></div>
+      <div class="rounded-3xl border border-violet-200/70 bg-violet-50/70 p-4"><div class="text-xs font-semibold text-violet-700">{% trans %}Abonnements actifs{% endtrans %}</div><div class="mt-1 text-3xl font-black text-violet-900">{{ subscriptionKpis.activeSubscriptions|number_format(0, ',', ' ') }}</div></div>
+      <div class="rounded-3xl border border-rose-200/70 bg-rose-50/70 p-4"><div class="text-xs font-semibold text-rose-700">{% trans %}Litiges ouverts{% endtrans %}</div><div class="mt-1 text-3xl font-black text-rose-900">{{ disputeKpis.openDisputes|number_format(0, ',', ' ') }}</div></div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-4">
+        <div class="rounded-3xl border border-amber-200/70 bg-amber-50/70 p-4">
+            <div class="text-xs font-semibold text-amber-700">{% trans %}Revenus période{% endtrans %}</div>
+            <div class="mt-1 text-3xl font-black text-amber-900">{{ paymentKpis.revenueTotal|number_format(0, ',', ' ') }}</div>
+        </div>
+        <div class="rounded-3xl border border-slate-200/70 bg-white/70 p-4">
+            <div class="text-xs font-semibold text-slate-500">{% trans %}Litiges en revue{% endtrans %}</div>
+            <div class="mt-1 text-3xl font-black text-slate-900">{{ disputeKpis.reviewDisputes|number_format(0, ',', ' ') }}</div>
+        </div>
+        <div class="rounded-3xl border border-emerald-200/70 bg-emerald-50/70 p-4">
+            <div class="text-xs font-semibold text-emerald-700">{% trans %}Litiges résolus{% endtrans %}</div>
+            <div class="mt-1 text-3xl font-black text-emerald-900">{{ disputeKpis.resolvedDisputes|number_format(0, ',', ' ') }}</div>
+        </div>
+        <div class="rounded-3xl border border-violet-200/70 bg-violet-50/70 p-4">
+            <div class="text-xs font-semibold text-violet-700">{% trans %}Litiges remboursés{% endtrans %}</div>
+            <div class="mt-1 text-3xl font-black text-violet-900">{{ disputeKpis.refundedDisputes|number_format(0, ',', ' ') }}</div>
+        </div>
+        <div class="rounded-3xl border border-rose-200/70 bg-rose-50/70 p-4">
+            <div class="text-xs font-semibold text-rose-700">{% trans %}Signalements comptes ouverts{% endtrans %}</div>
+            <div class="mt-1 text-3xl font-black text-rose-900">{{ reportKpis.openReports|number_format(0, ',', ' ') }}</div>
+        </div>
+
+        <div class="rounded-3xl border border-fuchsia-200/70 bg-fuchsia-50/70 p-4">
+            <div class="text-xs font-semibold text-fuchsia-700">{% trans %}Signalements offres pending{% endtrans %}</div>
+            <div class="mt-1 text-3xl font-black text-fuchsia-900">{{ jobReportKpis.pendingJobReports|number_format(0, ',', ' ') }}</div>
+        </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-3">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden"><div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">📈 {% trans %}Inscriptions{% endtrans %}</div><div class="p-4"><div class="rounded-2xl border border-slate-200 bg-white p-3 h-[240px]"><canvas id="signupsChart"></canvas></div></div></div>
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden"><div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">📣 {% trans %}Offres{% endtrans %}</div><div class="p-4"><div class="rounded-2xl border border-slate-200 bg-white p-3 h-[240px]"><canvas id="jobsChart"></canvas></div></div></div>
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden"><div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">📦 {% trans %}Abonnements{% endtrans %}</div><div class="p-4"><div class="rounded-2xl border border-slate-200 bg-white p-3 h-[240px]"><canvas id="subscriptionsChart"></canvas></div></div></div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-4">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden"><div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">💳 {% trans %}Paiements{% endtrans %}</div><div class="p-4"><div class="rounded-2xl border border-slate-200 bg-white p-3 h-[220px]"><canvas id="paymentsChart"></canvas></div></div></div>
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden"><div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">🧾 {% trans %}Factures{% endtrans %}</div><div class="p-4"><div class="rounded-2xl border border-slate-200 bg-white p-3 h-[220px]"><canvas id="invoicesChart"></canvas></div></div></div>
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden"><div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">💰 {% trans %}Revenus{% endtrans %}</div><div class="p-4"><div class="rounded-2xl border border-slate-200 bg-white p-3 h-[220px]"><canvas id="revenueChart"></canvas></div></div></div>
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden"><div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">🚨 {% trans %}Litiges{% endtrans %}</div><div class="p-4"><div class="rounded-2xl border border-slate-200 bg-white p-3 h-[220px]"><canvas id="disputesChart"></canvas></div></div></div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-2">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">🏦 {% trans %}Top fournisseurs{% endtrans %}</div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <tbody class="divide-y divide-slate-200/70">
+              {% for row in topProviders %}
+                <tr><td class="px-5 py-3 font-bold text-slate-900">{{ row.provider ?: '—' }}</td><td class="px-5 py-3 text-slate-700 font-semibold">{{ row.total }}</td></tr>
+              {% else %}
+                <tr><td colspan="2" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucune donnée.{% endtrans %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">📦 {% trans %}Top plans{% endtrans %}</div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <tbody class="divide-y divide-slate-200/70">
+              {% for row in topPlans %}
+                <tr><td class="px-5 py-3 font-bold text-slate-900">{{ row.planName ?: '—' }}</td><td class="px-5 py-3 text-slate-700 font-semibold">{{ row.total }}</td></tr>
+              {% else %}
+                <tr><td colspan="2" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucune donnée.{% endtrans %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-2">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">🧭 {% trans %}Sources de litiges{% endtrans %}</div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <tbody class="divide-y divide-slate-200/70">
+              {% for row in sourceStats %}
+                <tr><td class="px-5 py-3 font-bold text-slate-900">{{ row.source }}</td><td class="px-5 py-3 text-slate-700 font-semibold">{{ row.total }}</td></tr>
+              {% else %}
+                <tr><td colspan="2" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucune donnée.{% endtrans %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">⚠️ {% trans %}Priorités litiges{% endtrans %}</div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <tbody class="divide-y divide-slate-200/70">
+              {% for row in priorityStats %}
+                <tr><td class="px-5 py-3 font-bold text-slate-900">{{ row.priority }}</td><td class="px-5 py-3 text-slate-700 font-semibold">{{ row.total }}</td></tr>
+              {% else %}
+                <tr><td colspan="2" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucune donnée.{% endtrans %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-2">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">🚨 {% trans %}Signalements comptes{% endtrans %}</div>
+        <div class="p-4">
+          <div class="rounded-2xl border border-slate-200 bg-white p-3 h-[240px]">
+            <canvas id="reportsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">🚩 {% trans %}Signalements offres{% endtrans %}</div>
+        <div class="p-4">
+          <div class="rounded-2xl border border-slate-200 bg-white p-3 h-[240px]">
+            <canvas id="jobReportsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-2">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">👤 {% trans %}Comptes les plus signalés{% endtrans %}</div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <tbody class="divide-y divide-slate-200/70">
+              {% for row in topReportedUsers %}
+                <tr>
+                  <td class="px-5 py-3 font-bold text-slate-900">{{ row.email ?: '—' }}</td>
+                  <td class="px-5 py-3 text-slate-700 font-semibold">{{ row.total }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="2" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucune donnée.{% endtrans %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 overflow-hidden">
+        <div class="px-5 py-4 border-b bg-white/60 text-sm font-extrabold text-slate-900">📣 {% trans %}Offres les plus signalées{% endtrans %}</div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <tbody class="divide-y divide-slate-200/70">
+              {% for row in topReportedJobs %}
+                <tr>
+                  <td class="px-5 py-3 font-bold text-slate-900">{{ row.title ?: '—' }}</td>
+                  <td class="px-5 py-3 text-slate-700 font-semibold">{{ row.total }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="2" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">{% trans %}Aucune donnée.{% endtrans %}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(() => {
+  const charts = {
+    signups: {{ charts.signups|json_encode|raw }},
+    jobs: {{ charts.jobs|json_encode|raw }},
+    payments: {{ charts.payments|json_encode|raw }},
+    revenue: {{ charts.revenue|json_encode|raw }},
+    invoices: {{ charts.invoices|json_encode|raw }},
+    subscriptions: {{ charts.subscriptions|json_encode|raw }},
+    disputes: {{ charts.disputes|json_encode|raw }},
+    reports: {{ charts.reports|json_encode|raw }},
+    jobReports: {{ charts.jobReports|json_encode|raw }},
+  };
+
+  const baseOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true },
+      tooltip: { intersect: false, mode: 'index' }
+    },
+    interaction: { intersect: false, mode: 'index' },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true, grid: { color: 'rgba(15,23,42,.06)' } }
+    }
+  };
+
+  const mount = (id, type, label, rows) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    new Chart(el, {
+      type,
+      data: {
+        labels: rows.map(x => x.label),
+        datasets: [{
+          label,
+          data: rows.map(x => x.value),
+          tension: 0.35,
+          fill: type === 'line',
+          pointRadius: 2,
+          pointHoverRadius: 4,
+          borderWidth: 2
+        }]
+      },
+      options: baseOptions
+    });
+  };
+
+    mount('signupsChart', 'line', '{{ "Inscriptions"|trans }}', charts.signups);
+    mount('jobsChart', 'bar', '{{ "Offres"|trans }}', charts.jobs);
+    mount('subscriptionsChart', 'bar', '{{ "Abonnements"|trans }}', charts.subscriptions);
+    mount('paymentsChart', 'bar', '{{ "Paiements"|trans }}', charts.payments);
+    mount('invoicesChart', 'bar', '{{ "Factures"|trans }}', charts.invoices);
+    mount('revenueChart', 'line', '{{ "Revenus"|trans }}', charts.revenue);
+    mount('disputesChart', 'bar', '{{ "Litiges"|trans }}', charts.disputes);
+    mount('reportsChart', 'bar', '{{ "Signalements comptes"|trans }}', charts.reports);
+    mount('jobReportsChart', 'bar', '{{ "Signalements offres"|trans }}', charts.jobReports);
+})();
+</script>
+{% endblock %}

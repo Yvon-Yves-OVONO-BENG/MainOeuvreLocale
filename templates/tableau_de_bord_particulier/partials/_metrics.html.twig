@@ -1,0 +1,31 @@
+{# ===================== INDICATEURS ===================== #}
+            <section class="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                <div class="mol-metric-card">
+                    <span class="mol-metric-icon bg-emerald-50 text-emerald-700" aria-hidden="true">📄</span>
+                    <div>
+                        <div class="mol-metric-value">{{ kpi.projectsPublished|default(0) }}</div>
+                        <div class="mol-metric-label">{% trans %}Missions publiées{% endtrans %}</div>
+                    </div>
+                </div>
+                <div class="mol-metric-card">
+                    <span class="mol-metric-icon bg-indigo-50 text-indigo-700" aria-hidden="true">📬</span>
+                    <div>
+                        <div class="mol-metric-value">{{ kpi.proposalsReceived|default(0) }}</div>
+                        <div class="mol-metric-label">{% trans %}Propositions reçues{% endtrans %}</div>
+                    </div>
+                </div>
+                <div class="mol-metric-card">
+                    <span class="mol-metric-icon bg-amber-50 text-amber-700" aria-hidden="true">⭐</span>
+                    <div>
+                        <div class="mol-metric-value">{{ kpi.favoritesCount|default(0) }}</div>
+                        <div class="mol-metric-label">{% trans %}Favoris enregistrés{% endtrans %}</div>
+                    </div>
+                </div>
+                <div class="mol-metric-card">
+                    <span class="mol-metric-icon bg-blue-50 text-blue-700" aria-hidden="true">📨</span>
+                    <div>
+                        <div class="mol-metric-value">{{ applicationTotal }}</div>
+                        <div class="mol-metric-label">{% trans %}Demandes envoyées{% endtrans %}</div>
+                    </div>
+                </div>
+            </section>

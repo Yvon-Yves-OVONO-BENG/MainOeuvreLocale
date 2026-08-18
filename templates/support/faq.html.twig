@@ -1,0 +1,86 @@
+{% extends 'support/layout.html.twig' %}
+{% set seo_description = 'FAQ Main d’Œuvre Locale : 10 réponses sur le compte, les profils, les missions, les annonces, la messagerie, le boost et la sécurité.' %}
+
+{% block title %}{% trans %}FAQ — Main d’Œuvre Locale{% endtrans %}{% endblock %}
+
+{% block support_hero %}
+    <section class="mol-support-hero">
+        <div class="mol-support-hero__inner">
+            <span class="mol-support-eyebrow">
+                <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+                {% trans %}10 réponses essentielles{% endtrans %}
+            </span>
+    
+            <h1>{% trans %}Questions fréquemment posées{% endtrans %}</h1>
+            <p>{% trans %}Des réponses simples et directes pour utiliser la plateforme avec confiance, depuis la création du compte jusqu’au boost d’une annonce.{% endtrans %}</p>
+    
+            <div class="mol-faq-tools">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input id="molFaqSearch" type="search" placeholder="{% trans %}Rechercher une question ou un mot-clé…{% endtrans %}" autocomplete="off">
+                <span class="mol-faq-count"><span id="molFaqCount">{{ faqs|length }}</span>/{{ faqs|length }}</span>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block support_content %}
+
+    <section class="mol-support-section">
+        <div class="mol-faq-list" id="molFaqList">
+            {% for faq in faqs %}
+                <details class="mol-faq-item" data-faq-item>
+                    <summary>
+                        <span class="mol-faq-question">
+                            <span class="mol-faq-badge">{{ faq.category }}</span>
+                            <span>{{ faq.question }}</span>
+                        </span>
+                        <span class="mol-faq-chevron"><i class="fa-solid fa-chevron-down" aria-hidden="true"></i></span>
+                    </summary>
+                    <div class="mol-faq-answer">{{ faq.answer }}</div>
+                </details>
+            {% endfor %}
+
+            <div class="mol-faq-empty" id="molFaqEmpty">
+                <i class="fa-regular fa-face-frown-open fa-2x" aria-hidden="true"></i>
+                <h3 class="mt-3">{% trans %}Aucune question trouvée{% endtrans %}</h3>
+                <p class="mb-0">{% trans %}Essayez un autre mot-clé ou contactez directement notre support.{% endtrans %}</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="mol-support-band">
+        <div>
+            <h2>{% trans %}Votre question n’est pas dans la liste ?{% endtrans %}</h2>
+            <p>{% trans %}Notre équipe peut vous accompagner pour un problème de compte, de publication, de paiement ou de sécurité.{% endtrans %}</p>
+        </div>
+        <a href="{{ path('contact_page') }}" class="mol-support-btn" data-turbo="false">
+            <i class="fa-solid fa-paper-plane" aria-hidden="true"></i>
+            {% trans %}Poser ma question{% endtrans %}
+        </a>
+    </section>
+
+    <script>
+        (function () {
+            const input = document.getElementById('molFaqSearch');
+            const items = Array.from(document.querySelectorAll('[data-faq-item]'));
+            const count = document.getElementById('molFaqCount');
+            const empty = document.getElementById('molFaqEmpty');
+
+            if (!input || items.length === 0 || !count || !empty) return;
+
+            input.addEventListener('input', function () {
+                const query = input.value.toLocaleLowerCase().trim();
+                let visible = 0;
+
+                items.forEach(function (item) {
+                    const matches = query === '' || item.textContent.toLocaleLowerCase().includes(query);
+                    item.hidden = !matches;
+                    if (matches) visible += 1;
+                });
+
+                count.textContent = String(visible);
+                empty.style.display = visible === 0 ? 'block' : 'none';
+            });
+        })();
+    </script>
+{% endblock %}

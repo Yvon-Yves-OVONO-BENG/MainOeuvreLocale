@@ -1,0 +1,146 @@
+{# templates/chat/_panel.html.twig #}
+{% if app.user %}
+<button
+    type="button"
+    id="molChatFab"
+    class="mol-chat-fab"
+    data-mol-chat-open
+    data-mol-chat-user="{{ app.user.id }}"
+    aria-label="{{ 'Ouvrir la messagerie instantanée'|trans }}">
+
+    <span class="mol-chat-fab-pulse" aria-hidden="true"></span>
+
+    <span
+        class="mol-chat-fab-label"
+        aria-hidden="true"
+        hidden>
+
+        <strong>
+            {% trans %}Bonjour ! Je suis Colombe, votre messagerie instantanée.{% endtrans %}
+        </strong>
+
+        <small>
+            {% trans %}Mon petit bec me dit que le bon contact vous attend peut-être ici dans le tchat 😊{% endtrans %}
+        </small>
+    </span>
+
+    <span
+        class="mol-chat-fab-icon mol-chat-colombe-float"
+        aria-hidden="true">
+
+        <img
+            src="{{ asset('images/chat/colombe.png') }}"
+            class="mol-chat-colombe-img"
+            alt="">
+
+        <span class="mol-chat-fab-online"></span>
+    </span>
+
+    <span
+        class="mol-chat-fab-badge"
+        data-mol-chat-unread
+        hidden>
+        0
+    </span>
+</button>
+
+<section id="molChatPanel" class="mol-chat-panel" aria-hidden="true" aria-label="Messagerie">
+    <div class="mol-chat-panel-card">
+        <header class="mol-chat-panel-header">
+            <h3 class="mol-chat-panel-title">
+                <i class="bi bi-chat-dots-fill"></i>
+                <span>{% trans %}Messagerie{% endtrans %}</span>
+            </h3>
+
+            <div class="mol-chat-panel-actions">
+
+                <div class="mol-chat-menu-wrap">
+                    <button type="button" class="mol-chat-icon-btn" data-mol-menu-toggle="molChatPanelMenu" title="Options" aria-label="Options">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+
+                    <div id="molChatPanelMenu" class="mol-chat-menu mol-chat-panel-menu">
+                        <button type="button" data-mol-panel-action="mark_all_read">
+                            <i class="bi bi-check2-square"></i>
+                            <span>{% trans %}Tout marquer comme lu{% endtrans %}</span>
+                        </button>
+
+                        <a href="{{ path('app_chat_settings') }}" data-turbo="false">
+                            <i class="bi bi-gear"></i>
+                            <span>{% trans %}Paramètres du chat{% endtrans %}</span>
+                        </a>
+
+                        <button
+                            type="button"
+                            class="mol-panel-menu__item"
+                            data-notification-toggle
+                            data-toggle-url="{{ path('app_notifications_toggle') }}"
+                            data-status-url="{{ path('app_notifications_status') }}"
+                            data-csrf="{{ csrf_token('notification_preference') }}"
+                        >
+                            <i class="bi bi-bell-slash"></i>
+                            <span>{% trans %}Désactiver les notifications{% endtrans %}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="mol-panel-menu__item"
+                            data-mol-panel-action="message_sounds"
+                            data-mol-message-sounds-open
+                        >
+                            <i class="bi bi-volume-up"></i>
+                            <span>{% trans %}Sons des messages{% endtrans %}</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="mol-panel-menu__item"
+                            data-mol-panel-action="blockSettings"
+                            data-mol-block-settings-open
+                        >
+                            <i class="bi bi-slash-circle"></i>
+                            <span>{% trans %}Réglages de blocage{% endtrans %}</span>
+                        </button>
+
+                        <hr>
+
+                        {# <button type="button" data-mol-panel-action="groups">
+                            <i class="bi bi-people"></i>
+                            <span>{% trans %}Groupes{% endtrans %}</span>
+                        </button> #}
+                    </div>
+                </div>
+
+                <button type="button" class="mol-chat-icon-btn" data-mol-chat-close title="Fermer" aria-label="Fermer">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="mol-chat-tabs" role="tablist">
+            <button type="button" class="is-active" data-mol-tab="private"><i class="bi bi-chat-dots"></i> Privés</button>
+            {# <button type="button" data-mol-tab="groups"><i class="bi bi-people"></i> Groupes</button> #}
+            <button type="button" data-mol-tab="search"><i class="bi bi-search"></i> Recherche</button>
+        </div>
+
+        <div class="mol-chat-search" data-mol-search-private>
+            <i class="bi bi-search"></i>
+            <input type="search" id="molChatSearchInput" placeholder="Search..." autocomplete="off">
+        </div>
+
+        <div class="mol-chat-global-search" data-mol-search-global hidden>
+            <div class="mol-chat-search">
+                <i class="bi bi-search"></i>
+                <input type="search" id="molChatGlobalSearchInput" placeholder="Search in messages..." autocomplete="off">
+            </div>
+            <div id="molChatGlobalResults" class="mol-chat-global-results"></div>
+        </div>
+
+        <div id="molChatPrivateList" class="mol-chat-conversation-list is-active" data-mol-list="private"></div>
+        <div id="molChatGroupList" class="mol-chat-conversation-list" data-mol-list="groups"></div>
+    </div>
+</section>
+
+<div id="molChatThreadDock" class="mol-chat-thread-dock" aria-live="polite"></div>
+<div id="molChatToasts" class="mol-chat-toasts" aria-live="polite" aria-atomic="true"></div>
+{% endif %}

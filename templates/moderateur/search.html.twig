@@ -1,0 +1,235 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Modérateur • Recherche{% endtrans %}{% endblock %}
+
+{% block body %}
+
+{% include "moderateur/ui/_vip_ui_search.html.twig" %}
+
+{% set q = q|default('') %}
+{% set scope = scope|default('all') %}
+
+<div class="mod-page">
+  <div class="mod-wrap">
+
+    <div class="mod-card">
+      <div class="hd">
+        <div>
+          <div class="mod-title">🔎 {% trans %}Recherche{% endtrans %}</div>
+          <div class="hint">{% trans %}Résultats unifiés (Users / Companies / Reports) — rapide, clair, premium.{% endtrans %}</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          <a class="mod-btn" href="{{ path('moderateur_search_advanced', { q: q }) }}">
+            ⚙️ {% trans %}Recherche avancée{% endtrans %}
+          </a>
+        </div>
+      </div>
+
+      <div class="bd">
+
+        {# ===== Search Hero ===== #}
+        <div class="search-hero">
+          <form method="get" action="{{ path('moderateur_search') }}">
+            <div class="search-grid">
+
+              <div class="searchbox">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <label class="form-label fw-bold mb-0">{% trans %}Mot-clé{% endtrans %}</label>
+                  <span class="hint">{% trans %}Ex: email, téléphone, ID, mot-clé{% endtrans %}</span>
+                </div>
+
+                <div class="inputwrap">
+                  <span class="ico">🔍</span>
+                  <input
+                    name="q"
+                    value="{{ q }}"
+                    class="form-control mod-input"
+                    placeholder="{{ 'Rechercher : email, téléphone, ID, mot-clé…'|trans }}"
+                    autocomplete="off"
+                  >
+                </div>
+              </div>
+
+              <div>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <label class="form-label fw-bold mb-0">{% trans %}Périmètre{% endtrans %}</label>
+                  <span class="hint"><span class="kbd">{% trans %}Tous{% endtrans %}</span> 
+                  <span class="kbd">{% trans %}Users{% endtrans %}</span> 
+                  <span class="kbd">{% trans %}Compagnies{% endtrans %}</span> 
+                  <span class="kbd">{% trans %}Reports{% endtrans %}</span></span>
+                </div>
+
+                <div class="segmented">
+                  <input type="radio" id="sc_all" name="scope" value="all" {{ scope=='all' ? 'checked' : '' }}>
+                  <label for="sc_all">{% trans %}✨ Tout{% endtrans %}</label>
+
+                  <input type="radio" id="sc_users" name="scope" value="users" {{ scope=='users' ? 'checked' : '' }}>
+                  <label for="sc_users">{% trans %}👤 Utilisateurs{% endtrans %}</label>
+
+                  <input type="radio" id="sc_companies" name="scope" value="companies" {{ scope=='companies' ? 'checked' : '' }}>
+                  <label for="sc_companies">{% trans %}🏢 Compagnies{% endtrans %}</label>
+
+                  <input type="radio" id="sc_reports" name="scope" value="reports" {{ scope=='reports' ? 'checked' : '' }}>
+                  <label for="sc_reports">{% trans %}🚩 Reports{% endtrans %}</label>
+                </div>
+              </div>
+
+              <div class="d-grid">
+                <button class="mod-btn mod-btn-primary" type="submit" style="height:52px;">
+                  {% trans %}Rechercher →{% endtrans %}
+                </button>
+              </div>
+
+            </div>
+          </form>
+
+          {% if q is not empty %}
+            <div class="mt-3 results-head">
+              <div class="d-flex gap-2 flex-wrap align-items-center">
+                <span class="pill">🔎 {% trans %}Requête :{% endtrans %} <b>{{ q }}</b></span>
+                <span class="pill">🎯 {% trans %}Scope :{% endtrans %} <b>{{ scope }}</b></span>
+              </div>
+              <div class="d-flex gap-2 align-items-center">
+                <span class="badge-soft">
+                  {% trans %}Total :{% endtrans %}
+                  {{ (results.users|length) + (results.companies|length) + (results.reports|length) }}
+                </span>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <hr class="my-4" style="border-color: rgba(15,23,42,.10);">
+
+        {% if q is empty %}
+          <div class="empty">
+            <div class="fw-bold mb-1">👋 {% trans %}Lance une recherche{% endtrans %}</div>
+            <div class="hint">
+              {% trans %}Tape un mot-clé (email, téléphone, ID…) puis choisis un périmètre.{% endtrans %}
+              {% trans %}Astuce : commence par{% endtrans %} <span class="kbd">{% trans %}Tous{% endtrans %}</span> {% trans %}pour une vue globale.{% endtrans %}
+            </div>
+          </div>
+        {% else %}
+          <div class="row g-3">
+
+            {# ===== Users ===== #}
+            <div class="col-12 col-lg-4">
+              <div class="res-card h-100">
+                <div class="res-hd">
+                  <div>
+                    <div class="res-title">👤 {% trans %}Users{% endtrans %}</div>
+                    <div class="hint">{{ results.users|length }} {% trans %}trouvés{% endtrans %}</div>
+                  </div>
+                  <span class="badge-soft">{{ results.users|length }}</span>
+                </div>
+
+                <div class="res-bd">
+                  <div class="res-list">
+                    {% for u in results.users %}
+                      {% set email = u.email ?? '—' %}
+                      {% set initials = (email|slice(0,1))|upper %}
+                      <div class="res-item">
+                        <div class="res-left">
+                          <div class="avatar">{{ initials }}</div>
+                          <div class="res-meta">
+                            <div class="top">#{{ u.id }} • {{ email }}</div>
+                            <div class="sub">{% trans %}Rôles :{% endtrans %} {{ u.roles ? u.roles|join(', ') : '—' }}</div>
+                          </div>
+                        </div>
+                        <a class="mod-btn" href="{{ path('moderateur_search', { q: u.id, scope: 'users' }) }}">{% trans %}Voir{% endtrans %}</a>
+                      </div>
+                    {% else %}
+                      <div class="empty">
+                        <div class="fw-bold mb-1">{% trans %}Aucun résultat{% endtrans %}</div>
+                        <div class="hint">{% trans %}Essaie un email, un ID, ou passe en scope{% endtrans %} <span class="kbd">{% trans %}Tous{% endtrans %}</span>.</div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# ===== Companies ===== #}
+            <div class="col-12 col-lg-4">
+              <div class="res-card h-100">
+                <div class="res-hd">
+                  <div>
+                    <div class="res-title">🏢 {% trans %}Companies{% endtrans %}</div>
+                    <div class="hint">{{ results.companies|length }} {% trans %}trouvées{% endtrans %}</div>
+                  </div>
+                  <span class="badge-soft">{{ results.companies|length }}</span>
+                </div>
+
+                <div class="res-bd">
+                  <div class="res-list">
+                    {% for c in results.companies %}
+                      {% set name = attribute(c,'name') ?? '—' %}
+                      {% set initials = (name|slice(0,1))|upper %}
+                      <div class="res-item">
+                        <div class="res-left">
+                          <div class="avatar">{{ initials }}</div>
+                          <div class="res-meta">
+                            <div class="top">#{{ c.id }} • {{ name }}</div>
+                            <div class="sub">{{ attribute(c,'email') ?? '' }}</div>
+                          </div>
+                        </div>
+                        <a class="mod-btn" href="{{ path('moderateur_search', { q: c.id, scope: 'companies' }) }}">{% trans %}Voir{% endtrans %}</a>
+                      </div>
+                    {% else %}
+                      <div class="empty">
+                        <div class="fw-bold mb-1">{% trans %}Aucun résultat{% endtrans %}</div>
+                        <div class="hint">{% trans %}Essaie le nom de la company, son email, ou son ID.{% endtrans %}</div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# ===== Reports ===== #}
+            <div class="col-12 col-lg-4">
+              <div class="res-card h-100">
+                <div class="res-hd">
+                  <div>
+                    <div class="res-title">🚩 {% trans %}Reports{% endtrans %}</div>
+                    <div class="hint">{{ results.reports|length }} {% trans %}trouvés{% endtrans %}</div>
+                  </div>
+                  <span class="badge-soft">{{ results.reports|length }}</span>
+                </div>
+
+                <div class="res-bd">
+                  <div class="res-list">
+                    {% for r in results.reports %}
+                      {% set st = attribute(r,'status') ?? '—' %}
+                      {% set initials = (st|slice(0,1))|upper %}
+                      <div class="res-item">
+                        <div class="res-left">
+                          <div class="avatar">{{ initials }}</div>
+                          <div class="res-meta">
+                            <div class="top">#{{ r.id }} • {{ st }}</div>
+                            <div class="sub">{{ attribute(r,'reason') ?? '' }}</div>
+                          </div>
+                        </div>
+                        {# Si tu as une route de détail report, remplace ce lien #}
+                        <a class="mod-btn" href="{{ path('moderateur_search', { q: r.id, scope: 'reports' }) }}">{% trans %}Voir{% endtrans %}</a>
+                      </div>
+                    {% else %}
+                      <div class="empty">
+                        <div class="fw-bold mb-1">{% trans %}Aucun résultat{% endtrans %}</div>
+                        <div class="hint">{% trans %}Essaie un ID, un statut, ou un mot du motif (reason).{% endtrans %}</div>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

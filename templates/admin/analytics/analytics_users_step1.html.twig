@@ -1,0 +1,207 @@
+{% extends 'base.html.twig' %}
+{% block title %}Admin • Analytics utilisateurs{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 space-y-5">
+
+    <section class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)]">
+      <div class="p-5 bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.16),transparent_60%),radial-gradient(800px_circle_at_90%_30%,rgba(6,182,212,.12),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.90),rgba(255,255,255,.72))]">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div class="text-sm font-semibold text-slate-500">Analytics • Utilisateurs</div>
+            <h1 class="mt-1 text-2xl sm:text-3xl font-black tracking-tight text-slate-900">👥 Vue utilisateurs</h1>
+            <p class="mt-2 max-w-3xl text-sm font-medium text-slate-600">
+              Statistiques réelles des comptes, activité, vérification email et dernières inscriptions.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+              ← Tableau de bord
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_18px_55px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      <form method="get" class="flex flex-wrap gap-3">
+        <select name="range" class="rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 outline-none">
+          <option value="7d" {{ range == '7d' ? 'selected' : '' }}>7 jours</option>
+          <option value="30d" {{ range == '30d' ? 'selected' : '' }}>30 jours</option>
+          <option value="90d" {{ range == '90d' ? 'selected' : '' }}>90 jours</option>
+          <option value="12m" {{ range == '12m' ? 'selected' : '' }}>12 mois</option>
+        </select>
+
+        <button class="rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-4 py-2.5 text-sm font-extrabold text-white hover:opacity-95">
+          Actualiser
+        </button>
+      </form>
+    </section>
+
+    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-slate-500">Total utilisateurs</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-slate-900">{{ kpis.totalUsers|number_format(0, ',', ' ') }}</div>
+      </div>
+
+      <div class="rounded-3xl border border-emerald-200/70 bg-emerald-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-emerald-700">Utilisateurs actifs</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-emerald-900">{{ kpis.activeUsers|number_format(0, ',', ' ') }}</div>
+      </div>
+
+      <div class="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-slate-600">Utilisateurs inactifs</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-slate-800">{{ kpis.inactiveUsers|number_format(0, ',', ' ') }}</div>
+      </div>
+
+      <div class="rounded-3xl border border-cyan-200/70 bg-cyan-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-cyan-700">Emails vérifiés</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-cyan-900">{{ kpis.verifiedUsers|number_format(0, ',', ' ') }}</div>
+      </div>
+
+      <div class="rounded-3xl border border-amber-200/70 bg-amber-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-amber-700">Emails non vérifiés</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-amber-900">{{ kpis.unverifiedUsers|number_format(0, ',', ' ') }}</div>
+      </div>
+
+      <div class="rounded-3xl border border-indigo-200/70 bg-indigo-50/70 p-4 shadow-[0_12px_35px_rgba(2,6,23,.08)]">
+        <div class="text-xs font-semibold text-indigo-700">Nouveaux utilisateurs</div>
+        <div class="mt-1 text-3xl font-black tracking-tight text-indigo-900">{{ kpis.newUsers|number_format(0, ',', ' ') }}</div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-3">
+      <div class="xl:col-span-2 rounded-3xl border border-slate-200/70 bg-white/70 shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+          <div class="text-sm font-extrabold text-slate-900">📈 Inscriptions sur la période</div>
+          <div class="text-xs font-semibold text-slate-500">Données réelles issues de User.createdAt</div>
+        </div>
+        <div class="p-4">
+          <div class="rounded-2xl border border-slate-200 bg-white p-3 h-[340px]">
+            <canvas id="signupsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+          <div class="text-sm font-extrabold text-slate-900">🧩 Répartition rôles</div>
+          <div class="text-xs font-semibold text-slate-500">Comptage basé sur les rôles utilisateurs</div>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3"><span class="text-sm font-semibold text-slate-700">Admins</span><span class="font-black text-slate-900">{{ roleStats.admins }}</span></div>
+          <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3"><span class="text-sm font-semibold text-slate-700">Modérateurs</span><span class="font-black text-slate-900">{{ roleStats.moderators }}</span></div>
+          <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3"><span class="text-sm font-semibold text-slate-700">Compagnies</span><span class="font-black text-slate-900">{{ roleStats.companies }}</span></div>
+          <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3"><span class="text-sm font-semibold text-slate-700">Talents</span><span class="font-black text-slate-900">{{ roleStats.talents }}</span></div>
+          <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3"><span class="text-sm font-semibold text-slate-700">Particuliers</span><span class="font-black text-slate-900">{{ roleStats.particuliers }}</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid gap-4 xl:grid-cols-2">
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+          <div class="text-sm font-extrabold text-slate-900">🆕 Dernières inscriptions</div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50/60">
+              <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+                <th class="px-5 py-3 font-extrabold">Email</th>
+                <th class="px-5 py-3 font-extrabold">Actif</th>
+                <th class="px-5 py-3 font-extrabold">Email vérifié</th>
+                <th class="px-5 py-3 font-extrabold">Créé</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200/70">
+              {% for u in recentUsers %}
+                <tr>
+                  <td class="px-5 py-3 font-bold text-slate-900">{{ u.email }}</td>
+                  <td class="px-5 py-3">{{ u.isActive ? 'Oui' : 'Non' }}</td>
+                  <td class="px-5 py-3">{{ u.isEmailVerified ? 'Oui' : 'Non' }}</td>
+                  <td class="px-5 py-3 text-xs font-semibold text-slate-500">{{ u.createdAt ? u.createdAt|date('d/m/Y H:i') : '—' }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="4" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">Aucune donnée.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="rounded-3xl border border-slate-200/70 bg-white/70 shadow-[0_18px_55px_rgba(2,6,23,.10)] overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-200/70 bg-white/60">
+          <div class="text-sm font-extrabold text-slate-900">🕒 Dernières connexions</div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-slate-50/60">
+              <tr class="text-left text-[11px] uppercase tracking-wider text-slate-500">
+                <th class="px-5 py-3 font-extrabold">Email</th>
+                <th class="px-5 py-3 font-extrabold">Dernière connexion</th>
+                <th class="px-5 py-3 font-extrabold">Actif</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200/70">
+              {% for u in lastLogins %}
+                <tr>
+                  <td class="px-5 py-3 font-bold text-slate-900">{{ u.email }}</td>
+                  <td class="px-5 py-3 text-xs font-semibold text-slate-500">{{ u.lastLoginAt ? u.lastLoginAt|date('d/m/Y H:i') : '—' }}</td>
+                  <td class="px-5 py-3">{{ u.isActive ? 'Oui' : 'Non' }}</td>
+                </tr>
+              {% else %}
+                <tr><td colspan="3" class="px-5 py-8 text-center text-sm font-semibold text-slate-500">Aucune donnée.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+(() => {
+  const signupsData = {{ charts.signups|json_encode|raw }};
+  const el = document.getElementById('signupsChart');
+
+  if (!el) return;
+
+  new Chart(el, {
+    type: 'line',
+    data: {
+      labels: signupsData.map(x => x.label),
+      datasets: [{
+        label: 'Inscriptions',
+        data: signupsData.map(x => x.value),
+        tension: 0.35,
+        fill: true,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true },
+        tooltip: { intersect: false, mode: 'index' }
+      },
+      interaction: { intersect: false, mode: 'index' },
+      scales: {
+        x: { grid: { display: false } },
+        y: { beginAtZero: true, grid: { color: 'rgba(15,23,42,.06)' } }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

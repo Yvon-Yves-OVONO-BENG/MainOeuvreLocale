@@ -1,0 +1,32 @@
+<form class="js-review-form" action="{{ postUrl }}" method="post">
+  <div class="position-relative">
+    <textarea
+      name="comment"
+      class="form-control rounded-4 js-review-text"
+      rows="3"
+      placeholder="{{ 'Écris ton avis...'|trans }}"
+    ></textarea>
+
+    <button
+      type="button"
+      class="btn btn-light border rounded-circle position-absolute js-emoji-btn"
+      style="right:10px; bottom:10px; width:36px; height:36px;"
+      aria-label="{{ 'Choisir un emoji'|trans }}"
+      title="{{ 'Choisir un emoji'|trans }}"
+    >
+      😊
+    </button>
+
+    <emoji-picker
+      class="d-none position-absolute shadow rounded-4 js-emoji-picker"
+      style="right:0; bottom:55px; z-index:1050;">
+    </emoji-picker>
+  </div>
+
+  <div class="d-flex justify-content-end mt-2">
+    <button type="submit" class="btn btn-primary rounded-4">
+      <i class="fa fa-paper-plane me-2"></i>
+      {% trans %}Envoyer{% endtrans %}
+    </button>
+  </div>
+</form>

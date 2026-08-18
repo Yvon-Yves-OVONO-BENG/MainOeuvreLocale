@@ -1,0 +1,933 @@
+<style>
+		:root
+		{
+			--mol-bg: #f6f8fc;
+			--mol-card: rgba(255, 255, 255, .92);
+			--mol-border: rgba(15, 23, 42, .08);
+			--mol-muted: rgba(15, 23, 42, .62);
+			--mol-text: rgba(15, 23, 42, .92);
+			--mol-shadow: 0 18px 45px rgba(2, 6, 23, .08);
+			--mol-shadow-sm: 0 10px 25px rgba(2, 6, 23, .06);
+			--mol-radius: 20px;
+			--mol-radius-sm: 16px;
+		}
+
+		.mol-page {
+			background: var(--mol-bg);
+		}
+
+		.mol-card {
+			background: var(--mol-card);
+			border: 1px solid var(--mol-border);
+			border-radius: var(--mol-radius);
+			box-shadow: var(--mol-shadow-sm);
+			overflow: hidden;
+			transition: 0.2s ease;
+		}
+		.mol-card:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 16px 40px rgba(2, 6, 23, .08);
+		}
+
+		.mol-soft {
+			color: var(--mol-muted);
+		}
+		.mol-title {
+			font-weight: 950;
+			letter-spacing: -0.02em;
+			line-height: 1.1;
+			color: var(--mol-text);
+		}
+
+		/* HERO */
+		.mol-hero {
+			border-radius: var(--mol-radius);
+			padding: 18px;
+			background: radial-gradient(1100px circle at 12% 18%, rgba(13,110,253,.18), transparent 58%), radial-gradient(900px circle at 88% 12%, rgba(32, 201, 151, 0.16), transparent 55%), linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.75));
+			border: 1px solid var(--mol-border);
+			box-shadow: var(--mol-shadow-sm);
+		}
+
+		.mol-avatar {
+			width: 92px;
+			height: 92px;
+			object-fit: cover;
+			border-radius: 22px;
+			border: 1px solid rgba(255, 255, 255, .9);
+			box-shadow: 0 12px 26px rgba(2, 6, 23, .10);
+			background: #fff;
+		}
+
+		.mol-chip {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.45rem;
+			padding: 0.42rem 0.72rem;
+			border-radius: 999px;
+			border: 1px solid var(--mol-border);
+			background: rgba(255, 255, 255, .78);
+			font-size: 0.86rem;
+			font-weight: 700;
+			color: rgba(15, 23, 42, .78);
+			backdrop-filter:blur(10px);
+		}
+		.mol-chip i {
+			opacity: .9;
+		}
+
+		.mol-actions .btn {
+			padding: 0.58rem 0.9rem;
+			border-radius: 14px;
+			font-weight: 800;
+		}
+		.mol-actions .btn i {
+			margin-right: 0.45rem;
+		}
+
+		/* NAV */
+		.mol-sections {
+			display: flex;
+			gap: 0.6rem;
+			flex-wrap: wrap;
+			padding: 0.9rem 0.9rem 0;
+			border-bottom: 1px solid var(--mol-border);
+			background: rgba(255, 255, 255, .55);
+		}
+		.mol-sections a {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.55rem;
+			padding: 0.6rem 0.85rem;
+			border-radius: 999px;
+			text-decoration: none;
+			font-weight: 900;
+			color: rgba(15, 23, 42, .72);
+			border: 1px solid transparent;
+			transition: 0.18s ease;
+		}
+		.mol-sections a:hover {
+			background: rgba(13, 110, 253, .08);
+			border-color: rgba(13, 110, 253, .18);
+			color: #0d6efd;
+			transform: translateY(-1px);
+		}
+		.mol-sections a i {
+			width: 16px;
+			text-align: center;
+		}
+
+		.mol-block {
+			padding: 18px;
+		}
+		.mol-h {
+			display: flex;
+			align-items: center;
+			gap: 0.65rem;
+			margin: 0 0 0.75rem;
+			font-weight: 950;
+			letter-spacing: -0.01em;
+			color: var(--mol-text);
+		}
+		.mol-h i {
+			width: 34px;
+			height: 34px;
+			border-radius: 12px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			background: rgba(13, 110, 253, .10);
+			border: 1px solid rgba(13, 110, 253, .16);
+			color: #0d6efd;
+		}
+
+		/* Timeline */
+		.mol-timeline {
+			position: relative;
+			padding-left: 18px;
+		}
+		.mol-timeline:before {
+			content: "";
+			position: absolute;
+			left: 6px;
+			top: 6px;
+			bottom: 6px;
+			width: 2px;
+			background: rgba(15, 23, 42, .08);
+			border-radius: 2px;
+		}
+		.mol-item {
+			position: relative;
+			padding: 12px 12px 12px 14px;
+			border: 1px solid var(--mol-border);
+			border-radius: 16px;
+			background: rgba(255, 255, 255, .75);
+			box-shadow: 0 8px 18px rgba(2, 6, 23, .05);
+			margin-bottom: 12px;
+		}
+		.mol-item:before {
+			content: "";
+			position: absolute;
+			left: -18px;
+			top: 18px;
+			width: 12px;
+			height: 12px;
+			border-radius: 999px;
+			background: #0d6efd;
+			box-shadow: 0 0 0 4px rgba(13, 110, 253, .15);
+		}
+		.mol-item .t {
+			font-weight: 950;
+			margin: 0;
+		}
+		.mol-item .s {
+			color: var(--mol-muted);
+			font-weight: 700;
+		}
+		.mol-item .d {
+			color: rgba(15, 23, 42, .78);
+			margin: 0.45rem 0 0;
+		}
+
+		/* Skills */
+		.mol-skill {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.45rem;
+			padding: 0.45rem 0.7rem;
+			border-radius: 999px;
+			background: rgba(13, 110, 253, .08);
+			border: 1px solid rgba(13, 110, 253, .14);
+			font-weight: 900;
+			font-size: 0.85rem;
+			margin: 0.25rem 0.25rem 0 0;
+			color: rgba(15, 23, 42, .80);
+		}
+		.mol-skill i {
+			color: #0d6efd;
+		}
+
+		/* Sidebar sticky */
+		@media(min-width:992px) {
+			.mol-sticky {
+				position: sticky;
+				top: 90px;
+			}
+		}
+		.mol-side-head {
+			padding: 14px 16px;
+			border-bottom: 1px solid var(--mol-border);
+			background: rgba(255, 255, 255, .55);
+		}
+		.mol-side-head h5 {
+			margin: 0;
+			font-weight: 950;
+		}
+		.mol-side-head small {
+			color: var(--mol-muted);
+			font-weight: 700;
+		}
+
+		/* Favorite */
+		.mol-fav-btn {
+			width: 46px;
+			height: 46px;
+			border-radius: 14px;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			border: 1px solid var(--mol-border);
+			background: rgba(255, 255, 255, .82);
+			box-shadow: 0 10px 22px rgba(2, 6, 23, .06);
+			cursor: pointer;
+			transition: 0.18s ease;
+		}
+		.mol-fav-btn:hover {
+			transform: translateY(-1px);
+		}
+		.mol-fav-btn i {
+			font-size: 18px;
+		}
+		.mol-fav-btn.is-active {
+			border-color: rgba(220, 53, 69, .35);
+			background: rgba(220, 53, 69, .08);
+		}
+		.mol-fav-btn.is-active i {
+			color: #dc3545;
+		}
+
+		.mol-swal-premium {
+			backdrop-filter: blur(8px);
+		}
+
+		/* =========================
+		Bouton Signalement (Report)
+		========================= */
+
+		.mol-report-btn {
+		--danger: #dc3545;
+		--danger-soft: rgba(220, 53, 69, 0.12);
+		--text: #1f2933;
+
+		width: 46px;
+		height: 46px;
+		border-radius: 12px;
+
+		border: 1px solid rgba(15, 23, 42, 0.08);
+		background: #ffffff;
+
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+
+		cursor: pointer;
+		transition: all 0.25s ease;
+		position: relative;
+
+		font-size: 16px;
+		color: var(--text);
+		}
+
+		/* Hover élégant */
+		.mol-report-btn:hover {
+		transform: translateY(-1px) scale(1.03);
+		border-color: rgba(220, 53, 69, 0.35);
+		background: var(--danger-soft);
+		color: var(--danger);
+		box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+		}
+
+		/* Click feedback */
+		.mol-report-btn:active {
+		transform: scale(0.96);
+		box-shadow: none;
+		}
+
+		/* Icône */
+		.mol-report-btn i {
+		pointer-events: none;
+		transition: transform 0.2s ease;
+		}
+
+		/* Petit effet hover icône */
+		.mol-report-btn:hover i {
+		transform: scale(1.1);
+		}
+
+		/* =========================
+		Etat ACTIF (signalé)
+		========================= */
+
+		.mol-report-btn.is-active {
+		background: var(--danger);
+		border-color: var(--danger);
+		color: white;
+		box-shadow: 0 10px 22px rgba(220, 53, 69, 0.35);
+		}
+
+		/* Hover quand actif */
+		.mol-report-btn.is-active:hover {
+		background: #c82333;
+		border-color: #c82333;
+		transform: translateY(-1px) scale(1.03);
+		}
+
+		/* Icône actif */
+		.mol-report-btn.is-active i {
+		color: white;
+		}
+
+		/* =========================
+		Optionnel : badge pulse (si besoin futur)
+		========================= */
+
+		.mol-report-btn::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		}
+
+		.mol-report-btn:hover::after {
+		opacity: 1;
+		}
+
+		{# NOUVEAU CSS SaaS PREMIUM  #}
+		/* ===== SaaS Premium polish (sans casser l'existant) ===== */
+		.mol-shell{
+		max-width: 1140px;
+		margin: 0 auto;
+		}
+
+		.mol-cover{
+		position: relative;
+		border-radius: var(--mol-radius);
+		overflow: hidden;
+		border: 1px solid var(--mol-border);
+		box-shadow: var(--mol-shadow-sm);
+		background:
+			radial-gradient(900px circle at 15% 20%, rgba(13,110,253,.22), transparent 55%),
+			radial-gradient(700px circle at 85% 15%, rgba(32,201,151,.18), transparent 55%),
+			linear-gradient(135deg, rgba(255,255,255,.65), rgba(255,255,255,.25));
+		min-height: 170px;
+		}
+
+		.mol-cover::after{
+		content:"";
+		position:absolute; inset:0;
+		background:
+			linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(246,248,252,.85) 85%, var(--mol-bg) 100%);
+		}
+
+		.mol-cover .mol-cover-meta{
+		position:absolute;
+		right: 14px;
+		top: 14px;
+		z-index: 2;
+		display:flex;
+		gap:.5rem;
+		}
+
+		.mol-mini-btn{
+		width: 40px;
+		height: 40px;
+		border-radius: 14px;
+		border: 1px solid var(--mol-border);
+		background: rgba(255,255,255,.82);
+		display:inline-flex;
+		align-items:center;
+		justify-content:center;
+		box-shadow: 0 10px 22px rgba(2,6,23,.06);
+		transition: .18s ease;
+		}
+		.mol-mini-btn:hover{ transform: translateY(-1px); }
+
+		.mol-profile-head{
+		margin-top: -48px;
+		position: relative;
+		z-index: 3;
+		}
+
+		.mol-avatar-ring{
+		position: relative;
+		}
+		.mol-avatar-ring::before{
+		content:"";
+		position:absolute;
+		inset:-10px;
+		border-radius: 28px;
+		background: radial-gradient(circle at 30% 30%, rgba(13,110,253,.22), transparent 55%),
+					radial-gradient(circle at 70% 30%, rgba(32,201,151,.18), transparent 55%);
+		filter: blur(10px);
+		z-index: -1;
+		}
+
+		/* Sticky action bar (comme réseau social) */
+		.mol-stickybar{
+		position: sticky;
+		top: 76px;
+		z-index: 40;
+		margin-top: 14px;
+		border-radius: 999px;
+		border: 1px solid var(--mol-border);
+		background: rgba(255,255,255,.72);
+		backdrop-filter: blur(10px);
+		box-shadow: 0 12px 26px rgba(2,6,23,.06);
+		padding: 10px 12px;
+		display:flex;
+		align-items:center;
+		justify-content: space-between;
+		gap: 10px;
+		}
+		@media(max-width:991px){
+		.mol-stickybar{ top: 10px; border-radius: 18px; }
+		}
+
+		/* Layout “feed” */
+		.mol-grid{
+		display:grid;
+		grid-template-columns: 1fr;
+		gap: 16px;
+		}
+		@media(min-width:992px){
+		.mol-grid{ grid-template-columns: 1.25fr .75fr; }
+		}
+
+		.mol-feed-card{
+		border: 1px solid var(--mol-border);
+		background: rgba(255,255,255,.75);
+		border-radius: var(--mol-radius);
+		box-shadow: 0 10px 24px rgba(2,6,23,.05);
+		overflow: hidden;
+		}
+
+		.mol-card-head{
+		padding: 14px 16px;
+		border-bottom: 1px solid var(--mol-border);
+		background: rgba(255,255,255,.55);
+		display:flex;
+		align-items:center;
+		justify-content: space-between;
+		gap: 10px;
+		}
+		.mol-card-head .ttl{
+		margin:0;
+		font-weight: 950;
+		letter-spacing:-.01em;
+		}
+
+		.mol-quickstat{
+		display:flex;
+		gap:10px;
+		flex-wrap: wrap;
+		}
+		.mol-stat{
+		padding: 10px 12px;
+		border-radius: 16px;
+		border: 1px solid var(--mol-border);
+		background: rgba(255,255,255,.7);
+		min-width: 130px;
+		}
+		.mol-stat .k{
+		font-weight: 950;
+		font-size: 1.05rem;
+		line-height: 1;
+		}
+		.mol-stat .l{
+		color: var(--mol-muted);
+		font-weight: 700;
+		font-size: .85rem;
+		}
+
+		/* “Composer” fake pour look réseau social */
+		.mol-composer{
+		padding: 14px 16px;
+		display:flex;
+		gap: 10px;
+		align-items:center;
+		}
+		.mol-composer .pill{
+		flex: 1;
+		border-radius: 999px;
+		border: 1px solid var(--mol-border);
+		background: rgba(255,255,255,.8);
+		padding: 10px 14px;
+		color: rgba(15,23,42,.72);
+		font-weight: 800;
+		}
+		.mol-composer .pill small{ color: var(--mol-muted); font-weight:700; }
+
+		/* sidebar cards */
+		.mol-side-card{
+		border: 1px solid var(--mol-border);
+		background: rgba(255,255,255,.75);
+		border-radius: var(--mol-radius);
+		box-shadow: 0 10px 24px rgba(2,6,23,.05);
+		overflow: hidden;
+		}
+		.mol-side-card .body{ padding: 14px 16px; }
+
+		/* boutons: petit glow premium */
+		.btn.btn-primary{
+		box-shadow: 0 12px 26px rgba(13,110,253,.22);
+		}
+		.btn.btn-primary:hover{
+		box-shadow: 0 16px 32px rgba(13,110,253,.28);
+		transform: translateY(-1px);
+		}
+
+
+		.mol-stars-inline{
+		display:flex;
+		gap:4px;
+		line-height:1;
+		}
+
+		.mol-stars-inline .fa-star{
+		font-size: 14px;
+		}
+
+		.mol-stars-inline .is-on{
+		color:#f59e0b; /* doré */
+		text-shadow:0 6px 18px rgba(245,158,11,.25);
+		}
+
+		.mol-stars-inline .is-off{
+		color:#cbd5e1; /* gris doux */
+		}
+
+	</style>
+
+	<style>
+		/* ===== Correctif visibilité des textes ===== */
+
+		/* textes principaux du header */
+		.mol-title,
+		.mol-head-copy,
+		.mol-head-copy *:not(.badge):not(.btn):not(i),
+		.mol-rating-meta strong,
+		.mol-rating-meta small {
+			color: #0f172a !important;
+		}
+
+		/* chips infos sous le nom */
+		.mol-chip {
+			color: #334155 !important;
+			background: #f8fbff !important;
+			border-color: rgba(37, 99, 235, .10) !important;
+		}
+
+		.mol-chip i {
+			color: #2563eb !important;
+			opacity: 1 !important;
+		}
+
+		/* badge compte vérifié */
+		.mol-verified-badge.ok {
+			color: #ffffff !important;
+			background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+			border-color: transparent !important;
+		}
+
+		.mol-verified-badge.no {
+			color: #ffffff !important;
+			background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+			border-color: transparent !important;
+		}
+
+		/* statut dispo / occupé / indisponible */
+		.mol-status-chip.ok {
+			color: #166534 !important;
+			background: #dcfce7 !important;
+		}
+
+		.mol-status-chip.warn {
+			color: #92400e !important;
+			background: #fef3c7 !important;
+		}
+
+		.mol-status-chip.bad {
+			color: #991b1b !important;
+			background: #fee2e2 !important;
+		}
+
+		/* navigation sections */
+		.mol-nav-pill {
+			color: #334155 !important;
+		}
+
+		.mol-nav-pill i {
+			color: #64748b !important;
+		}
+
+		/* sous-titres / textes secondaires */
+		.mol-soft,
+		.mol-card-head .sub,
+		.mol-side-head small,
+		.mol-review-date,
+		.text-muted {
+			color: #64748b !important;
+			opacity: 1 !important;
+		}
+
+		/* titres sidebar */
+		.mol-side-row .k {
+			color: #64748b !important;
+		}
+
+		.mol-side-row .v,
+		.mol-review-author,
+		.mol-review-comment,
+		.mol-about-text,
+		.mol-item .t,
+		.mol-item .s,
+		.mol-item .d {
+			color: #0f172a !important;
+		}
+
+		/* évite les textes trop pâles dans le hero */
+		.mol-hero {
+			color: #0f172a !important;
+		}
+
+		/* sécurité pour bootstrap qui rend parfois certains textes trop blancs */
+		.mol-hero .badge,
+		.mol-hero .mol-chip,
+		.mol-hero .mol-status-chip,
+		.mol-hero .mol-verified-badge {
+			opacity: 1 !important;
+			filter: none !important;
+		}
+	</style>
+
+	<style>
+		/* ===== Boutons premium fins & soft ===== */
+
+		.mol-tools{
+			gap: 10px !important;
+			align-items: center;
+		}
+
+		.mol-tools .btn{
+			height: 46px !important;
+			padding: 0 18px !important;
+			border-radius: 14px !important;
+			font-size: .95rem !important;
+			font-weight: 800 !important;
+			box-shadow: none !important;
+			transition: all .18s ease !important;
+			display: inline-flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			gap: 8px !important;
+		}
+
+		.mol-tools .btn i{
+			margin-right: 0 !important;
+			font-size: 15px !important;
+		}
+
+		/* bouton bleu principal plus soft */
+		.mol-tools .btn.btn-primary{
+			background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+			border: 1px solid rgba(37, 99, 235, .10) !important;
+			color: #fff !important;
+			box-shadow: 0 8px 18px rgba(37, 99, 235, .14) !important;
+		}
+
+		.mol-tools .btn.btn-primary:hover{
+			transform: translateY(-1px) !important;
+			box-shadow: 0 10px 22px rgba(37, 99, 235, .18) !important;
+			filter: brightness(.98);
+		}
+
+		/* bouton clair plus fin */
+		.mol-tools .btn.btn-light{
+			background: #ffffff !important;
+			border: 1px solid rgba(37, 99, 235, .12) !important;
+			color: #1d4ed8 !important;
+			box-shadow: 0 6px 14px rgba(15, 23, 42, .04) !important;
+		}
+
+		.mol-tools .btn.btn-light:hover{
+			background: #f8fbff !important;
+			border-color: rgba(37, 99, 235, .18) !important;
+			transform: translateY(-1px) !important;
+		}
+
+		/* bouton outline plus discret */
+		.mol-tools .btn.btn-outline-primary{
+			background: #ffffff !important;
+			border: 1px solid rgba(37, 99, 235, .14) !important;
+			color: #1d4ed8 !important;
+			box-shadow: 0 6px 14px rgba(15, 23, 42, .04) !important;
+		}
+
+		.mol-tools .btn.btn-outline-primary:hover{
+			background: #f8fbff !important;
+			border-color: rgba(37, 99, 235, .20) !important;
+			transform: translateY(-1px) !important;
+		}
+
+		/* boutons coeur / signalement plus élégants */
+		.mol-fav-btn,
+		.mol-report-btn{
+			width: 46px !important;
+			height: 46px !important;
+			border-radius: 14px !important;
+			box-shadow: 0 6px 14px rgba(15, 23, 42, .04) !important;
+		}
+
+		.mol-fav-btn i,
+		.mol-report-btn i{
+			font-size: 16px !important;
+		}
+
+		/* responsive */
+		@media (max-width: 767px){
+			.mol-tools{
+				display: grid !important;
+				grid-template-columns: 1fr 1fr !important;
+				gap: 10px !important;
+				width: 100% !important;
+			}
+
+			.mol-tools .btn{
+				width: 100% !important;
+				height: 42px !important;
+				padding: 0 14px !important;
+				font-size: .90rem !important;
+				border-radius: 12px !important;
+			}
+
+			.mol-fav-btn,
+			.mol-report-btn{
+				width: 100% !important;
+				height: 42px !important;
+				border-radius: 12px !important;
+			}
+		}
+	</style>
+
+	<style>
+		/* ===== Raffinement soft / petite police ===== */
+		.mol-page{
+			font-size: 13.5px;
+			color: #0f172a;
+		}
+
+		.mol-hero{
+			padding: 16px 18px !important;
+			border-radius: 22px;
+			background:
+				radial-gradient(1000px circle at 12% 18%, rgba(37,99,235,.10), transparent 58%),
+				radial-gradient(780px circle at 88% 12%, rgba(16,185,129,.10), transparent 55%),
+				linear-gradient(180deg, rgba(255,255,255,.96), rgba(255,255,255,.88));
+			box-shadow: 0 10px 28px rgba(15, 23, 42, .05);
+		}
+
+		.mol-title{
+			font-size: 1.45rem;
+			font-weight: 900;
+		}
+
+		.mol-soft,
+		.mol-page small,
+		.text-muted{
+			font-size: 12.4px !important;
+		}
+
+		.mol-chip{
+			font-size: 12.2px !important;
+			padding: .42rem .72rem;
+			border-radius: 999px;
+			background: rgba(255,255,255,.92) !important;
+			border: 1px solid rgba(148,163,184,.18) !important;
+			box-shadow: 0 4px 14px rgba(15,23,42,.03);
+		}
+
+		.mol-skill{
+			font-size: 12.2px !important;
+			padding: .42rem .68rem;
+			background: rgba(37,99,235,.06);
+			border-color: rgba(37,99,235,.10);
+		}
+
+		.mol-block{
+			padding: 16px;
+		}
+
+		.mol-h{
+			font-size: 1rem;
+			margin-bottom: .85rem;
+		}
+
+		.mol-item{
+			border-radius: 18px;
+			background: rgba(255,255,255,.88);
+			box-shadow: 0 8px 24px rgba(15,23,42,.04);
+		}
+
+		.mol-sections{
+			padding: .8rem .8rem 0;
+			gap: .5rem;
+		}
+
+		.mol-sections a{
+			font-size: 12.5px;
+			font-weight: 800;
+			padding: .56rem .82rem;
+			background: rgba(255,255,255,.62);
+			border: 1px solid rgba(148,163,184,.14);
+		}
+
+		.mol-actions .btn,
+		#contact .btn,
+		#reviews .btn{
+			font-size: 12.5px !important;
+			font-weight: 800 !important;
+			border-radius: 13px !important;
+			padding: .58rem .88rem !important;
+		}
+
+		/* ===== Carte disponibilités ===== */
+		.mol-availability-box{
+			border: 1px solid rgba(148,163,184,.16);
+			background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,250,252,.92));
+			border-radius: 20px;
+			padding: 14px;
+			box-shadow: 0 8px 24px rgba(15,23,42,.04);
+		}
+
+		.mol-availability-top{
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 12px;
+			flex-wrap: wrap;
+			margin-bottom: 10px;
+		}
+
+		.mol-availability-count{
+			display: inline-flex;
+			align-items: center;
+			gap: .45rem;
+			padding: .42rem .7rem;
+			border-radius: 999px;
+			background: rgba(37,99,235,.08);
+			border: 1px solid rgba(37,99,235,.10);
+			color: #1d4ed8;
+			font-weight: 800;
+			font-size: 12.2px;
+		}
+
+		.mol-availability-grid{
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+		}
+
+		.mol-day-pill{
+			display: inline-flex;
+			align-items: center;
+			gap: .45rem;
+			padding: .5rem .75rem;
+			border-radius: 14px;
+			background: #fff;
+			border: 1px solid rgba(148,163,184,.18);
+			box-shadow: 0 6px 14px rgba(15,23,42,.03);
+			font-size: 12.4px;
+			font-weight: 700;
+			color: #334155;
+		}
+
+		.mol-day-pill i{
+			color: #2563eb;
+		}
+
+		.mol-empty-soft{
+			border: 1px dashed rgba(148,163,184,.28);
+			border-radius: 16px;
+			padding: 14px;
+			background: rgba(248,250,252,.7);
+			color: #64748b;
+			font-size: 12.5px;
+		}
+
+		@media (max-width: 767px){
+			.mol-title{
+				font-size: 1.2rem;
+			}
+
+			.mol-avatar{
+				width: 78px;
+				height: 78px;
+				border-radius: 18px;
+			}
+
+			.mol-block{
+				padding: 14px;
+			}
+		}
+	</style>

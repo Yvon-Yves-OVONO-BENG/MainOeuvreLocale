@@ -1,0 +1,220 @@
+{% extends 'base.html.twig' %}
+{% block title %}Mes contacts • Main d'oeuvre locale{% endblock %}
+
+{% block body %}
+
+{% include "mes_contacts/_vip_ui.html.twig" %}
+
+{% set me = app.user %}
+
+<div class="ct-page py-4">
+  <div class="container">
+
+    {# ================= HERO ================= #}
+    <section class="ct-card p-4 p-md-5 mb-4">
+      <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-4">
+        <div class="min-w-0">
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge rounded-pill bg-light text-dark border">📇 Contacts</span>
+            <span class="badge rounded-pill bg-light text-dark border">💬 Conversations</span>
+            <span class="badge rounded-pill bg-light text-dark border">⭐ SaaS VIP</span>
+        </div>
+
+          <h1 class="mt-3 mb-2 fw-black" style="font-weight:900; color:#0f172a;">
+            Mes contacts
+          </h1>
+          <p class="mb-0 text-muted" style="max-width: 60ch;">
+            Retrouve rapidement les talents avec qui tu as déjà échangé, relance-les, et ouvre le chat en un clic.
+          </p>
+
+          <div class="mt-3 d-flex flex-wrap gap-2">
+            <a href="{{ path('liste_talents') }}" class="btn btn-dark rounded-4 fw-bold px-3 py-2" data-turbo="false">
+              🔍 Trouver un talent
+            </a>
+            <button type="button" onclick="MOLChatOpen()"  data-turbo="false" class="btn btn-outline-dark rounded-4 fw-bold px-3 py-2">
+              💬 Ouvrir la messagerie
+            </button>
+          </div>
+        </div>
+
+        <div class="ct-soft p-3 p-md-4" style="min-width: 280px;">
+          <div class="small text-muted">Résumé rapide</div>
+          <div class="mt-2 d-grid gap-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="fw-bold">Contacts</span>
+              <span class="fw-black">{{ stats.totalContacts ?? 0 }}</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="fw-bold">Avec non lus</span>
+              <span class="fw-black text-danger">{{ stats.contactsWithUnread ?? 0 }}</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="fw-bold">Actifs (7 jours)</span>
+              <span class="fw-black text-primary">{{ stats.recentActiveCount ?? 0 }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# KPI mini cards #}
+      <div class="row g-3 mt-3">
+        <div class="col-12 col-md-4">
+          <div class="ct-soft p-4 h-100">
+            <div class="text-uppercase text-muted fw-bold small">Total contacts</div>
+            <div class="display-6 fw-black mt-2" style="font-weight:900;">{{ stats.totalContacts ?? 0 }}</div>
+            <div class="small text-muted">Talents déjà contactés</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="ct-soft p-4 h-100">
+            <div class="text-uppercase text-muted fw-bold small">Contacts avec non lus</div>
+            <div class="display-6 fw-black mt-2 text-danger" style="font-weight:900;">{{ stats.contactsWithUnread ?? 0 }}</div>
+            <div class="small text-muted">À relancer rapidement</div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="ct-soft p-4 h-100">
+            <div class="text-uppercase text-muted fw-bold small">Activité récente</div>
+            <div class="display-6 fw-black mt-2 text-primary" style="font-weight:900;">{{ stats.recentActiveCount ?? 0 }}</div>
+            <div class="small text-muted">Derniers 7 jours</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {# ================= LISTE CONTACTS ================= #}
+    <section class="ct-card p-4">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+          <div class="fw-black" style="font-weight:900; color:#0f172a;">📇 Liste de mes contacts</div>
+          <div class="small text-muted">Clique sur “Chat” pour reprendre la conversation</div>
+        </div>
+        <div class="small text-muted">
+          {{ pagination.total ?? 0 }} contact{{ (pagination.total ?? 0) > 1 ? 's' : '' }}
+        </div>
+      </div>
+
+      {% if contacts is not empty %}
+        <div class="row g-3">
+          {% for card in contacts %}
+            {% set other = card.other %}
+            {% set pro = card.professionalProfile %}
+            {% set displayName = other.userIdentifier ?? other.email ?? ('Utilisateur #' ~ other.id) %}
+            {% set avatar =
+              (other.personalProfile is defined and other.personalProfile and other.personalProfile.photo)
+                ? asset('uploads/profiles/' ~ other.personalProfile.photo)
+                : 'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=' ~ displayName|url_encode
+            %}
+
+            <div class="col-12 col-xl-6">
+              <div class="ct-soft p-3 p-md-4 h-100">
+                <div class="d-flex align-items-start justify-content-between gap-3">
+                  <div class="d-flex align-items-start gap-3 min-w-0">
+                    <img src="{{ avatar }}"
+                         alt="avatar"
+                         class="rounded-4 flex-shrink-0"
+                         style="width:52px;height:52px;object-fit:cover;border:1px solid rgba(15,23,42,.08);">
+
+                    <div class="min-w-0">
+                      <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <div class="fw-black text-truncate" style="font-weight:900; color:#0f172a; max-width: 240px;">
+                          {{ displayName }}
+                        </div>
+
+                        {% if card.unreadCount > 0 %}
+                          <span class="badge rounded-pill text-bg-danger">
+                            {{ card.unreadCount }} non lu{{ card.unreadCount > 1 ? 's' : '' }}
+                          </span>
+                        {% endif %}
+                      </div>
+
+                      <div class="small text-muted text-truncate">
+                        {{ other.email ?? '' }}
+                      </div>
+
+                      {% if pro %}
+                        <div class="mt-1 d-flex flex-wrap gap-2">
+                          {% if pro.profession is defined and pro.profession and pro.profession.name is defined %}
+                            <span class="badge rounded-pill text-bg-light border">💼 {{ pro.profession.name }}</span>
+                          {% else %}
+                            <span class="badge rounded-pill text-bg-light border">💼 Talent</span>
+                          {% endif %}
+
+                          {% if pro.city is defined and pro.city %}
+                            <span class="badge rounded-pill text-bg-light border">📍 {{ pro.city }}</span>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <div class="text-end flex-shrink-0">
+                    <div class="small text-muted">
+                      {{ card.lastAt ? card.lastAt|date('d/m/Y H:i') : '—' }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-3 p-3 bg-white rounded-4 border">
+                  <div class="small text-muted mb-1">Dernier message</div>
+                  <div class="small text-dark text-truncate">
+                    {{ card.preview ?: 'Aucun message' }}
+                  </div>
+                </div>
+
+                <div class="mt-3 d-flex flex-wrap gap-2">
+                  <a href="javascript:void(0);" onclick="MOLChatOpen()"  data-turbo="false" class="btn btn-dark rounded-4 fw-bold px-3 py-2">
+                    💬 Chat
+                  </a>
+
+                  {% if pro %}
+                    <a href="{{ path('talent_review_new',{id: pro.id }) }}"  data-turbo="false"  class="btn btn-outline-dark rounded-4 fw-bold px-3 py-2">
+                      👤 Profil
+                    </a>
+                  {% endif %}
+
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        {# ================= PAGINATION ================= #}
+        {% if (pagination.totalPages ?? 1) > 1 %}
+          <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+              {% set page = pagination.page ?? 1 %}
+              {% set totalPages = pagination.totalPages ?? 1 %}
+
+              <li class="page-item {{ page <= 1 ? 'disabled' }}">
+                <a class="page-link" href="{{ path('contacts_index', {page: page - 1}) }}">←</a>
+              </li>
+
+              {% for p in 1..totalPages %}
+                <li class="page-item {{ p == page ? 'active' }}">
+                  <a class="page-link" href="{{ path('contacts_index', {page: p}) }}">{{ p }}</a>
+                </li>
+              {% endfor %}
+
+              <li class="page-item {{ page >= totalPages ? 'disabled' }}">
+                <a class="page-link" href="{{ path('contacts_index', {page: page + 1}) }}">→</a>
+              </li>
+            </ul>
+          </nav>
+        {% endif %}
+
+      {% else %}
+        <div class="text-center py-5">
+          <div class="display-6 mb-2">📭</div>
+          <div class="fw-black mb-1" style="font-weight:900;">Aucun contact pour l’instant</div>
+          <div class="text-muted">Commence par contacter un talent pour le retrouver ici.</div>
+          <a href="{{ path('liste_talents') }}" class="btn btn-dark rounded-4 fw-bold px-3 py-2 mt-3">
+            🔍 Rechercher un talent
+          </a>
+        </div>
+      {% endif %}
+    </section>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% set currentRoute = app.request.attributes.get('_route') %}
+
+<div class="sec-nav">
+  <a href="{{ path('admin_roles_index') }}"
+     class="sec-btn {{ currentRoute starts with 'admin_roles_' ? 'sec-btn-primary' : 'sec-btn-soft' }}">
+    <span class="sec-dot"></span> {% trans %}Rôles{% endtrans %}
+  </a>
+
+  <a href="{{ path('admin_permissions_index') }}"
+     class="sec-btn {{ currentRoute starts with 'admin_permissions_' ? 'sec-btn-primary' : 'sec-btn-soft' }}">
+    <span class="sec-dot"></span> {% trans %}Permissions{% endtrans %}
+  </a>
+
+  <a href="{{ path('admin_sessions_index') }}"
+     class="sec-btn {{ currentRoute starts with 'admin_sessions_' ? 'sec-btn-primary' : 'sec-btn-soft' }}">
+    <span class="sec-dot"></span> {% trans %}Sessions actives{% endtrans %}
+  </a>
+
+  <a href="{{ path('admin_security_incidents') }}"
+     class="sec-btn {{ currentRoute starts with 'admin_security_' ? 'sec-btn-primary' : 'sec-btn-soft' }}">
+    <span class="sec-dot"></span> {% trans %}Incidents{% endtrans %}
+  </a>
+
+  <a href="{{ path('admin_2fa_index') }}"
+     class="sec-btn {{ currentRoute starts with 'admin_2fa_' ? 'sec-btn-primary' : 'sec-btn-soft' }}">
+    <span class="sec-dot"></span> {% trans %}2FA{% endtrans %}
+  </a>
+</div>

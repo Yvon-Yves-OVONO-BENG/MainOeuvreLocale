@@ -1,0 +1,131 @@
+{# templates/moderateur/ui/_vip_ui_reports_show.html.twig #}
+
+<style>
+  :root{
+    --m-bg0:#F7F9FF;
+    --m-bg1:#EEF2FF;
+    --m-line:rgba(15,23,42,.10);
+    --m-card:rgba(255,255,255,.78);
+    --m-card2:rgba(255,255,255,.92);
+    --m-muted:rgba(15,23,42,.62);
+    --m-text:rgba(15,23,42,.92);
+    --m-r2:24px;
+    --m-shadowSm:0 10px 30px rgba(15,23,42,.10);
+  }
+
+  .page{
+    min-height:calc(100vh - 80px);
+    background:linear-gradient(180deg,var(--m-bg0),var(--m-bg1));
+    padding:18px 12px 46px;
+  }
+
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+  }
+
+  .card{
+    background:linear-gradient(180deg,var(--m-card2),var(--m-card));
+    border:1px solid var(--m-line);
+    border-radius:var(--m-r2);
+    box-shadow:var(--m-shadowSm);
+    overflow:hidden;
+  }
+
+  .hd{
+    padding:14px 16px;
+    border-bottom:1px solid var(--m-line);
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    background:rgba(255,255,255,.75);
+  }
+
+  .bd{
+    padding:16px;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    border-radius:14px;
+    border:1px solid rgba(15,23,42,.12);
+    background:rgba(255,255,255,.88);
+    padding:10px 12px;
+    font-weight:900;
+    text-decoration:none;
+    color:rgba(15,23,42,.92);
+    cursor:pointer;
+  }
+
+  .btn.warn{
+    border-color:rgba(245,158,11,.45);
+  }
+
+  .btn.good{
+    border-color:rgba(34,197,94,.45);
+  }
+
+  .btn.ghost{
+    background:rgba(255,255,255,.65);
+  }
+
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:950;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(15,23,42,.12);
+    background:rgba(255,255,255,.86);
+  }
+
+  .chip.open{
+    background:rgba(245,158,11,.14);
+    border-color:rgba(245,158,11,.28);
+  }
+
+  .chip.resolved{
+    background:rgba(34,197,94,.12);
+    border-color:rgba(34,197,94,.26);
+  }
+
+  .chip.canceled{
+    background:rgba(148,163,184,.22);
+    border-color:rgba(148,163,184,.35);
+  }
+
+  .muted{
+    color:var(--m-muted);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1.4fr .9fr;
+    gap:12px;
+  }
+
+  @media(max-width:992px){
+    .grid{
+      grid-template-columns:1fr;
+    }
+  }
+
+  .box{
+    padding:12px;
+    border-radius:18px;
+    border:1px solid rgba(15,23,42,.10);
+    background:rgba(255,255,255,.84);
+  }
+
+  .h1{
+    font-weight:950;
+    letter-spacing:-.02em;
+    font-size:18px;
+    margin:0;
+  }
+</style>

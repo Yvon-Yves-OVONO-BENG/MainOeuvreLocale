@@ -1,0 +1,118 @@
+{% extends 'base.html.twig' %}
+{% trans_default_domain 'messages' %}
+
+{% block title %}{% trans %}Metrics API{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+{% set currentPage = pagination.page %}
+{% set totalPages = pagination.totalPages %}
+{% set totalItems = pagination.totalItems %}
+{% set limit = pagination.limit %}
+{% set startItem = totalItems > 0 ? ((currentPage - 1) * limit) + 1 : 0 %}
+{% set endItem = currentPage * limit > totalItems ? totalItems : currentPage * limit %}
+
+<div class="min-h-screen bg-[radial-gradient(1000px_circle_at_0%_0%,rgba(59,130,246,.10),transparent_35%),radial-gradient(1200px_circle_at_100%_0%,rgba(16,185,129,.10),transparent_35%),linear-gradient(180deg,#f8fafc,#eef2ff_45%,#f8fafc)] text-slate-900">
+    <div class="mx-auto max-w-7xl px-4 py-6 lg:px-8 lg:py-8">
+
+        <section class="rounded-[2rem] border border-white/70 bg-white/75 p-5 shadow-[0_20px_80px_rgba(15,23,42,.08)] backdrop-blur xl:p-7">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <div class="inline-flex items-center rounded-full bg-cyan-50 px-3 py-1 text-[11px] font-extrabold uppercase tracking-[0.18em] text-cyan-700 ring-1 ring-cyan-200">
+                        {% trans %}API Metrics{% endtrans %}
+                    </div>
+                    <h1 class="mt-4 text-2xl font-black tracking-tight text-slate-950 lg:text-4xl">
+                        📡 {% trans %}Liste des métriques API{% endtrans %}
+                    </h1>
+                    <p class="mt-3 text-sm leading-7 text-slate-500">
+                        {% trans %}Historique des endpoints API sollicités, avec volume, erreurs et latence cumulée.{% endtrans %}
+                    </p>
+                </div>
+
+                <a href="javascript:history.back()" class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                    ← {% trans %}Retour{% endtrans %}
+                </a>
+            </div>
+        </section>
+
+        <section class="mt-5 rounded-[2rem] border border-white/70 bg-white/80 p-3 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur xl:p-4">
+            <div class="overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-slate-200 text-sm">
+                        <thead class="bg-slate-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Endpoint{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Méthode{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Date{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Hits{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Erreurs{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Durée totale{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Dernier statut{% endtrans %}</th>
+                                <th class="px-4 py-3 text-left text-[11px] font-extrabold uppercase tracking-[0.18em] text-slate-500">{% trans %}Dernier appel{% endtrans %}</th>
+                            </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100 bg-white">
+                            {% for m in metrics %}
+                                <tr class="hover:bg-slate-50/70">
+                                    <td class="px-4 py-4 font-semibold text-slate-900">{{ m.routePath }}</td>
+                                    <td class="px-4 py-4 text-slate-700">{{ m.httpMethod }}</td>
+                                    <td class="px-4 py-4 text-slate-700">{{ m.metricDate ? m.metricDate|date('d/m/Y') : '-' }}</td>
+                                    <td class="px-4 py-4 font-bold text-slate-900">{{ m.hits|number_format(0, ',', ' ') }}</td>
+                                    <td class="px-4 py-4 text-slate-700">{{ m.errorHits|number_format(0, ',', ' ') }}</td>
+                                    <td class="px-4 py-4 text-slate-700">{{ m.totalDurationMs|number_format(2, ',', ' ') }} ms</td>
+                                    <td class="px-4 py-4 text-slate-700">{{ m.lastStatusCode ?? '-' }}</td>
+                                    <td class="px-4 py-4 text-slate-700">{{ m.lastCalledAt ? m.lastCalledAt|date('d/m/Y H:i') : '-' }}</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="8" class="px-4 py-10 text-center text-slate-400">
+                                        {% trans %}Aucune métrique API disponible.{% endtrans %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mt-5 flex flex-col gap-4 rounded-[2rem] border border-white/70 bg-white/80 p-4 shadow-[0_18px_60px_rgba(15,23,42,.06)] backdrop-blur md:flex-row md:items-center md:justify-between">
+                <div class="text-sm font-semibold text-slate-600">
+                    {% trans %}Affichage{% endtrans %} {{ startItem }}–{{ endItem }} {% trans %}sur{% endtrans %} {{ totalItems }}
+                </div>
+
+                {% if totalPages > 1 %}
+                    <div class="flex flex-wrap items-center gap-3">
+                        {% if pagination.hasPrevious %}
+                            <a href="{{ path('admin_api_metrics_index', {page: pagination.previousPage}) }}"
+                               class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50">
+                                ← {% trans %}Précédent{% endtrans %}
+                            </a>
+                        {% else %}
+                            <span class="inline-flex cursor-not-allowed items-center rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-black text-slate-300">
+                                ← {% trans %}Précédent{% endtrans %}
+                            </span>
+                        {% endif %}
+
+                        <span class="inline-flex items-center rounded-2xl bg-slate-900 px-4 py-2 text-sm font-black text-white">
+                            {% trans %}Page{% endtrans %} {{ currentPage }} / {{ totalPages }}
+                        </span>
+
+                        {% if pagination.hasNext %}
+                            <a href="{{ path('admin_api_metrics_index', {page: pagination.nextPage}) }}"
+                               class="inline-flex items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm transition hover:bg-slate-50">
+                                {% trans %}Suivant{% endtrans %} →
+                            </a>
+                        {% else %}
+                            <span class="inline-flex cursor-not-allowed items-center rounded-2xl border border-slate-100 bg-slate-50 px-4 py-2 text-sm font-black text-slate-300">
+                                {% trans %}Suivant{% endtrans %} →
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

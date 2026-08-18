@@ -1,0 +1,156 @@
+
+<style>
+  .pay-hero{
+    background: radial-gradient(1000px circle at 10% 10%, rgba(13,110,253,.18), transparent 55%),
+                radial-gradient(800px circle at 90% 10%, rgba(32,201,151,.16), transparent 50%),
+                linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,255,255,.75));
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.06);
+  }
+  .pay-card{
+    border: 1px solid rgba(0,0,0,.06);
+    border-radius: 16px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.05);
+    overflow: hidden;
+    background: rgba(255,255,255,.92);
+  }
+  .pay-option{
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,.06);
+    background: rgba(255,255,255,.95);
+    box-shadow: 0 10px 26px rgba(0,0,0,.05);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .pay-option:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 14px 34px rgba(0,0,0,.08);
+  }
+  .pay-badge{
+    background: rgba(0,0,0,.05);
+    border: 1px solid rgba(0,0,0,.08);
+    color: rgba(33,37,41,.75);
+    font-weight: 600;
+  }
+  .btn-soft{
+    background: rgba(13,110,253,.10);
+    border: 1px solid rgba(13,110,253,.18);
+    color: #0d6efd;
+  }
+  .btn-soft:hover{ background: rgba(13,110,253,.16); }
+
+  .plan-chip{
+    display:inline-flex; align-items:center; gap:.5rem;
+    padding:.45rem .75rem;
+    border-radius:999px;
+    border:1px solid rgba(13,110,253,.18);
+    background: rgba(13,110,253,.08);
+    font-weight:800;
+  }
+  .plan-icon{
+    width:34px;height:34px;border-radius:12px;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.85);
+    border:1px solid rgba(0,0,0,.06);
+  }
+
+  /* =========================
+     MODAL CUSTOM (sans Bootstrap JS)
+  ========================== */
+  .mol-modal-backdrop{
+    position: fixed;
+    inset: 0;
+    background: rgba(2,6,23,.55);
+    display: none;
+    z-index: 200000;
+  }
+  .mol-modal-backdrop.is-open{ display: block; }
+
+  .mol-modal{
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 200001;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+  .mol-modal.is-open{ display: flex; }
+
+  .mol-modal-card{
+    width: min(520px, 100%);
+    background: rgba(255,255,255,.98);
+    border-radius: 16px;
+    box-shadow: 0 30px 90px rgba(2,6,23,.35);
+    border: 1px solid rgba(0,0,0,.08);
+    overflow: hidden;
+    transform: translateY(8px);
+    opacity: 0;
+    transition: transform .16s ease, opacity .16s ease;
+  }
+  .mol-modal.is-open .mol-modal-card{
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .mol-modal-h{
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 10px;
+  }
+  .mol-modal-title{ font-weight: 800; margin:0; }
+  .mol-x{
+    border:0;
+    background: rgba(0,0,0,.06);
+    width: 38px; height: 38px;
+    border-radius: 12px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+  }
+  .mol-x:hover{ background: rgba(0,0,0,.10); }
+
+  .mol-modal-b{
+    padding: 16px;
+  }
+
+  
+</style>
+
+<style>
+  .toast-container{
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 999999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mol-toast{
+    min-width: 300px;
+    max-width: 420px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 18px 45px rgba(0,0,0,.18);
+    transform: translateX(120%);
+    opacity: 0;
+    animation: in .35s ease forwards, out .35s ease 4.2s forwards;
+  }
+  .mol-toast-success{ background: linear-gradient(135deg,#16a34a,#22c55e); }
+  .mol-toast-danger{ background: linear-gradient(135deg,#dc2626,#ef4444); }
+  .mol-toast-warning{ background: linear-gradient(135deg,#f59e0b,#fbbf24); color:#1f2937; }
+
+  @keyframes in { to{ transform: translateX(0); opacity: 1; } }
+  @keyframes out { to{ transform: translateX(120%); opacity: 0; } }
+</style>
+
+<style>
+  .mol-modal { display:none; }
+  .mol-modal.is-open { display:flex; }
+</style>

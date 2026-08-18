@@ -1,0 +1,132 @@
+{% extends 'marketing/layout.html.twig' %}
+{% set seo_description = 'Découvrez les services Main d’Œuvre Locale : recherche de talents, publication de missions, profils professionnels, avis et mise en relation locale.' %}
+{% block title %}{{ 'Nos services — Main d’Œuvre Locale'|trans }}{% endblock %}
+
+{% block marketing_content %}
+<div class="mol-page-head">
+    <span class="mol-page-label">
+        {% trans %}Nos Services{% endtrans %}
+    </span>
+
+    <div class="mol-page-actions">
+        <a href="{{ path('app_register') }}" class="mol-cta-primary">
+          {% trans %}Créer mon compte maintenant{% endtrans %}
+        </a>
+        <a href="{{ path('app_login') }}" class="mol-cta-soft">
+          {% trans %}Se connecter{% endtrans %}
+        </a>
+    </div>
+</div>
+<section
+  class="mol-hero mol-hero--single"
+  style="--mol-hero-image:url('{{ asset('images/marketing/nos-services.jpeg') }}')"
+>
+  <div class="mol-hero-grid mol-hero-grid--single">
+    <div class="flex flex-col justify-end">
+
+      <h1 class="mol-hero-title">
+        {% trans %}Tout ce qu’il faut pour recruter, travailler et réussir au même endroit.{% endtrans %}
+      </h1>
+
+      {# <p class="mt-4 mol-hero-text">
+        {% trans %}Des outils pensés pour créer la confiance, accélérer la mise en relation et transformer chaque profil en opportunité réelle.{% endtrans %}
+      </p> #}
+
+    </div>
+
+
+  </div>
+</section>
+
+<section class="mol-after-hero">
+  <div class="mol-hero-card mol-hero-card--below rounded-[28px] p-5 sm:p-6">
+<div class="mol-after-hero-title"> {% trans %}Packs de valeur{% endtrans %}</div>
+
+  <div class="mt-4 grid gap-3">
+    <div class="mol-kpi">
+      <div class="k">{% trans %}Gratuit{% endtrans %}</div>
+      <div class="v">{% trans %}Profil, recherche, messagerie{% endtrans %}</div>
+    </div>
+    <div class="mol-kpi">
+      <div class="k">{% trans %}Boost{% endtrans %}</div>
+      <div class="v">{% trans %}Plus de visibilité, plus de réponses{% endtrans %}</div>
+    </div>
+    <div class="mol-kpi">
+      <div class="k">{% trans %}Entreprise Pro{% endtrans %}</div>
+      <div class="v">{% trans %}Shortlist, offres, insights et pilotage{% endtrans %}</div>
+    </div>
+  </div>
+  </div>
+</section>
+
+<section class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div class="mol-card p-5">
+    <div class="text-xs text-slate-500 font-bold">{% trans %}Rapide{% endtrans %}</div>
+    <div class="mt-1 text-base font-extrabold text-slate-900">{% trans %}Trouve en minutes{% endtrans %}</div>
+  </div>
+  <div class="mol-card p-5">
+    <div class="text-xs text-slate-500 font-bold">{% trans %}Fiable{% endtrans %}</div>
+    <div class="mt-1 text-base font-extrabold text-slate-900">{% trans %}Profils vérifiables{% endtrans %}</div>
+  </div>
+  <div class="mol-card p-5">
+    <div class="text-xs text-slate-500 font-bold">{% trans %}Pro{% endtrans %}</div>
+    <div class="mt-1 text-base font-extrabold text-slate-900">{% trans %}UX premium et claire{% endtrans %}</div>
+  </div>
+</section>
+
+<section class="mt-8">
+  <h2 class="mol-section-title">{% trans %}Fonctionnalités clés{% endtrans %}</h2>
+
+  <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Profils {% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Photo, bio, compétences, réalisations et disponibilité.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Recherche & localisation{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Filtrer par zone, métier, expérience, note et disponibilité.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Messages & chat{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Contact direct et conversations fluides{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Offres & candidatures{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Publier, postuler, shortlist et gérer les réponses plus vite.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Boost visibilité{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Mettez vos annonces en avant pour toucher plus rapidement les bonnes personnes.{% endtrans %}</p>
+    </div>
+
+    <div class="mol-card p-6">
+      <div class="mol-iconbox"></div>
+      <div class="mt-4 text-lg font-extrabold text-slate-900">{% trans %}Sécurité & modération{% endtrans %}</div>
+      <p class="mt-2 mol-section-text">{% trans %}Avis, signalements, gestion rigoureuse des comptes, au service de  la confiance.{% endtrans %}</p>
+    </div>
+  </div>
+</section>
+
+<section class="mt-8 mol-card p-6 sm:p-8">
+  <div class="flex flex-col md:flex-row items-center justify-between gap-5">
+    <div>
+      <h3 class="text-2xl font-extrabold text-slate-900">{% trans %}Tu veux être visible dès aujourd’hui ?{% endtrans %}</h3>
+      <p class="mt-2 mol-section-text">{% trans %}Votre prochaine opportunité commence ici:tout commence par un compte qui ouvre la porte à de nouvelles collaborations. {% endtrans %}</p>
+    </div>
+
+    <div class="flex flex-wrap gap-3">
+      <a href="{{ path('app_register') }}" class="mol-cta-primary">{% trans %}Créer un compte{% endtrans %}</a>
+      <a href="{{ path('marketing_story') }}" class="mol-cta-soft">{% trans %}Lire notre histoire{% endtrans %}</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

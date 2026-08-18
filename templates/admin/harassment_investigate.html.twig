@@ -1,0 +1,236 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Harcèlement{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-6xl px-4 py-6 space-y-4">
+
+    <div class="rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)] p-5">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div class="text-xs font-semibold text-slate-500">{% trans %}Investigation{% endtrans %}</div>
+          <div class="text-xl font-black tracking-tight text-slate-900">🚨 {% trans %}Harcèlement • Analyse conversation{% endtrans %}</div>
+          <div class="mt-1 text-sm font-medium text-slate-600">{% trans %}Sélectionne le dénonciateur et le harceleur, puis affiche l’historique.{% endtrans %}</div>
+        </div>
+
+        <a href="{{ path('tableau_de_bord') }}" class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+          ← {% trans %}Retour dashboard{% endtrans %}
+        </a>
+      </div>
+
+      <form class="mt-4 grid gap-3 md:grid-cols-3" method="get" action="{{ path('admin_harassment_investigate') }}">
+        <div class="relative">
+          <label class="text-xs font-bold text-slate-600">{% trans %}User qui dénonce{% endtrans %}</label>
+
+          <input
+            class="js-user-input mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none"
+            name="reporter"
+            placeholder="{% trans %}Rechercher (email)…{% endtrans %}"
+            data-target="reporterId"
+            value="{{ reporter ? reporter.email : '' }}"
+            autocomplete="off"
+          >
+
+          <input type="hidden" name="reporterId" id="reporterId" value="{{ reporter ? reporter.id : '' }}">
+          <div class="js-suggest absolute z-50 mt-2 hidden w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_55px_rgba(2,6,23,.12)]"></div>
+        </div>
+
+        <div class="relative">
+          <label class="text-xs font-bold text-slate-600">{% trans %}User accusé (harceleur){% endtrans %}</label>
+
+          <input
+            class="js-user-input mt-1 w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold outline-none"
+            name="harasser"
+            placeholder="{% trans %}Rechercher (email)…{% endtrans %}"
+            data-target="harasserId"
+            value="{{ harasser ? harasser.email : '' }}"
+            autocomplete="off"
+          >
+
+          <input type="hidden" name="harasserId" id="harasserId" value="{{ harasser ? harasser.id : '' }}">
+          <div class="js-suggest absolute z-50 mt-2 hidden w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_55px_rgba(2,6,23,.12)]"></div>
+        </div>
+
+        <div class="flex items-end gap-2">
+          <button
+            type="submit"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-rose-500 to-orange-500 px-4 py-2.5 text-sm font-extrabold text-white shadow-[0_18px_55px_rgba(244,63,94,.20)] hover:opacity-95">
+            🔎 {% trans %}Afficher conversation{% endtrans %}
+          </button>
+        </div>
+      </form>
+
+      {% if reporter and harasser %}
+        <div class="mt-4 flex flex-wrap gap-2">
+          <a href="{{ path('moderateur_verifications_block', { id: harasser.id }) }}"
+            class="inline-flex items-center gap-2 rounded-2xl border border-rose-200/70 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-700 hover:bg-rose-100/60">
+            ⛔ {% trans %}Bloquer harceleur{% endtrans %}
+          </a>
+
+          <a href="{{ path('admin_sanction_new', { user: harasser.id }) }}"
+            class="inline-flex items-center gap-2 rounded-2xl border border-amber-200/70 bg-amber-50 px-3 py-2 text-xs font-extrabold text-amber-700 hover:bg-amber-100/60">
+            🧾 {% trans %}Créer sanction{% endtrans %}
+          </a>
+
+          {# <a href="{{ path('admin_harassment_export', { reporterId: reporter.id, harasserId: harasser.id }) }}"
+            class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-800 hover:bg-slate-50">
+            ⬇️ Export preuves
+          </a> #}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="overflow-hidden rounded-3xl border border-slate-200/70 bg-white/70 backdrop-blur-xl shadow-[0_18px_55px_rgba(2,6,23,.10)]">
+      <div class="border-b border-slate-200/70 bg-white/60 px-5 py-4">
+        <div class="text-sm font-extrabold text-slate-900">💬 {% trans %}Conversation{% endtrans %}</div>
+        <div class="text-xs font-semibold text-slate-500">
+          {% if reporter and harasser %}
+            {{ reporter.email }} ↔ {{ harasser.email }}
+          {% else %}
+            {% trans %}Sélectionne 2 utilisateurs.{% endtrans %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="p-5">
+        {% if reporter and harasser %}
+          {% if thread is not empty %}
+            <div class="space-y-3">
+              {% for m in thread %}
+                {% set isReporter = (m.sender.id == reporter.id) %}
+                <div class="flex {{ isReporter ? 'justify-start' : 'justify-end' }}">
+                  <div class="max-w-[80%] rounded-3xl border px-4 py-3 shadow-[0_10px_30px_rgba(2,6,23,.06)] {{ isReporter ? 'border-slate-200 bg-white' : 'border-indigo-200/70 bg-indigo-50' }}">
+                    <div class="flex items-center justify-between gap-3 text-[11px] font-extrabold text-slate-500">
+                      <span>{{ isReporter ? 'Dénonciateur'|trans : 'Accusé'|trans }}</span>
+                      <span>{{ m.createdAt ? m.createdAt|date('d/m/Y H:i') : '' }}</span>
+                    </div>
+                    <div class="mt-1 whitespace-pre-line text-sm font-semibold text-slate-900">
+                      {{ m.content }}
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="py-10 text-center text-sm font-semibold text-slate-500">
+              {% trans %}Aucune conversation trouvée entre ces 2 utilisateurs.{% endtrans %}
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="py-10 text-center text-sm font-semibold text-slate-500">
+            {% trans %}Choisis le dénonciateur + le harceleur pour afficher l’historique.{% endtrans %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(() => {
+  const endpoint = '{{ path('admin_harassment_user_search') }}?q=';
+
+  function closeAllSuggests() {
+    document.querySelectorAll('.js-suggest').forEach(s => s.classList.add('hidden'));
+  }
+
+  async function searchUsers(q) {
+    const res = await fetch(endpoint + encodeURIComponent(q), {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    if (!res.ok) {
+      return [];
+    }
+
+    const data = await res.json().catch(() => ({}));
+    return data.items || [];
+  }
+
+  function renderSuggest(box, items, onPick) {
+    if (!items.length) {
+      box.innerHTML = '<div class="px-3 py-2 text-sm font-semibold text-slate-500">{{ "Aucun résultat"|trans }}</div>';
+      box.classList.remove('hidden');
+      return;
+    }
+
+    box.innerHTML = items.map(u => `
+      <button type="button"
+              class="w-full px-3 py-2 text-left transition hover:bg-indigo-50/40"
+              data-id="${u.id}"
+              data-label="${(u.label || '').replace(/"/g, '&quot;')}">
+        <div class="text-sm font-extrabold text-slate-900">${u.label}</div>
+        <div class="text-[11px] font-semibold text-slate-500">${(u.roles || []).join(' • ')}</div>
+      </button>
+    `).join('');
+
+    box.classList.remove('hidden');
+
+    box.querySelectorAll('button[data-id]').forEach(btn => {
+      btn.addEventListener('click', () => onPick(btn.dataset.id, btn.dataset.label));
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.js-user-input') && !e.target.closest('.js-suggest')) {
+      closeAllSuggests();
+    }
+  });
+
+  document.querySelectorAll('.js-user-input').forEach(input => {
+    const suggest = input.parentElement.querySelector('.js-suggest');
+    const targetId = input.dataset.target;
+    const hidden = document.getElementById(targetId);
+    let timer = null;
+
+    input.addEventListener('input', () => {
+      const q = input.value.trim();
+      hidden.value = '';
+
+      if (q.length < 2) {
+        suggest.classList.add('hidden');
+        suggest.innerHTML = '';
+        return;
+      }
+
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        const items = await searchUsers(q);
+        renderSuggest(suggest, items, (id, label) => {
+          input.value = label;
+          hidden.value = id;
+          suggest.classList.add('hidden');
+        });
+      }, 180);
+    });
+
+    input.addEventListener('focus', () => {
+      const q = input.value.trim();
+      if (q.length >= 2) {
+        input.dispatchEvent(new Event('input'));
+      }
+    });
+  });
+
+  const form = document.querySelector('form[action="{{ path('admin_harassment_investigate') }}"]');
+
+  form?.addEventListener('submit', (e) => {
+    const reporterInput = document.querySelector('.js-user-input[data-target="reporterId"]');
+    const harasserInput = document.querySelector('.js-user-input[data-target="harasserId"]');
+    const reporterId = document.getElementById('reporterId')?.value.trim();
+    const harasserId = document.getElementById('harasserId')?.value.trim();
+
+    if (reporterInput?.value.trim() && !reporterId) {
+      return;
+    }
+
+    if (harasserInput?.value.trim() && !harasserId) {
+      return;
+    }
+  });
+})();
+</script>
+{% endblock %}

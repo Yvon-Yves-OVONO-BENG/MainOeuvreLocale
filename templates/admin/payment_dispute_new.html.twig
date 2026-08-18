@@ -1,0 +1,193 @@
+{% extends 'base.html.twig' %}
+{% block title %}{% trans %}Admin • Nouveau litige{% endtrans %}{% endblock %}
+
+{% block body %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<div class="min-h-[calc(100vh-1px)] bg-[radial-gradient(1200px_circle_at_12%_10%,rgba(99,102,241,.14),transparent_55%),radial-gradient(900px_circle_at_90%_12%,rgba(6,182,212,.12),transparent_52%),radial-gradient(900px_circle_at_22%_88%,rgba(16,185,129,.10),transparent_55%),linear-gradient(180deg,#f8fafc,#eef2ff_50%,#f8fafc)]">
+  <div class="mx-auto max-w-7xl px-4 py-6 lg:py-8">
+
+    <div class="overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/75 shadow-[0_24px_70px_rgba(2,6,23,.10)] backdrop-blur-xl">
+      {# HEADER #}
+      <div class="border-b border-slate-200/70 bg-[radial-gradient(900px_circle_at_15%_10%,rgba(99,102,241,.14),transparent_60%),radial-gradient(700px_circle_at_90%_20%,rgba(6,182,212,.10),transparent_60%),linear-gradient(180deg,rgba(255,255,255,.92),rgba(255,255,255,.78))] px-6 py-5 lg:px-8">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div class="text-xs font-semibold uppercase tracking-[.18em] text-slate-500">{% trans %}Finance • Administration{% endtrans %}</div>
+            <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+              💳 {% trans %}Nouveau litige admin{% endtrans %}
+            </h1>
+            <p class="mt-2 max-w-3xl text-sm font-medium text-slate-600">
+              {% trans %}Ouvre un dossier de contestation, rattache-le au paiement concerné et précise le niveau de priorité ainsi que l’état de traitement.{% endtrans %}
+            </p>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <a href="{{ path('admin_payment_dispute_index') }}"
+               class="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-800 shadow-[0_10px_30px_rgba(2,6,23,.06)] hover:bg-slate-50">
+              ← {% trans %}Retour liste{% endtrans %}
+            </a>
+            <a href="{{ path('tableau_de_bord') }}"
+               class="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-4 py-2.5 text-xs font-extrabold text-white shadow-[0_10px_30px_rgba(15,23,42,.16)] hover:opacity-95">
+              🛡️ {% trans %}Tableau de bord{% endtrans %}
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {# CONTENT #}
+      <div class="p-6 lg:p-8">
+        {{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+          <div class="grid gap-6 xl:grid-cols-3">
+            {# FORM COLUMN #}
+            <div class="xl:col-span-2 space-y-6">
+              <div class="rounded-[24px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_12px_35px_rgba(2,6,23,.06)]">
+                <div class="mb-4">
+                  <div class="text-sm font-extrabold text-slate-900">{% trans %}Informations du litige{% endtrans %}</div>
+                  <div class="text-xs font-semibold text-slate-500">{% trans %}Associe le paiement et la facture au bon dossier.{% endtrans %}</div>
+                </div>
+
+                {# LES 2 PREMIERES LISTES SUR UNE SEULE LIGNE #}
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
+                      {% trans %}Paiement{% endtrans %}
+                    </label>
+                    {{ form_widget(form.payment, {
+                      attr: {
+                        class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none'
+                      }
+                    }) }}
+                    <div class="mt-1 text-xs text-rose-600">
+                      {{ form_errors(form.payment) }}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
+                      {% trans %}Facture{% endtrans %}
+                    </label>
+                    {{ form_widget(form.invoice, {
+                      attr: {
+                        class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none'
+                      }
+                    }) }}
+                    <div class="mt-1 text-xs text-rose-600">
+                      {{ form_errors(form.invoice) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-5">
+                  <label class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
+                    {% trans %}Motif du litige{% endtrans %}
+                  </label>
+                  {{ form_widget(form.reason, {
+                    attr: {
+                      class: 'min-h-[170px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none',
+                      placeholder: 'Explique clairement le problème : double débit, service non activé, facture incohérente, etc.'|trans
+                    }
+                  }) }}
+                  <div class="mt-1 text-xs text-rose-600">
+                    {{ form_errors(form.reason) }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[24px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_12px_35px_rgba(2,6,23,.06)]">
+                <div class="mb-4">
+                  <div class="text-sm font-extrabold text-slate-900">{% trans %}Traitement administratif{% endtrans %}</div>
+                  <div class="text-xs font-semibold text-slate-500">{% trans %}Définis la priorité et l’état initial du dossier.{% endtrans %}</div>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
+                      {% trans %}Priorité{% endtrans %}
+                    </label>
+                    {{ form_widget(form.priority, {
+                      attr: {
+                        class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none'
+                      }
+                    }) }}
+                    <div class="mt-1 text-xs text-rose-600">
+                      {{ form_errors(form.priority) }}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
+                      {% trans %}Statut{% endtrans %}
+                    </label>
+                    {{ form_widget(form.status, {
+                      attr: {
+                        class: 'w-full rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold text-slate-800 outline-none'
+                      }
+                    }) }}
+                    <div class="mt-1 text-xs text-rose-600">
+                      {{ form_errors(form.status) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-5">
+                  <label class="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wide text-slate-600">
+                    {% trans %}Note admin{% endtrans %}
+                  </label>
+                  {{ form_widget(form.adminNote, {
+                    attr: {
+                      class: 'min-h-[150px] w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none',
+                      placeholder: 'Ajoute une note interne pour le suivi administratif...'|trans
+                    }
+                  }) }}
+                  <div class="mt-1 text-xs text-rose-600">
+                    {{ form_errors(form.adminNote) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {# SIDE PANEL #}
+            <div class="space-y-6">
+              <div class="rounded-[24px] border border-indigo-200/70 bg-[linear-gradient(180deg,rgba(99,102,241,.08),rgba(59,130,246,.05))] p-5 shadow-[0_12px_35px_rgba(2,6,23,.06)]">
+                <div class="text-sm font-extrabold text-slate-900">🧠 {% trans %}Conseils de gestion{% endtrans %}</div>
+                <div class="mt-3 space-y-3 text-sm font-medium text-slate-600">
+                  <div class="rounded-2xl border border-white/70 bg-white/70 p-3">
+                    <span class="font-black text-slate-800">{% trans %}Priorité haute{% endtrans %}</span><br>
+                    {% trans %}Pour fraude présumée, double débit ou impact financier critique.{% endtrans %}
+                  </div>
+                  <div class="rounded-2xl border border-white/70 bg-white/70 p-3">
+                    <span class="font-black text-slate-800">{% trans %}En revue{% endtrans %}</span><br>
+                    {% trans %}Utilise ce statut quand l’enquête est en cours avec le fournisseur ou le support.{% endtrans %}
+                  </div>
+                  <div class="rounded-2xl border border-white/70 bg-white/70 p-3">
+                    <span class="font-black text-slate-800">{% trans %}Résolu{% endtrans %}</span><br>
+                    {% trans %}À utiliser uniquement quand une décision claire a été prise et documentée.{% endtrans %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="rounded-[24px] border border-slate-200/70 bg-white/80 p-5 shadow-[0_12px_35px_rgba(2,6,23,.06)]">
+                <div class="text-sm font-extrabold text-slate-900">⚙️ {% trans %}Actions{% endtrans %}</div>
+                <div class="mt-4 flex flex-col gap-3">
+                  <button type="submit"
+                          class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-indigo-600 to-blue-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-[0_14px_35px_rgba(79,70,229,.22)] hover:opacity-95">
+                    ✅ {% trans %}Enregistrer le litige{% endtrans %}
+                  </button>
+
+                  <a href="{{ path('admin_payment_dispute_index') }}"
+                     class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-extrabold text-slate-800 hover:bg-slate-50">
+                    {% trans %}Annuler{% endtrans %}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {{ form_rest(form) }}
+        {{ form_end(form) }}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
