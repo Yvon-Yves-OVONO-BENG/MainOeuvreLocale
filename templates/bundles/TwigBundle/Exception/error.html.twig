@@ -1,11 +1,10 @@
 {% set fallbackStatus = status_code|default(500) %}
-{% set fallbackTitle = fallbackStatus == 404 ? 'Page introuvable' : (fallbackStatus == 403 ? 'Accès non autorisé' : (fallbackStatus in [502,503,504] ? 'Service temporairement indisponible' : 'Un imprévu est survenu')) %}
-{% set fallbackMessage = fallbackStatus == 404 ? 'Cette page n’existe plus, a été déplacée ou le lien utilisé est incorrect.' : (fallbackStatus == 403 ? 'Vous n’avez pas les autorisations nécessaires pour accéder à cette page.' : 'Nous n’avons pas pu terminer cette action. Réessayez dans un instant.') %}
+{% set fallbackTitle = fallbackStatus == 404 ? 'Page ou ressource introuvable' : (fallbackStatus == 403 ? 'Accès non autorisé' : (fallbackStatus in [502,503,504] ? 'Service temporairement indisponible' : 'Un incident technique est survenu')) %}
+{% set fallbackMessage = fallbackStatus == 404 ? 'La ressource demandée est introuvable. L’incident a été enregistré pour vérification.' : (fallbackStatus == 403 ? 'Vous n’avez pas les autorisations nécessaires pour accéder à cette ressource.' : 'Nous n’avons pas pu terminer cette action. L’erreur a été enregistrée automatiquement pour l’administration.') %}
 {% include 'error/friendly.html.twig' with {
     status: fallbackStatus,
     title: fallbackTitle,
     message: fallbackMessage,
-    reference: 'MOL-' ~ 'now'|date('YmdHis'),
-    canRetry: fallbackStatus in [500,502,503,504] and app is defined and app.request is defined and app.request.method in ['GET','HEAD'],
+    reference: 'MOL-' ~ 'now'|date('Ymd-His'),
     attemptedAt: date()
 } only %}

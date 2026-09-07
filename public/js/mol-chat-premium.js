@@ -27,6 +27,8 @@
         typingVisible: new Set(),
         listPoll: null,
         unreadPoll: null,
+        privateListPromise: null,
+        privateListController: null,
         z: 1,
     };
 
@@ -360,25 +362,51 @@
     }
 
     async function loadPrivateConversations() {
-        privateList.innerHTML = '<div class="mol-chat-loading">Chargement...</div>';
-        try {
-            const input = $('#molChatSearchInput');
-            const q = input?.value?.trim() || '';
-            const url = new URL(buildUrl(urls.conversations));
-            url.searchParams.set('limit', '80');
-            if (q) url.searchParams.set('q', q);
-            url.searchParams.set('_ts', Date.now().toString());
-            const data = await fetchJson(url.toString());
-            state.privateItems = data.items || data.conversations || [];
-            renderPrivateConversations(state.privateItems);
-        } catch (error) {
-            privateList.innerHTML = `<div class="mol-chat-empty">${escapeHtml(error.message || 'Erreur de chargement.')}</div>`;
-        }
+        // Une synchronisation ne masque jamais la liste déjà affichée. Les
+        // appels rapprochés partagent la même promesse afin d'éviter les
+        // réponses concurrentes et le clignotement du panel.
+        if (state.privateListPromise) return state.privateListPromise;
+
+        state.privateListController?.abort();
+        state.privateListController = new AbortController();
+
+        state.privateListPromise = (async () => {
+            const timeout = window.setTimeout(
+                () => state.privateListController?.abort(),
+                8000
+            );
+
+            try {
+                const input = $('#molChatSearchInput');
+                const q = input?.value?.trim() || '';
+                const url = new URL(buildUrl(urls.conversations));
+                url.searchParams.set('limit', '80');
+                if (q) url.searchParams.set('q', q);
+                url.searchParams.set('_ts', Date.now().toString());
+
+                const data = await fetchJson(url.toString(), {
+                    signal: state.privateListController.signal,
+                });
+
+                state.privateItems = data.items || data.conversations || [];
+                renderPrivateConversations(state.privateItems);
+            } catch (error) {
+                // Une coupure momentanée ne remplace jamais les conversations
+                // présentes par un loader ou un message d'erreur.
+                console.debug('[MOL CHAT] Synchronisation différée', error);
+            } finally {
+                window.clearTimeout(timeout);
+            }
+        })().finally(() => {
+            state.privateListPromise = null;
+            state.privateListController = null;
+        });
+
+        return state.privateListPromise;
     }
 
     async function loadGroups() {
         if (!groupList || !groupUrls.mine) return;
-        groupList.innerHTML = '<div class="mol-chat-loading">Chargement...</div>';
         try {
             const data = await fetchJson(groupUrls.mine + (String(groupUrls.mine).includes('?') ? '&' : '?') + '_ts=' + Date.now());
             state.groupItems = data.items || [];
@@ -537,9 +565,7 @@
                 </div>
             </header>
 
-            <div class="mol-chat-thread-messages" data-thread-messages>
-                <div class="mol-chat-loading">Chargement...</div>
-            </div>
+            <div class="mol-chat-thread-messages" data-thread-messages></div>
 
             <div class="mol-chat-thread-typing-host" data-thread-typing-host hidden></div>
 

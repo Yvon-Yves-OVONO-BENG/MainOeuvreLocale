@@ -267,7 +267,7 @@
                   <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-4">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                       <div class="text-sm font-extrabold text-slate-900">
-                        {{ r.targetBy ? r.targetBy.publicDisplayName : ('Utilisateur'|trans) }}
+                        {{ r.author ? r.author.publicDisplayName : ('Utilisateur'|trans) }}
                       </div>
                       <div class="text-xs font-extrabold text-slate-500">
                         {{ r.createdAt ? r.createdAt|date('d/m/Y H:i') : '' }}

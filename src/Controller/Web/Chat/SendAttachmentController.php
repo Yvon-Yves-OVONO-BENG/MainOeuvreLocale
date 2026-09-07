@@ -4,7 +4,6 @@ namespace App\Controller\Web\Chat;
 
 use App\Entity\Conversation;
 use App\Entity\Message;
-use App\Realtime\MercurePublisher;
 use App\Security\ConversationAccess;
 use App\Security\CurrentUser;
 use App\Repository\MessageRepository;
@@ -29,7 +28,6 @@ final class SendAttachmentController extends AbstractController
         private CurrentUser $currentUser,
         private ConversationAccess $access,
         private MessageRepository $messageRepository,
-        private MercurePublisher $mercure,
         private SluggerInterface $slugger,
         private ChatBlockService $chatBlockService,
         private UploadOptimizer $uploadOptimizer,
@@ -77,6 +75,10 @@ final class SendAttachmentController extends AbstractController
             ], 400);
         }
 
+        if (($file->getSize() ?: 0) > 25 * 1024 * 1024) {
+            return $this->json(['ok' => false, 'error' => 'Le fichier dépasse la limite de 25 Mo.'], 413);
+        }
+
         $tmpPath = $file->getPathname();
 
         if (!$tmpPath || !is_file($tmpPath) || !is_readable($tmpPath)) {
@@ -105,6 +107,16 @@ final class SendAttachmentController extends AbstractController
         }
 
         $originalName = $file->getClientOriginalName() ?: 'fichier';
+        $clientExtension = strtolower((string) pathinfo($originalName, PATHINFO_EXTENSION));
+        $forbiddenExtensions = ['php', 'phtml', 'phar', 'cgi', 'pl', 'py', 'sh', 'bash', 'bat', 'cmd', 'exe', 'com', 'msi', 'dll', 'jar'];
+
+        if ($clientExtension !== '' && in_array($clientExtension, $forbiddenExtensions, true)) {
+            return $this->json([
+                'ok' => false,
+                'error' => 'Ce type de fichier exécutable n’est pas autorisé pour des raisons de sécurité.',
+            ], 415);
+        }
+
         $mimeType = $file->getClientMimeType() ?: $file->getMimeType() ?: 'application/octet-stream';
         $size = $file->getSize() ?: 0;
 
@@ -153,14 +165,6 @@ final class SendAttachmentController extends AbstractController
         $this->em->persist($message);
         $conversation->addMessage($message);
         $this->em->flush();
-
-        $topic = sprintf('/conversations/%d/messages', $conversation->getId());
-        $this->mercure->publish($topic, [
-            'type' => 'message',
-            'conversationId' => $conversation->getId(),
-            'messageId' => $message->getId(),
-        ]);
-
         return $this->json([
             'ok' => true,
             'messageId' => $message->getId(),
@@ -279,14 +283,6 @@ final class SendAttachmentController extends AbstractController
         $this->em->persist($message);
         $conversation->addMessage($message);
         $this->em->flush();
-
-        $topic = sprintf('/conversations/%d/messages', $conversation->getId());
-        $this->mercure->publish($topic, [
-            'type' => 'message',
-            'conversationId' => $conversation->getId(),
-            'messageId' => $message->getId(),
-        ]);
-
         return $this->json([
             'ok' => true,
             'messageId' => $message->getId(),

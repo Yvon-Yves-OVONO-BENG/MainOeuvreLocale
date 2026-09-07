@@ -15,16 +15,16 @@
                         </a>
                         <h2 class="text-center mb-1">Choisir votre paiement</h2>
                         <p class="text-center text-muted">
-                            Abonnement <strong>{{ plan.name }}</strong>
+                            {% if plan.slug == 'pro' %}Ticket contacts{% else %}Abonnement <strong>{{ plan.name }}</strong>{% endif %}
                         </p>
                         
                         {# Résumé du plan et de la durée sélectionnée #}
                         <div class="plan-resume">
                             <div class="resume-item">
                                 <span class="resume-label">
-                                    <i class="fas fa-clock me-1"></i> Durée
+                                    <i class="fas {{ plan.slug == 'pro' ? 'fa-ticket-alt' : 'fa-clock' }} me-1"></i> {{ plan.slug == 'pro' ? 'Crédit' : 'Durée' }}
                                 </span>
-                                <span class="resume-value">{{ selected_duration.label }}</span>
+                                <span class="resume-value">{{ plan.slug == 'pro' ? '3 contacts' : selected_duration.label }}</span>
                             </div>
                             <div class="resume-item">
                                 <span class="resume-label">
@@ -47,6 +47,24 @@
                             </div>
                             {% endif %}
                         </div>
+
+                        {% if plan.slug == 'pro' %}
+                            <div class="ticket-categorie mt-4">
+                                <label for="ticketCategorie" class="form-label fw-bold">
+                                    <i class="fas fa-layer-group me-1 text-primary"></i> Catégorie du ticket
+                                </label>
+                                <select id="ticketCategorie" class="form-select" required>
+                                    <option value="">Choisir une catégorie</option>
+                                    {% for categorie in categories %}
+                                        <option value="{{ categorie.id }}">{{ categorie.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div id="categorieError" class="text-danger small mt-2 d-none">
+                                    Choisissez la catégorie des 3 contacts.
+                                </div>
+                                <p class="text-muted small mt-2 mb-0">Les trois contacts débloqués devront appartenir à cette même catégorie.</p>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="payment-methods">
@@ -476,6 +494,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 return;
             }
+
+            const categorieSelect = document.getElementById('ticketCategorie');
+            if (categorieSelect && !categorieSelect.value) {
+                e.preventDefault();
+                categorieSelect.classList.add('is-invalid');
+                document.getElementById('categorieError')?.classList.remove('d-none');
+                categorieSelect.focus();
+                return;
+            }
             
             // Vérifier si l'utilisateur est connecté
             if (!isAuthenticated) {
@@ -519,7 +546,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         // Rediriger vers la page de connexion avec retour
-                        const returnUrl = encodeURIComponent('{{ path('subscription_payment', {slug: plan.slug}) }}?method=' + selectedMethod + '&duration={{ selected_duration.id }}');
+                        const categorieParam = categorieSelect ? '&categorie=' + encodeURIComponent(categorieSelect.value) : '';
+                        const returnUrl = encodeURIComponent('{{ path('subscription_payment', {slug: plan.slug}) }}?method=' + selectedMethod + '&duration={{ selected_duration.id }}' + categorieParam);
                         window.location.href = '{{ path('app_login') }}?redirect=' + returnUrl;
                     }
                 });
@@ -540,7 +568,8 @@ document.addEventListener('DOMContentLoaded', function() {
             this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Redirection...';
             
             // Rediriger vers la page de paiement AVEC la durée
-            const redirectUrl = '{{ path('subscription_payment', {slug: plan.slug}) }}?method=' + selectedMethod + '&duration={{ selected_duration.id }}';
+            const categorieParam = categorieSelect ? '&categorie=' + encodeURIComponent(categorieSelect.value) : '';
+            const redirectUrl = '{{ path('subscription_payment', {slug: plan.slug}) }}?method=' + selectedMethod + '&duration={{ selected_duration.id }}' + categorieParam;
             setTimeout(function() {
                 window.location.href = redirectUrl;
             }, 300);

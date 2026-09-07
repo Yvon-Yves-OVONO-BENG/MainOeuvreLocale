@@ -183,13 +183,6 @@ class AdminPlatformCenterController extends AbstractController
                 'lastSync' => new \DateTimeImmutable('-2 hours'),
             ],
             [
-                'name' => 'Mercure',
-                'category' => 'Temps réel',
-                'status' => 'connected',
-                'env' => 'Production',
-                'lastSync' => new \DateTimeImmutable('-4 minutes'),
-            ],
-            [
                 'name' => 'SMTP Mailer',
                 'category' => 'Email',
                 'status' => 'connected',

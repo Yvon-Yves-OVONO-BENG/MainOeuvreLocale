@@ -7,7 +7,6 @@ use App\Entity\Message;
 use App\Repository\MessageRepository;
 use App\Security\ConversationAccess;
 use App\Security\CurrentUser;
-use App\Realtime\MercurePublisher;
 use App\Service\ChatBlockService;
 use App\Util\ChatTimestamp;
 use Doctrine\ORM\EntityManagerInterface;
@@ -24,7 +23,6 @@ final class SendMessageController extends AbstractController
         private CurrentUser $currentUser,
         private ConversationAccess $access,
         private MessageRepository $messageRepository,
-        private MercurePublisher $mercure,
         private ChatBlockService $chatBlockService,
     ) {
     }
@@ -80,19 +78,6 @@ final class SendMessageController extends AbstractController
         $this->em->persist($message);
         $conversation->addMessage($message);
         $this->em->flush();
-
-        $topic = sprintf('/conversations/%d/messages', $conversation->getId());
-
-        try {
-            $this->mercure->publish($topic, [
-                'type' => 'message',
-                'conversationId' => $conversation->getId(),
-                'messageId' => $message->getId(),
-            ]);
-        } catch (\Throwable $e) {
-            // Le message est déjà enregistré.
-            // On ne doit jamais casser la réponse HTTP à cause de Mercure.
-        }
 
         return $this->json([
             'ok' => true,

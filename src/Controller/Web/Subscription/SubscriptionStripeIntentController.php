@@ -4,6 +4,8 @@ namespace App\Controller\Web\Subscription;
 
 use App\Entity\User;
 use App\Repository\PlanDurationRepository;
+use App\Repository\CategorieRepository;
+use App\Repository\ProfessionRepository;
 use App\Service\PlanManager;
 use App\Service\SubscriptionStripePaymentService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +24,8 @@ final class SubscriptionStripeIntentController extends AbstractController
         Request $request,
         PlanManager $planManager,
         PlanDurationRepository $durationRepository,
+        CategorieRepository $categorieRepository,
+        ProfessionRepository $professionRepository,
         SubscriptionStripePaymentService $stripePaymentService
     ): JsonResponse {
         $plan = $planManager->getPlanBySlug($slug);
@@ -38,10 +42,23 @@ final class SubscriptionStripeIntentController extends AbstractController
 
         $payload = json_decode($request->getContent(), true);
         $durationId = is_array($payload) ? (int) ($payload['duration_id'] ?? 0) : 0;
+        $categorieId = is_array($payload) ? (int) ($payload['categorie_id'] ?? 0) : 0;
+        $professionId = is_array($payload) ? (int) ($payload['profession_id'] ?? 0) : 0;
         $duration = $durationId > 0 ? $durationRepository->find($durationId) : null;
 
         if (!$duration || $duration->getPlan()?->getId() !== $plan->getId()) {
             return $this->json(['ok' => false, 'message' => 'Durée d’abonnement invalide.'], 400);
+        }
+
+        $categorie = $plan->getSlug() === 'pro' ? $categorieRepository->find($categorieId) : null;
+        $profession = $plan->getSlug() === 'pro' ? $professionRepository->find($professionId) : null;
+        if ($plan->getSlug() === 'pro' && (
+            !$categorie
+            || !$categorie->isIsActive()
+            || !$profession
+            || $profession->getCategorie()?->getId() !== $categorie->getId()
+        )) {
+            return $this->json(['ok' => false, 'message' => 'Catégorie du ticket invalide.'], 400);
         }
 
         /** @var User|null $user */
@@ -51,7 +68,7 @@ final class SubscriptionStripeIntentController extends AbstractController
         }
 
         try {
-            return $this->json($stripePaymentService->createIntent($plan, $duration, $user));
+            return $this->json($stripePaymentService->createIntent($plan, $duration, $user, $profession));
         } catch (BadRequestHttpException $exception) {
             return $this->json(['ok' => false, 'message' => $exception->getMessage()], 400);
         }

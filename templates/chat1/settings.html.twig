@@ -15,7 +15,7 @@
 
     <div class="row g-4">
         <div class="col-lg-8">
-            <form method="post" action="{{ path('app_chat_settings_save') }}" class="card border-0 shadow-sm rounded-4">
+            <form method="post" action="{{ path('admin_chat_settings_save') }}" class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
                     <input type="hidden" name="_token" value="{{ csrf_token('chat_settings') }}">
 
@@ -307,7 +307,7 @@
 
         testChatForm.querySelector('input[name="message"]').value = '';
 
-        const response = await fetch('{{ path('app_chat_test') }}', {
+        const response = await fetch('{{ path('admin_chat_test') }}', {
             method: 'POST',
             body: formData,
             headers: {

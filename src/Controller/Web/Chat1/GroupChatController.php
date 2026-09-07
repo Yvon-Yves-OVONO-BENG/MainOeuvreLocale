@@ -9,7 +9,6 @@ use App\Entity\ChatGroupMessage;
 use App\Entity\ChatGroupRecommendation;
 use App\Entity\Friendship;
 use App\Entity\User;
-use App\Realtime\MercurePublisher;
 use App\Security\CurrentUser;
 use App\Service\ChatGroupAccessService;
 use App\Service\UploadOptimizer;
@@ -32,7 +31,6 @@ final class GroupChatController extends AbstractController
         private EntityManagerInterface $em,
         private CurrentUser $currentUser,
         private ChatGroupAccessService $groupAccess,
-        private MercurePublisher $mercure,
         private SluggerInterface $slugger,
         private UploadOptimizer $uploadOptimizer,
         #[Autowire('%kernel.project_dir%')]
@@ -467,6 +465,16 @@ final class GroupChatController extends AbstractController
         }
 
         $originalName = $file->getClientOriginalName() ?: 'fichier';
+        $clientExtension = strtolower((string) pathinfo($originalName, PATHINFO_EXTENSION));
+        $forbiddenExtensions = ['php', 'phtml', 'phar', 'cgi', 'pl', 'py', 'sh', 'bash', 'bat', 'cmd', 'exe', 'com', 'msi', 'dll', 'jar'];
+
+        if ($clientExtension !== '' && in_array($clientExtension, $forbiddenExtensions, true)) {
+            return $this->json([
+                'ok' => false,
+                'message' => 'Ce type de fichier exécutable n’est pas autorisé pour des raisons de sécurité.',
+            ], 415);
+        }
+
         $mimeType = $file->getClientMimeType() ?: $file->getMimeType() ?: 'application/octet-stream';
         $size = $file->getSize() ?: 0;
 
@@ -993,11 +1001,6 @@ final class GroupChatController extends AbstractController
         $this->em->persist($systemMessage);
         $this->em->flush();
 
-        $this->mercure->publish(sprintf('/groups/%d/messages', $group->getId()), [
-            'type' => 'member_removed',
-            'groupId' => $group->getId(),
-            'memberId' => $member->getId(),
-        ]);
 
         return $this->json([
             'ok' => true,
@@ -1069,11 +1072,6 @@ final class GroupChatController extends AbstractController
         $this->em->persist($systemMessage);
         $this->em->flush();
 
-        $this->mercure->publish(sprintf('/groups/%d/messages', $group->getId()), [
-            'type' => 'member_invited',
-            'groupId' => $group->getId(),
-            'memberId' => $member->getId(),
-        ]);
 
         return $this->json([
             'ok' => true,
@@ -1172,11 +1170,6 @@ final class GroupChatController extends AbstractController
     {
         $topic = sprintf('/groups/%d/messages', $group->getId());
 
-        $this->mercure->publish($topic, [
-            'type' => $event,
-            'groupId' => $group->getId(),
-            'messageId' => $message->getId(),
-        ]);
     }
 
     private function normalizeGroup(ChatGroup $group, User $viewer): array

@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ incident.reference }} • Incident technique{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.tid{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--soft:#f8fafc;--blue:#2563eb;--danger:#dc2626;max-width:1180px;margin:28px auto;padding:0 22px;color:var(--ink)}
+.tid *{box-sizing:border-box}.tid-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,#fff,#f6f9ff);box-shadow:0 14px 34px rgba(15,23,42,.06)}.tid-kicker{color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.tid h1{margin:5px 0 8px;font-size:clamp(22px,3vw,32px);letter-spacing:-.03em}.tid-ref{display:inline-flex;padding:6px 9px;border-radius:9px;background:#eff6ff;color:#1d4ed8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;font-weight:850}.tid-actions{display:flex;gap:8px;flex-wrap:wrap}.tid-btn{display:inline-flex;min-height:39px;align-items:center;justify-content:center;gap:7px;padding:0 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#334155;font-weight:800;font-size:12px;text-decoration:none;cursor:pointer}.tid-btn--danger{color:#b91c1c;border-color:#fecaca;background:#fff7f7}.tid-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;margin-top:14px}.tid-card{grid-column:span 6;padding:18px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 10px 26px rgba(15,23,42,.045)}.tid-card--full{grid-column:1/-1}.tid-card h2{margin:0 0 13px;font-size:14px}.tid-dl{display:grid;grid-template-columns:minmax(120px,.35fr) minmax(0,1fr);gap:9px 14px;margin:0}.tid-dl dt{color:var(--muted);font-size:11px;font-weight:800}.tid-dl dd{min-width:0;margin:0;color:#334155;font-size:12px;overflow-wrap:anywhere}.tid-chip{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:10px;font-weight:850}.tid-chip--critical,.tid-chip--error{background:#fff1f2;color:#be123c}.tid-chip--warning{background:#fff7ed;color:#c2410c}.tid-chip--resolved{background:#ecfdf5;color:#047857}.tid-code{max-height:520px;overflow:auto;margin:0;padding:14px;border:1px solid #dbe4ef;border-radius:13px;background:#0f172a;color:#dbeafe;font:11px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere}.tid-message{margin:0;padding:14px;border:1px solid #fecdd3;border-radius:13px;background:#fff7f8;color:#9f1239;font-size:13px;line-height:1.6;overflow-wrap:anywhere}.tid-empty{color:var(--muted);font-size:12px}.tid-flash{margin-bottom:12px;padding:11px 14px;border-radius:12px;background:#ecfdf5;color:#047857;font-weight:700;font-size:12px}
+@media(max-width:800px){.tid{margin-top:15px;padding:0 12px}.tid-head{flex-direction:column}.tid-actions{width:100%}.tid-actions>*{flex:1 1 auto}.tid-card{grid-column:1/-1}.tid-dl{grid-template-columns:1fr}.tid-dl dt{margin-top:5px}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="tid">
+    {% for message in app.flashes('success') %}<div class="tid-flash">{{ message }}</div>{% endfor %}
+
+    <header class="tid-head">
+        <div>
+            <div class="tid-kicker">Administration • Diagnostic</div>
+            <h1>Détail de l’incident technique</h1>
+            <span class="tid-ref">{{ incident.reference }}</span>
+        </div>
+        <div class="tid-actions">
+            <a class="tid-btn" href="{{ path('admin_incidents_index') }}" data-turbo="false">← Tous les incidents</a>
+            {% if incident.status != 'resolved' %}
+                <form method="post" action="{{ path('admin_incidents_resolve', {id: incident.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('incident_resolve_' ~ incident.id) }}">
+                    <button class="tid-btn" type="submit">Marquer résolu</button>
+                </form>
+            {% endif %}
+            <form method="post" action="{{ path('admin_incidents_delete', {id: incident.id}) }}" onsubmit="return confirm('Supprimer définitivement cet incident ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('incident_delete_' ~ incident.id) }}">
+                <button class="tid-btn tid-btn--danger" type="submit">Supprimer</button>
+            </form>
+        </div>
+    </header>
+
+    <div class="tid-grid">
+        <section class="tid-card tid-card--full">
+            <h2>Message de l’exception</h2>
+            <p class="tid-message">{{ incident.message ?: 'Aucun message fourni.' }}</p>
+        </section>
+
+        <section class="tid-card">
+            <h2>Classification</h2>
+            <dl class="tid-dl">
+                <dt>Statut</dt><dd><span class="tid-chip tid-chip--{{ incident.status }}">{{ incident.status|upper }}</span></dd>
+                <dt>Sévérité</dt><dd><span class="tid-chip tid-chip--{{ incident.severity }}">{{ incident.severity|upper }}</span></dd>
+                <dt>HTTP</dt><dd>{{ incident.httpStatus ?? '—' }}</dd>
+                <dt>Exception</dt><dd>{{ incident.exceptionClass }}</dd>
+                <dt>Occurrences</dt><dd>{{ incident.occurrenceCount }}</dd>
+                <dt>Première occurrence</dt><dd>{{ incident.createdAt|date('d/m/Y H:i:s') }}</dd>
+                <dt>Dernière occurrence</dt><dd>{{ incident.lastOccurredAt|date('d/m/Y H:i:s') }}</dd>
+                <dt>Résolu le</dt><dd>{{ incident.resolvedAt ? incident.resolvedAt|date('d/m/Y H:i:s') : '—' }}</dd>
+            </dl>
+        </section>
+
+        <section class="tid-card">
+            <h2>Requête et utilisateur</h2>
+            <dl class="tid-dl">
+                <dt>Méthode</dt><dd>{{ incident.method ?: '—' }}</dd>
+                <dt>Route</dt><dd>{{ incident.route ?: '—' }}</dd>
+                <dt>URI</dt><dd>{{ incident.requestUri ?: '—' }}</dd>
+                <dt>Compte</dt><dd>{{ incident.user ? incident.user.email : 'Visiteur / non authentifié' }}</dd>
+                <dt>IP</dt><dd>{{ incident.ip ?: '—' }}</dd>
+                <dt>Référent</dt><dd>{{ incident.referer ?: '—' }}</dd>
+                <dt>User-Agent</dt><dd>{{ incident.userAgent ?: '—' }}</dd>
+            </dl>
+        </section>
+
+        <section class="tid-card tid-card--full">
+            <h2>Emplacement source</h2>
+            <dl class="tid-dl">
+                <dt>Fichier</dt><dd>{{ incident.sourceFile ?: '—' }}</dd>
+                <dt>Ligne</dt><dd>{{ incident.sourceLine ?? '—' }}</dd>
+                <dt>Empreinte</dt><dd><code>{{ incident.fingerprint }}</code></dd>
+            </dl>
+        </section>
+
+        <section class="tid-card tid-card--full">
+            <h2>Trace applicative</h2>
+            {% if incident.trace %}
+                <pre class="tid-code">{{ incident.trace|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+            {% else %}<div class="tid-empty">Aucune trace enregistrée.</div>{% endif %}
+        </section>
+
+        <section class="tid-card tid-card--full">
+            <h2>Contexte sécurisé</h2>
+            {% if incident.context %}
+                <pre class="tid-code">{{ incident.context|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+            {% else %}<div class="tid-empty">Aucun contexte supplémentaire enregistré.</div>{% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}

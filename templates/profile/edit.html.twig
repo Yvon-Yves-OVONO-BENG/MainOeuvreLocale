@@ -68,6 +68,11 @@
             font-size: .85rem;
         }
 
+        .mol-profile-save-status.is-error {
+            color: #b42318;
+            font-weight: 700;
+        }
+
         .mol-country-native-wrap {
             position: relative;
         }
@@ -591,15 +596,6 @@
                                             </div>
 
                                             <div class="col-md-6">
-                                                <div class="field-container" data-required="false">
-                                                    {{ form_label(form.companyContactPhone, null, {'label_attr': {'class':'form-label'}}) }}
-                                                    {{ form_widget(form.companyContactPhone, {'attr': {'class':'form-control', 'placeholder':'ex: +237 6XX XXX XXX'}}) }}
-                                                    <div class="help-muted mt-1">{% trans %}Facultatif{% endtrans %}</div>
-                                                    {{ form_errors(form.companyContactPhone) }}
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
                                                 <div class="field-container" data-required="true">
                                                     {{ form_label(form.city, null, {'label_attr': {'class':'form-label'}}) }}
                                                     {{ form_widget(form.city, {'attr': {'class':'form-control', 'placeholder':'ex: Douala'}}) }}
@@ -627,10 +623,10 @@
                                             </div>
 
                                             <div class="col-12">
-                                                <div class="field-container" data-required="true">
+                                                <div class="field-container" data-required="false">
                                                     {{ form_label(form.companyDescription, null, {'label_attr': {'class':'form-label'}}) }}
-                                                    {{ form_widget(form.companyDescription, {'attr': {'class':'form-control', 'rows': 5, 'placeholder':"Présentez l'entreprise, ses activités et ses services"}}) }}
-                                                    <span class="validation-icon validation-icon--field">!</span>
+                                                    {{ form_widget(form.companyDescription, {'attr': {'class':'form-control', 'rows': 5, 'placeholder':"Présentez l'entreprise, ses activités et ses services (facultatif)"}}) }}
+                                                    <div class="help-muted mt-1">{% trans %}Facultatif{% endtrans %}</div>
                                                     {{ form_errors(form.companyDescription) }}
                                                 </div>
                                             </div>
@@ -709,7 +705,7 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="{{ asset('js/profile/edit.js') }}?v=20260815" defer></script>
+    <script src="{{ asset('js/profile/edit.js') }}?v=20260828-1" defer></script>
     <script>
         (function () {
             'use strict';

@@ -52,7 +52,7 @@ class MessageSoundPreferenceController extends AbstractController
             ], 403);
         }
 
-        $sound = (string) $request->request->get('sound', MessageSoundPreference::SOUND_CRYSTAL);
+        $sound = (string) $request->request->get('sound', MessageSoundPreference::SOUND_SOFT);
         $enabled = filter_var($request->request->get('enabled', true), FILTER_VALIDATE_BOOL);
 
         if (!in_array($sound, MessageSoundPreference::ALLOWED_SOUNDS, true)) {

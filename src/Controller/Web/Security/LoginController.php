@@ -4,6 +4,7 @@ namespace App\Controller\Web\Security;
 
 use App\Service\SecurityService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -12,6 +13,7 @@ final class LoginController extends AbstractController
 {
     #[Route('/login', name: 'app_login', methods: ['GET', 'POST'])]
     public function __invoke(
+        Request $request,
         AuthenticationUtils $authenticationUtils,
         SecurityService $securityService
     ): Response {
@@ -28,8 +30,10 @@ final class LoginController extends AbstractController
             );
         }
 
+        $emailFromReset = strtolower(trim((string) $request->query->get('email', '')));
+
         return $this->render('security/login.html.twig', [
-            'last_username' => $data['last_username'],
+            'last_username' => $emailFromReset !== '' ? $emailFromReset : $data['last_username'],
             'error' => $data['error'],
         ]);
     }

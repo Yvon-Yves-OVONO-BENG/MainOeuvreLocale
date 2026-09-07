@@ -22,13 +22,9 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 #[Route('/admin/professions')]
 class ProfessionController extends AbstractController
 {
-    private const PHOTO_MAX_SIZE = 2 * 1024 * 1024;
+    // Une taille d'entrée raisonnable est admise avant compression automatique.
+    private const PHOTO_MAX_SIZE = 15 * 1024 * 1024;
 
-    private const PHOTO_ALLOWED_MIME_TYPES = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-    ];
     #[Route('/', name: 'admin_professions_index', methods: ['GET'])]
     public function index(CategorieRepository $categoriesRepository): Response
     {
@@ -498,14 +494,7 @@ class ProfessionController extends AbstractController
         $fileSize = $photoFile->getSize();
         if ($fileSize === false || $fileSize > self::PHOTO_MAX_SIZE) {
             return $this->photoValidationError(
-                'La photo ne doit pas dépasser 2 Mo.'
-            );
-        }
-
-        $mimeType = (string) $photoFile->getMimeType();
-        if (!in_array($mimeType, self::PHOTO_ALLOWED_MIME_TYPES, true)) {
-            return $this->photoValidationError(
-                'Format non autorisé. Utilisez une image JPG, PNG ou GIF.'
+                'La photo ne doit pas dépasser 15 Mo avant compression.'
             );
         }
 

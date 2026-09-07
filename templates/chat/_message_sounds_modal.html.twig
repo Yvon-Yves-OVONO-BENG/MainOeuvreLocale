@@ -94,7 +94,43 @@
                         <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
                     </button>
 
-                    <button type="button" class="mol-sound-option" data-mol-sound-option="none">
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="pop">
+                        <span class="mol-sound-option-icon"><i class="bi bi-soundwave"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Pop{% endtrans %}</strong>
+                            <small>{% trans %}Court, net et dynamique{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="pulse">
+                        <span class="mol-sound-option-icon"><i class="bi bi-activity"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Pulse{% endtrans %}</strong>
+                            <small>{% trans %}Rythmé et discret{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="soft_bell">
+                        <span class="mol-sound-option-icon"><i class="bi bi-bell"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Soft Bell{% endtrans %}</strong>
+                            <small>{% trans %}Cloche douce et élégante{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="digital_drop">
+                        <span class="mol-sound-option-icon"><i class="bi bi-stars"></i></span>
+                        <span class="mol-sound-option-text">
+                            <strong>{% trans %}Digital Drop{% endtrans %}</strong>
+                            <small>{% trans %}Son digital premium{% endtrans %}</small>
+                        </span>
+                        <span class="mol-sound-option-check"><i class="bi bi-check-lg"></i></span>
+                    </button>
+
+                    <button type="button" class="mol-sound-option" data-mol-sound-option="silent">
                         <span class="mol-sound-option-icon"><i class="bi bi-volume-mute-fill"></i></span>
                         <span class="mol-sound-option-text">
                             <strong>{% trans %}Aucun son{% endtrans %}</strong>
@@ -441,7 +477,24 @@
                 { frequency: 700, duration: 0.055, delay: 0.07, gain: 0.05 },
                 { frequency: 900, duration: 0.06, delay: 0.14, gain: 0.045 }
             ],
-            none: []
+            pop: [
+                { frequency: 520, duration: 0.045, delay: 0, gain: 0.055 },
+                { frequency: 780, duration: 0.045, delay: 0.045, gain: 0.035 }
+            ],
+            pulse: [
+                { frequency: 610, duration: 0.055, delay: 0, gain: 0.04 },
+                { frequency: 610, duration: 0.055, delay: 0.09, gain: 0.032 }
+            ],
+            soft_bell: [
+                { frequency: 784, duration: 0.12, delay: 0, gain: 0.035 },
+                { frequency: 1174, duration: 0.16, delay: 0.04, gain: 0.025 }
+            ],
+            digital_drop: [
+                { frequency: 1320, duration: 0.045, delay: 0, gain: 0.04 },
+                { frequency: 990, duration: 0.05, delay: 0.045, gain: 0.035 },
+                { frequency: 660, duration: 0.07, delay: 0.095, gain: 0.03 }
+            ],
+            silent: []
         };
 
         let audioContext = null;
@@ -486,6 +539,82 @@
             refreshSoundUi();
         }
 
+        function getSoundApi() {
+            return {
+                status: window.MOL_CHAT?.urls?.messageSoundStatus || '',
+                save: window.MOL_CHAT?.urls?.messageSoundSave || '',
+                token: window.MOL_CHAT?.csrf?.messageSound || ''
+            };
+        }
+
+        async function syncFromServer() {
+            const api = getSoundApi();
+            if (!api.status) return false;
+
+            try {
+                const response = await fetch(api.status, {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || payload.success === false) return false;
+
+                const sound = SOUND_PATTERNS[payload.sound] ? payload.sound : SOUND_DEFAULT;
+                localStorage.setItem(STORAGE_SELECTED, sound);
+                localStorage.setItem(STORAGE_ENABLED, payload.enabled ? '1' : '0');
+                localStorage.setItem(STORAGE_PANEL_ENABLED, payload.enabled ? '1' : '0');
+                window.MOL_CHAT_SOUND_ENABLED = Boolean(payload.enabled);
+                refreshSoundUi();
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        async function saveToServer() {
+            const api = getSoundApi();
+            if (!api.save || !api.token) {
+                return { success: true, localOnly: true };
+            }
+
+            const sound = getSelectedSound();
+            const enabled = isEnabled() && sound !== 'silent';
+            const body = new URLSearchParams({
+                _token: api.token,
+                sound,
+                enabled: enabled ? '1' : '0'
+            });
+
+            const response = await fetch(api.save, {
+                method: 'POST',
+                credentials: 'same-origin',
+                cache: 'no-store',
+                body,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const payload = await response.json().catch(() => ({}));
+
+            if (!response.ok || payload.success === false) {
+                throw new Error(payload.message || '{{ "Impossible d’enregistrer votre préférence sonore."|trans|e("js") }}');
+            }
+
+            localStorage.setItem(STORAGE_SELECTED, payload.sound || sound);
+            localStorage.setItem(STORAGE_ENABLED, payload.enabled ? '1' : '0');
+            localStorage.setItem(STORAGE_PANEL_ENABLED, payload.enabled ? '1' : '0');
+            window.MOL_CHAT_SOUND_ENABLED = Boolean(payload.enabled);
+            refreshSoundUi();
+
+            return payload;
+        }
+
         function playTone(frequency, duration, delay, gainValue) {
             const ctx = getAudioContext();
 
@@ -513,7 +642,7 @@
             const soundName = name || getSelectedSound();
 
             if (!force && !isEnabled()) return;
-            if (soundName === 'none') return;
+            if (soundName === 'silent') return;
 
             const pattern = SOUND_PATTERNS[soundName] || SOUND_PATTERNS[SOUND_DEFAULT];
 
@@ -564,6 +693,7 @@
             }
 
             refreshSoundUi();
+            void syncFromServer();
             closeChatMenus();
 
             if (window.bootstrap?.Modal) {
@@ -623,6 +753,10 @@
 
                 if (!input) return;
 
+                if (input.checked && getSelectedSound() === 'silent') {
+                    setSelectedSound(SOUND_DEFAULT);
+                }
+
                 setEnabled(input.checked);
 
                 if (input.checked) {
@@ -639,9 +773,11 @@
 
                 const sound = setSelectedSound(option.dataset.molSoundOption);
 
-                if (sound !== 'none') {
+                if (sound !== 'silent') {
                     setEnabled(true);
                     playSound(sound, true);
+                } else {
+                    setEnabled(false);
                 }
             });
 
@@ -649,21 +785,46 @@
                 playSelected(true);
             });
 
-            qs('molSoundSaveBtn')?.addEventListener('click', () => {
-                setEnabled(qs('molSoundEnabled')?.checked !== false);
-                refreshSoundUi();
-                closeModal();
+            qs('molSoundSaveBtn')?.addEventListener('click', async (event) => {
+                const button = event.currentTarget;
+                const originalHtml = button.innerHTML;
+                const selected = getSelectedSound();
 
-                if (window.Swal) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '{{ "Sons enregistrés"|trans }}',
-                        text: '{{ "Votre préférence de son a été sauvegardée."|trans }}',
-                        timer: 1500,
-                        showConfirmButton: false,
-                        confirmButtonColor: '#2563eb',
-                        backdrop: 'rgba(15,23,42,.35)'
-                    });
+                setEnabled((qs('molSoundEnabled')?.checked !== false) && selected !== 'silent');
+                refreshSoundUi();
+
+                button.disabled = true;
+                button.setAttribute('aria-busy', 'true');
+                button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span><span>{{ "Enregistrement…"|trans|e("js") }}</span>';
+
+                try {
+                    await saveToServer();
+                    closeModal();
+
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '{{ "Sons enregistrés"|trans|e("js") }}',
+                            text: '{{ "Votre préférence de son a été sauvegardée."|trans|e("js") }}',
+                            timer: 1500,
+                            showConfirmButton: false,
+                            confirmButtonColor: '#2563eb',
+                            backdrop: 'rgba(15,23,42,.35)'
+                        });
+                    }
+                } catch (error) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '{{ "Enregistrement impossible"|trans|e("js") }}',
+                            text: error?.message || '{{ "Veuillez réessayer."|trans|e("js") }}',
+                            confirmButtonColor: '#2563eb'
+                        });
+                    }
+                } finally {
+                    button.disabled = false;
+                    button.removeAttribute('aria-busy');
+                    button.innerHTML = originalHtml;
                 }
             });
         }
@@ -704,6 +865,8 @@
             setSelectedSound,
             isEnabled,
             setEnabled,
+            syncFromServer,
+            saveToServer,
             refresh: refreshSoundUi
         };
 
@@ -724,6 +887,7 @@
 
             window.MOL_CHAT_SOUND_ENABLED = isEnabled();
             refreshSoundUi();
+            void syncFromServer();
         }
 
         document.addEventListener('DOMContentLoaded', boot);

@@ -1,0 +1,12 @@
+<aside class="container my-3" data-advertising-slot="{{ code|default('home-main') }}" hidden></aside>
+<script>
+(() => {
+  const slot = document.currentScript.previousElementSibling;
+  fetch('{{ path('advertising_slot', {code: code|default('home-main')}) }}', {headers:{'X-Requested-With':'XMLHttpRequest'}, cache:'no-store'})
+    .then(r => r.ok ? r.json() : null).then(data => {
+      const c = data?.campaign; if (!c) return;
+      slot.innerHTML = `<a href="${c.clickUrl}" target="_blank" rel="sponsored noopener"><img src="${c.image}" alt="${String(c.title || 'Publicité').replaceAll('"','&quot;')}" class="img-fluid rounded-4 w-100"></a>`;
+      slot.hidden = false;
+    }).catch(() => {});
+})();
+</script>

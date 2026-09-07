@@ -192,7 +192,34 @@ class ResetPasswordService
             ];
         }
 
-        $user->setPassword($this->passwordHasher->hashPassword($user, $plainPassword));
+        // La saisie est normalisée de la même façon avant le contrôle et le hachage.
+        // Cela évite qu'un espace ajouté par copier-coller rende ensuite le mot de passe inutilisable.
+        $plainPassword = trim($plainPassword);
+
+        if (mb_strlen($plainPassword) < 8) {
+            return [
+                'ok' => false,
+                'flashType' => 'danger',
+                'message' => $this->translator->trans('Le mot de passe doit contenir au moins 8 caractères.'),
+                'routeName' => 'app_reset_password',
+                'routeParams' => ['token' => $token],
+            ];
+        }
+
+        $hash = $this->passwordHasher->hashPassword($user, $plainPassword);
+        $user->setPassword($hash);
+
+        // On ne consomme le jeton que si le hachage fraîchement créé est réellement vérifiable.
+        if (!$this->passwordHasher->isPasswordValid($user, $plainPassword)) {
+            return [
+                'ok' => false,
+                'flashType' => 'danger',
+                'message' => $this->translator->trans('Le nouveau mot de passe n’a pas pu être enregistré. Veuillez réessayer.'),
+                'routeName' => 'app_reset_password',
+                'routeParams' => ['token' => $token],
+            ];
+        }
+
         $user->setResetPasswordToken(null);
         $user->setResetPasswordExpiresAt(null);
 
@@ -203,7 +230,7 @@ class ResetPasswordService
             'flashType' => 'success',
             'message' => $this->translator->trans('Mot de passe réinitialisé avec succès. Connectez-vous.'),
             'routeName' => 'app_login',
-            'routeParams' => [],
+            'routeParams' => ['email' => $user->getEmail()],
         ];
     }
 

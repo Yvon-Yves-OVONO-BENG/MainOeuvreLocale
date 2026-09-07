@@ -82,10 +82,37 @@ class CategorieRepository extends ServiceEntityRepository
                ->setParameter('search', '%' . $search . '%');
         }
         
-        return $qb->orderBy('c.nom', 'ASC')
-                  ->addOrderBy('c.id', 'ASC')
-                  ->getQuery()
-                  ->getResult();
+        $categories = $qb->orderBy('c.nom', 'ASC')
+            ->addOrderBy('c.id', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        // Dans l'administration, la catégorie générique « Autres » doit
+        // toujours rester après toutes les catégories spécifiques.
+        usort($categories, static function (Categorie $left, Categorie $right): int {
+            $normalize = static function (string $name): string {
+                $name = mb_strtolower(trim($name));
+                return strtr($name, [
+                    'à'=>'a', 'â'=>'a', 'ä'=>'a', 'é'=>'e', 'è'=>'e', 'ê'=>'e', 'ë'=>'e',
+                    'î'=>'i', 'ï'=>'i', 'ô'=>'o', 'ö'=>'o', 'ù'=>'u', 'û'=>'u', 'ü'=>'u',
+                ]);
+            };
+
+            $otherNames = ['autre', 'autres', 'other', 'others'];
+            $leftName = $normalize((string) $left->getNom());
+            $rightName = $normalize((string) $right->getNom());
+            $leftIsOther = in_array($leftName, $otherNames, true);
+            $rightIsOther = in_array($rightName, $otherNames, true);
+
+            if ($leftIsOther !== $rightIsOther) {
+                return $leftIsOther ? 1 : -1;
+            }
+
+            $byName = strnatcasecmp($leftName, $rightName);
+            return $byName !== 0 ? $byName : ((int) $left->getId() <=> (int) $right->getId());
+        });
+
+        return $categories;
     }
 
     public function deleteMultiple(array $slugs): void

@@ -12,6 +12,9 @@ use App\Service\PlanManager;
 use App\Service\PaymentService;
 use App\Repository\PlanDurationRepository;
 use App\Repository\PlanRepository;
+use App\Repository\CategorieRepository;
+use App\Repository\ProfessionRepository;
+use App\Service\ContactTicketManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -65,10 +68,11 @@ class SubscriptionController extends AbstractController
     #[Route('/abonnement/choisir/{slug}', name: 'subscription_choose')]
     public function choosePlan(
         string $slug, 
-        Request $request,
+        Request $request, 
         PlanManager $planManager,
         PlanDurationRepository $durationRepository,
-        CurrencyConverter $currencyConverter
+        CurrencyConverter $currencyConverter,
+        CategorieRepository $categorieRepository
     ): Response {
         $plan = $planManager->getPlanBySlug($slug);
         
@@ -115,6 +119,7 @@ class SubscriptionController extends AbstractController
             'formatted_price' => $formattedPrice,
             'user_currency' => $currencyConverter->getUserCurrency(),
             'currency_symbol' => $currencyConverter->getCurrencySymbol(),
+            'categories' => $slug === 'pro' ? $categorieRepository->findUniqueNonEmptyOrdered(true) : [],
         ]);
     }
 
@@ -126,6 +131,8 @@ class SubscriptionController extends AbstractController
         Request $request, 
         PlanManager $planManager,
         PlanDurationRepository $durationRepository,
+        CategorieRepository $categorieRepository,
+        ProfessionRepository $professionRepository,
         CurrencyConverter $currencyConverter,
         BoostStripeCardService $stripeCardService
     ): Response {
@@ -150,6 +157,17 @@ class SubscriptionController extends AbstractController
         if (!$selectedDuration) {
             $this->addFlash('error', 'Veuillez sélectionner une durée d\'abonnement.');
             return $this->redirectToRoute('subscription_choose', ['slug' => $slug]);
+        }
+
+        $categorie = null;
+        $profession = null;
+        if ($slug === 'pro') {
+            $categorie = $categorieRepository->find((int) $request->query->get('categorie', 0));
+            $profession = $categorie ? ($professionRepository->findByCategorie((int) $categorie->getId())[0] ?? null) : null;
+            if (!$categorie || !$categorie->isIsActive() || !$profession) {
+                $this->addFlash('error', 'Veuillez choisir une catégorie valide contenant au moins une profession.');
+                return $this->redirectToRoute('subscription_choose', ['slug' => $slug]);
+            }
         }
 
         $method = (string) $request->query->get('method', 'card');
@@ -178,6 +196,8 @@ class SubscriptionController extends AbstractController
             'user_currency' => $currencyConverter->getUserCurrency(),
             'currency_symbol' => $currencyConverter->getCurrencySymbol(),
             'stripe_public_key' => $stripeCardService->getPublicKey(),
+            'profession' => $profession,
+            'categorie' => $categorie,
         ]);
     }
 
@@ -189,8 +209,11 @@ class SubscriptionController extends AbstractController
         Request $request,
         PlanManager $planManager,
         PlanDurationRepository $durationRepository,
+        CategorieRepository $categorieRepository,
+        ProfessionRepository $professionRepository,
         PaymentService $paymentService,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        ContactTicketManager $ticketManager
     ): Response {
         $plan = $planManager->getPlanBySlug($slug);
         
@@ -227,6 +250,16 @@ class SubscriptionController extends AbstractController
         }
 
         $user = $this->getUser();
+        $categorie = null;
+        $profession = null;
+        if ($slug === 'pro') {
+            $categorie = $categorieRepository->find((int) $request->request->get('categorie_id', 0));
+            $profession = $professionRepository->find((int) $request->request->get('profession_id', 0));
+            if (!$categorie || !$categorie->isIsActive() || !$profession || $profession->getCategorie()?->getId() !== $categorie->getId()) {
+                $this->addFlash('error', 'La catégorie sélectionnée pour le ticket est invalide.');
+                return $this->redirectToRoute('subscription_choose', ['slug' => $slug]);
+            }
+        }
         $paymentMethod = (string) $request->request->get('payment_method', 'card');
         if (!in_array($paymentMethod, ['card', 'orange', 'mtn'], true)) {
             $this->addFlash('error', 'Le moyen de paiement sélectionné est invalide.');
@@ -247,6 +280,7 @@ class SubscriptionController extends AbstractController
             'user' => $user,
             'plan' => $plan,
             'duration' => $selectedDuration,
+            'profession' => $profession,
         ]);
 
         if (!$paymentResult['success']) {
@@ -254,8 +288,26 @@ class SubscriptionController extends AbstractController
             return $this->redirectToRoute('subscription_payment', [
                 'slug' => $slug,
                 'duration' => $selectedDuration->getId(),
+                'categorie' => $categorie?->getId(),
                 'method' => $paymentMethod,
             ]);
+        }
+
+        if ($slug === 'pro' && $profession) {
+            $ticket = $ticketManager->issue(
+                $user,
+                $profession,
+                $paymentResult['transaction_id'],
+                $paymentMethod
+            );
+
+            $this->addFlash('success', sprintf(
+                'Votre ticket est actif : %d contacts disponibles dans la catégorie « %s ».',
+                $ticket->getRemainingContacts(),
+                $categorie->getNom()
+            ));
+
+            return $this->redirectToRoute('liste_talents', ['q' => $categorie->getNom()]);
         }
 
         $existingSubscription = $em->getRepository(Subscription::class)->findOneBy([

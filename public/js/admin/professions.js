@@ -866,25 +866,12 @@
 
     window.previewPhoto = function (input) {
         var file = input && input.files ? input.files[0] : null;
-        var allowedTypes = [
-            'image/jpeg',
-            'image/png',
-            'image/gif',
-            'image/webp'
-        ];
-
         if (!file) {
             return;
         }
 
         if (file.size > 15 * 1024 * 1024) {
             showError('La photo ne doit pas dépasser 15 Mo avant compression.');
-            input.value = '';
-            return;
-        }
-
-        if (allowedTypes.indexOf(file.type) === -1) {
-            showError('Utilisez une image JPG, PNG, GIF ou WebP.');
             input.value = '';
             return;
         }

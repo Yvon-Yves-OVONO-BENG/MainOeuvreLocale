@@ -387,15 +387,6 @@ class AccountProfileEditType extends AbstractType
                     ],
                     'label' => 'Nom du contact',
                 ])
-                ->add('companyContactPhone', TextType::class, [
-                    'mapped' => true,
-                    'required' => false,
-                    'attr' => [
-                        'class' => 'form-control',
-                        'placeholder' => 'Téléphone du contact (facultatif)',
-                    ],
-                    'label' => 'Téléphone du contact',
-                ])
                 ->add('companyWebsite', UrlType::class, [
                     'mapped' => true,
                     'required' => false,
@@ -408,13 +399,12 @@ class AccountProfileEditType extends AbstractType
                 ])
                 ->add('companyDescription', TextareaType::class, [
                     'mapped' => true,
-                    'required' => true,
+                    'required' => false,
                     'empty_data' => '',
-                    'constraints' => [new NotBlank(['message' => $requiredMessage])],
                     'attr' => [
                         'class' => 'form-control',
                         'rows' => 5,
-                        'placeholder' => "Présentation de l'entreprise",
+                        'placeholder' => "Présentation de l'entreprise (facultatif)",
                     ],
                     'label' => "Description de l'entreprise",
                 ])

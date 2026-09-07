@@ -122,6 +122,7 @@
                                 {'route':'admin_invoices_index','href':path('admin_invoices_index'),'label':'Paiements du jour'|trans,'icon':'💳','badge':(kpi.paymentsToday ?? 0)|number_format(0, ',', ' ')},
                                 {'route':'admin_newsletter_index','href':path('admin_newsletter_index'),'label':'Alertes offres'|trans,'icon':'🔔','badge':'Auto'},
                                 {'route':'admin_audit_index','href':path('admin_audit_index'),'label':'Audit & logs'|trans,'icon':'🧾','badge':'Logs'},
+                                {'route':'admin_incidents_index','href':path('admin_incidents_index'),'label':'Incidents techniques'|trans,'icon':'⚠️','badge':'Erreurs'|trans,'tone':'danger'},
                                 {'route':'admin_support_new','href':path('admin_support_new'),'label':'Support'|trans,'icon':'🎧','badge':kpi.openTickets ?? '-'}
                             ] %}
 

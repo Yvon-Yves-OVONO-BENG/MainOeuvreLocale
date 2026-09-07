@@ -5,6 +5,23 @@
 {% block stylesheets %}
   {{ parent() }}
   <link rel="stylesheet" href="{{ asset('css/auth/register.css') }}?v={{ random() }}">
+
+  {# Messages de validation ajoutés sans modifier la feuille CSS existante. #}
+  <style>
+    .password-validation-feedback,
+    .terms-validation-feedback {
+      display: none;
+      margin-top: 6px;
+      font-size: 0.78rem;
+      line-height: 1.35;
+      color: #dc2626;
+    }
+
+    .password-validation-feedback.is-visible,
+    .terms-validation-feedback.is-visible {
+      display: block;
+    }
+  </style>
 {% endblock %}
 
 {% block body %}
@@ -129,6 +146,7 @@
             </div>
 
             {{ form_errors(registrationForm.plainPassword.first) }}
+            <div id="passwordFirstFeedback" class="password-validation-feedback" aria-live="polite"></div>
           </div>
 
           <div class="form-groupx">
@@ -172,6 +190,7 @@
             </div>
 
             {{ form_errors(registrationForm.plainPassword.second) }}
+            <div id="passwordSecondFeedback" class="password-validation-feedback" aria-live="polite"></div>
           </div>
         </div>
 
@@ -180,7 +199,7 @@
             <div class="password-meter-bar" id="passwordMeterBar"></div>
           </div>
           <div class="password-meter-text" id="passwordMeterText">
-            {% trans %}Rigidité du mot de passe : non définie{% endtrans %}
+            {% trans %}8 caractères minimum{% endtrans %}
           </div>
         </div>
         
@@ -202,10 +221,12 @@
                 </a><span>{% trans %}.{% endtrans %}</span>
             </label>
         </div>
+        <div id="termsFeedback" class="terms-validation-feedback" aria-live="polite"></div>
 
         <input type="hidden" value="{{ csrfToken }}" name="csrfToken">
 
-        <button type="submit" class="btn-create" id="submitRegisterBtn" disabled aria-disabled="true">
+        {# Le bouton reste cliquable : la validation explique maintenant précisément ce qui bloque. #}
+        <button type="submit" class="btn-create" id="submitRegisterBtn" aria-disabled="false">
           <span class="btn-create-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M15 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -318,6 +339,9 @@
       const pwd1 = byId('register_password_first', '{{ registrationForm.plainPassword.first.vars.id }}');
       const pwd2 = byId('register_password_second', '{{ registrationForm.plainPassword.second.vars.id }}');
       const agreeTerms = document.getElementById('agree_terms');
+      const passwordFirstFeedback = document.getElementById('passwordFirstFeedback');
+      const passwordSecondFeedback = document.getElementById('passwordSecondFeedback');
+      const termsFeedback = document.getElementById('termsFeedback');
 
       const emailField = document.getElementById('emailField');
       const emailFeedback = document.getElementById('emailFeedback');
@@ -331,32 +355,62 @@
       const phoneRegex = /^[+]?[\d\s().-]{6,30}$/;
 
       function passwordMeetsRequirements(value) {
-        return value.length >= 8
-          && /[a-z]/.test(value)
-          && /[A-Z]/.test(value)
-          && /\d/.test(value)
-          && /[^A-Za-z0-9]/.test(value);
+        return value.length >= 8;
       }
 
-      function isFormReady() {
-        const emailValue = emailInput ? emailInput.value.trim().toLowerCase() : '';
-        const passwordValue = pwd1 ? pwd1.value : '';
-        const confirmationValue = pwd2 ? pwd2.value : '';
-
-        return emailRegex.test(emailValue)
-          && emailState !== 'used'
-          && emailState !== 'invalid'
-          && passwordMeetsRequirements(passwordValue)
-          && confirmationValue === passwordValue
-          && Boolean(agreeTerms && agreeTerms.checked);
-      }
-
+      // Le bouton ne doit pas être désactivé avant le clic : sinon l'utilisateur
+      // ne peut pas savoir quel champ bloque la création du compte.
       function updateSubmitState() {
         if (!submitBtn || submitBtn.classList.contains('is-loading')) return;
 
-        const enabled = isFormReady();
-        submitBtn.disabled = !enabled;
-        submitBtn.setAttribute('aria-disabled', enabled ? 'false' : 'true');
+        submitBtn.disabled = false;
+        submitBtn.setAttribute('aria-disabled', 'false');
+      }
+
+      function setFieldFeedback(input, feedback, message) {
+        if (feedback) {
+          feedback.textContent = message || '';
+          feedback.classList.toggle('is-visible', Boolean(message));
+        }
+
+        if (input) {
+          input.classList.toggle('is-invalid', Boolean(message));
+        }
+      }
+
+      function clearFieldFeedback(input, feedback) {
+        setFieldFeedback(input, feedback, '');
+        clearInvalidField(input);
+      }
+
+      function setTermsFeedback(message) {
+        if (!termsFeedback) return;
+
+        termsFeedback.textContent = message || '';
+        termsFeedback.classList.toggle('is-visible', Boolean(message));
+      }
+
+      function validatePasswordMatchLive() {
+        if (!pwd1 || !pwd2) return;
+
+        const passwordValue = pwd1.value || '';
+        const confirmationValue = pwd2.value || '';
+
+        if (!confirmationValue) {
+          clearFieldFeedback(pwd2, passwordSecondFeedback);
+          return;
+        }
+
+        if (confirmationValue !== passwordValue) {
+          setFieldFeedback(
+            pwd2,
+            passwordSecondFeedback,
+            'Les mots de passe ne correspondent pas.'
+          );
+          return;
+        }
+
+        clearFieldFeedback(pwd2, passwordSecondFeedback);
       }
 
       function resetEmailClasses() {
@@ -393,60 +447,77 @@
       }
 
       function validateFields() {
-      let ok = true;
-      let firstInvalid = null;
+        let ok = true;
+        let firstInvalid = null;
 
-      const emailValue = (emailInput ? emailInput.value : '').trim();
-      const pwd1Value = (pwd1 ? pwd1.value : '').trim();
-      const pwd2Value = (pwd2 ? pwd2.value : '').trim();
+        const emailValue = (emailInput ? emailInput.value : '').trim();
+        const pwd1Value = pwd1 ? (pwd1.value || '') : '';
+        const pwd2Value = pwd2 ? (pwd2.value || '') : '';
 
-
-      if (!emailValue) {
-        vibrateField(emailInput);
-        setEmailMessage('invalid', 'Email requis');
-        firstInvalid = firstInvalid || emailInput;
-        ok = false;
-      } else if (!emailRegex.test(emailValue)) {
-        vibrateField(emailInput);
-        setEmailMessage('invalid', 'Email non valide');
-        firstInvalid = firstInvalid || emailInput;
-        ok = false;
-      } else {
-        clearInvalidField(emailInput);
-      }
-
-      if (!pwd1Value) {
-        vibrateField(pwd1);
-        firstInvalid = firstInvalid || pwd1;
-        ok = false;
-      } else {
-        clearInvalidField(pwd1);
-      }
-
-      if (!pwd2Value) {
-        vibrateField(pwd2);
-        firstInvalid = firstInvalid || pwd2;
-        ok = false;
-      } else {
-        clearInvalidField(pwd2);
-      }
-
-      if (pwd1Value && pwd2Value && pwd1Value !== pwd2Value) {
-        vibrateField(pwd1);
-        vibrateField(pwd2);
-        firstInvalid = firstInvalid || pwd2;
-        ok = false;
-      }
-
-      if (!ok) {
-        vibrateDevice();
-
-        if (firstInvalid) {
-          firstInvalid.focus();
+        if (!emailValue) {
+          vibrateField(emailInput);
+          setEmailMessage('invalid', 'Email requis');
+          firstInvalid = firstInvalid || emailInput;
+          ok = false;
+        } else if (!emailRegex.test(emailValue)) {
+          vibrateField(emailInput);
+          setEmailMessage('invalid', 'Email non valide');
+          firstInvalid = firstInvalid || emailInput;
+          ok = false;
+        } else {
+          clearInvalidField(emailInput);
         }
-      }
 
-      return ok;
+        if (!pwd1Value) {
+          setFieldFeedback(pwd1, passwordFirstFeedback, 'Mot de passe requis.');
+          vibrateField(pwd1);
+          firstInvalid = firstInvalid || pwd1;
+          ok = false;
+        } else if (!passwordMeetsRequirements(pwd1Value)) {
+          setFieldFeedback(
+            pwd1,
+            passwordFirstFeedback,
+            'Le mot de passe doit contenir au moins 8 caractères.'
+          );
+          vibrateField(pwd1);
+          firstInvalid = firstInvalid || pwd1;
+          ok = false;
+        } else {
+          clearFieldFeedback(pwd1, passwordFirstFeedback);
+        }
+
+        if (!pwd2Value) {
+          setFieldFeedback(pwd2, passwordSecondFeedback, 'Veuillez confirmer le mot de passe.');
+          vibrateField(pwd2);
+          firstInvalid = firstInvalid || pwd2;
+          ok = false;
+        } else if (pwd1Value && pwd2Value !== pwd1Value) {
+          setFieldFeedback(pwd2, passwordSecondFeedback, 'Les mots de passe ne correspondent pas.');
+          vibrateField(pwd1);
+          vibrateField(pwd2);
+          firstInvalid = firstInvalid || pwd2;
+          ok = false;
+        } else {
+          clearFieldFeedback(pwd2, passwordSecondFeedback);
+        }
+
+        if (!agreeTerms || !agreeTerms.checked) {
+          setTermsFeedback('Veuillez accepter les termes et conditions et la politique de confidentialité.');
+          firstInvalid = firstInvalid || agreeTerms;
+          ok = false;
+        } else {
+          setTermsFeedback('');
+        }
+
+        if (!ok) {
+          vibrateDevice();
+
+          if (firstInvalid && typeof firstInvalid.focus === 'function') {
+            firstInvalid.focus();
+          }
+        }
+
+        return ok;
       }
 
       function checkEmailAvailability(callback) {
@@ -593,17 +664,14 @@
         let score = 0;
 
         if (value.length >= 8) score++;
-        if (/[a-z]/.test(value) && /[A-Z]/.test(value)) score++;
-        if (/\d/.test(value)) score++;
-        if (/[^A-Za-z0-9]/.test(value)) score++;
-        if (value.length >= 12) score++;
+        if (value.length >= 8) score = 4;
 
         meterText.classList.remove('is-weak', 'is-medium', 'is-strong');
 
         if (!value) {
           meterBar.style.width = '0%';
           meterBar.style.background = '#64748b';
-          meterText.textContent = 'Rigidité du mot de passe : non définie';
+          meterText.textContent = '8 caractères minimum';
           updateSubmitState();
           return;
         }
@@ -611,7 +679,7 @@
         if (score <= 1) {
           meterBar.style.width = '25%';
           meterBar.style.background = '#ef4444';
-          meterText.textContent = 'Rigidité du mot de passe : faible';
+          meterText.textContent = '8 caractères minimum';
           meterText.classList.add('is-weak');
           updateSubmitState();
           return;
@@ -620,7 +688,7 @@
         if (score <= 3) {
           meterBar.style.width = '60%';
           meterBar.style.background = '#eab308';
-          meterText.textContent = 'Rigidité du mot de passe : moyenne';
+          meterText.textContent = '8 caractères minimum';
           meterText.classList.add('is-medium');
           updateSubmitState();
           return;
@@ -628,23 +696,35 @@
 
         meterBar.style.width = '100%';
         meterBar.style.background = '#22c55e';
-        meterText.textContent = 'Rigidité du mot de passe : forte';
+        meterText.textContent = 'Mot de passe valide';
         meterText.classList.add('is-strong');
         updateSubmitState();
       }
 
       if (pwd1) {
-        pwd1.addEventListener('input', renderPasswordStrength);
+        pwd1.addEventListener('input', function () {
+          clearFieldFeedback(pwd1, passwordFirstFeedback);
+          renderPasswordStrength();
+          validatePasswordMatchLive();
+        });
         renderPasswordStrength();
       }
 
       if (pwd2) {
-        pwd2.addEventListener('input', updateSubmitState);
-        pwd2.addEventListener('change', updateSubmitState);
+        pwd2.addEventListener('input', function () {
+          validatePasswordMatchLive();
+          updateSubmitState();
+        });
+        pwd2.addEventListener('change', validatePasswordMatchLive);
       }
 
       if (agreeTerms) {
-        agreeTerms.addEventListener('change', updateSubmitState);
+        agreeTerms.addEventListener('change', function () {
+          if (agreeTerms.checked) {
+            setTermsFeedback('');
+          }
+          updateSubmitState();
+        });
       }
 
       updateSubmitState();
@@ -659,17 +739,6 @@
 
           if (!validateFields()) {
             return;
-          }
-
-          if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.classList.add('is-loading');
-            submitBtn.setAttribute('aria-busy', 'true');
-            submitBtn.setAttribute('aria-disabled', 'true');
-
-            if (submitLabel) {
-              submitLabel.textContent = 'Vérification...';
-            }
           }
 
           checkEmailAvailability(function (emailOk) {
@@ -692,11 +761,35 @@
               return;
             }
 
+            // Le spinner ne démarre qu'après validation de tous les champs
+            // et confirmation de la disponibilité de l'adresse email.
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.classList.add('is-loading');
+              submitBtn.setAttribute('aria-busy', 'true');
+              submitBtn.setAttribute('aria-disabled', 'true');
+
+              if (submitLabel) {
+                submitLabel.textContent = 'Création...';
+              }
+            }
+
             form.dataset.ready = '1';
             form.submit();
           });
         });
       }
+
+      // Restaure toujours le bouton après un retour arrière depuis le navigateur.
+      window.addEventListener('pageshow', function () {
+        if (!submitBtn) return;
+        form && delete form.dataset.ready;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('is-loading');
+        submitBtn.removeAttribute('aria-busy');
+        submitBtn.setAttribute('aria-disabled', 'false');
+        if (submitLabel) submitLabel.textContent = 'Créer mon compte';
+      });
     });
   })();
 
@@ -767,129 +860,7 @@
   }
 </script>
 
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('registerForm');
-    const submitBtn = document.getElementById('submitRegisterBtn');
-
-    const fields = [
-      document.getElementById('register_type_compte'),
-      document.getElementById('register_email'),
-      document.getElementById('register_phone'),
-      document.getElementById('register_password_first'),
-      document.getElementById('register_password_second'),
-      document.getElementById('agree_terms')
-    ].filter(Boolean);
-
-    function getBox(field) {
-      if (!field) return null;
-
-      if (field.id === 'register_phone') {
-        return field.closest('.phone-field') || field.closest('.floating-field');
-      }
-
-      return field.closest('.floating-field') || field.parentElement;
-    }
-
-    function shake(field) {
-      const box = getBox(field);
-
-      field.classList.add('is-invalid');
-
-      if (box) {
-        box.classList.remove('mol-vibrate');
-        void box.offsetWidth;
-        box.classList.add('mol-vibrate');
-
-        setTimeout(function () {
-          box.classList.remove('mol-vibrate');
-        }, 450);
-      }
-    }
-
-    function clearField(field) {
-      field.classList.remove('is-invalid');
-
-      const box = getBox(field);
-      if (box) {
-        box.classList.remove('mol-vibrate');
-      }
-    }
-
-    function isEmpty(field) {
-        if (field.type === 'checkbox') {
-            return !field.checked;
-        }
-    
-        return !field.value || field.value.trim() === '';
-    }
-
-    function validateRequiredFields() {
-      let valid = true;
-      let firstInvalid = null;
-
-      fields.forEach(function (field) {
-        if (isEmpty(field)) {
-          shake(field);
-          firstInvalid = firstInvalid || field;
-          valid = false;
-        } else {
-          clearField(field);
-        }
-      });
-
-      const pwd1 = document.getElementById('register_password_first');
-      const pwd2 = document.getElementById('register_password_second');
-
-      if (pwd1 && pwd2 && pwd1.value.trim() && pwd2.value.trim() && pwd1.value !== pwd2.value) {
-        shake(pwd1);
-        shake(pwd2);
-        firstInvalid = firstInvalid || pwd2;
-        valid = false;
-      }
-
-      if (!valid) {
-        if (navigator.vibrate) {
-          navigator.vibrate([80, 40, 80]);
-        }
-
-        if (firstInvalid) {
-          firstInvalid.focus();
-        }
-      }
-
-      return valid;
-    }
-
-    fields.forEach(function (field) {
-      field.addEventListener('input', function () {
-        clearField(field);
-      });
-
-      field.addEventListener('change', function () {
-        clearField(field);
-      });
-    });
-
-    if (submitBtn) {
-      submitBtn.addEventListener('click', function (event) {
-        if (!validateRequiredFields()) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-        }
-      }, true);
-    }
-
-    if (form) {
-      form.addEventListener('submit', function (event) {
-        if (!validateRequiredFields()) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-        }
-      }, true);
-    }
-  });
-</script>
+{# Ancien validateur JS dupliqué supprimé : il bloquait le submit avant l'affichage des messages précis. #}
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {

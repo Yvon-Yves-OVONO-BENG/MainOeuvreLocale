@@ -1,0 +1,493 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paramètres du chat – Main d’Œuvre Locale{% endblock %}
+
+{% block body %}
+<style>
+    .mol-chat-settings-page {
+        --mcs-blue: #2563eb;
+        --mcs-blue-dark: #1d4ed8;
+        --mcs-ink: #0f172a;
+        --mcs-muted: #64748b;
+        --mcs-line: #e2e8f0;
+        min-height: 100vh;
+        padding: clamp(26px, 5vw, 58px) 16px 72px;
+        background:
+            radial-gradient(circle at 9% 7%, rgba(37, 99, 235, .11), transparent 28%),
+            radial-gradient(circle at 94% 17%, rgba(14, 165, 233, .08), transparent 24%),
+            linear-gradient(180deg, #f8fbff 0%, #f8fafc 55%, #ffffff 100%);
+    }
+
+    .mol-chat-settings-shell {
+        width: min(1080px, 100%);
+        margin: 0 auto;
+    }
+
+    .mol-chat-settings-hero {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 24px;
+        align-items: center;
+        padding: clamp(24px, 4vw, 40px);
+        border: 1px solid rgba(37, 99, 235, .13);
+        border-radius: 28px;
+        color: #fff;
+        background: linear-gradient(135deg, #0f2f78 0%, #1d4ed8 58%, #0ea5e9 135%);
+        box-shadow: 0 28px 72px rgba(30, 64, 175, .18);
+    }
+
+    .mol-chat-settings-hero::after {
+        content: "";
+        position: absolute;
+        right: -70px;
+        top: -92px;
+        width: 270px;
+        height: 270px;
+        border: 45px solid rgba(255,255,255,.08);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .mol-chat-settings-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+        font-size: .72rem;
+        font-weight: 900;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        opacity: .86;
+    }
+
+    .mol-chat-settings-hero h1 {
+        margin: 0;
+        font-size: clamp(1.7rem, 4vw, 2.55rem);
+        font-weight: 950;
+        letter-spacing: -.04em;
+        line-height: 1.05;
+    }
+
+    .mol-chat-settings-hero p {
+        max-width: 700px;
+        margin: 12px 0 0;
+        color: rgba(255,255,255,.82);
+        font-size: .96rem;
+        line-height: 1.6;
+    }
+
+    .mol-chat-settings-back {
+        position: relative;
+        z-index: 2;
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 15px;
+        border: 1px solid rgba(255,255,255,.23);
+        border-radius: 14px;
+        background: rgba(255,255,255,.10);
+        color: #fff !important;
+        font-size: .8rem;
+        font-weight: 850;
+        text-decoration: none;
+        backdrop-filter: blur(8px);
+    }
+
+    .mol-chat-settings-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+    }
+
+    .mol-chat-setting-card {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        gap: 18px;
+        padding: 22px;
+        border: 1px solid var(--mcs-line);
+        border-radius: 22px;
+        background: rgba(255,255,255,.94);
+        box-shadow: 0 13px 34px rgba(15,23,42,.055);
+    }
+
+    .mol-chat-setting-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+    }
+
+    .mol-chat-setting-icon {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        display: inline-grid;
+        place-items: center;
+        border-radius: 14px;
+        color: var(--mcs-blue);
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        font-size: 1.02rem;
+    }
+
+    .mol-chat-setting-head h2 {
+        margin: 1px 0 4px;
+        color: var(--mcs-ink);
+        font-size: 1rem;
+        font-weight: 930;
+        letter-spacing: -.015em;
+    }
+
+    .mol-chat-setting-head p {
+        margin: 0;
+        color: var(--mcs-muted);
+        font-size: .78rem;
+        line-height: 1.48;
+    }
+
+    .mol-chat-setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 58px;
+        padding: 12px 14px;
+        border: 1px solid #edf2f7;
+        border-radius: 16px;
+        background: #f8fafc;
+    }
+
+    .mol-chat-setting-row strong {
+        display: block;
+        color: #334155;
+        font-size: .8rem;
+        font-weight: 850;
+    }
+
+    .mol-chat-setting-row small {
+        display: block;
+        margin-top: 3px;
+        color: #7c8798;
+        font-size: .69rem;
+    }
+
+    .mol-chat-setting-status {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 29px;
+        padding: 5px 9px;
+        border-radius: 999px;
+        color: #166534;
+        background: #ecfdf5;
+        border: 1px solid #bbf7d0;
+        font-size: .65rem;
+        font-weight: 900;
+    }
+
+    .mol-chat-setting-status.is-off {
+        color: #9f1239;
+        background: #fff1f2;
+        border-color: #fecdd3;
+    }
+
+    .mol-chat-setting-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: auto;
+    }
+
+    .mol-chat-setting-btn {
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 13px;
+        border: 1px solid #dbe4f0;
+        border-radius: 13px;
+        background: #fff;
+        color: #334155;
+        font-size: .74rem;
+        font-weight: 850;
+        cursor: pointer;
+        text-decoration: none;
+        transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .mol-chat-setting-btn:hover {
+        transform: translateY(-1px);
+        border-color: #bfdbfe;
+        color: var(--mcs-blue-dark);
+        box-shadow: 0 8px 20px rgba(37,99,235,.08);
+    }
+
+    .mol-chat-setting-btn--primary {
+        border-color: var(--mcs-blue);
+        background: var(--mcs-blue);
+        color: #fff !important;
+    }
+
+    .mol-chat-setting-btn[disabled] {
+        opacity: .62;
+        cursor: wait;
+        transform: none;
+    }
+
+    .mol-chat-settings-note {
+        margin-top: 18px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 16px;
+        border: 1px solid #dbeafe;
+        border-radius: 16px;
+        color: #475569;
+        background: #f0f7ff;
+        font-size: .73rem;
+        line-height: 1.5;
+    }
+
+    @media (max-width: 760px) {
+        .mol-chat-settings-page { padding-top: 18px; }
+        .mol-chat-settings-hero { grid-template-columns: 1fr; border-radius: 22px; }
+        .mol-chat-settings-back { justify-self: start; }
+        .mol-chat-settings-grid { grid-template-columns: 1fr; }
+        .mol-chat-setting-card { padding: 18px; border-radius: 19px; }
+        .mol-chat-setting-row { align-items: flex-start; flex-direction: column; }
+    }
+</style>
+
+<section
+    class="mol-chat-settings-page"
+    id="molChatSettingsPage"
+    data-notification-status-url="{{ path('app_notifications_status') }}"
+    data-notification-toggle-url="{{ path('app_notifications_toggle') }}"
+    data-notification-token="{{ csrf_token('notification_preference') }}"
+    data-sound-status-url="{{ path('app_message_sounds_status') }}"
+>
+    <div class="mol-chat-settings-shell">
+        <header class="mol-chat-settings-hero">
+            <div>
+                <div class="mol-chat-settings-eyebrow"><i class="bi bi-chat-square-heart"></i> Messagerie</div>
+                <h1>Paramètres du chat</h1>
+                <p>Personnalisez les notifications, les sons et la confidentialité de votre messagerie sans quitter votre espace Main d’Œuvre Locale.</p>
+            </div>
+            <a class="mol-chat-settings-back" href="{{ path('accueil') }}" onclick="if (history.length > 1) { event.preventDefault(); history.back(); }">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+        </header>
+
+        <div class="mol-chat-settings-grid">
+            <article class="mol-chat-setting-card">
+                <div class="mol-chat-setting-head">
+                    <span class="mol-chat-setting-icon"><i class="bi bi-bell"></i></span>
+                    <div>
+                        <h2>Notifications</h2>
+                        <p>Activez ou coupez les alertes de nouveaux messages pour votre compte.</p>
+                    </div>
+                </div>
+                <div class="mol-chat-setting-row">
+                    <div>
+                        <strong>Alertes de messagerie</strong>
+                        <small>Préférence enregistrée sur votre compte.</small>
+                    </div>
+                    <span class="mol-chat-setting-status" id="molSettingsNotificationStatus">Chargement…</span>
+                </div>
+                <div class="mol-chat-setting-actions">
+                    <button type="button" class="mol-chat-setting-btn mol-chat-setting-btn--primary" id="molSettingsNotificationToggle">
+                        <i class="bi bi-bell-slash"></i><span>Modifier</span>
+                    </button>
+                </div>
+            </article>
+
+            <article class="mol-chat-setting-card">
+                <div class="mol-chat-setting-head">
+                    <span class="mol-chat-setting-icon"><i class="bi bi-volume-up"></i></span>
+                    <div>
+                        <h2>Sons des messages</h2>
+                        <p>Choisissez parmi 10 sonneries modernes, ou passez en mode silencieux.</p>
+                    </div>
+                </div>
+                <div class="mol-chat-setting-row">
+                    <div>
+                        <strong>Son actuel</strong>
+                        <small>Synchronisé avec votre compte.</small>
+                    </div>
+                    <span class="mol-chat-setting-status" id="molSettingsSoundStatus">Chargement…</span>
+                </div>
+                <div class="mol-chat-setting-actions">
+                    <button type="button" class="mol-chat-setting-btn mol-chat-setting-btn--primary" id="molSettingsSoundOpen">
+                        <i class="bi bi-music-note-beamed"></i> Choisir un son
+                    </button>
+                </div>
+            </article>
+
+            <article class="mol-chat-setting-card">
+                <div class="mol-chat-setting-head">
+                    <span class="mol-chat-setting-icon"><i class="bi bi-shield-lock"></i></span>
+                    <div>
+                        <h2>Confidentialité et blocage</h2>
+                        <p>Contrôlez les contacts autorisés, les appels, les fichiers et votre liste de blocage.</p>
+                    </div>
+                </div>
+                <div class="mol-chat-setting-row">
+                    <div>
+                        <strong>Protection de la messagerie</strong>
+                        <small>Les règles sont appliquées avant chaque envoi et chaque appel.</small>
+                    </div>
+                    <span class="mol-chat-setting-status">Disponible</span>
+                </div>
+                <div class="mol-chat-setting-actions">
+                    <button type="button" class="mol-chat-setting-btn mol-chat-setting-btn--primary" id="molSettingsBlockOpen">
+                        <i class="bi bi-slash-circle"></i> Régler les blocages
+                    </button>
+                </div>
+            </article>
+
+            <article class="mol-chat-setting-card">
+                <div class="mol-chat-setting-head">
+                    <span class="mol-chat-setting-icon"><i class="bi bi-camera-video"></i></span>
+                    <div>
+                        <h2>Appels audio et vidéo</h2>
+                        <p>Les appels utilisent WebRTC et les permissions caméra/micro de votre appareil.</p>
+                    </div>
+                </div>
+                <div class="mol-chat-setting-row">
+                    <div>
+                        <strong>Compatibilité navigateur</strong>
+                        <small id="molSettingsMediaHint">Vérification en cours…</small>
+                    </div>
+                    <span class="mol-chat-setting-status" id="molSettingsMediaStatus">…</span>
+                </div>
+                <div class="mol-chat-setting-actions">
+                    <button type="button" class="mol-chat-setting-btn" id="molSettingsMediaHelp">
+                        <i class="bi bi-info-circle"></i> Conditions d’utilisation
+                    </button>
+                </div>
+            </article>
+        </div>
+
+        <div class="mol-chat-settings-note">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Pour les appels, la caméra et le microphone nécessitent une connexion HTTPS et l’autorisation du navigateur. Les messages et états de lecture sont synchronisés en AJAX.</span>
+        </div>
+    </div>
+</section>
+
+<script>
+(() => {
+    const boot = () => {
+        const root = document.getElementById('molChatSettingsPage');
+        if (!root || root.dataset.bound === '1') return;
+        root.dataset.bound = '1';
+
+        const notificationStatus = document.getElementById('molSettingsNotificationStatus');
+        const notificationToggle = document.getElementById('molSettingsNotificationToggle');
+        const soundStatus = document.getElementById('molSettingsSoundStatus');
+        const soundOpen = document.getElementById('molSettingsSoundOpen');
+        const blockOpen = document.getElementById('molSettingsBlockOpen');
+        const mediaStatus = document.getElementById('molSettingsMediaStatus');
+        const mediaHint = document.getElementById('molSettingsMediaHint');
+
+        const setPill = (node, text, enabled = true) => {
+            if (!node) return;
+            node.textContent = text;
+            node.classList.toggle('is-off', !enabled);
+        };
+
+        const loadNotifications = async () => {
+            try {
+                const response = await fetch(root.dataset.notificationStatusUrl, {
+                    credentials: 'same-origin', cache: 'no-store',
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const payload = await response.json();
+                if (!response.ok || payload.success === false) throw new Error();
+                setPill(notificationStatus, payload.enabled ? 'Activées' : 'Désactivées', Boolean(payload.enabled));
+                notificationToggle.dataset.enabled = payload.enabled ? '1' : '0';
+                notificationToggle.querySelector('span').textContent = payload.enabled ? 'Désactiver' : 'Activer';
+            } catch (_) {
+                setPill(notificationStatus, 'Indisponible', false);
+            }
+        };
+
+        notificationToggle?.addEventListener('click', async () => {
+            if (notificationToggle.disabled) return;
+            notificationToggle.disabled = true;
+            try {
+                const body = new URLSearchParams({ _token: root.dataset.notificationToken || '' });
+                const response = await fetch(root.dataset.notificationToggleUrl, {
+                    method: 'POST', credentials: 'same-origin', body,
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const payload = await response.json().catch(() => ({}));
+                if (!response.ok || payload.success === false) throw new Error(payload.message || 'Action impossible.');
+                await loadNotifications();
+            } catch (error) {
+                window.Swal?.fire?.({ icon: 'error', title: 'Action impossible', text: error.message || 'Veuillez réessayer.', confirmButtonColor: '#2563eb' });
+            } finally {
+                notificationToggle.disabled = false;
+            }
+        });
+
+        const soundNames = {
+            soft: 'Soft pop', crystal: 'Crystal', bubble: 'Bubble', ding: 'Ding', success: 'Success',
+            alert: 'Alert', pop: 'Pop', pulse: 'Pulse', soft_bell: 'Soft Bell', digital_drop: 'Digital Drop', silent: 'Silencieux'
+        };
+
+        const loadSound = async () => {
+            try {
+                const response = await fetch(root.dataset.soundStatusUrl, {
+                    credentials: 'same-origin', cache: 'no-store',
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const payload = await response.json();
+                if (!response.ok || payload.success === false) throw new Error();
+                const label = payload.enabled ? (soundNames[payload.sound] || 'Personnalisé') : 'Silencieux';
+                setPill(soundStatus, label, Boolean(payload.enabled));
+            } catch (_) {
+                setPill(soundStatus, 'Indisponible', false);
+            }
+        };
+
+        soundOpen?.addEventListener('click', () => window.MolMessageSounds?.open?.());
+        document.getElementById('molMessageSoundsModal')?.addEventListener('hidden.bs.modal', loadSound);
+        document.getElementById('molSoundSaveBtn')?.addEventListener('click', () => window.setTimeout(loadSound, 500));
+
+        blockOpen?.addEventListener('click', () => window.MolBlockSettings?.open?.());
+
+        const mediaSupported = Boolean(window.isSecureContext && navigator.mediaDevices?.getUserMedia && window.RTCPeerConnection);
+        setPill(mediaStatus, mediaSupported ? 'Compatible' : 'À vérifier', mediaSupported);
+        if (mediaHint) {
+            mediaHint.textContent = mediaSupported
+                ? 'Votre navigateur prend en charge les appels sécurisés.'
+                : 'HTTPS, WebRTC ou les API média ne sont pas disponibles ici.';
+        }
+
+        document.getElementById('molSettingsMediaHelp')?.addEventListener('click', () => {
+            window.Swal?.fire?.({
+                icon: 'info',
+                title: 'Appels audio et vidéo',
+                html: 'Utilisez le site en <strong>HTTPS</strong>, puis autorisez la <strong>caméra</strong> et le <strong>microphone</strong> lorsque le navigateur le demande.',
+                confirmButtonColor: '#2563eb'
+            });
+        });
+
+        void loadNotifications();
+        void loadSound();
+    };
+
+    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('turbo:load', boot);
+    if (document.readyState !== 'loading') boot();
+})();
+</script>
+{% endblock %}

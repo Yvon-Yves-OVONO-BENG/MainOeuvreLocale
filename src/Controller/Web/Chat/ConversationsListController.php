@@ -31,9 +31,23 @@ final class ConversationsListController extends AbstractController
         $convs = $this->conversationRepository->findForUser($me, $limit);
         $basePath = $request->getBasePath();
 
+        // Charge les compteurs et les derniers messages en deux requêtes
+        // globales. L'ancienne boucle déclenchait deux requêtes par
+        // conversation et pouvait laisser le panel bloqué sur « Chargement ».
+        $validConversations = array_values(array_filter(
+            $convs,
+            static fn (mixed $conversation): bool => $conversation instanceof Conversation,
+        ));
+        $conversationIds = array_values(array_filter(array_map(
+            static fn (Conversation $conversation): ?int => $conversation->getId(),
+            $validConversations,
+        )));
+        $lastMessages = $this->messageRepository->getLastMessagesByConversationIds($conversationIds);
+        $unreadCounts = $this->messageRepository->getUnreadCountsByConversationIdsForUser($conversationIds, $me);
+
         $items = [];
-        
-        foreach ($convs as $c) {
+
+        foreach ($validConversations as $c) {
             if (!$c instanceof Conversation) {
                 continue;
             }
@@ -59,8 +73,9 @@ final class ConversationsListController extends AbstractController
 
             $avatar = $other->getPersonalProfile()?->getPhoto();
 
-            $lastMessage = $this->messageRepository->findLastMessageForConversation($c);
-            $unread = $this->messageRepository->countUnreadForConversation($c, $me);
+            $conversationId = (int) $c->getId();
+            $lastMessage = $lastMessages[$conversationId] ?? null;
+            $unread = (int) ($unreadCounts[$conversationId] ?? 0);
 
             $presence = $other->getPresenceStatus();
 

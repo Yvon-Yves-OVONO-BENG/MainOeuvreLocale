@@ -25,7 +25,7 @@
                         <!-- Récapitulatif -->
                         <div class="order-summary">
                             <div class="d-flex justify-content-between">
-                                <span>Abonnement {{ plan.name }} · {{ selected_duration.label }}</span>
+                                <span>{% if plan.slug == 'pro' %}Ticket 3 contacts · {{ categorie.nom }}{% else %}Abonnement {{ plan.name }} · {{ selected_duration.label }}{% endif %}</span>
                                 <span class="fw-bold">{{ selected_duration.price|number_format(0, ',', ' ') }} XAF</span>
                             </div>
                             <div class="d-flex justify-content-between text-success">
@@ -43,6 +43,8 @@
                         <form id="paymentForm" method="POST" action="{{ path('subscription_process', {slug: plan.slug}) }}">
                             <input type="hidden" name="payment_method" value="{{ method }}">
                             <input type="hidden" name="duration_id" value="{{ selected_duration.id }}">
+                            {% if profession %}<input type="hidden" name="profession_id" value="{{ profession.id }}">{% endif %}
+                            {% if categorie %}<input type="hidden" name="categorie_id" value="{{ categorie.id }}">{% endif %}
                             <input type="hidden" name="_token" value="{{ csrf_token('subscription_process_' ~ plan.slug) }}">
                             <input type="hidden" name="payment_token" id="paymentToken" value="">
                             
@@ -682,7 +684,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-Requested-With': 'XMLHttpRequest',
                         'X-CSRF-Token': {{ csrf_token('subscription_stripe_intent_' ~ plan.slug)|json_encode|raw }}
                     },
-                    body: JSON.stringify({ duration_id: {{ selected_duration.id }} })
+                    body: JSON.stringify({
+                        duration_id: {{ selected_duration.id }},
+                        categorie_id: {{ categorie ? categorie.id : 0 }},
+                        profession_id: {{ profession ? profession.id : 0 }}
+                    })
                 });
                 const intentData = await intentResponse.json();
 

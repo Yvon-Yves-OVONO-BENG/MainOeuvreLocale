@@ -234,6 +234,8 @@ class ProfessionalProfileRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('p')
             ->leftJoin('p.user', 'u')->addSelect('u')
             ->innerJoin('u.personalProfile', 'pp')->addSelect('pp')
+            ->innerJoin('p.profession', 'profession')->addSelect('profession')
+            ->leftJoin('profession.categorie', 'categorie')->addSelect('categorie')
             ->andWhere('pp.id IS NOT NULL')
             // Un profil public doit avoir une vraie identité et une vraie photo.
             ->andWhere('pp.fullName IS NOT NULL')
@@ -268,7 +270,7 @@ class ProfessionalProfileRepository extends ServiceEntityRepository
 
         $q = trim($q);
         if ($q !== '') {
-            $qb->andWhere('pp.fullName LIKE :q')
+            $qb->andWhere('pp.fullName LIKE :q OR profession.profession LIKE :q OR categorie.nom LIKE :q')
             ->setParameter('q', '%' . $q . '%');
         }
 

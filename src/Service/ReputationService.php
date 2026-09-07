@@ -192,14 +192,10 @@ class ReputationService
 
         $review = $myReview ?? new Review();
         if (!$myReview) {
-            $review->setTargetReview($target);
-            $review->setTargetBy($me);
-            $review->setCreatedAt(new \DateTime());
+            $review->setAuthor($me);
+            $review->setTarget($target);
         }
         $review->setComment(trim($comment));
-        if (!$review->getCreatedAt()) {
-            $review->setCreatedAt(new \DateTime());
-        }
         $this->entityManager->persist($review);
 
         $this->entityManager->flush();
@@ -262,7 +258,7 @@ class ReputationService
 
     private function formatReview(Review $review): array
     {
-        $author = $review->getTargetBy();
+        $author = $review->getAuthor();
 
         return [
             'id' => $review->getId(),

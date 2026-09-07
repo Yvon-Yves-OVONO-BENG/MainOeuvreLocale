@@ -47,7 +47,7 @@
                         'badge': 'Populaire',
                         'badgeIcon': 'fa-fire',
                         'btnClass': 'btn-primary',
-                        'btnText': 'Choisir Pro',
+                        'btnText': 'Acheter un ticket',
                         'btnIcon': 'fa-arrow-right',
                         'featured': true,
                         'borderColor': '#3b82f6',
@@ -106,10 +106,10 @@
                         </div>
 
                         {# Sélecteur de durée pour plans payants #}
-                        {% if plan.price > 0 %}
+                        {% if plan.price > 0 and plan.slug != 'pro' %}
                             <div class="duration-selector-wrapper">
                                 <label class="duration-label">
-                                    <i class="far fa-clock me-1"></i> Durée
+                                    <i class="far fa-clock me-1"></i> Sélectionnez la durée de votre abonnement
                                 </label>
                                 <select class="form-select duration-select" data-plan-id="{{ plan.id }}">
                                     {% for duration in plan.durations %}
@@ -124,11 +124,27 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                        {% else %}
+                            <div class="duration-selector-wrapper duration-selector-placeholder" aria-hidden="true">
+                                <span class="duration-label"><i class="far fa-clock me-1"></i> Durée</span>
+                                <div class="form-select">1 mois</div>
+                
+                            </div>
                         {% endif %}
 
                         {# Affichage du prix #}
                         <div class="plan-price" id="price-display-{{ plan.id }}">
-                            {% if plan.price > 0 %}
+                            {% if plan.slug == 'pro' %}
+                                <div class="price-main">
+                                    <span class="amount">200 FCFA</span>
+                                </div>
+                                <div class="price-period">1 ticket · 3 contacts au choix</div>
+                                {% elseif plan.slug == 'premium' %}
+                   <div class="price-main">
+                   <span class="amount">1 000 FCFA</span>
+                   </div>
+                   <div class="price-period">Accès à toutes les fonctionnalités</div>
+                            {% elseif plan.price > 0 %}
                                 <div class="price-main">
                                     <span class="amount">{{ currency_converter.formatPrice(plan.durations|first.price) }}</span>
                                 </div>
@@ -148,12 +164,18 @@
                         {# Liste des fonctionnalités #}
                         <div class="plan-features-wrapper">
                             <ul class="plan-features">
+                                {% if plan.slug == 'pro' %}
+                                    <li><i class="fas fa-check-circle" style="color: {{ planMeta.color }};"></i><span>3 contacts par ticket</span></li>
+                                    <li><i class="fas fa-check-circle" style="color: {{ planMeta.color }};"></i><span>Une catégorie au choix</span></li>
+                                    <li><i class="fas fa-check-circle" style="color: {{ planMeta.color }};"></i><span>Ticket sans abonnement mensuel</span></li>
+                                {% else %}
                                 {% for feature in plan.features %}
                                     <li>
                                         <i class="fas fa-check-circle" style="color: {{ planMeta.color }};"></i>
                                         <span>{{ feature }}</span>
                                     </li>
                                 {% endfor %}
+                                {% endif %}
                                 {% if plan.canVideoCall %}
                                     <li>
                                         <i class="fas fa-video" style="color: {{ planMeta.color }};"></i>
@@ -165,7 +187,7 @@
 
                         {# Bouton d'action #}
                         <div class="plan-action">
-                            {% if currentPlan and currentPlan.id == plan.id %}
+                            {% if currentPlan and currentPlan.id == plan.id and plan.slug != 'pro' %}
                                 <button class="btn btn-current-plan" disabled>
                                     <i class="fas fa-check-circle me-2"></i> Plan actif
                                 </button>
@@ -181,7 +203,7 @@
                                    class="btn {{ planMeta.btnClass }} plan-btn choose-plan-btn {% if planMeta.featured %}btn-featured{% endif %}"
                                    data-turbo="false"
                                    data-plan-slug="{{ plan.slug }}"
-                                   data-duration-select=".duration-select[data-plan-id='{{ plan.id }}']"
+                                   {% if plan.slug != 'pro' %}data-duration-select=".duration-select[data-plan-id='{{ plan.id }}']"{% endif %}
                                    data-loading-text="<i class='fas fa-spinner fa-spin me-2'></i> Chargement...">
                                     <i class="fas {{ planMeta.btnIcon }} me-2"></i> {{ planMeta.btnText }}
                                 </a>
@@ -300,6 +322,7 @@
 .plan-header {
     padding: 32px 28px 20px;
     text-align: center;
+    min-height: 240px;
 }
 
 .plan-icon {
@@ -336,6 +359,11 @@
 .duration-selector-wrapper {
     padding: 0 28px 20px;
     border-bottom: 1px solid #f1f5f9;
+}
+
+.duration-selector-placeholder {
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .duration-label {
@@ -540,6 +568,7 @@
     
     .plan-header {
         padding: 24px 20px 16px;
+        min-height: 0;
     }
     
     .plan-icon {
@@ -555,6 +584,10 @@
     
     .duration-selector-wrapper {
         padding: 0 20px 16px;
+    }
+
+    .duration-selector-placeholder {
+        display: none;
     }
     
     .plan-price {

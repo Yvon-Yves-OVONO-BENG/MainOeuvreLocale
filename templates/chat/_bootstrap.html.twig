@@ -4,7 +4,6 @@
     window.MOL_CHAT = {
         version: 'messenger-premium-saas-2.0',
         baseUrl: {{ app.request.basePath|json_encode|raw }},
-        mercureHub: {{ app.request.server.get('MERCURE_PUBLIC_URL')|default('')|json_encode|raw }},
         meId: {{ app.user.id }},
         meName: {{ (app.user.personalProfile ? (app.user.personalProfile.displayIdentity ?? app.user.personalProfile.fullName) : app.user.email)|json_encode|raw }},
         meAvatar: {{ (app.user.personalProfile and app.user.personalProfile.photo ? asset('uploads/profiles/' ~ app.user.personalProfile.photo) : asset('uploads/profiles/avatar.png'))|json_encode|raw }},
@@ -65,6 +64,9 @@
             accept: {{ path('chat_call_accept', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
             decline: {{ path('chat_call_decline', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
             signal: {{ path('chat_call_signal', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
+            signals: {{ path('chat_call_signals', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
+            state: {{ path('chat_call_state', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__'),
+            incoming: {{ path('chat_call_incoming')|json_encode|raw }},
             end: {{ path('chat_call_end', { id: 0 })|json_encode|raw }}.replace('/0', '/__ID__')
         },
         csrf: {

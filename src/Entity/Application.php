@@ -45,6 +45,15 @@ class Application
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $viewedAt = null;
 
+    #[ORM\Column(type: 'smallint', nullable: true)]
+    private ?int $internalScore = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $internalNote = null;
+
+    #[ORM\Column(type: 'datetime_immutable', nullable: true)]
+    private ?\DateTimeImmutable $internallyRatedAt = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -115,5 +124,11 @@ class Application
     public function getViewedAt(): ?\DateTimeInterface { return $this->viewedAt; }
     public function setViewedAt(?\DateTimeInterface $dt): static { $this->viewedAt = $dt; return $this; }
     public function isViewed(): bool { return $this->viewedAt !== null; }
+    public function getInternalScore(): ?int { return $this->internalScore; }
+    public function setInternalScore(?int $score): static { $this->internalScore = $score === null ? null : max(1, min(10, $score)); return $this; }
+    public function getInternalNote(): ?string { return $this->internalNote; }
+    public function setInternalNote(?string $note): static { $this->internalNote = $note !== null ? trim($note) : null; return $this; }
+    public function getInternallyRatedAt(): ?\DateTimeImmutable { return $this->internallyRatedAt; }
+    public function setInternallyRatedAt(?\DateTimeImmutable $at): static { $this->internallyRatedAt = $at; return $this; }
     
 }

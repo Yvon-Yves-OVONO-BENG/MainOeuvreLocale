@@ -34,7 +34,7 @@ class PlanManager
             'badge' => 'Populaire',
             'badgeIcon' => 'fa-fire',
             'btnClass' => 'btn-primary',
-            'btnText' => 'Choisir Pro',
+            'btnText' => 'Acheter un ticket',
             'btnIcon' => 'fa-arrow-right',
             'featured' => true,
             'borderColor' => '#0ea5e9'

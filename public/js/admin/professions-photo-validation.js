@@ -2,12 +2,7 @@
 (function (window, document, $) {
     'use strict';
 
-    var MAX_SIZE = 2 * 1024 * 1024;
-    var ALLOWED_TYPES = [
-        'image/jpeg',
-        'image/png',
-        'image/gif'
-    ];
+    var MAX_SIZE = 15 * 1024 * 1024;
     var originalSaveProfession = null;
 
     function elements() {
@@ -89,9 +84,7 @@
         if (!file && !hasExistingPhoto(el)) {
             message = 'Veuillez ajouter une photo pour cette profession.';
         } else if (file && file.size > MAX_SIZE) {
-            message = 'La photo ne doit pas dépasser 2 Mo.';
-        } else if (file && ALLOWED_TYPES.indexOf(file.type) === -1) {
-            message = 'Format non autorisé. Utilisez une image JPG, PNG ou GIF.';
+            message = 'La photo ne doit pas dépasser 15 Mo avant compression.';
         }
 
         if (message) {

@@ -7,7 +7,6 @@ use App\Entity\Message;
 use App\Entity\User;
 use App\Repository\MessageReactionRepository;
 use App\Repository\MessageRepository;
-use App\Realtime\MercurePublisher;
 use App\Security\ConversationAccess;
 use App\Security\CurrentUser;
 use App\Util\ChatTimestamp;
@@ -26,7 +25,6 @@ final class GetMessagesController extends AbstractController
         private MessageReactionRepository $messageReactionRepository,
         private CurrentUser $currentUser,
         private ConversationAccess $access,
-        private MercurePublisher $mercure,
     ) {
     }
 
@@ -37,16 +35,6 @@ final class GetMessagesController extends AbstractController
         $this->access->assertParticipant($conversation, $me);
 
         $changed = $this->messageRepository->markIncomingAsRead($conversation, $me);
-
-        if ($changed > 0) {
-            $this->mercure->publish(sprintf('/conversations/%d/status', $conversation->getId()), [
-                'type' => 'read',
-                'conversationId' => $conversation->getId(),
-                'byUserId' => $me->getId(),
-                'changed' => $changed,
-            ]);
-        }
-
         $limit = max(1, min(200, (int) $request->query->get('limit', 50)));
         $messages = $this->messageRepository->findForConversation($conversation, $limit);
 
@@ -57,6 +45,8 @@ final class GetMessagesController extends AbstractController
                 $messages
             ),
             'readChanged' => $changed,
+            'lastMessageId' => $messages ? (int) end($messages)->getId() : 0,
+            'serverTime' => (new \DateTimeImmutable())->format(DATE_ATOM),
         ]);
     }
 

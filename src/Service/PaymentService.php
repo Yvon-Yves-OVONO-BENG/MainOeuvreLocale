@@ -30,6 +30,7 @@ class PaymentService
         $plan = $data['plan'] ?? null;
         $duration = $data['duration'] ?? null;
         $user = $data['user'] ?? null;
+        $profession = $data['profession'] ?? null;
 
         if (!$plan || !$duration || !$user || $token === '') {
             return ['success' => false, 'message' => 'Confirmation de paiement manquante.'];
@@ -39,7 +40,8 @@ class PaymentService
             $token,
             $plan,
             $duration,
-            $user
+            $user,
+            $profession
         );
     }
 

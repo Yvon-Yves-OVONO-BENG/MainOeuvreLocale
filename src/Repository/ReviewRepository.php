@@ -152,13 +152,13 @@ class ReviewRepository extends ServiceEntityRepository
 
     public function findMine(User $target, User $me): ?Review
     {
-        return $this->findOneBy(['author' => $target, 'target' => $me]);
+        return $this->findOneBy(['author' => $me, 'target' => $target]);
     }
 
     public function findForTarget(User $target, int $limit = 50): array
     {
         return $this->findBy(
-            ['author' => $target],
+            ['target' => $target, 'published' => true],
             ['createdAt' => 'DESC'],
             $limit
         );

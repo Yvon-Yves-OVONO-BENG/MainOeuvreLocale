@@ -147,6 +147,15 @@
                     </li>
                 </ul>
             </li>
+
+            <li style="list-style:none;margin:0;padding:0;">
+                <a class="pm-menu-link {% if app.request.attributes.get('_route') starts with 'subscription_' %}active{% endif %}"
+                   href="{{ path('subscription_plans') }}"
+                   data-turbo="false"
+                   style="display:flex;align-items:center;gap:5px;padding:8px 10px;border-radius:999px;font-size:13px;font-weight:500;text-decoration:none;transition:all 0.2s ease;background:transparent;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff !important;{% else %}color:#1f2937 !important;{% endif %}{% if app.request.attributes.get('_route') starts with 'subscription_' %}background:rgba(37,99,235,0.10) !important;{% endif %}">
+                    <i class="fas fa-tags" style="font-size:12px;{% if app.request.attributes.get('_route') == 'accueil' %}color:#ffffff;{% else %}color:#1f2937;{% endif %}"></i> {% trans %}ABONNEMENT{% endtrans %}
+                </a>
+            </li>
             
             <li style="list-style:none;margin:0;padding:0;">
                 <a class="pm-menu-link {% if app.request.attributes.get('_route') == 'contact_page' %}active{% endif %}" 
@@ -159,7 +168,7 @@
         </ul>
 
         <!-- Actions Desktop -->
-        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <div class="pm-desktop-actions" style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
             <!-- Langue - Déroulant -->
             <div class="pm-lang-selector" style="position:relative;">
                 <button class="pm-lang-btn" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid {% if app.request.attributes.get('_route') == 'accueil' %}rgba(255,255,255,0.25){% else %}rgba(15,23,42,0.15){% endif %};background:{% if app.request.attributes.get('_route') == 'accueil' %}rgba(255,255,255,0.08){% else %}rgba(255,255,255,0.9){% endif %};color:{% if app.request.attributes.get('_route') == 'accueil' %}#ffffff{% else %}#1f2937{% endif %};font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s ease;">
@@ -367,6 +376,13 @@
 
 <!-- STYLE DE FORCE POUR LE MENU MOBILE -->
 <style>
+    /* Le menu desktop reste compact, y compris lorsque les actions du compte sont affichées. */
+    .pm-desktop-menu > li > .pm-menu-link {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+        font-size: 13px !important;
+    }
+
     /* FORCER LE MENU MOBILE À ÊTRE AU-DESSUS DE TOUT */
     .pm-mobile-menu,
     #pmMobileMenu {
@@ -1163,6 +1179,10 @@
 
     /* Desktop - tout visible */
     @media (min-width: 993px) {
+        .pm-navbar-pro {
+            box-sizing: border-box !important;
+        }
+
         .pm-mobile-menu,
         .pm-overlay {
             display: none !important;
@@ -1170,6 +1190,52 @@
         
         #pmHamburgerBtn {
             display: none !important;
+        }
+    }
+
+    /* Compactage progressif pour que toutes les actions restent dans la largeur desktop. */
+    @media (min-width: 993px) and (max-width: 1399.98px) {
+        .pm-navbar-pro {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+        }
+
+        .pm-navbar-pro .pm-navbar-inner {
+            max-width: 100% !important;
+            gap: 8px !important;
+        }
+
+        .pm-navbar-pro .pm-brand-desktop img {
+            height: 34px !important;
+        }
+
+        .pm-navbar-pro .pm-desktop-menu {
+            gap: 0 !important;
+        }
+
+        .pm-navbar-pro .pm-desktop-menu > li > .pm-menu-link {
+            gap: 4px !important;
+            padding: 7px 8px !important;
+            font-size: 12px !important;
+            white-space: nowrap !important;
+        }
+
+        .pm-navbar-pro .pm-desktop-menu > li > .pm-menu-link i {
+            font-size: 11px !important;
+        }
+
+        .pm-navbar-pro .pm-desktop-actions {
+            gap: 6px !important;
+        }
+
+        .pm-navbar-pro .pm-lang-btn {
+            padding: 6px 9px !important;
+        }
+
+        .pm-navbar-pro .mol-auth-btn {
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+            white-space: nowrap !important;
         }
     }
 

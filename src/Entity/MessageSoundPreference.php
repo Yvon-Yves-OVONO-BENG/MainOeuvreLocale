@@ -9,15 +9,26 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\UniqueConstraint(name: 'uniq_message_sound_preference_user', columns: ['user_identifier'])]
 class MessageSoundPreference
 {
+    public const SOUND_SOFT = 'soft';
     public const SOUND_CRYSTAL = 'crystal';
+    public const SOUND_BUBBLE = 'bubble';
+    public const SOUND_DING = 'ding';
+    public const SOUND_SUCCESS = 'success';
+    public const SOUND_ALERT = 'alert';
     public const SOUND_POP = 'pop';
     public const SOUND_PULSE = 'pulse';
     public const SOUND_SOFT_BELL = 'soft_bell';
     public const SOUND_DIGITAL_DROP = 'digital_drop';
     public const SOUND_SILENT = 'silent';
 
+    /** Dix sonneries sélectionnables + le mode silencieux. */
     public const ALLOWED_SOUNDS = [
+        self::SOUND_SOFT,
         self::SOUND_CRYSTAL,
+        self::SOUND_BUBBLE,
+        self::SOUND_DING,
+        self::SOUND_SUCCESS,
+        self::SOUND_ALERT,
         self::SOUND_POP,
         self::SOUND_PULSE,
         self::SOUND_SOFT_BELL,
@@ -34,7 +45,7 @@ class MessageSoundPreference
     private string $userIdentifier;
 
     #[ORM\Column(length: 40)]
-    private string $sound = self::SOUND_CRYSTAL;
+    private string $sound = self::SOUND_SOFT;
 
     #[ORM\Column]
     private bool $enabled = true;
@@ -78,7 +89,7 @@ class MessageSoundPreference
     public function setSound(string $sound): self
     {
         if (!in_array($sound, self::ALLOWED_SOUNDS, true)) {
-            $sound = self::SOUND_CRYSTAL;
+            $sound = self::SOUND_SOFT;
         }
 
         $this->sound = $sound;

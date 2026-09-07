@@ -215,19 +215,19 @@
                     rejectUrlTpl: "{{ path('friendship_reject', { id: 0 }) }}".replace('/0', '/__ID__')
                 };
 
-                window.MERCURE_HUB = "{{ app.request.server.get('MERCURE_PUBLIC_URL')|default('http://localhost:3000/.well-known/mercure') }}";
-
                 window.MOL_CALL = {
                     meId: {{ app.user ? app.user.id : 'null' }},
                     meAvatar: "{{ app.user and app.user.personalProfile and app.user.personalProfile.photo
                         ? asset('uploads/profiles/' ~ app.user.personalProfile.photo)
                         : asset('uploads/profiles/avatar.png') }}",
-                    mercureHub: window.MERCURE_HUB,
                     urls: {
                         start: "{{ path('chat_call_start', {id: 0}) }}".replace('/0/', '/__CONV__/'),
                         accept: "{{ path('chat_call_accept', {id: 0}) }}".replace('/0', '/__CALL__'),
                         decline: "{{ path('chat_call_decline', {id: 0}) }}".replace('/0', '/__CALL__'),
                         signal: "{{ path('chat_call_signal', {id: 0}) }}".replace('/0', '/__CALL__'),
+                        signals: "{{ path('chat_call_signals', {id: 0}) }}".replace('/0', '/__CALL__'),
+                        state: "{{ path('chat_call_state', {id: 0}) }}".replace('/0', '/__CALL__'),
+                        incoming: "{{ path('chat_call_incoming') }}",
                         end: "{{ path('chat_call_end', {id: 0}) }}".replace('/0', '/__CALL__')
                     }
                 };
@@ -249,6 +249,8 @@
                         accept: "{{ path('chat_call_accept', { id: 0 }) }}".replace('/0', '/__ID__'),
                         decline: "{{ path('chat_call_decline', { id: 0 }) }}".replace('/0', '/__ID__'),
                         signal: "{{ path('chat_call_signal', { id: 0 }) }}".replace('/0', '/__ID__'),
+                        signals: "{{ path('chat_call_signals', { id: 0 }) }}".replace('/0', '/__ID__'),
+                        state: "{{ path('chat_call_state', { id: 0 }) }}".replace('/0', '/__ID__'),
                         end: "{{ path('chat_call_end', { id: 0 }) }}".replace('/0', '/__ID__'),
                         incoming: "{{ path('chat_call_incoming') }}"
                     };
@@ -306,25 +308,6 @@
             <main class="main-content">
                 {% block body %}{% endblock %}
 
-                {#
-                    Bouton Retour uniforme : il reste fixe pendant le scroll et se place
-                    visuellement au niveau supérieur des héros / en-têtes de page.
-                    Les écrans d'accueil, d'authentification et de choix initial de profil
-                    sont volontairement exclus pour ne pas casser leur parcours.
-                #}
-                {% set molCurrentRoute = app.request.attributes.get('_route')|default('') %}
-                {% set molBackExcludedRoutes = [
-                    'accueil',
-                    'app_login',
-                    'app_register',
-                    'app_register_submit',
-                    'app_register_check_email',
-                    'profile_type_choice'
-                ] %}
-
-                {% if molCurrentRoute not in molBackExcludedRoutes %}
-                    {{ include('includes/_previous_page_button.html.twig') }}
-                {% endif %}
             </main>
         </div>
 
@@ -604,11 +587,22 @@
                         {% trans %}Suivez-nous{% endtrans %}
                     </div>
         
-                    <ul class="mol-social list-unstyled d-flex gap-2 mb-0">
-                        <li><a class="mol-social-btn" href="{{ social_facebook ?? '#' }}" aria-label="Facebook" data-turbo="false"><i class="fa fa-facebook"></i></a></li>
-                        <li><a class="mol-social-btn" href="{{ social_linkedin ?? '#' }}" aria-label="LinkedIn" data-turbo="false"><i class="fa fa-linkedin"></i></a></li>
-                        <li><a class="mol-social-btn" href="{{ social_youtube ?? '#' }}" aria-label="YouTube" data-turbo="false"><i class="fa fa-youtube"></i></a></li>
-                    </ul>
+            <ul class="mol-social list-unstyled d-flex gap-2 mb-0">
+                {# Mets uniquement ceux que tu utilises vraiment #}
+                <li><a class="mol-social-btn" href="{{ social_facebook ?? 'https://www.facebook.com/share/18KmeyftZh/' }}" aria-label="Facebook"><i class="fa fa-facebook"></i></a></li>
+                <li>
+    <a class="mol-social-btn" href="{{ social_instagram ?? 'https://www.instagram.com/maindoeuvrelocale?igsi=cXhhY2NibDRhNTlh' }}" aria-label="Instagram">
+        <i class="fa fa-instagram"></i>
+    </a>
+</li>
+<li>
+    <a class="mol-social-btn" href="{{ social_tiktok ?? 'https://www.tiktok.com/@maindoeuvrelocale' }}" aria-label="TikTok">
+        <i class="fa-brands fa-tiktok"></i>
+    </a>
+</li>
+                <li><a class="mol-social-btn" href="{{ social_youtube ?? '#' }}" aria-label="YouTube"><i class="fa fa-youtube"></i></a></li>
+            </ul>
+            
                     </div>
                 </div>
         
@@ -1119,7 +1113,10 @@
                     emojiLoading: null,
                     cameraStream: null,
                     cameraConversationId: null,
-                    chatMercure: new Map(),
+                    cameraFacingMode: 'environment',
+                    ajaxPollers: new Map(),
+                    ajaxSnapshots: new Map(),
+                    ajaxLastIncoming: new Map(),
                     currentMobileConversationId: null,
                     mobileThreadReady: false,
                     typingTimers: new Map(),
@@ -1131,8 +1128,11 @@
                     peer: null,
                     localStream: null,
                     remoteStream: null,
-                    mercureIncoming: null,
-                    mercureCall: null,
+                    incomingPollTimer: null,
+                    callPollTimer: null,
+                    lastSignalId: 0,
+                    offerStarted: false,
+                    pendingCandidates: [],
                     isMuted: false,
                     isCameraEnabled: true,
                     isSpeakerOn: false,
@@ -2928,7 +2928,7 @@
 
                     const picker = new Ctor({
                         position: 'top-start',
-                        autoHide: true,
+                        autoHide: false,
                         theme: 'light',
                         rootElement: document.body,
                         zIndex: 2147483647
@@ -2987,7 +2987,7 @@
                         }
 
                         await bindEmojiPickerForToast(convId);
-                        initMercureConversation(convId);
+                        initAjaxConversation(convId);
                     }
 
                     if (window.bootstrap?.Toast) {
@@ -3298,9 +3298,14 @@
                             <div style="width:min(640px,100%);background:#fff;border-radius:24px;padding:14px;box-shadow:0 24px 60px rgba(15,23,42,.25);">
                                 <video id="molCameraVideo" autoplay playsinline style="width:100%;border-radius:16px;background:#000;"></video>
                                 <canvas id="molCameraCanvas" class="d-none"></canvas>
-                                <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
-                                    <button type="button" id="molCameraCloseBtn" class="btn btn-light">Fermer</button>
-                                    <button type="button" id="molCameraSnapBtn" class="btn btn-primary">Capturer</button>
+                                <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-top:12px;">
+                                    <button type="button" id="molCameraSwitchBtn" class="btn btn-light" title="Changer de caméra">
+                                        <i class="bi bi-arrow-repeat"></i> Changer de caméra
+                                    </button>
+                                    <div style="display:flex;gap:8px;margin-left:auto;">
+                                        <button type="button" id="molCameraCloseBtn" class="btn btn-light">Fermer</button>
+                                        <button type="button" id="molCameraSnapBtn" class="btn btn-primary"><i class="bi bi-camera-fill"></i> Capturer</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -3314,22 +3319,56 @@
                 }
 
                 async function openDesktopCamera(conversationId) {
+                    if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+                        throw new Error('camera-api-unavailable');
+                    }
+
                     const overlay = ensureCameraOverlay();
                     const video = qs('molCameraVideo');
                     const closeBtn = qs('molCameraCloseBtn');
                     const snapBtn = qs('molCameraSnapBtn');
+                    const switchBtn = qs('molCameraSwitchBtn');
 
                     CHAT.cameraConversationId = conversationId;
-                    CHAT.cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                    closeDesktopCamera(false);
+                    CHAT.cameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: CHAT.cameraFacingMode || 'environment' } },
+                        audio: false
+                    });
 
                     video.srcObject = CHAT.cameraStream;
+                    await video.play().catch(() => {});
                     overlay.style.display = 'flex';
 
-                    closeBtn.onclick = closeDesktopCamera;
+                    closeBtn.onclick = () => closeDesktopCamera(true);
                     snapBtn.onclick = captureDesktopCamera;
+                    switchBtn.onclick = switchDesktopCamera;
                 }
 
-                function closeDesktopCamera() {
+                async function switchDesktopCamera() {
+                    if (!CHAT.cameraConversationId || !navigator.mediaDevices?.getUserMedia) return;
+                    const video = qs('molCameraVideo');
+                    const nextFacing = CHAT.cameraFacingMode === 'user' ? 'environment' : 'user';
+                    const previous = CHAT.cameraStream;
+
+                    try {
+                        previous?.getTracks().forEach(track => track.stop());
+                        CHAT.cameraStream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: { ideal: nextFacing } },
+                            audio: false
+                        });
+                        CHAT.cameraFacingMode = nextFacing;
+                        if (video) {
+                            video.srcObject = CHAT.cameraStream;
+                            await video.play().catch(() => {});
+                        }
+                    } catch (error) {
+                        CHAT.cameraStream = null;
+                        notify('error', '{% trans %}Caméra indisponible{% endtrans %}', '{% trans %}Impossible de changer de caméra sur cet appareil.{% endtrans %}');
+                    }
+                }
+
+                function closeDesktopCamera(resetConversation = true) {
                     const overlay = qs('molCameraOverlay');
                     const video = qs('molCameraVideo');
 
@@ -3340,6 +3379,7 @@
 
                     if (video) video.srcObject = null;
                     if (overlay) overlay.style.display = 'none';
+                    if (resetConversation) CHAT.cameraConversationId = null;
                 }
 
                 async function captureDesktopCamera() {
@@ -3357,27 +3397,26 @@
                     if (!blob) return;
 
                     const file = new File([blob], `camera-${Date.now()}.jpg`, { type: 'image/jpeg' });
-                    closeDesktopCamera();
-                    await sendFile(CHAT.cameraConversationId, file);
+                    const conversationId = Number(CHAT.cameraConversationId || 0);
+                    closeDesktopCamera(true);
+                    if (conversationId) await sendFile(conversationId, file);
                 }
 
                 async function handleCameraClick(conversationId) {
-                    if (isProbablyMobileDevice()) {
-                        const input = qs(`molCamera-${conversationId}`);
-
-                        if (input) {
-                            input.setAttribute('accept', 'image/*');
-                            input.setAttribute('capture', 'environment');
-                            input.click();
-                        }
-
-                        return;
-                    }
-
                     try {
                         await openDesktopCamera(conversationId);
                     } catch (e) {
-                        console.error(e);
+                        console.debug('Caméra navigateur indisponible, repli natif.', e);
+                        const input = Number(CHAT.currentMobileConversationId || 0) === Number(conversationId)
+                            ? qs('molChatThreadCamera')
+                            : qs(`molCamera-${conversationId}`);
+
+                        if (input) {
+                            input.setAttribute('accept', 'image/*');
+                            input.setAttribute('capture', CHAT.cameraFacingMode || 'environment');
+                            input.click();
+                            return;
+                        }
 
                         notify(
                             'error',
@@ -3511,46 +3550,89 @@
                     CHAT.typingTimers.set(conversationId, timer);
                 }
 
-                function initMercureConversation(conversationId) {
-                    const hub = window.MERCURE_HUB || window.MOL_CHAT?.mercureHub;
-                    if (!hub || CHAT.chatMercure.has(conversationId)) return;
+                async function pollTyping(conversationId) {
+                    if (!window.MOL_CHAT?.urls?.typing) return;
+                    try {
+                        const res = await fetch(molUrl(window.MOL_CHAT.urls.typing, conversationId), {
+                            credentials: 'same-origin',
+                            cache: 'no-store',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Cache-Control': 'no-cache' }
+                        });
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        if (data?.typing) showTyping(conversationId);
+                        else hideTyping(conversationId);
+                    } catch (_) {}
+                }
+
+                async function pollConversation(conversationId) {
+                    conversationId = Number(conversationId || 0);
+                    if (!conversationId || document.visibilityState === 'hidden') return;
+
+                    const bubbleBox = qs(`molToastMsgs-${conversationId}`);
+                    const mobileBox = Number(CHAT.currentMobileConversationId || 0) === conversationId
+                        ? qs('molChatThreadMsgs') : null;
+
+                    if (!bubbleBox && !mobileBox) {
+                        const entry = CHAT.ajaxPollers.get(conversationId);
+                        if (entry) {
+                            entry.misses = (entry.misses || 0) + 1;
+                            if (entry.misses >= 6) {
+                                clearInterval(entry.timer);
+                                CHAT.ajaxPollers.delete(conversationId);
+                                CHAT.ajaxSnapshots.delete(conversationId);
+                                CHAT.ajaxLastIncoming.delete(conversationId);
+                            }
+                        }
+                        return;
+                    }
+
+                    const entry = CHAT.ajaxPollers.get(conversationId);
+                    if (entry) entry.misses = 0;
 
                     try {
-                        const url = new URL(hub);
-                        url.searchParams.append('topic', `chat/conversation/${conversationId}`);
-                        url.searchParams.append('topic', `chat/conversation/${conversationId}/typing`);
+                        const data = await fetchMessages(conversationId);
+                        const items = Array.isArray(data?.items) ? data.items : [];
+                        const signature = items.map((m) => {
+                            const reactions = (m.reactions || []).map(r => `${r.emoji}:${r.count ?? r.total ?? 0}:${r.reactedByMe ? 1 : 0}`).join(',');
+                            return `${m.id}:${m.status || ''}:${m.deleted ? 1 : 0}:${m.readAt || ''}:${m.deliveredAt || ''}:${reactions}`;
+                        }).join('|');
 
-                        const es = new EventSource(url.toString());
+                        const previousSignature = CHAT.ajaxSnapshots.get(conversationId);
+                        const incomingIds = items.filter(m => !m.mine).map(m => Number(m.id || 0));
+                        const lastIncoming = incomingIds.length ? Math.max(...incomingIds) : 0;
+                        const previousIncoming = CHAT.ajaxLastIncoming.get(conversationId);
 
-                        es.onmessage = async (event) => {
-                            let data = null;
-                            try {
-                                data = JSON.parse(event.data);
-                            } catch (_) {
-                                return;
-                            }
+                        if (previousSignature !== signature) {
+                            const html = renderMessages(items, conversationId);
+                            [bubbleBox, mobileBox].filter(Boolean).forEach((box) => {
+                                const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 110;
+                                box.innerHTML = html;
+                                bindMessageInteractions(box, conversationId);
+                                if (nearBottom || previousSignature === undefined) box.scrollTop = box.scrollHeight;
+                            });
+                            CHAT.ajaxSnapshots.set(conversationId, signature);
+                        }
 
-                            if (data?.typing !== undefined) {
-                                if (data.typing) showTyping(data.conversationId || conversationId);
-                                else hideTyping(data.conversationId || conversationId);
-                                return;
-                            }
-
-                            if (data?.message || data?.conversationId) {
-                                await refreshConversationEverywhere(conversationId);
-                                await refreshList(qs('molChatSearch')?.value?.trim() || '');
-                                onNewMessage(conversationId);
-                            }
-                        };
-
-                        es.onerror = (e) => {
-                            console.warn('Mercure conversation error', e);
-                        };
-
-                        CHAT.chatMercure.set(conversationId, es);
-                    } catch (e) {
-                        console.warn('Mercure init failed', e);
+                        if (previousIncoming !== undefined && lastIncoming > previousIncoming) {
+                            onNewMessage(conversationId, { playSound: true, useVibrate: true });
+                            refreshList(qs('molChatSearch')?.value?.trim() || '').catch(() => {});
+                        }
+                        CHAT.ajaxLastIncoming.set(conversationId, Math.max(lastIncoming, previousIncoming || 0));
+                        await pollTyping(conversationId);
+                    } catch (error) {
+                        console.debug('Chat AJAX poll différé', error);
                     }
+                }
+
+                function initAjaxConversation(conversationId) {
+                    conversationId = Number(conversationId || 0);
+                    if (!conversationId || CHAT.ajaxPollers.has(conversationId)) return;
+
+                    const entry = { timer: null, misses: 0 };
+                    entry.timer = window.setInterval(() => pollConversation(conversationId), 1100);
+                    CHAT.ajaxPollers.set(conversationId, entry);
+                    pollConversation(conversationId);
                 }
 
                 function ensureMobileThreadUi() {
@@ -3730,11 +3812,7 @@
 
                     qs('molChatThreadCameraBtn')?.addEventListener('click', async () => {
                         if (!CHAT.currentMobileConversationId) return;
-                        if (isProbablyMobileDevice()) {
-                            qs('molChatThreadCamera')?.click();
-                        } else {
-                            await handleCameraClick(CHAT.currentMobileConversationId);
-                        }
+                        await handleCameraClick(CHAT.currentMobileConversationId);
                     });
 
                     qs('molChatThreadCamera')?.addEventListener('change', async () => {
@@ -3767,7 +3845,7 @@
 
                         const picker = new Ctor({
                             position: 'top-start',
-                            autoHide: true,
+                            autoHide: false,
                             theme: 'light',
                             rootElement: document.body,
                             zIndex: 2147483647
@@ -3812,7 +3890,7 @@
 
                     handleMobileComposerState();
                     renderReplyBox(CHAT.currentMobileConversationId);
-                    initMercureConversation(CHAT.currentMobileConversationId);
+                    initAjaxConversation(CHAT.currentMobileConversationId);
                     await refreshMobileThread(CHAT.currentMobileConversationId);
 
                     setTimeout(() => {
@@ -3980,8 +4058,13 @@
                 }
 
                 function onNewMessage(conversationId, { playSound = false, useVibrate = false } = {}) {
-                    window.MolMessageSounds?.playSelected();
-                    if (playSound) playPopSound();
+                    if (playSound) {
+                        if (window.MolMessageSounds?.playSelected) {
+                            window.MolMessageSounds.playSelected();
+                        } else {
+                            playPopSound();
+                        }
+                    }
                     if (useVibrate) vibrate();
 
                     const toast = qs(`molToast-${conversationId}`);
@@ -4701,112 +4784,114 @@
                     };
                 }
 
-                async function callSubscribeTopic(callId) {
-                    if (!window.MOL_CALL?.mercureHub) return;
+                async function callProcessSignal(signal) {
+                    if (!CALL.current || !signal) return;
+                    const pc = CALL.peer || callCreatePeer(CALL.current.id, CALL.current.type === 'video');
 
-                    if (CALL.mercureCall) {
-                        CALL.mercureCall.close();
-                        CALL.mercureCall = null;
+                    if (signal.type === 'offer' && signal.data) {
+                        const stream = await callEnsureLocalMedia(CALL.current.type === 'video');
+                        await callAttachLocalTracks(pc, stream);
+                        await pc.setRemoteDescription(new RTCSessionDescription(signal.data));
+                        const answer = await pc.createAnswer();
+                        await pc.setLocalDescription(answer);
+                        await fetch(molUrl(window.MOL_CALL.urls.signal, CALL.current.id), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                            body: JSON.stringify({ type: 'answer', data: answer })
+                        });
+                        for (const candidate of CALL.pendingCandidates.splice(0)) {
+                            try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch (_) {}
+                        }
+                        callSetStatus('Connexion en cours...', 'Réponse envoyée');
+                        callSetPhase('incall');
+                        return;
                     }
 
-                    const url = new URL(window.MOL_CALL.mercureHub);
-                    url.searchParams.set('topic', `/chat/call/${callId}`);
+                    if (signal.type === 'answer' && signal.data) {
+                        await pc.setRemoteDescription(new RTCSessionDescription(signal.data));
+                        for (const candidate of CALL.pendingCandidates.splice(0)) {
+                            try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch (_) {}
+                        }
+                        callSetStatus('Connexion établie', 'Appel en cours');
+                        callStartTimer();
+                        callSetPhase('incall');
+                        return;
+                    }
 
-                    CALL.mercureCall = new EventSource(url.toString());
+                    if (signal.type === 'candidate' && signal.data) {
+                        if (!pc.remoteDescription) {
+                            CALL.pendingCandidates.push(signal.data);
+                            return;
+                        }
+                        try { await pc.addIceCandidate(new RTCIceCandidate(signal.data)); } catch (_) {}
+                    }
+                }
 
-                    CALL.mercureCall.onmessage = async (event) => {
-                        const payload = JSON.parse(event.data);
-                        if (!CALL.current || CALL.current.id !== payload.callId) return;
+                async function callPollOnce(callId) {
+                    if (!CALL.current || Number(CALL.current.id) !== Number(callId)) return;
 
-                        if (payload.event === 'accepted') {
-                            callSetStatus('Appel accepté', 'Initialisation WebRTC');
+                    try {
+                        const stateRes = await fetch(molUrl(window.MOL_CALL.urls.state, callId) + `?_ts=${Date.now()}`, {
+                            credentials: 'same-origin', cache: 'no-store',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Cache-Control': 'no-cache' }
+                        });
+                        if (!stateRes.ok) return;
+                        const state = await stateRes.json();
+                        const status = state.status;
+
+                        if (status === 'accepted') {
                             callSetPhase('incall');
-
-                            if (CALL.current.role === 'caller') {
+                            if (CALL.current.role === 'caller' && !CALL.offerStarted) {
+                                CALL.offerStarted = true;
+                                callSetStatus('Appel accepté', 'Initialisation WebRTC');
                                 const isVideo = CALL.current.type === 'video';
                                 const stream = await callEnsureLocalMedia(isVideo);
                                 const pc = callCreatePeer(CALL.current.id, isVideo);
                                 await callAttachLocalTracks(pc, stream);
-
                                 const offer = await pc.createOffer();
                                 await pc.setLocalDescription(offer);
-
                                 await fetch(molUrl(window.MOL_CALL.urls.signal, CALL.current.id), {
                                     method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    },
-                                    body: JSON.stringify({
-                                        type: 'offer',
-                                        data: offer
-                                    })
+                                    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                                    body: JSON.stringify({ type: 'offer', data: offer })
                                 });
                             }
-
-                            return;
-                        }
-
-                        if (payload.event === 'declined') {
+                        } else if (status === 'declined') {
                             callSetStatus('Appel refusé', 'Votre correspondant a refusé l’appel');
-                            setTimeout(() => cleanupCall(true), 900);
+                            setTimeout(() => cleanupCall(true), 700);
                             return;
-                        }
-
-                        if (payload.event === 'ended') {
-                            callSetStatus('Appel terminé', 'La communication a été fermée');
+                        } else if (status === 'ended' || status === 'missed') {
+                            callSetStatus(status === 'missed' ? 'Appel manqué' : 'Appel terminé', 'La communication a été fermée');
                             setTimeout(() => cleanupCall(true), 600);
                             return;
                         }
 
-                        if (payload.event === 'signal') {
-                            if (payload.fromUserId === window.MOL_CALL.meId) return;
-
-                            const pc = CALL.peer || callCreatePeer(CALL.current.id, CALL.current.type === 'video');
-
-                            if (payload.signalType === 'offer') {
-                                const stream = await callEnsureLocalMedia(CALL.current.type === 'video');
-                                await callAttachLocalTracks(pc, stream);
-
-                                await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
-                                const answer = await pc.createAnswer();
-                                await pc.setLocalDescription(answer);
-
-                                await fetch(molUrl(window.MOL_CALL.urls.signal, CALL.current.id), {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    },
-                                    body: JSON.stringify({
-                                        type: 'answer',
-                                        data: answer
-                                    })
-                                });
-
-                                callSetStatus('Connexion en cours...', 'Réponse envoyée');
-                                callSetPhase('incall');
-                                return;
-                            }
-
-                            if (payload.signalType === 'answer') {
-                                await pc.setRemoteDescription(new RTCSessionDescription(payload.data));
-                                callSetStatus('Connexion établie', 'Appel en cours');
-                                callStartTimer();
-                                return;
-                            }
-
-                            if (payload.signalType === 'candidate' && payload.data) {
-                                try {
-                                    await pc.addIceCandidate(new RTCIceCandidate(payload.data));
-                                } catch (_) {}
-                            }
+                        const signalUrl = molUrl(window.MOL_CALL.urls.signals, callId)
+                            + `?after=${Number(CALL.lastSignalId || 0)}&_ts=${Date.now()}`;
+                        const signalsRes = await fetch(signalUrl, {
+                            credentials: 'same-origin', cache: 'no-store',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Cache-Control': 'no-cache' }
+                        });
+                        if (!signalsRes.ok) return;
+                        const payload = await signalsRes.json();
+                        const items = Array.isArray(payload.items) ? payload.items : [];
+                        for (const signal of items) {
+                            await callProcessSignal(signal);
+                            CALL.lastSignalId = Math.max(Number(CALL.lastSignalId || 0), Number(signal.id || 0));
                         }
-                    };
+                    } catch (error) {
+                        console.debug('Synchronisation appel AJAX différée', error);
+                    }
+                }
 
-                    CALL.mercureCall.onerror = (e) => {
-                        console.warn('call topic error', e);
-                    };
+                async function callSubscribeTopic(callId) {
+                    if (!window.MOL_CALL?.urls?.state || !window.MOL_CALL?.urls?.signals) return;
+                    if (CALL.callPollTimer) clearInterval(CALL.callPollTimer);
+                    CALL.lastSignalId = 0;
+                    CALL.offerStarted = false;
+                    CALL.pendingCandidates = [];
+                    await callPollOnce(callId);
+                    CALL.callPollTimer = window.setInterval(() => callPollOnce(callId), 650);
                 }
 
                 async function startConversationCall(conversationId, type) {
@@ -4925,10 +5010,13 @@
                         CALL.remoteStream = null;
                     }
 
-                    if (CALL.mercureCall) {
-                        CALL.mercureCall.close();
-                        CALL.mercureCall = null;
+                    if (CALL.callPollTimer) {
+                        clearInterval(CALL.callPollTimer);
+                        CALL.callPollTimer = null;
                     }
+                    CALL.lastSignalId = 0;
+                    CALL.offerStarted = false;
+                    CALL.pendingCandidates = [];
 
                     CALL.current = null;
                     CALL.isMuted = false;
@@ -4949,46 +5037,46 @@
                 }
 
                 function subscribeIncomingCalls() {
-                    if (!window.MOL_CALL?.meId || !window.MOL_CALL?.mercureHub) return;
+                    if (!window.MOL_CALL?.meId || !window.MOL_CALL?.urls?.incoming) return;
+                    if (CALL.incomingPollTimer) clearInterval(CALL.incomingPollTimer);
 
-                    if (CALL.mercureIncoming) {
-                        CALL.mercureIncoming.close();
-                        CALL.mercureIncoming = null;
-                    }
+                    const checkIncoming = async () => {
+                        if (document.visibilityState === 'hidden' || CALL.current) return;
+                        try {
+                            const res = await fetch(window.MOL_CALL.urls.incoming + `?_ts=${Date.now()}`, {
+                                credentials: 'same-origin', cache: 'no-store',
+                                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Cache-Control': 'no-cache' }
+                            });
+                            if (!res.ok) return;
+                            const data = await res.json();
+                            const incoming = data?.incoming;
+                            if (!incoming?.callId) return;
 
-                    const url = new URL(window.MOL_CALL.mercureHub);
-                    url.searchParams.set('topic', `/chat/user/${window.MOL_CALL.meId}/incoming-call`);
-
-                    CALL.mercureIncoming = new EventSource(url.toString());
-
-                    CALL.mercureIncoming.onmessage = (event) => {
-                        const payload = JSON.parse(event.data);
-                        if (payload.event !== 'incoming_call') return;
-
-                        CALL.current = {
-                            id: payload.callId,
-                            conversationId: payload.conversationId,
-                            type: payload.type,
-                            role: 'callee'
-                        };
-
-                        callSetCallerUi({
-                            name: payload.fromName || 'Appel entrant',
-                            avatar: payload.fromAvatar || '/uploads/profiles/avatar.png'
-                        });
-
-                        callSetTypeUi(payload.type || 'audio');
-                        callSetStatus(
-                            payload.type === 'video' ? 'Appel vidéo entrant...' : 'Appel audio entrant...',
-                            'Décrochez ou refusez'
-                        );
-                        callSetPhase('incoming');
-                        callOverlayOpen();
+                            CALL.current = {
+                                id: Number(incoming.callId),
+                                conversationId: Number(incoming.conversationId || 0),
+                                type: incoming.type || 'audio',
+                                role: 'callee'
+                            };
+                            callSetCallerUi({
+                                name: incoming.callerName || 'Appel entrant',
+                                avatar: incoming.callerAvatar || '/uploads/profiles/avatar.png'
+                            });
+                            callSetTypeUi(CALL.current.type);
+                            callSetStatus(
+                                CALL.current.type === 'video' ? 'Appel vidéo entrant...' : 'Appel audio entrant...',
+                                'Décrochez ou refusez'
+                            );
+                            callSetPhase('incoming');
+                            callOverlayOpen();
+                            callSubscribeTopic(CALL.current.id);
+                        } catch (error) {
+                            console.debug('Vérification appel entrant différée', error);
+                        }
                     };
 
-                    CALL.mercureIncoming.onerror = (e) => {
-                        console.warn('incoming-call error', e);
-                    };
+                    checkIncoming();
+                    CALL.incomingPollTimer = window.setInterval(checkIncoming, 1200);
                 }
 
                 function bindCallUi() {
@@ -5024,7 +5112,7 @@
                         if (qs('molChatPanel')?.classList.contains('is-open')) {
                             refreshList(qs('molChatSearch')?.value?.trim() || '');
                         }
-                    }, 25000);
+                    }, 3000);
 
                     setInterval(() => {
                         refreshRenderedPresence();

@@ -31,27 +31,34 @@ class ContactController extends AbstractController
 
         // Vérifier le plan de l'utilisateur
         $plan = $planManager->getCurrentPlan($user);
-        $remainingContacts = $planManager->getRemainingContacts($user);
-
-        if ($remainingContacts <= 0) {
-            return $this->json([
-                'error' => 'Vous avez atteint votre limite de contacts pour ce mois. Passez à un plan supérieur pour continuer.',
-                'limit_reached' => true,
-                'plan' => $plan?->getName() ?? 'Découverte',
-                'remaining' => 0,
-            ], 403);
-        }
-
         // Récupérer le type de contact demandé
         $type = $request->request->get('type', 'email');
+        if (!in_array($type, ['email', 'phone'], true)) {
+            return $this->json(['error' => 'Type de contact invalide.'], 400);
+        }
         $value = $type === 'phone' ? $targetUser->getPhone() : $targetUser->getEmail();
 
         if (!$value) {
             return $this->json(['error' => 'Information non disponible.'], 404);
         }
 
-        // Enregistrer le contact utilisé
-        $contactManager->logContact($user, $targetUser, $type);
+        $access = $contactManager->authorizeContact($user, $targetUser, $type);
+        if (!$access['allowed']) {
+            $categorieName = $targetUser->getProfessionalProfile()?->getProfession()?->getCategorie()?->getNom();
+            return $this->json([
+                'error' => $categorieName
+                    ? sprintf('Aucun ticket disponible pour la catégorie « %s ». Achetez un ticket à 200 FCFA pour débloquer 3 contacts de cette catégorie.', $categorieName)
+                    : 'Aucun ticket disponible pour la catégorie de ce profil.',
+                'limit_reached' => true,
+                'ticket_required' => true,
+                'ticket_price' => 200,
+                'ticket_contacts' => 3,
+                'buy_url' => $this->generateUrl('subscription_choose', ['slug' => 'pro']),
+                'plan' => $plan?->getName() ?? 'Découverte',
+                'remaining' => 0,
+                'ticket_remaining' => $access['ticket_remaining'],
+            ], 403);
+        }
 
         // Récupérer le nouveau nombre restant
         $newRemaining = $planManager->getRemainingContacts($user);
@@ -61,12 +68,13 @@ class ContactController extends AbstractController
             'type' => $type,
             'value' => $value,
             'remaining' => $newRemaining,
+            'ticket_remaining' => $access['ticket_remaining'],
             'plan' => $plan?->getName() ?? 'Découverte',
         ]);
     }
 
     #[Route('/contact/remaining', name: 'contact_remaining', methods: ['GET'])]
-    public function getRemainingContacts(PlanManager $planManager): JsonResponse
+    public function getRemainingContacts(PlanManager $planManager, \App\Service\ContactTicketManager $ticketManager): JsonResponse
     {
         $user = $this->getUser();
         $remaining = $planManager->getRemainingContacts($user);
@@ -76,6 +84,9 @@ class ContactController extends AbstractController
             'remaining' => $remaining,
             'plan' => $plan?->getName() ?? 'Découverte',
             'max' => $plan?->getMaxContacts() ?? 3,
+            'ticket_remaining' => $ticketManager->remaining($user),
+            'ticket_price' => 200,
+            'ticket_contacts' => 3,
         ]);
     }
 }

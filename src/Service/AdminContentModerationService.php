@@ -33,6 +33,19 @@ class AdminContentModerationService
     ) {
     }
 
+    /** Analyse un texte utilisateur avant publication. */
+    public function assessUserText(string $text): array
+    {
+        $normalized = mb_strtolower(trim($text));
+        $matches = array_values(array_filter(
+            self::SUSPICIOUS_TERMS,
+            static fn (string $term): bool => str_contains($normalized, mb_strtolower($term)),
+        ));
+        $links = preg_match_all('#(?:https?://|www\.|wa\.me/|t\.me/)#iu', $normalized);
+        $blocked = count($matches) >= 2 || ($links > 1) || preg_match('/(.)\1{7,}/u', $normalized) === 1;
+        return ['allowed' => !$blocked, 'requiresModeration' => $matches !== [] || $links > 0, 'matches' => $matches];
+    }
+
     public function getQueueData(int $limit = 80): array
     {
         $items = array_merge(

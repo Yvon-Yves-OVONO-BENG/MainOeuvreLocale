@@ -18,10 +18,13 @@
     .ph-hero-bg-slider:not(.is-media-ready){background:linear-gradient(100deg,#15233b 25%,#263b5a 42%,#15233b 60%);background-size:220% 100%;animation:molHeroSkeleton 1.3s linear infinite}
     .ph-hero-bg-slider.is-media-ready{animation:none}
     @keyframes molHeroSkeleton{from{background-position:100% 0}to{background-position:-120% 0}}
+    /* Le CTA du héros reste réservé aux écrans mobiles. */
+    @media (min-width: 768px){.ph-hero-register-cta{display:none!important}}
   </style>
 {% endblock %}
 
 {% block body %}
+    {% include 'accueil/_advertising_slot.html.twig' with {code: 'home-main'} only %}
 	<div class="ph-home">
         
         <!-- HERO INDEX -->

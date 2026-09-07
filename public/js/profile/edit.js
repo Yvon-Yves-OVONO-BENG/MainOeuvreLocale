@@ -123,7 +123,7 @@
             const mode = form.dataset.profileMode || 'particulier';
             const photoRequired = form.dataset.photoRequired === '1';
             const cvRequired = form.dataset.cvRequired === '1';
-            const companyRequiredFields = ['email', 'phone', 'country', 'companyLegalName', 'companyTradeName', 'companyRegistrationNumber', 'companyTaxNumber', 'companyContactName', 'companyContactPhone', 'city', 'companyWebsite', 'adress', 'companyDescription'];
+            const companyRequiredFields = ['email', 'phone', 'country', 'companyLegalName', 'companyTradeName', 'companyRegistrationNumber', 'companyTaxNumber', 'companyContactName', 'city'];
             const talentRequiredFields = ['email', 'phone', 'country', 'fullName', 'sexe', 'adress', 'city', 'bio', 'experience', 'categorie', 'profession', 'experienceYears', 'skills'];
             const particulierRequiredFields = ['email', 'phone', 'country', 'fullName', 'sexe', 'adress', 'city'];
 

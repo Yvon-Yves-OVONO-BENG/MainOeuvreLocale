@@ -22,6 +22,10 @@ class ContactLog
     #[ORM\JoinColumn(nullable: false)]
     private ?User $targetUser = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
+    private ?ContactTicket $ticket = null;
+
     #[ORM\Column(length: 20)]
     private ?string $type = null; // 'email' ou 'phone'
 
@@ -34,6 +38,8 @@ class ContactLog
     public function setUser(?User $user): self { $this->user = $user; return $this; }
     public function getTargetUser(): ?User { return $this->targetUser; }
     public function setTargetUser(?User $targetUser): self { $this->targetUser = $targetUser; return $this; }
+    public function getTicket(): ?ContactTicket { return $this->ticket; }
+    public function setTicket(?ContactTicket $ticket): self { $this->ticket = $ticket; return $this; }
     public function getType(): ?string { return $this->type; }
     public function setType(string $type): self { $this->type = $type; return $this; }
     public function getCreatedAt(): ?\DateTime { return $this->createdAt; }

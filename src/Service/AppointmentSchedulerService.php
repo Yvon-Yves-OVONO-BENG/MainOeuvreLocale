@@ -12,8 +12,6 @@ use App\Repository\AppointmentRepository;
 use App\Repository\ConversationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mercure\HubInterface;
-use Symfony\Component\Mercure\Update;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mime\Address;
 
@@ -25,7 +23,6 @@ class AppointmentSchedulerService
         private ApplicationRepository $applicationRepo,
         private ConversationRepository $conversationRepo,
         private MailerInterface $mailer,
-        private ?HubInterface $mercureHub = null,
     ) {}
 
     /**
@@ -486,30 +483,7 @@ class AppointmentSchedulerService
 
     private function publishRealtimeNotification(Appointment $appointment, string $event, array $extra = []): void
     {
-        if (!$this->mercureHub) {
-            return;
-        }
-
-        $payload = array_merge([
-            'event' => $event,
-            'appointmentId' => $appointment->getId(),
-            'status' => $appointment->getStatus(),
-            'startAt' => $appointment->getStartAt()->format(\DateTimeInterface::ATOM),
-            'endAt' => $appointment->getEndAt()->format(\DateTimeInterface::ATOM),
-            'jobTitle' => $appointment->getJob()?->getTitle(),
-            'talentId' => $appointment->getTalent()?->getId(),
-            'particularId' => $appointment->getParticular()?->getId(),
-        ], $extra);
-
-        // Topic user particulier
-        $topics = [
-            sprintf('/users/%d/notifications', $appointment->getParticular()?->getId()),
-            sprintf('/users/%d/notifications', $appointment->getTalent()?->getId()),
-            sprintf('/appointments/%d', $appointment->getId()),
-        ];
-
-        foreach ($topics as $topic) {
-            $this->mercureHub->publish(new Update($topic, json_encode($payload, JSON_UNESCAPED_UNICODE)));
-        }
+        // Les écrans concernés relisent leur état par AJAX. La méthode reste en
+        // place afin de préserver les appels métier existants.
     }
 }

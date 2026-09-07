@@ -25,12 +25,10 @@ class VerifyEmailService
                 'ok' => true,
                 'flashType' => 'success',
                 'message' => $this->translator->trans(
-                    'Compte activé avec succès. Vous pouvez maintenant vous connecter.'
+                    'Compte activé avec succès. Choisissez maintenant votre profil.'
                 ),
-                'routeName' => 'app_login',
-                'routeParams' => [
-                    'email' => $user->getEmail(),
-                ],
+                'routeName' => 'profile_type_choice',
+                'routeParams' => [],
                 'user' => $user,
             ];
         } catch (InvalidTokenException) {

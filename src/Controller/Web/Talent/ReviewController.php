@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Entity\Review;
 use App\Entity\ReviewScore;
 use App\Repository\ReviewCriteriaRepository;
+use App\Service\AdminContentModerationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,7 +22,8 @@ class ReviewController extends AbstractController
         #[MapEntity(mapping: ['slug' => 'slug'])] User $user,
         Request $request,
         ReviewCriteriaRepository $criteriaRepository,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        AdminContentModerationService $moderation,
     ): Response {
     
         if (!$this->getUser()) {
@@ -55,11 +57,18 @@ class ReviewController extends AbstractController
                     ['slug' => $user->getSlug()]
                 );
             }
+
+            $assessment = $moderation->assessUserText($comment);
+            if (!$assessment['allowed']) {
+                $this->addFlash('error', 'Ce commentaire contient un contenu inapproprié ou assimilé à du spam.');
+                return $this->redirectToRoute('review_create', ['slug' => $user->getSlug()]);
+            }
     
             $review = new Review();
             $review->setAuthor($this->getUser());
             $review->setTarget($user);
             $review->setComment($comment);
+            $review->setPublished(!$assessment['requiresModeration']);
     
             $total = 0;
             $count = 0;

@@ -1340,7 +1340,7 @@
                             >
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <p class="mb-1">Cliquez pour uploader</p>
-                                <small class="text-muted" id="professionPhotoHelp">JPG, PNG ou GIF (max 2 Mo). Obligatoire à la création.</small>
+                                <small class="text-muted" id="professionPhotoHelp">Toute image valide (max 15 Mo avant compression). Obligatoire à la création.</small>
                             </div>
                             
                             <!-- Preview -->
@@ -1353,7 +1353,7 @@
                             </div>
                             
                             <input type="file" class="d-none" id="professionPhoto" name="photo"
-                                   accept="image/jpeg,image/png,image/gif" onchange="previewPhoto(this)"
+                                   accept="image/*" onchange="previewPhoto(this)"
                                    aria-invalid="false" aria-describedby="professionPhotoHelp professionPhotoError">
                             <div class="profession-photo-error" id="professionPhotoError" role="alert" aria-live="polite"></div>
                         </div>

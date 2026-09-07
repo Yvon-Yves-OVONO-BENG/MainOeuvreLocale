@@ -84,6 +84,20 @@ class ContactLogRepository extends ServiceEntityRepository
         return $count > 0;
     }
 
+    /** Un contact débloqué avec un ticket reste accessible sans consommer un second crédit. */
+    public function hasTicketAccess(User $user, User $targetUser): bool
+    {
+        return (int) $this->createQueryBuilder('cl')
+            ->select('COUNT(cl.id)')
+            ->andWhere('cl.user = :user')
+            ->andWhere('cl.targetUser = :target')
+            ->andWhere('cl.ticket IS NOT NULL')
+            ->setParameter('user', $user)
+            ->setParameter('target', $targetUser)
+            ->getQuery()
+            ->getSingleScalarResult() > 0;
+    }
+
     /**
      * Récupère tous les contacts d'un utilisateur pour le mois en cours
      */

@@ -5,6 +5,7 @@ namespace App\Controller\Web\Review;
 use App\Entity\Review;
 use App\Entity\User;
 use App\Repository\ProfessionalProfileRepository;
+use App\Service\AdminContentModerationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,7 +21,8 @@ class TalentReviewController extends AbstractController
         int $id,
         Request $request,
         ProfessionalProfileRepository $professionalProfileRepository,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        AdminContentModerationService $moderation,
     ): JsonResponse {
         // ✅ On force l'AJAX (optionnel mais conseillé)
         if (!$request->isXmlHttpRequest()) {
@@ -82,6 +84,11 @@ class TalentReviewController extends AbstractController
             ], 422);
         }
 
+        $assessment = $moderation->assessUserText($comment);
+        if (!$assessment['allowed']) {
+            return $this->json(['success' => false, 'message' => 'Cet avis contient un contenu inapproprié ou assimilé à du spam.'], 422);
+        }
+
         // 🔒 Anti “auto-avis”
         if ($targetUser === $user) {
             return $this->json([
@@ -95,6 +102,7 @@ class TalentReviewController extends AbstractController
         $review->setTargetReview($targetUser);    // cible
         $review->setComment($comment);
         $review->setCreatedAt(new \DateTime());
+        if (method_exists($review, 'setPublished') && $assessment['requiresModeration']) $review->setPublished(false);
 
         $em->persist($review);
         $em->flush();

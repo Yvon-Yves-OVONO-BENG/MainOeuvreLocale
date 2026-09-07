@@ -8,7 +8,6 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use App\Entity\Calendrier;
 
 class EmailVerifierService
@@ -27,7 +26,7 @@ class EmailVerifierService
             ->sender($from)
             ->returnPath('ne-repondez-pas@maindoeuvrelocale.com')
             ->to(new Address($user->getEmail()))
-            ->subject('Activez votre compte')
+            ->subject("Main d'Œuvre Locale — confirmez votre adresse e-mail")
             ->htmlTemplate('verify_email/verify_email.html.twig')
             ->context([
                 'user' => $user,

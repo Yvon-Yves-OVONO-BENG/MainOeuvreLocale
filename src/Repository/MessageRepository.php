@@ -187,11 +187,15 @@ final class MessageRepository extends ServiceEntityRepository
             ->select('MAX(m2.id)')
             ->from(Message::class, 'm2')
             ->where('IDENTITY(m2.conversation) IN (:ids)')
+            ->andWhere('m2.deletedAt IS NULL')
+            ->andWhere('m2.deleted = false')
             ->groupBy('m2.conversation');
 
         $messages = $this->createQueryBuilder('m')
             ->leftJoin('m.sender', 's')->addSelect('s')
             ->andWhere('m.id IN (' . $subQb->getDQL() . ')')
+            ->andWhere('m.deletedAt IS NULL')
+            ->andWhere('m.deleted = false')
             ->setParameter('ids', $conversationIds)
             ->getQuery()
             ->getResult();

@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Incidents techniques • Administration{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+.tech-inc{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--soft:#f8fafc;--blue:#2563eb;--danger:#dc2626;max-width:1380px;margin:28px auto;padding:0 22px;color:var(--ink)}
+.tech-inc *{box-sizing:border-box}.ti-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:18px;padding:22px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(135deg,#fff,#f6f9ff);box-shadow:0 14px 34px rgba(15,23,42,.06)}.ti-kicker{color:var(--blue);font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.ti-head h1{margin:5px 0 5px;font-size:clamp(25px,3vw,36px);letter-spacing:-.03em}.ti-head p{margin:0;color:var(--muted);font-size:13px}.ti-actions{display:flex;gap:9px;flex-wrap:wrap}.ti-btn{display:inline-flex;min-height:39px;align-items:center;justify-content:center;gap:7px;padding:0 13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#334155;font-weight:800;font-size:12px;text-decoration:none;cursor:pointer}.ti-btn--danger{color:#b91c1c;border-color:#fecaca;background:#fff7f7}.ti-btn--primary{color:#fff;border-color:var(--blue);background:var(--blue)}.ti-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px}.ti-kpi{padding:16px 18px;border:1px solid var(--line);border-radius:17px;background:#fff}.ti-kpi span{display:block;color:var(--muted);font-size:11px;font-weight:750}.ti-kpi strong{display:block;margin-top:5px;font-size:25px}.ti-card{overflow:hidden;border:1px solid var(--line);border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(15,23,42,.05)}.ti-tools{display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid var(--line);background:var(--soft)}.ti-search{width:100%;min-height:42px;padding:0 13px;border:1px solid #cbd5e1;border-radius:11px;background:#fff;outline:0}.ti-table-wrap{overflow:auto}.ti-table{width:100%;min-width:1100px;border-collapse:collapse}.ti-table th{padding:12px 13px;background:#f8fafc;color:#64748b;font-size:10px;letter-spacing:.06em;text-align:left;text-transform:uppercase}.ti-table td{padding:13px;border-top:1px solid #edf2f7;font-size:12px;vertical-align:top}.ti-ref{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#1d4ed8;font-weight:800}.ti-msg{max-width:380px;color:#475569;white-space:normal;overflow-wrap:anywhere}.ti-chip{display:inline-flex;padding:5px 8px;border-radius:999px;background:#f1f5f9;color:#475569;font-size:10px;font-weight:850}.ti-chip--critical,.ti-chip--error{background:#fff1f2;color:#be123c}.ti-chip--warning{background:#fff7ed;color:#c2410c}.ti-chip--resolved{background:#ecfdf5;color:#047857}.ti-row-actions{display:flex;gap:7px}.ti-empty{padding:34px;text-align:center;color:#64748b}.ti-flash{margin:0 0 12px;padding:11px 14px;border-radius:12px;background:#ecfdf5;color:#047857;font-weight:700;font-size:12px}
+@media(max-width:780px){.tech-inc{padding:0 12px;margin-top:16px}.ti-head{align-items:stretch;flex-direction:column}.ti-actions .ti-btn,.ti-actions form{flex:1 1 100%}.ti-actions form .ti-btn{width:100%}.ti-kpis{grid-template-columns:1fr}}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="tech-inc">
+    {% for message in app.flashes('success') %}<div class="ti-flash">{{ message }}</div>{% endfor %}
+    <section class="ti-head">
+        <div>
+            <div class="ti-kicker">Administration • Observabilité</div>
+            <h1>Incidents techniques</h1>
+            <p>Erreurs Symfony/PHP et erreurs HTTP capturées automatiquement, sans exposer la page rouge aux utilisateurs.</p>
+        </div>
+        <div class="ti-actions">
+            <a class="ti-btn" href="{{ path('tableau_de_bord') }}" data-turbo="false">← Tableau de bord</a>
+            <form method="post" action="{{ path('admin_incidents_purge') }}" onsubmit="return confirm('Supprimer définitivement tous les incidents techniques ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('incident_purge') }}">
+                <button class="ti-btn ti-btn--danger" type="submit">Purger la table</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="ti-kpis">
+        <div class="ti-kpi"><span>Incidents ouverts</span><strong>{{ openCount }}</strong></div>
+        <div class="ti-kpi"><span>Total enregistré</span><strong>{{ totalCount }}</strong></div>
+        <div class="ti-kpi"><span>Dernière occurrence</span><strong style="font-size:15px">{{ incidents|length ? incidents|first.lastOccurredAt|date('d/m/Y H:i:s') : '—' }}</strong></div>
+    </section>
+
+    <section class="ti-card">
+        <div class="ti-tools"><input id="incidentSearch" class="ti-search" type="search" placeholder="Rechercher par référence, URL, message, classe, IP..." autocomplete="off"></div>
+        <div class="ti-table-wrap">
+            <table class="ti-table" id="incidentTable">
+                <thead><tr><th>Référence</th><th>HTTP</th><th>Erreur</th><th>Requête</th><th>Compte / IP</th><th>Occurrences</th><th>Dernière</th><th>Actions</th></tr></thead>
+                <tbody>
+                {% for incident in incidents %}
+                    <tr data-search="{{ (incident.reference ~ ' ' ~ incident.exceptionClass ~ ' ' ~ incident.message ~ ' ' ~ incident.requestUri ~ ' ' ~ incident.route ~ ' ' ~ incident.ip)|lower|e('html_attr') }}">
+                        <td><div class="ti-ref">{{ incident.reference }}</div><div style="margin-top:6px"><span class="ti-chip ti-chip--{{ incident.severity }}">{{ incident.severity|upper }}</span> <span class="ti-chip ti-chip--{{ incident.status }}">{{ incident.status|upper }}</span></div></td>
+                        <td><strong>{{ incident.httpStatus ?? '—' }}</strong></td>
+                        <td><div><strong>{{ incident.exceptionClass|split('\\')|last }}</strong></div><div class="ti-msg">{{ incident.message ? (incident.message|length > 180 ? incident.message|slice(0, 180) ~ '…' : incident.message) : '—' }}</div>{% if incident.sourceFile %}<small style="color:#94a3b8">{{ incident.sourceFile|split('/')|last }}:{{ incident.sourceLine }}</small>{% endif %}</td>
+                        <td><strong>{{ incident.method }}</strong> {{ incident.route ?: '—' }}<div class="ti-msg">{{ incident.requestUri }}</div></td>
+                        <td>{{ incident.user ? incident.user.email : 'Visiteur' }}<div style="color:#64748b">{{ incident.ip ?: 'IP inconnue' }}</div></td>
+                        <td><strong>{{ incident.occurrenceCount }}</strong></td>
+                        <td>{{ incident.lastOccurredAt|date('d/m/Y') }}<br><small>{{ incident.lastOccurredAt|date('H:i:s') }}</small></td>
+                        <td><div class="ti-row-actions">
+                            <a class="ti-btn ti-btn--primary" href="{{ path('admin_incidents_show', {id: incident.id}) }}" data-turbo="false">Détails</a>
+                            {% if incident.status != 'resolved' %}<form method="post" action="{{ path('admin_incidents_resolve', {id: incident.id}) }}"><input type="hidden" name="_token" value="{{ csrf_token('incident_resolve_' ~ incident.id) }}"><button class="ti-btn" type="submit">Résoudre</button></form>{% endif %}
+                            <form method="post" action="{{ path('admin_incidents_delete', {id: incident.id}) }}" onsubmit="return confirm('Supprimer cet incident ?');"><input type="hidden" name="_token" value="{{ csrf_token('incident_delete_' ~ incident.id) }}"><button class="ti-btn ti-btn--danger" type="submit">Supprimer</button></form>
+                        </div></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="8" class="ti-empty">Aucun incident technique enregistré.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+<script>
+(() => { const input=document.getElementById('incidentSearch'); if(!input)return; input.addEventListener('input',()=>{const q=input.value.trim().toLocaleLowerCase('fr');document.querySelectorAll('#incidentTable tbody tr[data-search]').forEach(row=>row.hidden=!!q&&!row.dataset.search.includes(q));}); })();
+</script>
+{% endblock %}

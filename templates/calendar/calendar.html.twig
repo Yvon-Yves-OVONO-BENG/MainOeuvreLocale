@@ -312,7 +312,6 @@
 		const MOVE_URL_TPL = {{ path('calendar_move', {'id': '__ID__'})|json_encode|raw }};
 		const CANCEL_URL_TPL = {{ path('calendar_cancel', {'id': '__ID__'})|json_encode|raw }};
 		const DONE_URL_TPL = {{ path('calendar_done', {'id': '__ID__'})|json_encode|raw }};
-		const MERCURE_URL = {{ (mercure_public_url ?? '')|json_encode|raw }};
 		const MY_USER_ID = {{ app.user ? app.user.id : 0 }};
 	</script>
 
@@ -334,7 +333,6 @@
 				const moveUrlTpl = MOVE_URL_TPL;
 				const cancelUrlTpl = CANCEL_URL_TPL;
 				const doneUrlTpl = DONE_URL_TPL;
-				const mercureUrl = MERCURE_URL;
 				const myUserId = MY_USER_ID;
 
 				const toastWrap = document.getElementById('vipToasts');
@@ -912,22 +910,11 @@
 					}
 				});
 
-				if (mercureUrl && myUserId && window.EventSource) {
-					try {
-						const url = new URL(mercureUrl);
-						url.searchParams.append('topic', `/users/${myUserId}/notifications`);
-
-						const es = new EventSource(url.toString());
-						es.onmessage = (e) => {
-							try {
-								const payload = JSON.parse(e.data);
-								if (payload && payload.event && String(payload.event).startsWith('appointment.')) {
-									toast("Mise à jour reçue (temps réel) ⚡");
-									calendar.refetchEvents();
-								}
-							} catch (_) {}
-						};
-					} catch (_) {}
+				// Synchronisation légère, compatible avec un hébergement mutualisé.
+				if (myUserId) {
+					window.setInterval(() => {
+						if (!document.hidden) calendar.refetchEvents();
+					}, 15000);
 				}
 			}
 

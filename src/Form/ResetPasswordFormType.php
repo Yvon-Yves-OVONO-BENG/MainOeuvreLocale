@@ -20,7 +20,11 @@ class ResetPasswordFormType extends AbstractType
             'mapped' => false,
             'constraints' => [
                 new Assert\NotBlank(),
-                new Assert\Length(min: 6, max: 4096),
+                new Assert\Length(
+                    min: 8,
+                    max: 4096,
+                    minMessage: 'Le mot de passe doit contenir au moins 8 caractères.'
+                ),
             ],
         ]);
     }
