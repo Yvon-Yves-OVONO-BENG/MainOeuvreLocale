@@ -58,6 +58,7 @@ class Job
     private ?Profession $profession = null;
 
     #[ORM\ManyToOne(inversedBy: 'jobs')]
+    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $createdBy = null;
 
     #[ORM\Column]

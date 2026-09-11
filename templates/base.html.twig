@@ -587,22 +587,11 @@
                         {% trans %}Suivez-nous{% endtrans %}
                     </div>
         
-            <ul class="mol-social list-unstyled d-flex gap-2 mb-0">
-                {# Mets uniquement ceux que tu utilises vraiment #}
-                <li><a class="mol-social-btn" href="{{ social_facebook ?? 'https://www.facebook.com/share/18KmeyftZh/' }}" aria-label="Facebook"><i class="fa fa-facebook"></i></a></li>
-                <li>
-    <a class="mol-social-btn" href="{{ social_instagram ?? 'https://www.instagram.com/maindoeuvrelocale?igsi=cXhhY2NibDRhNTlh' }}" aria-label="Instagram">
-        <i class="fa fa-instagram"></i>
-    </a>
-</li>
-<li>
-    <a class="mol-social-btn" href="{{ social_tiktok ?? 'https://www.tiktok.com/@maindoeuvrelocale' }}" aria-label="TikTok">
-        <i class="fa-brands fa-tiktok"></i>
-    </a>
-</li>
-                <li><a class="mol-social-btn" href="{{ social_youtube ?? '#' }}" aria-label="YouTube"><i class="fa fa-youtube"></i></a></li>
-            </ul>
-            
+                    <ul class="mol-social list-unstyled d-flex gap-2 mb-0">
+                        <li><a class="mol-social-btn" href="{{ social_facebook ?? '#' }}" aria-label="Facebook" data-turbo="false"><i class="fa fa-facebook"></i></a></li>
+                        <li><a class="mol-social-btn" href="{{ social_linkedin ?? '#' }}" aria-label="LinkedIn" data-turbo="false"><i class="fa fa-linkedin"></i></a></li>
+                        <li><a class="mol-social-btn" href="{{ social_youtube ?? '#' }}" aria-label="YouTube" data-turbo="false"><i class="fa fa-youtube"></i></a></li>
+                    </ul>
                     </div>
                 </div>
         
@@ -4075,39 +4064,6 @@
                     }
                 }
 
-                async function heartbeat() {
-                    const url = "{{ path('presence_heartbeat') }}";
-                    try {
-                        await fetch(url, {
-                            method: 'POST',
-                            credentials: 'same-origin',
-                            keepalive: true,
-                            cache: 'no-store',
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Cache-Control': 'no-cache'
-                            }
-                        });
-                    } catch (_) {}
-                }
-
-                function goOffline() {
-                    const url = "{{ path('presence_offline') }}";
-                    try {
-                        if (navigator.sendBeacon) {
-                            navigator.sendBeacon(url, new URLSearchParams());
-                            return;
-                        }
-                    } catch (_) {}
-
-                    fetch(url, {
-                        method: 'POST',
-                        credentials: 'same-origin',
-                        keepalive: true,
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                    }).catch(() => {});
-                }
-
                 function updateLayoutVars() {
                     const vv = window.visualViewport;
                     const vh = vv ? vv.height : window.innerHeight;
@@ -5105,10 +5061,7 @@
                     callUpdateToolStates();
                     callSetPhase('idle');
 
-                    heartbeat();
-
                     setInterval(() => {
-                        heartbeat();
                         if (qs('molChatPanel')?.classList.contains('is-open')) {
                             refreshList(qs('molChatSearch')?.value?.trim() || '');
                         }
@@ -5120,15 +5073,11 @@
 
                     document.addEventListener('visibilitychange', () => {
                         if (document.visibilityState === 'visible') {
-                            heartbeat();
                             if (qs('molChatPanel')?.classList.contains('is-open')) {
                                 refreshList(qs('molChatSearch')?.value?.trim() || '');
                             }
                         }
                     });
-
-                    window.addEventListener('pagehide', goOffline);
-                    window.addEventListener('beforeunload', goOffline);
 
                     updateLayoutVars();
                     window.addEventListener('resize', updateLayoutVars);

@@ -146,7 +146,9 @@
 
         if (!response.ok || data.ok === false || data.success === false) {
             const message = data.error || data.message || `HTTP ${response.status}`;
-            throw new Error(message);
+            const error = new Error(message);
+            error.status = response.status;
+            throw error;
         }
 
         return data;
@@ -3393,11 +3395,34 @@
         }
 
         function startHeartbeat() {
-            const beat = () => {
-                if (presenceUrls.heartbeat) fetchJson(presenceUrls.heartbeat, { method: 'POST' }).catch(() => {});
+            let heartbeatTimer = null;
+            let heartbeatStopped = false;
+
+            const stopHeartbeat = () => {
+                heartbeatStopped = true;
+                if (heartbeatTimer !== null) {
+                    clearInterval(heartbeatTimer);
+                    heartbeatTimer = null;
+                }
             };
+
+            const beat = async () => {
+                if (heartbeatStopped || !presenceUrls.heartbeat) return;
+
+                try {
+                    await fetchJson(presenceUrls.heartbeat, { method: 'POST' });
+                } catch (error) {
+                    // Une session expirée ne doit pas provoquer une boucle infinie
+                    // de réponses 401/403 dans la console et sur le serveur.
+                    if (error?.status === 401 || error?.status === 403) {
+                        stopHeartbeat();
+                    }
+                }
+            };
+
             beat();
-            setInterval(beat, 30000);
+            heartbeatTimer = setInterval(beat, 30000);
+
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') beat();
             });
