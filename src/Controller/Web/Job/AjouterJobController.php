@@ -57,7 +57,7 @@ class AjouterJobController extends AbstractController
         /** @var User|null $user */
         $user = $this->getUser();
 
-        $isAdmin = $user && $this->isGranted('ROLE_ADMIN');
+        $isAdmin = $user && ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SUPER_ADMIN'));
         $isModerator = $user && $this->isGranted('ROLE_MODERATEUR');
         $isStaff = $isAdmin || $isModerator;
 
@@ -68,7 +68,7 @@ class AjouterJobController extends AbstractController
         if ($slug !== '') {
             $job = $entityManager
                 ->getRepository(Job::class)
-                ->findOneBy(['slug' => $slug]);
+                ->findOneForModeration($slug);
 
             if (!$job instanceof Job) {
                 throw $this->createNotFoundException(
@@ -78,6 +78,13 @@ class AjouterJobController extends AbstractController
         } else {
             $job = new Job();
             $jobManagerService->initializeJob($job, $user);
+        }
+
+        if (!$user) {
+            throw $this->createAccessDeniedException('Connectez-vous pour gérer une offre.');
+        }
+        if ($job->getId() !== null && !$isStaff && $job->getCreatedBy()?->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres offres.');
         }
 
         $isNewJob = $job->getId() === null;
@@ -209,7 +216,7 @@ class AjouterJobController extends AbstractController
                     }
 
                     if (method_exists($job, 'setVerifiedAt')) {
-                        $job->setVerifiedAt(new \DateTimeImmutable());
+                        $job->setVerifiedAt(new \DateTime());
                     }
                 } else {
                     $job->setModerationStatus('modified');
@@ -220,7 +227,7 @@ class AjouterJobController extends AbstractController
                 }
 
                 if (method_exists($job, 'setModifiedByAdminAt')) {
-                    $job->setModifiedByAdminAt(new \DateTimeImmutable());
+                    $job->setModifiedByAdminAt(new \DateTime());
                 }
             }
 
@@ -248,12 +255,11 @@ class AjouterJobController extends AbstractController
                 $modificationNote = $job->getAdminModificationNote()
                     ?: 'Optimisation de votre offre pour une meilleure visibilité et conformité avec nos standards de qualité.';
 
-                $notificationSent = $this->notificationService
-                    ->sendJobModifiedNotification(
-                        $job,
-                        $user,
-                        $modificationNote
-                    );
+                try {
+                    $notificationSent = $this->notificationService->sendJobModifiedNotification($job, $user, $modificationNote);
+                } catch (\Throwable) {
+                    $notificationSent = false;
+                }
 
                 if ($notificationSent) {
                     $this->addFlash(

@@ -16,6 +16,18 @@ class StatusJobRepository extends ServiceEntityRepository
         parent::__construct($registry, StatusJob::class);
     }
 
+    /** Résout le statut de publication par son libellé, sans dépendre d'un identifiant fixe. */
+    public function findPublished(): ?StatusJob
+    {
+        foreach ($this->findBy([], ['id' => 'ASC']) as $status) {
+            $label = strtr(mb_strtoupper(trim((string) $status->getStatusJob()), 'UTF-8'), ['É' => 'E', 'È' => 'E', 'Ê' => 'E']);
+            if (in_array($label, ['PUBLIE', 'PUBLIEE', 'PUBLISHED'], true)) {
+                return $status;
+            }
+        }
+        return null;
+    }
+
     //    /**
     //     * @return StatusJob[] Returns an array of StatusJob objects
     //     */

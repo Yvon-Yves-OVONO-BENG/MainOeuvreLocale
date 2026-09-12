@@ -1,0 +1,36 @@
+CORRECTION MODÉRATION / MODIFICATION DES OFFRES
+
+1. Sauvegardez les 7 fichiers concernés avant remplacement.
+2. Copiez src/, templates/ et public/ à la racine du projet en conservant les chemins.
+   Fusionnez les dossiers ; ne supprimez pas vos dossiers existants.
+3. Exécutez avec le PHP du projet :
+   php bin/console cache:clear --env=prod
+4. Rechargez avec Ctrl+F5.
+Aucune migration SQL.
+
+CORRECTIONS
+Appels JavaScript des boutons Approuver et Rejeter correctement échappés.
+Confirmation, erreur visible et retour du bouton disponible après échec de publication.
+Mise à jour du statut dans la liste après approbation.
+Échéance future demandée pour publier une offre expirée : aucune prolongation arbitraire.
+Statut publié résolu par son libellé dans la publication et les deux recherches publiques concernées.
+Bouton de modification cliquable : les champs incorrects sont signalés après le clic.
+Note administrative facultative et validation de la cohérence des salaires.
+Dates administratives conformes au type mutable attendu par Doctrine.
+Chargement des anciennes relations par LEFT JOIN ; contrôle propriétaire/staff pour modifier.
+Un échec de notification ne masque plus une modification enregistrée.
+Brouillons de modification séparés par offre. Création inchangée.
+
+VALIDATION
+Syntaxe JavaScript vérifiée et tests simulés réussis : succès, annulation, expiration,
+erreurs HTTP/HTML/réseau, CSRF transmis, bouton réactivé, champs obligatoires,
+salaires incohérents, note facultative, double soumission.
+Code PHP examiné mais pas exécuté : PHP, vendor/, configuration complète et base absents.
+
+APRÈS INSTALLATION
+Approuvez une offre valide puis consultez la liste publique sans filtre.
+Une offre ancienne peut se trouver sur une page ultérieure selon le tri.
+Approuvez une offre expirée avec une nouvelle date et vérifiez sa présence.
+Modifiez une offre, testez un champ vide puis une saisie correcte, et rouvrez pour vérifier.
+Si la profession a été supprimée, choisissez une profession existante avant d'enregistrer.
+Le statut PUBLIÉE (ou PUBLIE/PUBLIEE/PUBLISHED) doit exister dans la table des statuts.

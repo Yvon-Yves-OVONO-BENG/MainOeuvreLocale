@@ -18088,18 +18088,308 @@ L’équipe de modération</source>
         <target>View registrations from the last 24 hours</target>
       </trans-unit>
       <trans-unit id="7TVWhVG" resname="Offres d'emploi">
-          <source>Offres d'emploi</source>
-          <target>Job offers</target>
+        <source>Offres d'emploi</source>
+        <target>Job offers</target>
       </trans-unit>
-
       <trans-unit id="FuKfR2j" resname="Les talents que nos employeurs recherchent aujourd'hui">
-          <source>Les talents que nos employeurs recherchent aujourd'hui</source>
-          <target>The talent our employers are looking for today</target>
+        <source>Les talents que nos employeurs recherchent aujourd'hui</source>
+        <target>The talent our employers are looking for today</target>
       </trans-unit>
-
       <trans-unit id="6h8tIIQ" resname="Voir l'annonce">
-          <source>Voir l'annonce</source>
-          <target>View job offer</target>
+        <source>Voir l'annonce</source>
+        <target>View job offer</target>
+      </trans-unit>
+      <trans-unit id="PP_KhWv" resname="Votre compte a bien été activé. Veuillez vous connecter.">
+        <source>Votre compte a bien été activé. Veuillez vous connecter.</source>
+        <target>__Votre compte a bien été activé. Veuillez vous connecter.</target>
+      </trans-unit>
+      <trans-unit id="ejHjwB2" resname="Adresse email invalide.">
+        <source>Adresse email invalide.</source>
+        <target>__Adresse email invalide.</target>
+      </trans-unit>
+      <trans-unit id="JEbb.81" resname="Cette adresse email est déjà utilisée.">
+        <source>Cette adresse email est déjà utilisée.</source>
+        <target>__Cette adresse email est déjà utilisée.</target>
+      </trans-unit>
+      <trans-unit id="AhBmHb8" resname="Si un compte existe avec cet email, un lien de réinitialisation a été envoyé. Pensez également à vérifier votre dossier de courriers indésirables (spams).">
+        <source>Si un compte existe avec cet email, un lien de réinitialisation a été envoyé. Pensez également à vérifier votre dossier de courriers indésirables (spams).</source>
+        <target>__Si un compte existe avec cet email, un lien de réinitialisation a été envoyé. Pensez également à vérifier votre dossier de courriers indésirables (spams).</target>
+      </trans-unit>
+      <trans-unit id="ts_Y_AS" resname="Le mot de passe doit contenir au moins 8 caractères.">
+        <source>Le mot de passe doit contenir au moins 8 caractères.</source>
+        <target>__Le mot de passe doit contenir au moins 8 caractères.</target>
+      </trans-unit>
+      <trans-unit id="c05eoIR" resname="Le nouveau mot de passe n’a pas pu être enregistré. Veuillez réessayer.">
+        <source>Le nouveau mot de passe n’a pas pu être enregistré. Veuillez réessayer.</source>
+        <target>__Le nouveau mot de passe n’a pas pu être enregistré. Veuillez réessayer.</target>
+      </trans-unit>
+      <trans-unit id="bWZ9jxS" resname="Compte activé avec succès. Choisissez maintenant votre profil.">
+        <source>Compte activé avec succès. Choisissez maintenant votre profil.</source>
+        <target>__Compte activé avec succès. Choisissez maintenant votre profil.</target>
+      </trans-unit>
+      <trans-unit id="V3ygu0D" resname="Téléchargement direct">
+        <source>Téléchargement direct</source>
+        <target>__Téléchargement direct</target>
+      </trans-unit>
+      <trans-unit id="PxrlQqe" resname="Bientôt disponible">
+        <source>Bientôt disponible</source>
+        <target>__Bientôt disponible</target>
+      </trans-unit>
+      <trans-unit id="WyPFkCQ" resname="Impact local">
+        <source>Impact local</source>
+        <target>__Impact local</target>
+      </trans-unit>
+      <trans-unit id="aI2oqyr" resname="Les compétences existent déjà. Rendons-les visibles.">
+        <source>Les compétences existent déjà. Rendons-les visibles.</source>
+        <target>__Les compétences existent déjà. Rendons-les visibles.</target>
+      </trans-unit>
+      <trans-unit id="ux0Qbz." resname="Chaque jour, des professionnels compétents cherchent des opportunités pendant que des familles et des entreprises cherchent des personnes de confiance. Main-d’œuvre Locale rapproche ces deux réalités.">
+        <source>Chaque jour, des professionnels compétents cherchent des opportunités pendant que des familles et des entreprises cherchent des personnes de confiance. Main-d’œuvre Locale rapproche ces deux réalités.</source>
+        <target>__Chaque jour, des professionnels compétents cherchent des opportunités pendant que des familles et des entreprises cherchent des personnes de confiance. Main-d’œuvre Locale rapproche ces deux réalités.</target>
+      </trans-unit>
+      <trans-unit id=".Wb9vse" resname="Vidéo sur l'impact de Main-d’œuvre Locale et témoignages">
+        <source>Vidéo sur l'impact de Main-d’œuvre Locale et témoignages</source>
+        <target>__Vidéo sur l'impact de Main-d’œuvre Locale et témoignages</target>
+      </trans-unit>
+      <trans-unit id="t6gZ3_f" resname="Votre navigateur ne prend pas en charge la lecture vidéo.">
+        <source>Votre navigateur ne prend pas en charge la lecture vidéo.</source>
+        <target>__Votre navigateur ne prend pas en charge la lecture vidéo.</target>
+      </trans-unit>
+      <trans-unit id="gOP2it7" resname="Une plateforme utile au quotidien">
+        <source>Une plateforme utile au quotidien</source>
+        <target>__Une plateforme utile au quotidien</target>
+      </trans-unit>
+      <trans-unit id=".jVDHzK" resname="Artisans, familles, entreprises et diaspora connectés plus simplement.">
+        <source>Artisans, familles, entreprises et diaspora connectés plus simplement.</source>
+        <target>__Artisans, familles, entreprises et diaspora connectés plus simplement.</target>
+      </trans-unit>
+      <trans-unit id="tjxRa4U" resname="Menuisier">
+        <source>Menuisier</source>
+        <target>__Menuisier</target>
+      </trans-unit>
+      <trans-unit id="JOdnLCi" resname="Avant, seuls les gens du quartier connaissaient mon savoir-faire. Aujourd’hui, davantage de clients peuvent voir mes réalisations.">
+        <source>Avant, seuls les gens du quartier connaissaient mon savoir-faire. Aujourd’hui, davantage de clients peuvent voir mes réalisations.</source>
+        <target>__Avant, seuls les gens du quartier connaissaient mon savoir-faire. Aujourd’hui, davantage de clients peuvent voir mes réalisations.</target>
+      </trans-unit>
+      <trans-unit id="MGXIoPw" resname="Peintre">
+        <source>Peintre</source>
+        <target>__Peintre</target>
+      </trans-unit>
+      <trans-unit id="Eb_CmJv" resname="Mon sérieux et les avis de mes clients rendent mon profil plus visible et m’apportent plus de demandes.">
+        <source>Mon sérieux et les avis de mes clients rendent mon profil plus visible et m’apportent plus de demandes.</source>
+        <target>__Mon sérieux et les avis de mes clients rendent mon profil plus visible et m’apportent plus de demandes.</target>
+      </trans-unit>
+      <trans-unit id="YPZ.Xl5" resname="Les notes et les avis m’aident à choisir un prestataire sérieux avec davantage de sérénité.">
+        <source>Les notes et les avis m’aident à choisir un prestataire sérieux avec davantage de sérénité.</source>
+        <target>__Les notes et les avis m’aident à choisir un prestataire sérieux avec davantage de sérénité.</target>
+      </trans-unit>
+      <trans-unit id="QZx6GHw" resname="Employeur vivant à l’étranger">
+        <source>Employeur vivant à l’étranger</source>
+        <target>__Employeur vivant à l’étranger</target>
+      </trans-unit>
+      <trans-unit id="lOPds9X" resname="La visioconférence et les profils détaillés me permettent d’échanger avec des candidats au pays sans me déplacer.">
+        <source>La visioconférence et les profils détaillés me permettent d’échanger avec des candidats au pays sans me déplacer.</source>
+        <target>__La visioconférence et les profils détaillés me permettent d’échanger avec des candidats au pays sans me déplacer.</target>
+      </trans-unit>
+      <trans-unit id="nLOJ.CN" resname="Main d’Œuvre Locale : parce que la richesse est déjà autour de nous.">
+        <source>Main d’Œuvre Locale : parce que la richesse est déjà autour de nous.</source>
+        <target>__Main d’Œuvre Locale : parce que la richesse est déjà autour de nous.</target>
+      </trans-unit>
+      <trans-unit id="qDR99B0" resname="N° d'immatriculation / RCCM">
+        <source>N° d'immatriculation / RCCM</source>
+        <target>__N° d'immatriculation / RCCM</target>
+      </trans-unit>
+      <trans-unit id="x69gZiN" resname="À contrôler avant validation du dossier KYC.">
+        <source>À contrôler avant validation du dossier KYC.</source>
+        <target>__À contrôler avant validation du dossier KYC.</target>
+      </trans-unit>
+      <trans-unit id="A3ojP.f" resname="Présentation de l'entreprise">
+        <source>Présentation de l'entreprise</source>
+        <target>__Présentation de l'entreprise</target>
+      </trans-unit>
+      <trans-unit id="N8ReMNM" resname="Saisissez un métier, un service ou une disponibilité, pas uniquement des chiffres.">
+        <source>Saisissez un métier, un service ou une disponibilité, pas uniquement des chiffres.</source>
+        <target>__Saisissez un métier, un service ou une disponibilité, pas uniquement des chiffres.</target>
+      </trans-unit>
+      <trans-unit id="CVsZ1rX" resname="Saisissez une ville, une région ou un pays, pas uniquement des chiffres.">
+        <source>Saisissez une ville, une région ou un pays, pas uniquement des chiffres.</source>
+        <target>__Saisissez une ville, une région ou un pays, pas uniquement des chiffres.</target>
+      </trans-unit>
+      <trans-unit id="BZ.WUqy" resname="Prestataire">
+        <source>Prestataire</source>
+        <target>__Prestataire</target>
+      </trans-unit>
+      <trans-unit id="Ay3en8D" resname="Prestataire de cette annonce">
+        <source>Prestataire de cette annonce</source>
+        <target>__Prestataire de cette annonce</target>
+      </trans-unit>
+      <trans-unit id="iThkNOP" resname="VOIR L'ANNONCE">
+        <source>VOIR L'ANNONCE</source>
+        <target>__VOIR L'ANNONCE</target>
+      </trans-unit>
+      <trans-unit id="vXUtKOH" resname="Recevez par email les nouvelles offres publiées. Si votre compte possède une profession, les alertes seront automatiquement ciblées.">
+        <source>Recevez par email les nouvelles offres publiées. Si votre compte possède une profession, les alertes seront automatiquement ciblées.</source>
+        <target>__Recevez par email les nouvelles offres publiées. Si votre compte possède une profession, les alertes seront automatiquement ciblées.</target>
+      </trans-unit>
+      <trans-unit id="19LW8D3" resname="Se désabonner des alertes ?">
+        <source>Se désabonner des alertes ?</source>
+        <target>__Se désabonner des alertes ?</target>
+      </trans-unit>
+      <trans-unit id="YbBSpfv" resname="Vous ne recevrez plus les nouvelles offres par email.">
+        <source>Vous ne recevrez plus les nouvelles offres par email.</source>
+        <target>__Vous ne recevrez plus les nouvelles offres par email.</target>
+      </trans-unit>
+      <trans-unit id="LaKUeA9" resname="Êtes-vous sûr de vouloir vous désabonner ?">
+        <source>Êtes-vous sûr de vouloir vous désabonner ?</source>
+        <target>__Êtes-vous sûr de vouloir vous désabonner ?</target>
+      </trans-unit>
+      <trans-unit id="Wox4Buc" resname="Impossible de changer de caméra sur cet appareil.">
+        <source>Impossible de changer de caméra sur cet appareil.</source>
+        <target>__Impossible de changer de caméra sur cet appareil.</target>
+      </trans-unit>
+      <trans-unit id="TWFtU5i" resname="Pop">
+        <source>Pop</source>
+        <target>__Pop</target>
+      </trans-unit>
+      <trans-unit id="DSGhH6n" resname="Court, net et dynamique">
+        <source>Court, net et dynamique</source>
+        <target>__Court, net et dynamique</target>
+      </trans-unit>
+      <trans-unit id="96QDxs3" resname="Pulse">
+        <source>Pulse</source>
+        <target>__Pulse</target>
+      </trans-unit>
+      <trans-unit id="VX9U_rD" resname="Rythmé et discret">
+        <source>Rythmé et discret</source>
+        <target>__Rythmé et discret</target>
+      </trans-unit>
+      <trans-unit id="m67vxjd" resname="Soft Bell">
+        <source>Soft Bell</source>
+        <target>__Soft Bell</target>
+      </trans-unit>
+      <trans-unit id="Mn8OIF3" resname="Cloche douce et élégante">
+        <source>Cloche douce et élégante</source>
+        <target>__Cloche douce et élégante</target>
+      </trans-unit>
+      <trans-unit id="Nr6ni2C" resname="Digital Drop">
+        <source>Digital Drop</source>
+        <target>__Digital Drop</target>
+      </trans-unit>
+      <trans-unit id="WKyhpeW" resname="Son digital premium">
+        <source>Son digital premium</source>
+        <target>__Son digital premium</target>
+      </trans-unit>
+      <trans-unit id="ZNWcKVo" resname="Impossible d’enregistrer votre préférence sonore.">
+        <source>Impossible d’enregistrer votre préférence sonore.</source>
+        <target>__Impossible d’enregistrer votre préférence sonore.</target>
+      </trans-unit>
+      <trans-unit id="Egve6u6" resname="Veuillez réessayer.">
+        <source>Veuillez réessayer.</source>
+        <target>__Veuillez réessayer.</target>
+      </trans-unit>
+      <trans-unit id="5qRRgjY" resname="Le nom ne doit pas contenir de chiffres.">
+        <source>Le nom ne doit pas contenir de chiffres.</source>
+        <target>__Le nom ne doit pas contenir de chiffres.</target>
+      </trans-unit>
+      <trans-unit id="911IY.7" resname="Veuillez entrer un nom valide (lettres, espaces, apostrophes et tirets uniquement).">
+        <source>Veuillez entrer un nom valide (lettres, espaces, apostrophes et tirets uniquement).</source>
+        <target>__Veuillez entrer un nom valide (lettres, espaces, apostrophes et tirets uniquement).</target>
+      </trans-unit>
+      <trans-unit id="y2P8h9W" resname="Essayez avec un autre métier, retirez un filtre ou élargissez votre rayon de recherche.">
+        <source>Essayez avec un autre métier, retirez un filtre ou élargissez votre rayon de recherche.</source>
+        <target>__Essayez avec un autre métier, retirez un filtre ou élargissez votre rayon de recherche.</target>
+      </trans-unit>
+      <trans-unit id="q64loTz" resname="Élargir à 100 km">
+        <source>Élargir à 100 km</source>
+        <target>__Élargir à 100 km</target>
+      </trans-unit>
+      <trans-unit id="Ziwg6qI" resname="Voir toutes les offres">
+        <source>Voir toutes les offres</source>
+        <target>__Voir toutes les offres</target>
+      </trans-unit>
+      <trans-unit id="LkBFujy" resname="Créer une alerte">
+        <source>Créer une alerte</source>
+        <target>__Créer une alerte</target>
+      </trans-unit>
+      <trans-unit id="WS7iIc9" resname="Saisissez un métier, un poste ou une compétence, pas uniquement des chiffres.">
+        <source>Saisissez un métier, un poste ou une compétence, pas uniquement des chiffres.</source>
+        <target>__Saisissez un métier, un poste ou une compétence, pas uniquement des chiffres.</target>
+      </trans-unit>
+      <trans-unit id="i54__Rc" resname="Évaluation interne privée">
+        <source>Évaluation interne privée</source>
+        <target>__Évaluation interne privée</target>
+      </trans-unit>
+      <trans-unit id="Nz3ivVn" resname="Décrivez les missions avec au moins 20 caractères.">
+        <source>Décrivez les missions avec au moins 20 caractères.</source>
+        <target>__Décrivez les missions avec au moins 20 caractères.</target>
+      </trans-unit>
+      <trans-unit id="wadb.j1" resname="Décrivez le profil recherché avec au moins 20 caractères.">
+        <source>Décrivez le profil recherché avec au moins 20 caractères.</source>
+        <target>__Décrivez le profil recherché avec au moins 20 caractères.</target>
+      </trans-unit>
+      <trans-unit id="2POHt.W" resname="Recentrer sur ma recherche">
+        <source>Recentrer sur ma recherche</source>
+        <target>__Recentrer sur ma recherche</target>
+      </trans-unit>
+      <trans-unit id="Kzb2gdU" resname="Recentrer">
+        <source>Recentrer</source>
+        <target>__Recentrer</target>
+      </trans-unit>
+      <trans-unit id="mMrGgNy" resname="Aucune offre exacte dans ce rayon.">
+        <source>Aucune offre exacte dans ce rayon.</source>
+        <target>__Aucune offre exacte dans ce rayon.</target>
+      </trans-unit>
+      <trans-unit id="57uexMV" resname="Essayez avec un autre métier ou élargissez le rayon.">
+        <source>Essayez avec un autre métier ou élargissez le rayon.</source>
+        <target>__Essayez avec un autre métier ou élargissez le rayon.</target>
+      </trans-unit>
+      <trans-unit id="Cre1LYd" resname="Le cercle bleu représente votre rayon de recherche.">
+        <source>Le cercle bleu représente votre rayon de recherche.</source>
+        <target>__Le cercle bleu représente votre rayon de recherche.</target>
+      </trans-unit>
+      <trans-unit id="_prBpcT" resname="Formats acceptés : PDF, DOC, DOCX — Taille max : 12 Mo">
+        <source>Formats acceptés : PDF, DOC, DOCX — Taille max : 12 Mo</source>
+        <target>__Formats acceptés : PDF, DOC, DOCX — Taille max : 12 Mo</target>
+      </trans-unit>
+      <trans-unit id="HGA2ikw" resname="Ce numéro d'immatriculation sera soumis à vérification par l'équipe Main d'Œuvre Locale.">
+        <source>Ce numéro d'immatriculation sera soumis à vérification par l'équipe Main d'Œuvre Locale.</source>
+        <target>__Ce numéro d'immatriculation sera soumis à vérification par l'équipe Main d'Œuvre Locale.</target>
+      </trans-unit>
+      <trans-unit id="eYE2f0." resname="Facultatif — une entreprise sans site web peut laisser ce champ vide.">
+        <source>Facultatif — une entreprise sans site web peut laisser ce champ vide.</source>
+        <target>__Facultatif — une entreprise sans site web peut laisser ce champ vide.</target>
+      </trans-unit>
+      <trans-unit id="obheCKz" resname="Facultatif — laissez vide si l'entreprise travaille à domicile ou sans bureau permanent.">
+        <source>Facultatif — laissez vide si l'entreprise travaille à domicile ou sans bureau permanent.</source>
+        <target>__Facultatif — laissez vide si l'entreprise travaille à domicile ou sans bureau permanent.</target>
+      </trans-unit>
+      <trans-unit id="RHoTZGY" resname="Facultatif">
+        <source>Facultatif</source>
+        <target>__Facultatif</target>
+      </trans-unit>
+      <trans-unit id="ev6Qtyu" resname="JPG, PNG, WebP ou GIF — 12 Mo maximum. Vous pouvez prendre une photo ou la choisir dans votre galerie.">
+        <source>JPG, PNG, WebP ou GIF — 12 Mo maximum. Vous pouvez prendre une photo ou la choisir dans votre galerie.</source>
+        <target>__JPG, PNG, WebP ou GIF — 12 Mo maximum. Vous pouvez prendre une photo ou la choisir dans votre galerie.</target>
+      </trans-unit>
+      <trans-unit id="jlbkvAP" resname="Choisir ou remplacer la photo">
+        <source>Choisir ou remplacer la photo</source>
+        <target>__Choisir ou remplacer la photo</target>
+      </trans-unit>
+      <trans-unit id="Gb.YXTo" resname="Annuler la sélection">
+        <source>Annuler la sélection</source>
+        <target>__Annuler la sélection</target>
+      </trans-unit>
+      <trans-unit id="n3MFms2" resname="Aucune nouvelle photo sélectionnée.">
+        <source>Aucune nouvelle photo sélectionnée.</source>
+        <target>__Aucune nouvelle photo sélectionnée.</target>
+      </trans-unit>
+      <trans-unit id="VPIRtDG" resname="8 caractères minimum">
+        <source>8 caractères minimum</source>
+        <target>__8 caractères minimum</target>
+      </trans-unit>
+      <trans-unit id="pn0UUkw" resname="Incidents techniques">
+        <source>Incidents techniques</source>
+        <target>__Incidents techniques</target>
       </trans-unit>
     </body>
   </file>

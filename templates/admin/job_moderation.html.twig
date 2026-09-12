@@ -138,11 +138,13 @@
                     </thead>
                     <tbody id="jobsTableBody">
                         {% for job in pendingJobs %}
+                        {% set authorEmail = job.createdBy ? job.createdBy.email : 'Auteur supprimé' %}
+                        {% set professionName = job.profession ? job.profession.profession : 'Profession supprimée' %}
                         <tr class="job-row" 
                             data-job-slug="{{ job.slug }}"
                             data-status="{{ job.moderationStatus }}"  {# ✅ Doit contenir pending/approved/rejected/modified #}
                             data-date="{{ job.createdAt|date('Y-m-d') }}"
-                            data-search="{{ job.title|lower }} {{ job.reference|lower }} {{ job.createdBy.email|lower }} {{ job.city|lower }}">
+                            data-search="{{ job.title|lower }} {{ job.reference|lower }} {{ authorEmail|lower }} {{ professionName|lower }} {{ job.city|lower }}">
                             <td>
                                 <div class="form-check">
                                     <input class="form-check-input job-checkbox" 
@@ -162,11 +164,9 @@
                                         <span class="meta-item">
                                             <i class="fas fa-map-marker-alt"></i> {{ job.city }}
                                         </span>
-                                        {% if job.profession %}
                                         <span class="meta-item">
-                                            <i class="fas fa-briefcase"></i> {{ job.profession.profession }}
+                                            <i class="fas fa-briefcase"></i> {{ professionName }}
                                         </span>
-                                        {% endif %}
                                     </div>
                                 </div>
                             </td>
@@ -174,7 +174,7 @@
                                 <div class="author-info">
                                     
                                     <div class="author-details">
-                                        <div class="author-name">{{ job.createdBy.email }}</div>
+                                        <div class="author-name">{{ authorEmail }}</div>
                                     </div>
                                 </div>
                             </td>
@@ -200,7 +200,7 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn-action btn-approve" onclick="approveJob({{ job.slug|json_encode|raw }})" title="Approuver">
+                                    <button type="button" class="btn-action btn-approve" data-approve-url="{{ path('admin_job_approve', {slug: job.slug}) }}" data-token="{{ csrf_token('moderate_job') }}" data-expired="{{ not job.dateExpirationAt or job.dateExpirationAt <= date() ? '1' : '0' }}" onclick="approveJob({{ job.slug|json_encode|e('html_attr') }}, this)" title="Approuver">
                                         <i class="fas fa-check"></i>
                                     </button>
                                     
@@ -212,7 +212,7 @@
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     
-                                    <button class="btn-action btn-reject" onclick="rejectJob({{ job.slug|json_encode|raw }})" title="Rejeter">
+                                    <button type="button" class="btn-action btn-reject" onclick="rejectJob({{ job.slug|json_encode|e('html_attr') }})" title="Rejeter">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 </div>
@@ -1070,37 +1070,77 @@ function batchAction(action) {
 }
 
 // ========== SINGLE JOB ACTIONS ==========
-function approveJob(jobId) {
-    Swal.fire({
-        title: 'Approuver cette offre ?',
-        text: 'L\'offre sera immédiatement publiée',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Oui, approuver',
-        confirmButtonColor: '#10b981',
-        cancelButtonText: 'Annuler',
-        input: 'textarea',
-        inputLabel: 'Commentaire (optionnel)',
-        inputPlaceholder: 'Ajouter un commentaire...'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            fetch(`/admin/job/${jobId}/approve`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: `comment=${encodeURIComponent(result.value || '')}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire('Approuvé !', data.message, 'success');
-                    setTimeout(() => location.reload(), 1000);
-                }
-            });
+// Confirme la publication, puis affiche chaque échec au lieu de laisser le clic sans réponse.
+async function approveJob(jobId, button) {
+    if (button.disabled) return;
+    const expired = button.dataset.expired === '1';
+    let comment = '';
+    let expiresAt = '';
+    if (typeof Swal !== 'undefined') {
+        const result = await Swal.fire({
+            title: 'Approuver cette offre ?',
+            text: expired
+                ? 'Cette offre est expirée ou sans échéance. Choisissez une nouvelle date pour la publier.'
+                : "L'offre sera immédiatement publiée.",
+            icon: 'question', showCancelButton: true,
+            confirmButtonText: 'Approuver et publier', cancelButtonText: 'Annuler',
+            confirmButtonColor: '#10b981',
+            input: expired ? 'datetime-local' : 'textarea',
+            inputLabel: expired ? 'Nouvelle date d’expiration' : 'Commentaire (optionnel)',
+            inputValidator: value => expired && (!value || !Number.isFinite(Date.parse(value)) || Date.parse(value) <= Date.now())
+                ? 'Choisissez une date et une heure futures.' : undefined
+        });
+        if (!result.isConfirmed) return;
+        if (expired) expiresAt = new Date(result.value).toISOString();
+        else comment = result.value || '';
+    } else {
+        if (!window.confirm("Approuver et publier cette offre ?")) return;
+        if (expired) {
+            const value = window.prompt('Nouvelle expiration (AAAA-MM-JJ HH:MM) :');
+            if (!value) return;
+            const date = new Date(value.replace(' ', 'T'));
+            if (!Number.isFinite(date.getTime()) || date.getTime() <= Date.now()) {
+                window.alert('Choisissez une date et une heure futures.'); return;
+            }
+            expiresAt = date.toISOString();
         }
-    });
+    }
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    const icon = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin" aria-hidden="true"></i>';
+    try {
+        const response = await fetch(button.dataset.approveUrl, {
+            method: 'POST', credentials: 'same-origin',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json'},
+            body: new URLSearchParams({comment, expires_at: expiresAt, _token: button.dataset.token})
+        });
+        const data = (response.headers.get('content-type') || '').includes('application/json')
+            ? await response.json() : null;
+        if (!response.ok || !data?.success) {
+            throw new Error(data?.message || 'Publication impossible. Rechargez la page pour vérifier votre session, puis réessayez.');
+        }
+        const row = button.closest('.job-row');
+        row.dataset.status = 'approved';
+        button.dataset.expired = '0';
+        const badge = row.querySelector('.status-badge');
+        badge.className = 'status-badge status-approved';
+        badge.innerHTML = '<i class="fas fa-check-circle"></i> Approuvé';
+        row.querySelector('.job-checkbox').checked = false;
+        selectedJobs.delete(jobId);
+        document.getElementById('totalPending').textContent = document.querySelectorAll('.job-row[data-status="pending"]').length;
+        applyFiltersAndPagination();
+        updateBatchUI();
+        if (typeof Swal !== 'undefined') await Swal.fire('Approuvé !', data.message, 'success');
+        else window.alert(data.message);
+    } catch (error) {
+        if (typeof Swal !== 'undefined') await Swal.fire('Publication impossible', error.message, 'error');
+        else window.alert(error.message);
+    } finally {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        button.innerHTML = icon;
+    }
 }
 
 function rejectJob(jobId) {

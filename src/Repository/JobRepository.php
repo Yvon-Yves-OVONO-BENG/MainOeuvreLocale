@@ -33,6 +33,40 @@ class JobRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+    /**
+     * Charge les offres de modération avec les relations utilisées par Twig.
+     *
+     * Les LEFT JOIN sont importants ici : une ancienne offre peut encore
+     * référencer un utilisateur ou une profession supprimés. Doctrine hydrate
+     * alors la relation à null au lieu de créer un proxy introuvable qui ferait
+     * échouer tout le rendu de la page.
+     *
+     * @return Job[]
+     */
+    public function findAllForModeration(): array
+    {
+        return $this->createQueryBuilder('j')
+            ->leftJoin('j.profession', 'moderationProfession')
+            ->addSelect('moderationProfession')
+            ->leftJoin('j.createdBy', 'moderationAuthor')
+            ->addSelect('moderationAuthor')
+            ->orderBy('j.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
+    /** Charge une offre à modifier/modérer même si une ancienne relation a été supprimée. */
+    public function findOneForModeration(string $slug): ?Job
+    {
+        return $this->createQueryBuilder('j')
+            ->leftJoin('j.profession', 'p')->addSelect('p')
+            ->leftJoin('j.createdBy', 'u')->addSelect('u')
+            ->leftJoin('j.typeJob', 't')->addSelect('t')
+            ->leftJoin('j.status', 's')->addSelect('s')
+            ->andWhere('j.slug = :slug')->setParameter('slug', $slug)
+            ->getQuery()->getOneOrNullResult();
+    }
 
     public function searchPaginated(array $filters, int $page = 1, int $limit = 10): Paginator
     {
@@ -54,7 +88,7 @@ class JobRepository extends ServiceEntityRepository
                 ->andWhere('j.moderationStatus = :approvedStatus')
                 ->andWhere('j.status = :publishedStatus')
                 ->setParameter('approvedStatus', 'approved')
-                ->setParameter('publishedStatus', 2);
+                ->setParameter('publishedStatus', $this->getEntityManager()->getRepository(\App\Entity\StatusJob::class)->findPublished()?->getId() ?? 0);
         }
     
         if (!empty($filters['q'])) {
@@ -197,7 +231,7 @@ class JobRepository extends ServiceEntityRepository
             'longitude' => (string) $longitude,
             'radius' => (string) $radiusKm,
             'approvedStatus' => 'approved',
-            'publishedStatus' => 2,
+            'publishedStatus' => $this->getEntityManager()->getRepository(\App\Entity\StatusJob::class)->findPublished()?->getId() ?? 0,
             'minLatitude' => (string) ($latitude - $latitudeDelta),
             'maxLatitude' => (string) ($latitude + $latitudeDelta),
             'minLongitude' => (string) ($longitude - $longitudeDelta),

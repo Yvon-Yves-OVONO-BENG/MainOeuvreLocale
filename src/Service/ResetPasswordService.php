@@ -91,7 +91,7 @@ class ResetPasswordService
             'ok' => true,
             'flashType' => 'success',
             'message' => $this->translator->trans(
-                'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.'
+                'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé. Pensez également à vérifier votre dossier de courriers indésirables (spams).'
             ),
             'routeName' => 'app_forgot_password',
             'routeParams' => [],

@@ -108,8 +108,9 @@
 		</div>
 
 		<div class="mol-card-b">
-			{{ form_start(form, {'attr': {'data-mol-autosave': '1', 'data-mol-autosave-key': editing ? 'job-edit' : 'job-new'}}) }}
+			{{ form_start(form, {'attr': {'data-mol-autosave': '1', 'data-mol-autosave-key': editing ? 'job-edit-' ~ slug : 'job-new'}}) }}
 
+            {{ form_errors(form) }}
 			<div class="row g-3">
 				<div class="col-12 col-md-6 col-lg-4">
 					{{ form_label(form.title) }}
@@ -229,8 +230,7 @@
 					<button type="submit"
 						class="btn btn-dark mol-btn mol-job-submit-clean"
 						data-job-submit
-						disabled
-						aria-disabled="true">
+						{% if not editing %}disabled aria-disabled="true"{% endif %}>
                         <span aria-hidden="true">💾</span>
 						<span>{% if editing %}{% trans %}Mettre à jour{% endtrans %}{% else %}{% trans %}Créer{% endtrans %}{% endif %}</span>
 					</button>
@@ -261,7 +261,11 @@
 
 
 
+{% if editing %}
+<script src="{{ asset('js/job/job-edit-validation.js') }}?v=20260912" defer></script>
+{% else %}
 <script src="{{ asset('js/job/job-form.js') }}?v=20260805" defer></script>
+{% endif %}
 
 {% if swalJob %}
 

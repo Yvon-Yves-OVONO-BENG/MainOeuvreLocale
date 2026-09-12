@@ -733,6 +733,42 @@
         <source>Saisissez la date et l'heure d'expiration.</source>
         <target>__Saisissez la date et l'heure d'expiration.</target>
       </trans-unit>
+      <trans-unit id="G34T9fg" resname="Sélectionnez votre pays.">
+        <source>Sélectionnez votre pays.</source>
+        <target>__Sélectionnez votre pays.</target>
+      </trans-unit>
+      <trans-unit id="oWPKGjs" resname="Veuillez renseigner votre nom complet, pas une adresse email.">
+        <source>Veuillez renseigner votre nom complet, pas une adresse email.</source>
+        <target>__Veuillez renseigner votre nom complet, pas une adresse email.</target>
+      </trans-unit>
+      <trans-unit id="xcb.._i" resname="Saisissez un métier, un service ou une disponibilité.">
+        <source>Saisissez un métier, un service ou une disponibilité.</source>
+        <target>__Saisissez un métier, un service ou une disponibilité.</target>
+      </trans-unit>
+      <trans-unit id="DYjrUzf" resname="Utilisez un intitulé clair. Les chiffres seuls ne sont pas acceptés.">
+        <source>Utilisez un intitulé clair. Les chiffres seuls ne sont pas acceptés.</source>
+        <target>__Utilisez un intitulé clair. Les chiffres seuls ne sont pas acceptés.</target>
+      </trans-unit>
+      <trans-unit id="i2BgKh1" resname="Saisissez un intitulé de poste.">
+        <source>Saisissez un intitulé de poste.</source>
+        <target>__Saisissez un intitulé de poste.</target>
+      </trans-unit>
+      <trans-unit id="vUSBFU8" resname="Utilisez un intitulé de métier ou de poste. Les chiffres seuls ne sont pas acceptés.">
+        <source>Utilisez un intitulé de métier ou de poste. Les chiffres seuls ne sont pas acceptés.</source>
+        <target>__Utilisez un intitulé de métier ou de poste. Les chiffres seuls ne sont pas acceptés.</target>
+      </trans-unit>
+      <trans-unit id="U_8.eLD" resname="Saisissez votre mot de passe actuel.">
+        <source>Saisissez votre mot de passe actuel.</source>
+        <target>__Saisissez votre mot de passe actuel.</target>
+      </trans-unit>
+      <trans-unit id="ts_Y_AS" resname="Le mot de passe doit contenir au moins 8 caractères.">
+        <source>Le mot de passe doit contenir au moins 8 caractères.</source>
+        <target>__Le mot de passe doit contenir au moins 8 caractères.</target>
+      </trans-unit>
+      <trans-unit id="X1FHpx_" resname="Le nom ne doit pas contenir de chiffres ni de caractères spéciaux.">
+        <source>Le nom ne doit pas contenir de chiffres ni de caractères spéciaux.</source>
+        <target>__Le nom ne doit pas contenir de chiffres ni de caractères spéciaux.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -35,11 +35,9 @@ class JobModerationController extends AbstractController
     #[Route('/admin/jobs/moderation', name: 'admin_jobs_moderation')]
     public function index(): Response
     {
-        // ✅ Charger TOUS les jobs (pas seulement les pending)
-        $allJobs = $this->jobRepository->findBy(
-            [],
-            ['createdAt' => 'DESC']
-        );
+        // Charger les relations nécessaires en LEFT JOIN afin qu'une ancienne
+        // référence orpheline ne bloque jamais toute la page de modération.
+        $allJobs = $this->jobRepository->findAllForModeration();
     
         // Séparer pour le compteur
         $pendingJobs = array_filter($allJobs, function($job) {
@@ -60,23 +58,46 @@ class JobModerationController extends AbstractController
  */
 #[Route('/admin/job/{slug}/approve', name: 'admin_job_approve', methods: ['POST'])]
 public function approveJob(
-    #[MapEntity(mapping: ['slug' => 'slug'])]
+    #[MapEntity(expr: 'repository.findOneForModeration(slug)')]
     Job $job,
     Request $request,
 ): JsonResponse
 {
+    if (!$this->isCsrfTokenValid('moderate_job', (string) $request->request->get('_token', ''))) {
+        return $this->json(['success' => false, 'message' => 'Votre session a expiré. Rechargez la page puis réessayez.'], 403);
+    }
+    // Une publication ne doit pas annoncer un succès si l'échéance la masque aussitôt.
+    $now = new \DateTimeImmutable();
+    $expiration = $job->getDateExpirationAt();
+    $requestedExpiration = trim((string) $request->request->get('expires_at', ''));
+    if ($requestedExpiration !== '') {
+        try {
+            $expiration = (new \DateTime($requestedExpiration))->setTimezone(new \DateTimeZone(date_default_timezone_get()));
+        } catch (\Exception) {
+            return $this->json(['success' => false, 'message' => 'La date d’expiration est invalide.'], 422);
+        }
+    }
+    if (!$expiration || $expiration <= $now) {
+        return $this->json(['success' => false, 'message' => 'Cette offre est expirée. Rechargez la page puis choisissez une nouvelle échéance en cliquant sur Approuver.'], 422);
+    }
+    $publishedStatus = $this->entityManager->getRepository(StatusJob::class)->findPublished();
+    if (!$publishedStatus) {
+        return $this->json(['success' => false, 'message' => 'Le statut PUBLIÉE est absent de la base. Ajoutez ce statut avant de publier.'], 422);
+    }
     /** @var User $admin */
     $admin = $this->getUser();
     $comment = $request->request->get('comment', '');
 
     // ✅ Accepter "pending" ET "modified"
-    $allowedStatuses = ['pending', 'modified','rejected'];
+    $allowedStatuses = ['pending', 'modified', 'rejected', 'approved'];
     if (!in_array($job->getModerationStatus(), $allowedStatuses)) {
         return new JsonResponse([
             'success' => false,
             'message' => 'Ce job ne peut pas être approuvé (statut actuel : ' . $job->getModerationStatus() . ').',
         ], 400);
     }
+
+    $job->setDateExpirationAt($expiration);
 
     // Mettre à jour les informations de modération
     if (method_exists($job, 'setModerationStatus')) {
@@ -97,7 +118,7 @@ public function approveJob(
 
     // Mettre le statut "PUBLIÉE"
     $statusRepo = $this->entityManager->getRepository(StatusJob::class);
-    $publishedStatus = $statusRepo->findOneBy(['statusJob' => 'PUBLIÉE']);
+    $publishedStatus = $statusRepo->findPublished();
 
     if ($publishedStatus) {
         $job->setStatus($publishedStatus);
@@ -119,7 +140,7 @@ public function approveJob(
             $admin,
             $comment ?: 'Votre offre a été approuvée et est maintenant publiée. Félicitations !'
         );
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         // Silencieux
     }
 
@@ -138,7 +159,7 @@ public function approveJob(
      */
     #[Route('/admin/job/{slug}/reject', name: 'admin_job_reject', methods: ['POST'])]
     public function rejectJob(
-        #[MapEntity(mapping: ['slug' => 'slug'])]
+        #[MapEntity(expr: 'repository.findOneForModeration(slug)')]
         Job $job,
         Request $request,
     ): JsonResponse
@@ -191,7 +212,7 @@ public function approveJob(
                 $admin,
                 "Votre offre n'a malheureusement pas été retenue pour la raison suivante : {$reason}"
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Silencieux - logger si nécessaire
         }
     
@@ -207,7 +228,7 @@ public function approveJob(
      */
     #[Route('/admin/job/{slug}/modify', name: 'admin_job_modify', methods: ['POST'])]
     public function modifyJob(
-        #[MapEntity(mapping: ['slug' => 'slug'])]
+        #[MapEntity(expr: 'repository.findOneForModeration(slug)')]
         Job $job,
         Request $request,
     ): JsonResponse
@@ -265,7 +286,7 @@ public function approveJob(
         // Envoyer notification au créateur
         try {
             $this->notificationService->sendJobModifiedNotification($job, $admin, $note);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Silencieux
         }
 
@@ -282,7 +303,7 @@ public function approveJob(
      */
     #[Route('/admin/job/{slug}/details', name: 'admin_job_details')]
     public function details(
-        #[MapEntity(mapping: ['slug' => 'slug'])]
+        #[MapEntity(expr: 'repository.findOneForModeration(slug)')]
         Job $job,
     ): Response
     {
@@ -344,7 +365,16 @@ public function approveJob(
 
         $publishedStatus = $this->entityManager
             ->getRepository(StatusJob::class)
-            ->findOneBy(['statusJob' => 'PUBLIÉE']);
+            ->findPublished();
+
+        if (!$publishedStatus) {
+            return $this->json(['success' => false, 'message' => 'Le statut PUBLIÉE est absent de la base.'], 422);
+        }
+        foreach ($jobs as $job) {
+            if ($job->getModerationStatus() === 'pending' && (!$job->getDateExpirationAt() || $job->getDateExpirationAt() <= new \DateTimeImmutable())) {
+                return $this->json(['success' => false, 'message' => 'La sélection contient des offres expirées. Approuvez-les individuellement pour choisir une nouvelle échéance.'], 422);
+            }
+        }
 
         foreach ($jobs as $job) {
             if ($job->getModerationStatus() === 'pending') {
@@ -370,7 +400,7 @@ public function approveJob(
                         $admin,
                         'Votre offre a été approuvée et est maintenant publiée. Félicitations !'
                     );
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     // Silencieux
                 }
             }
@@ -444,7 +474,7 @@ public function approveJob(
                         $admin,
                         "Votre offre n'a malheureusement pas été retenue pour la raison suivante : {$reason}"
                     );
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     // Silencieux
                 }
             }
