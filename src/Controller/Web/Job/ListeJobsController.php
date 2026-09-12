@@ -64,7 +64,7 @@ final class ListeJobsController extends AbstractController
         ];
     
         $page  = max(1, (int) $request->query->get('page', 1));
-        $limit = 12;
+        $limit = 8;
     
         $paginator = $jobRepository->searchPaginated($filters, $page, $limit);
         
@@ -150,7 +150,7 @@ final class ListeJobsController extends AbstractController
         ];
 
         $page  = max(1, (int) $request->query->get('page', 1));
-        $limit = 12;
+        $limit = 8;
 
         $paginator = $jobRepository->searchPaginated($filters, $page, $limit);
         $total = $paginator->count();
