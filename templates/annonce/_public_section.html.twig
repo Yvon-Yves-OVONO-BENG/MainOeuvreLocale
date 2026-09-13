@@ -135,7 +135,7 @@
 					{% set stats = owner ? (ratings[owner.id] ?? {'avg': 0, 'voters': 0}) : {'avg': 0, 'voters': 0} %}
 					<article class="anpub-card">
 						<div class="anpub-cover">
-                            <span class="mol-card-type-badge"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i><span>{% trans %}Annonce{% endtrans %}</span></span>
+                            <span class="mol-card-type-badge"><i class="fa-solid fa-bullhorn" aria-hidden="true"></i><span>{% trans %}Candidature{% endtrans %}</span></span>
 							<div class="anpub-media">
 								{% if annonce.profession and annonce.profession.photo %}<img loading="lazy" decoding="async" src="{{ asset('uploads/professions/' ~ annonce.profession.photo) }}" alt="{{ annonce.profession.profession }}">
 								{% else %}
