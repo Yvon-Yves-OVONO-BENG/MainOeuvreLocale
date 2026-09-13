@@ -497,7 +497,7 @@
                                     {% endif %}
 
                                     <div class="mol-job-cover{{ j.profession and j.profession.photo ? ' has-media' : '' }}">
-                            <span class="mol-card-type-badge"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>{% trans %}Offre d'emploi{% endtrans %}</span></span>
+                                        <span class="mol-card-type-badge"><i class="fa-solid fa-briefcase" aria-hidden="true"></i><span>{% trans %}Offre d'emploi{% endtrans %}</span></span>
                                         <div class="mol-job-cover-fallback">
                                             <i class="fa-solid {{ professionIcon }}"></i>
                                             <span>{{ professionName|default(j.title) }}</span>

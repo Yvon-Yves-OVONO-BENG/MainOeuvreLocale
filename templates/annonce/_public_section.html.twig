@@ -55,7 +55,7 @@
         }
     </style>
 	<div class="container">
-		<div class="anpub-head home-annonces-heading">
+		{# <div class="anpub-head home-annonces-heading">
 			<div class="home-annonces-heading__main">
 				<span class="home-annonces-heading__icon" aria-hidden="true">
 					<i class="fa-solid fa-bullhorn"></i>
@@ -70,7 +70,7 @@
 				{{ annonceTotal }}
 				{% if annonceTotal > 1 %}{% trans %}annonces publiées{% endtrans %}{% else %}{% trans %}annonce publiée{% endtrans %}{% endif %}
 			</div>
-		</div>
+		</div> #}
 
 		<form class="anpub-search" id="annonceNearbySearchForm" method="get" action="{{ path('annonce_search') }}" data-turbo="false" data-no-submit-spinner="1" autocomplete="off">
 			<div class="anpub-search-grid">

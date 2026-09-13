@@ -93,7 +93,7 @@ final class AccueilController extends AbstractController
         ];
 
         $page  = max(1, (int) $request->query->get('page', 1));
-        $limit = 8;
+        $limit = 20;
 
         $paginator = $jobRepository->searchPaginated($filters, $page, $limit);
         $total = $paginator->count();
