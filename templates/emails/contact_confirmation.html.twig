@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="{{ app.request.locale|default('fr') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% trans %}Nous avons bien reçu votre message{% endtrans %}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+           style="background:#f4f7fb;">
+        <tr>
+            <td align="center" style="padding:28px 12px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+                       style="max-width:620px;background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;">
+
+                    <tr>
+                        <td style="padding:26px 24px;background:#174ea6;color:#ffffff;">
+                            <p style="margin:0 0 10px;font-size:12px;font-weight:bold;letter-spacing:1px;">
+                                MAIN D’ŒUVRE LOCALE
+                            </p>
+                            <h1 style="margin:0;font-size:23px;line-height:1.4;">
+                                {% trans %}Votre message a bien été reçu{% endtrans %}
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:28px 24px;">
+                            <p style="margin:0 0 18px;font-size:16px;line-height:1.6;">
+                                {% trans with {'%name%': messageEntity.name} %}Bonjour %name%,{% endtrans %}
+                            </p>
+
+                            <p style="margin:0 0 16px;font-size:15px;line-height:1.8;color:#334155;">
+                                {% trans %}Merci d’avoir contacté{% endtrans %} <strong>Main d’Œuvre Locale</strong>.
+                                {% trans %}Nous vous confirmons que votre message a bien été reçu et enregistré.{% endtrans %}
+                            </p>
+
+                            <p style="margin:0 0 24px;font-size:15px;line-height:1.8;color:#334155;">
+                                {% trans %}Notre équipe prendra connaissance de votre demande et vous répondra dans les meilleurs délais.{% endtrans %}
+                            </p>
+
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+                                   style="background:#f0f6ff;border:1px solid #dbeafe;border-radius:12px;">
+                                <tr>
+                                    <td style="padding:18px;">
+                                        <p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#174ea6;">
+                                            {% trans %}Récapitulatif de votre demande{% endtrans %}
+                                        </p>
+                                        <p style="margin:0 0 8px;font-size:14px;line-height:1.6;">
+                                            <strong>{% trans %}Sujet :{% endtrans %}</strong> {{ subjectLabel|trans }}
+                                        </p>
+                                        <p style="margin:0;font-size:14px;line-height:1.6;">
+                                            <strong>{% trans %}Email de réponse :{% endtrans %}</strong>
+                                            {{ messageEntity.email }}
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin:24px 0 0;font-size:14px;line-height:1.8;color:#334155;">
+                                {% trans %}Pour compléter votre demande, vous pouvez répondre directement à cet email.{% endtrans %}
+                            </p>
+
+                            <p style="margin:22px 0 0;font-size:15px;line-height:1.7;">
+                                {% trans %}Cordialement,{% endtrans %}<br>
+                                <strong>{% trans %}L’équipe Main d’Œuvre Locale{% endtrans %}</strong>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding:18px 24px;background:#f8fafc;border-top:1px solid #e5e7eb;text-align:center;">
+                            <p style="margin:0;font-size:12px;line-height:1.7;color:#64748b;">
+                                {% trans %}Cet email confirme la réception de votre message.{% endtrans %}
+                            </p>
+                            <a href="https://maindoeuvrelocale.com"
+                               style="display:inline-block;margin-top:8px;font-size:13px;color:#174ea6;text-decoration:none;">
+                                maindoeuvrelocale.com
+                            </a>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

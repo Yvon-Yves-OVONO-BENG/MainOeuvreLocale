@@ -61,11 +61,10 @@ final class ContactController extends AbstractController
 
             $email = (new Email())
                 ->from($this->contactFromEmail)
-                ->to("ovono770@gmail.com")
+                ->to("support@maindoeuvrelocale.com")
                 ->replyTo((string) $contactMessage->getEmail())
                 ->subject(sprintf(
-                    '[Contact #%d] %s — %s',
-                    $contactMessage->getId(),
+                    '%s — %s',
                     $subjectLabel,
                     (string) $contactMessage->getName()
                 ))
@@ -85,6 +84,29 @@ final class ContactController extends AbstractController
                 $this->addFlash(
                     'warning',
                     $translator->trans('Votre message a bien été enregistré, mais l’email de notification n’a pas pu être envoyé.')
+                );
+            }
+
+            // Envoyer un accusé de réception à l'internaute.
+            try {
+                $confirmationEmail = (new Email())
+                    ->from($this->contactFromEmail)
+                    ->to((string) $contactMessage->getEmail())
+                    ->replyTo('support@maindoeuvrelocale.com')
+                    ->subject('Nous avons bien reçu votre message — Main d’Œuvre Locale')
+                    ->html($this->renderView('emails/contact_confirmation.html.twig', [
+                        'messageEntity' => $contactMessage,
+                        'subjectLabel' => $subjectLabel,
+                    ]));
+
+                $this->mailer->send($confirmationEmail);
+            } catch (TransportExceptionInterface) {
+                // Le message reste enregistré même si la confirmation ne peut pas partir.
+                $this->addFlash(
+                    'warning',
+                    $translator->trans(
+                        'Votre demande est bien enregistrée, mais le mail de confirmation n’a pas pu vous être envoyé. Notre équipe vous répondra très bientôt.'
+                    )
                 );
             }
 

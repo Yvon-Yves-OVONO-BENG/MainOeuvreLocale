@@ -18399,6 +18399,114 @@ L’équipe de modération</source>
         <source>Candidature</source>
         <target>Job application</target>
       </trans-unit>
+      <trans-unit id="z8uwLoB" resname="Votre demande est bien enregistrée, mais le mail de confirmation n’a pas pu vous être envoyé. Notre équipe vous répondra très bientôt.">
+        <source>Votre demande est bien enregistrée, mais le mail de confirmation n’a pas pu vous être envoyé. Notre équipe vous répondra très bientôt.</source>
+        <target>Your request has been saved, but the confirmation email could not be sent. Our team will get back to you very soon.</target>
+      </trans-unit>
+      <trans-unit id="u4Vj1yy" resname="Mon petit bec me dit que le bon contact vous attend ici dans le tchat 😊">
+        <source>Mon petit bec me dit que le bon contact vous attend ici dans le tchat 😊</source>
+        <target>A little bird tells me the right connection is waiting for you here in the chat 😊</target>
+      </trans-unit>
+      <trans-unit id="0VtklPG" resname="Nous avons bien reçu votre message">
+        <source>Nous avons bien reçu votre message</source>
+        <target>We have received your message</target>
+      </trans-unit>
+      <trans-unit id="uP2Uxp_" resname="Votre message a bien été reçu">
+        <source>Votre message a bien été reçu</source>
+        <target>Your message has been received</target>
+      </trans-unit>
+      <trans-unit id="h2WfHiK" resname="Bonjour %name%,">
+        <source>Bonjour %name%,</source>
+        <target>Hello %name%,</target>
+      </trans-unit>
+      <trans-unit id="x1Swyx." resname="Merci d’avoir contacté">
+        <source>Merci d’avoir contacté</source>
+        <target>Thank you for contacting</target>
+      </trans-unit>
+      <trans-unit id="6_Lr9Oo" resname="Nous vous confirmons que votre message a bien été reçu et enregistré.">
+        <source>Nous vous confirmons que votre message a bien été reçu et enregistré.</source>
+        <target>We confirm that your message has been received and saved.</target>
+      </trans-unit>
+      <trans-unit id="fRFpCqP" resname="Notre équipe prendra connaissance de votre demande et vous répondra dans les meilleurs délais.">
+        <source>Notre équipe prendra connaissance de votre demande et vous répondra dans les meilleurs délais.</source>
+        <target>Our team will review your request and get back to you as soon as possible.</target>
+      </trans-unit>
+      <trans-unit id="NECL6Jb" resname="Récapitulatif de votre demande">
+        <source>Récapitulatif de votre demande</source>
+        <target>Summary of your request</target>
+      </trans-unit>
+      <trans-unit id="qgVpfRG" resname="Sujet :">
+        <source>Sujet :</source>
+        <target>Subject:</target>
+      </trans-unit>
+      <trans-unit id="oCWwa8r" resname="Email de réponse :">
+        <source>Email de réponse :</source>
+        <target>Reply email address:</target>
+      </trans-unit>
+      <trans-unit id="mu7eCvR" resname="Pour compléter votre demande, vous pouvez répondre directement à cet email.">
+        <source>Pour compléter votre demande, vous pouvez répondre directement à cet email.</source>
+        <target>To add more information to your request, you can reply directly to this email.</target>
+      </trans-unit>
+      <trans-unit id="A0qx1I0" resname="Cordialement,">
+        <source>Cordialement,</source>
+        <target>Kind regards,</target>
+      </trans-unit>
+      <trans-unit id="Td0ID4F" resname="L’équipe Main d’Œuvre Locale">
+        <source>L’équipe Main d’Œuvre Locale</source>
+        <target>The Main d’Œuvre Locale team</target>
+      </trans-unit>
+      <trans-unit id="QmUz5H." resname="Cet email confirme la réception de votre message.">
+        <source>Cet email confirme la réception de votre message.</source>
+        <target>This email confirms receipt of your message.</target>
+      </trans-unit>
+      <trans-unit id="dyHdlbB" resname="Nouveau message de contact">
+        <source>Nouveau message de contact</source>
+        <target>New contact message</target>
+      </trans-unit>
+      <trans-unit id="gsEYSi1" resname="Nom :">
+        <source>Nom :</source>
+        <target>Name:</target>
+      </trans-unit>
+      <trans-unit id="o9c1cRf" resname="Téléphone :">
+        <source>Téléphone :</source>
+        <target>Phone:</target>
+      </trans-unit>
+      <trans-unit id="MGcd4WY" resname="Message :">
+        <source>Message :</source>
+        <target>Message:</target>
+      </trans-unit>
+      <trans-unit id="ZS0hVTX" resname="Incident technique">
+        <source>Incident technique</source>
+        <target>Technical incident</target>
+      </trans-unit>
+      <trans-unit id="Ip2tB6F" resname="Accueil Main d’Œuvre Locale">
+        <source>Accueil Main d’Œuvre Locale</source>
+        <target>Main d’Œuvre Locale home page</target>
+      </trans-unit>
+      <trans-unit id="ziYM_YJ" resname="Erreur interne">
+        <source>Erreur interne</source>
+        <target>Internal error</target>
+      </trans-unit>
+      <trans-unit id="IJ1fSsZ" resname="Requête non aboutie">
+        <source>Requête non aboutie</source>
+        <target>Request unsuccessful</target>
+      </trans-unit>
+      <trans-unit id="pPIkjbk" resname="Un incident technique est survenu">
+        <source>Un incident technique est survenu</source>
+        <target>A technical incident has occurred</target>
+      </trans-unit>
+      <trans-unit id="zJbQPfK" resname="Nous n’avons pas pu terminer cette action. L’erreur a été enregistrée automatiquement pour l’administration.">
+        <source>Nous n’avons pas pu terminer cette action. L’erreur a été enregistrée automatiquement pour l’administration.</source>
+        <target>We could not complete this action. The error has been automatically logged for the administration team.</target>
+      </trans-unit>
+      <trans-unit id=".u.uPpk" resname="Vous n’avez rien à transmettre à l’administrateur.">
+        <source>Vous n’avez rien à transmettre à l’administrateur.</source>
+        <target>You do not need to send anything to the administrator.</target>
+      </trans-unit>
+      <trans-unit id="dA2peUZ" resname="L’erreur, l’URL, la route, le compte concerné et les informations techniques utiles ont déjà été enregistrés avec cette référence.">
+        <source>L’erreur, l’URL, la route, le compte concerné et les informations techniques utiles ont déjà été enregistrés avec cette référence.</source>
+        <target>The error, URL, route, affected account and relevant technical details have already been logged under this reference.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

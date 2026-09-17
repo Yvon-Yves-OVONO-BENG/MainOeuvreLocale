@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="fr">
+<html lang="{{ app.request.locale|default('fr') }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="robots" content="noindex,nofollow">
     <meta name="theme-color" content="#08182d">
-    <title>{{ status|default(500) }} • Incident technique • Main d’Œuvre Locale</title>
+    <title>{{ status|default(500) }} • {% trans %}Incident technique{% endtrans %} • Main d’Œuvre Locale</title>
     <style>
         :root{--bg:#071426;--card:#0d1b30;--line:rgba(148,163,184,.18);--text:#f8fafc;--muted:#aebdd0;--blue:#2563eb;--cyan:#38bdf8;--soft:#132640;--danger:#fb7185}
         *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
@@ -18,34 +18,61 @@
 </head>
 <body>
 <main class="page">
-    <a class="brand" href="/" aria-label="Accueil Main d’Œuvre Locale">
+    {% set homeLabel %}{% trans %}Accueil Main d’Œuvre Locale{% endtrans %}{% endset %}
+    <a class="brand" href="/" aria-label="{{ homeLabel|e('html_attr') }}">
         <span class="brand-mark" aria-hidden="true">M</span>
         <span>Main d’Œuvre Locale</span>
     </a>
 
     <section class="card" role="alert" aria-labelledby="incident-title">
         <div class="body">
-            <span class="badge">Incident technique</span>
+            <span class="badge">{% trans %}Incident technique{% endtrans %}</span>
             <div class="icon" aria-hidden="true">!</div>
-            <div class="eyebrow">Erreur {{ status|default(500) }} • {{ status|default(500) >= 500 ? 'Erreur interne' : 'Requête non aboutie' }}</div>
-            <h1 class="title" id="incident-title">{{ title|default('Un incident technique est survenu') }}</h1>
-            <p class="message">{{ message|default('Nous n’avons pas pu terminer cette action. L’erreur a été enregistrée automatiquement pour l’administration.') }}</p>
 
-            <div class="reference">
-                <span>Référence de l’incident</span>
-                <code>{{ reference|default('MOL-ERROR') }}</code>
+            <div class="eyebrow">
+                {% trans %}Erreur{% endtrans %} {{ status|default(500) }} •
+                {% if status|default(500) >= 500 %}
+                    {% trans %}Erreur interne{% endtrans %}
+                {% else %}
+                    {% trans %}Requête non aboutie{% endtrans %}
+                {% endif %}
             </div>
 
+            <h1 class="title" id="incident-title">
+                {% if title|default('') %}
+                    {{ title|trans }}
+                {% else %}
+                    {% trans %}Un incident technique est survenu{% endtrans %}
+                {% endif %}
+            </h1>
+
+            <p class="message">
+                {% if message|default('') %}
+                    {{ message|trans }}
+                {% else %}
+                    {% trans %}Nous n’avons pas pu terminer cette action. L’erreur a été enregistrée automatiquement pour l’administration.{% endtrans %}
+                {% endif %}
+            </p>
+
             <div class="actions">
-                <a class="btn btn-primary" href="/">Retour à l’accueil</a>
-                <button class="btn" type="button" onclick="history.length > 1 ? history.back() : location.assign('/')">Retour à la page précédente</button>
+                <a class="btn btn-primary" href="/">
+                    {% trans %}Retour à l’accueil{% endtrans %}
+                </a>
+                <button class="btn" type="button"
+                        onclick="history.length > 1 ? history.back() : location.assign('/')">
+                    {% trans %}Retour à la page précédente{% endtrans %}
+                </button>
             </div>
 
             <div class="note">
                 <div class="note-icon">✓</div>
                 <div>
-                    <strong>Vous n’avez rien à transmettre à l’administrateur.</strong>
-                    <span>L’erreur, l’URL, la route, le compte concerné et les informations techniques utiles ont déjà été enregistrés avec cette référence.</span>
+                    <strong>
+                        {% trans %}Vous n’avez rien à transmettre à l’administrateur.{% endtrans %}
+                    </strong>
+                    <span>
+                        {% trans %}L’erreur, l’URL, la route, le compte concerné et les informations techniques utiles ont déjà été enregistrés avec cette référence.{% endtrans %}
+                    </span>
                 </div>
             </div>
         </div>
