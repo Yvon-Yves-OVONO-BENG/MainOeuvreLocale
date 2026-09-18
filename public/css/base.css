@@ -1560,7 +1560,7 @@ opacity: 1;
 .mol-legal-link{
 color: rgba(255,255,255,.65);
 text-decoration:none;
-font-size: .92rem;
+font-size: .52rem;
 }
 .mol-legal-link:hover{ color: rgba(255,255,255,.95); }
 .mol-dot{ color: rgba(255,255,255,.25); padding: 0 .25rem; }
