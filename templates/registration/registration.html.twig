@@ -225,8 +225,8 @@
 
         <input type="hidden" value="{{ csrfToken }}" name="csrfToken">
 
-        {# Le bouton reste cliquable : la validation explique maintenant précisément ce qui bloque. #}
-        <button type="submit" class="btn-create" id="submitRegisterBtn" aria-disabled="false">
+        {# Le bouton reste désactivé tant que les mots de passe ne sont pas valides et identiques. #}
+        <button type="submit" class="btn-create" id="submitRegisterBtn" disabled aria-disabled="true">
           <span class="btn-create-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
               <path d="M15 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -358,13 +358,16 @@
         return value.length >= 8;
       }
 
-      // Le bouton ne doit pas être désactivé avant le clic : sinon l'utilisateur
-      // ne peut pas savoir quel champ bloque la création du compte.
+      // Réévalue les deux mots de passe à chaque modification.
       function updateSubmitState() {
         if (!submitBtn || submitBtn.classList.contains('is-loading')) return;
 
-        submitBtn.disabled = false;
-        submitBtn.setAttribute('aria-disabled', 'false');
+        const passwordsValid = !!pwd1 && !!pwd2 &&
+          passwordMeetsRequirements(pwd1.value) &&
+          pwd1.value === pwd2.value;
+
+        submitBtn.disabled = !passwordsValid;
+        submitBtn.setAttribute('aria-disabled', passwordsValid ? 'false' : 'true');
       }
 
       function setFieldFeedback(input, feedback, message) {
@@ -391,6 +394,7 @@
       }
 
       function validatePasswordMatchLive() {
+        updateSubmitState();
         if (!pwd1 || !pwd2) return;
 
         const passwordValue = pwd1.value || '';
@@ -707,6 +711,10 @@
           renderPasswordStrength();
           validatePasswordMatchLive();
         });
+        pwd1.addEventListener('change', function () {
+          renderPasswordStrength();
+          validatePasswordMatchLive();
+        });
         renderPasswordStrength();
       }
 
@@ -738,6 +746,8 @@
           event.preventDefault();
 
           if (!validateFields()) {
+            event.stopImmediatePropagation();
+            updateSubmitState();
             return;
           }
 
@@ -761,6 +771,12 @@
               return;
             }
 
+            // Les champs peuvent avoir changé pendant la vérification de l'e-mail.
+            if (!validateFields()) {
+              updateSubmitState();
+              return;
+            }
+
             // Le spinner ne démarre qu'après validation de tous les champs
             // et confirmation de la disponibilité de l'adresse email.
             if (submitBtn) {
@@ -777,18 +793,17 @@
             form.dataset.ready = '1';
             form.submit();
           });
-        });
+        }, true);
       }
 
       // Restaure toujours le bouton après un retour arrière depuis le navigateur.
       window.addEventListener('pageshow', function () {
         if (!submitBtn) return;
         form && delete form.dataset.ready;
-        submitBtn.disabled = false;
         submitBtn.classList.remove('is-loading');
         submitBtn.removeAttribute('aria-busy');
-        submitBtn.setAttribute('aria-disabled', 'false');
         if (submitLabel) submitLabel.textContent = 'Créer mon compte';
+        validatePasswordMatchLive();
       });
     });
   })();

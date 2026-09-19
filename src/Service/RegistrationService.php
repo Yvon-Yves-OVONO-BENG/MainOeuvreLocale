@@ -129,7 +129,7 @@ class RegistrationService
             'flashType' => $mailSent ? 'success' : 'warning',
             'message' => $this->translator->trans(
                 $mailSent
-                    ? 'Votre compte a été créé. Vérifiez votre email pour l\'activer.'
+                    ? 'Votre compte a été créé. Vérifiez votre email pour l\'activer. Certains mails partent dans les spams.'
                     : 'Votre compte a été créé, mais l\'email d\'activation n\'a pas pu être envoyé. Utilisez « Renvoyer l\'email d\'activation » sur la page de connexion.'
             ),
             'routeName' => 'app_login',
